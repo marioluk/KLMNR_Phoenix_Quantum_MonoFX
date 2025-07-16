@@ -1,0 +1,167 @@
+{
+    "logging": {
+        "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-140725-STEP2.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "metatrader5": {
+        "login": 25437097,
+        "password": "wkchTWEO_.00",
+        "server": "FivePercentOnline-Real",
+        "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+        "broker_name": "The5ers",
+        "port": 18889,
+        "timeout": 60000
+    },
+    "account_currency": "USD",
+    "magic_number": 147251,
+    "features": {
+        "stop_loss": {
+            "enable": true
+        },
+        "take_profit": {
+            "enable": true,
+            "multiplier": 2.1
+        },
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 120,
+            "step_pips": 60
+        }
+    },
+    "quantum_params": {
+        "buffer_size": 1000,
+        "spin_window": 90,
+        "min_spin_samples": 40,
+        "spin_threshold": 0.27,
+        "signal_cooldown": 600,
+        "entropy_thresholds": {
+            "buy_signal": 0.54,
+            "sell_signal": 0.46
+        },
+        "volatility_scale": 1.0
+    },
+    "risk_parameters": {
+        "position_cooldown": 600,
+        "max_daily_trades": 6,
+        "max_positions": 1,
+        "min_sl_distance_pips": {
+            "EURUSD": 130,
+            "SP500": 200,
+            "default": 150
+        },
+        "base_sl_pips": {
+            "EURUSD": 180,
+            "SP500": 280,
+            "default": 200
+        },
+        "profit_multiplier": 2.1,
+        "max_position_hours": 12,
+        "risk_percent": 0.005,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 120,
+            "step_pips": 60,
+            "lock_percentage": 0.5
+        },
+        "max_spread": {
+            "EURUSD": 12,
+            "SP500": 50,
+            "default": 15
+        },
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
+        "profit_target_percent": 8
+    },
+    "symbols": {
+        "EURUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 130,
+                "base_sl_pips": 180,
+                "profit_multiplier": 2.1,
+                "risk_percent": 0.005,
+                "min_duration": 300,
+                "max_duration": 14400,
+                "trailing_stop": {
+                    "activation_pips": 100,
+                    "step_pips": 50
+                }
+            },
+            "trading_hours": ["07:00-10:00", "12:00-15:00"],
+            "comment": "Focus su London open e US morning",
+            "quantum_params_override": {
+                "buffer_size": 900,
+                "spin_window": 85,
+                "signal_cooldown": 300
+            }
+        },
+        "SP500": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 200,
+                "base_sl_pips": 280,
+                "profit_multiplier": 2.3,
+                "risk_percent": 0.005,
+                "min_duration": 300,
+                "max_duration": 10800,
+                "trailing_stop": {
+                    "activation_pips": 120,
+                    "step_pips": 60
+                }
+            },
+            "trading_hours": ["13:30-16:30"],
+            "comment": "Core US trading hours",
+            "quantum_params_override": {
+                "buffer_size": 800,
+                "spin_window": 100
+            }
+        },
+		"NAS100": {
+            "risk_management": {
+                "min_sl_distance_pips": 250,
+                "base_sl_pips": 350,
+                "profit_multiplier": 2.3,
+                "contract_size": 0.01,
+                "risk_percent": 0.004,
+                "trailing_stop": {"activation_pips": 150, "step_pips": 75}
+            },
+            "quantum_params_override": {
+                "buffer_size": 700,
+                "spin_window": 120,
+                "entropy_thresholds": {"buy_signal": 0.53, "sell_signal": 0.47}
+            }
+        },
+        "XAUUSD": {
+            "risk_management": {
+                "min_sl_distance_pips": 220,
+                "base_sl_pips": 300,
+                "profit_multiplier": 1.9,
+                "contract_size": 0.01,
+                "risk_percent": 0.004,
+                "trailing_stop": {"activation_pips": 120, "step_pips": 60}
+            },
+            "quantum_params_override": {
+                "buffer_size": 1000,
+                "spin_window": 60,
+                "signal_cooldown": 1200
+            }
+        }
+    },
+    "THE5ERS_specific": {
+        "step1_target": 8,
+        "step2_target": 5,
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
+        "min_profitable_days": 3,
+        "profit_share": "80-100%",
+        "scaling_target": 10,
+        "cost": 39,
+        "refund": true,
+        "drawdown_protection": {
+            "soft_limit": 2,
+            "hard_limit": 5
+        }
+    }
+}
