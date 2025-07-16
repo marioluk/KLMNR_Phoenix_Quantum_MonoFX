@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE5ERS Trading Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .metric-change {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .status-achieved { color: #28a745; }
+        .status-pending { color: #ffc107; }
+        .status-ok { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-critical { color: #dc3545; }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .compliance-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-achieved {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .badge-ok {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .badge-critical {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .quantum-indicators {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .quantum-indicator {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .last-update {
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .profit-positive { color: #28a745; }
+        .profit-negative { color: #dc3545; }
+        .profit-neutral { color: #6c757d; }
+        
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        .refresh-indicator.active {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <i class="fas fa-chart-line"></i> THE5ERS Trading Dashboard
+            </div>
+            <div class="dashboard-subtitle">
+                Real-time Quantum Trading Monitor
+            </div>
+        </div>
+        
+        <!-- Refresh Indicator -->
+        <div class="refresh-indicator" id="refreshIndicator">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+        
+        <!-- MT5 Refresh Button -->
+        <div style="position: fixed; top: 20px; right: 80px; z-index: 1000;">
+            <button class="btn btn-primary btn-sm" id="refreshMT5" onclick="refreshMT5Data()">
+                <i class="fas fa-download"></i> Refresh MT5
+            </button>
+        </div>
+        
+        <!-- Compliance Status -->
+        <div class="row">
+            <div class="col-12">
+                <div class="metric-card">
+                    <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
+                    <div id="complianceStatus">
+                        <div class="text-center">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i> Loading compliance data...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Key Metrics -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-target"></i> Profit Percentage
+                    </div>
+                    <div class="metric-value" id="profitPercentage">0.00%</div>
+                    <div class="metric-change" id="profitChange">Loading...</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-chart-line"></i> Total P&L
+                    </div>
+                    <div class="metric-value" id="totalPnl">$0.00</div>
+                    <div class="metric-change" id="pnlChange">Loading...</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-percentage"></i> Win Rate
+                    </div>
+                    <div class="metric-value" id="winRate">0.0%</div>
+                    <div class="metric-change" id="winRateChange">Loading...</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-arrow-down"></i> Max Drawdown
+                    </div>
+                    <div class="metric-value" id="maxDrawdown">0.0%</div>
+                    <div class="metric-change" id="drawdownChange">Loading...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Trading Metrics -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-exchange-alt"></i> Total Trades
+                    </div>
+                    <div class="metric-value" id="totalTrades">0</div>
+                    <div class="metric-change">
+                        <span id="dailyTrades">0</span> today
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-calculator"></i> Profit Factor
+                    </div>
+                    <div class="metric-value" id="profitFactor">0.00</div>
+                    <div class="metric-change">Higher is better</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <div class="metric-label">
+                        <i class="fas fa-layer-group"></i> Open Positions
+                    </div>
+                    <div class="metric-value" id="openPositions">0</div>
+                    <div class="metric-change">Current exposure</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quantum Signals -->
+        <div class="row">
+            <div class="col-12">
+                <div class="metric-card">
+                    <h5><i class="fas fa-atom"></i> Quantum Signals Analysis</h5>
+                    <div class="quantum-indicators">
+                        <div class="quantum-indicator">
+                            <div class="metric-label">Total Signals</div>
+                            <div class="metric-value" style="font-size: 1.5rem;" id="totalSignals">0</div>
+                        </div>
+                        <div class="quantum-indicator">
+                            <div class="metric-label">Buy Signals</div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #28a745;" id="buySignals">0</div>
+                        </div>
+                        <div class="quantum-indicator">
+                            <div class="metric-label">Sell Signals</div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #dc3545;" id="sellSignals">0</div>
+                        </div>
+                        <div class="quantum-indicator">
+                            <div class="metric-label">Avg Entropy</div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;" id="avgEntropy">0.000</div>
+                        </div>
+                        <div class="quantum-indicator">
+                            <div class="metric-label">Avg Spin</div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;" id="avgSpin">0.000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="pnlChart"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="drawdownChart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="balanceChart"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="hourlyChart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="symbolsChart"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <div id="signalsChart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Last Update -->
+        <div class="last-update">
+            <i class="fas fa-clock"></i> Last updated: <span id="lastUpdate">Never</span>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let refreshInterval;
+        let previousMetrics = {};
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            startDashboard();
+        });
+        
+        function startDashboard() {
+            // Initial load
+            updateDashboard();
+            
+            // Set refresh interval (every 2 seconds)
+            refreshInterval = setInterval(updateDashboard, 2000);
+            
+            console.log('🚀 THE5ERS Dashboard Started');
+        }
+        
+        function updateDashboard() {
+            const refreshIndicator = document.getElementById('refreshIndicator');
+            refreshIndicator.classList.add('active');
+            
+            // Update all data
+            Promise.all([
+                fetchMetrics(),
+                fetchCompliance(),
+                fetchCharts()
+            ]).then(() => {
+                refreshIndicator.classList.remove('active');
+                updateLastUpdate();
+            }).catch(error => {
+                console.error('Error updating dashboard:', error);
+                refreshIndicator.classList.remove('active');
+            });
+        }
+        
+        function fetchMetrics() {
+            return fetch('/api/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    updateMetricsDisplay(data);
+                    previousMetrics = data;
+                });
+        }
+        
+        function fetchCompliance() {
+            return fetch('/api/compliance')
+                .then(response => response.json())
+                .then(data => {
+                    updateComplianceDisplay(data);
+                });
+        }
+        
+        function fetchCharts() {
+            // Fetch all charts
+            const chartPromises = [
+                fetchChart('/api/charts/pnl', 'pnlChart'),
+                fetchChart('/api/charts/drawdown', 'drawdownChart'),
+                fetchChart('/api/charts/balance', 'balanceChart'),
+                fetchChart('/api/charts/hourly', 'hourlyChart'),
+                fetchChart('/api/charts/symbols', 'symbolsChart'),
+                fetchChart('/api/charts/signals', 'signalsChart')
+            ];
+            
+            return Promise.all(chartPromises);
+        }
+        
+        function fetchChart(url, elementId) {
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.data && data.data.length > 0) {
+                        Plotly.newPlot(elementId, data.data, data.layout, {
+                            responsive: true,
+                            displayModeBar: false
+                        });
+                    }
+                });
+        }
+        
+        function updateMetricsDisplay(metrics) {
+            // Profit percentage
+            const profitPercentage = document.getElementById('profitPercentage');
+            profitPercentage.textContent = `${metrics.profit_percentage.toFixed(2)}%`;
+            profitPercentage.className = `metric-value ${getProfitClass(metrics.profit_percentage)}`;
+            
+            // Total P&L
+            const totalPnl = document.getElementById('totalPnl');
+            totalPnl.textContent = `$${metrics.total_pnl.toFixed(2)}`;
+            totalPnl.className = `metric-value ${getProfitClass(metrics.total_pnl)}`;
+            
+            // Win Rate
+            document.getElementById('winRate').textContent = `${metrics.win_rate.toFixed(1)}%`;
+            
+            // Max Drawdown
+            const maxDrawdown = document.getElementById('maxDrawdown');
+            maxDrawdown.textContent = `${metrics.max_drawdown.toFixed(2)}%`;
+            maxDrawdown.className = `metric-value ${getDrawdownClass(metrics.max_drawdown)}`;
+            
+            // Total Trades
+            document.getElementById('totalTrades').textContent = metrics.total_trades;
+            document.getElementById('dailyTrades').textContent = metrics.daily_trades;
+            
+            // Profit Factor
+            const profitFactor = document.getElementById('profitFactor');
+            profitFactor.textContent = metrics.profit_factor === Infinity ? '∞' : metrics.profit_factor.toFixed(2);
+            
+            // Open Positions
+            document.getElementById('openPositions').textContent = metrics.positions_open;
+            
+            // Quantum Signals
+            const qs = metrics.quantum_signals;
+            document.getElementById('totalSignals').textContent = qs.total;
+            document.getElementById('buySignals').textContent = qs.buy;
+            document.getElementById('sellSignals').textContent = qs.sell;
+            document.getElementById('avgEntropy').textContent = qs.avg_entropy.toFixed(3);
+            document.getElementById('avgSpin').textContent = qs.avg_spin.toFixed(3);
+        }
+        
+        function updateComplianceDisplay(compliance) {
+            const complianceDiv = document.getElementById('complianceStatus');
+            let html = '';
+            
+            // Target status
+            if (compliance.target) {
+                html += `<div class="compliance-badge badge-${compliance.target.status}">
+                    ${compliance.target.message}
+                </div>`;
+            }
+            
+            // Drawdown status
+            if (compliance.drawdown) {
+                html += `<div class="compliance-badge badge-${compliance.drawdown.status}">
+                    ${compliance.drawdown.message}
+                </div>`;
+            }
+            
+            complianceDiv.innerHTML = html;
+        }
+        
+        function getProfitClass(value) {
+            if (value > 0) return 'profit-positive';
+            if (value < 0) return 'profit-negative';
+            return 'profit-neutral';
+        }
+        
+        function getDrawdownClass(value) {
+            if (value >= 5) return 'profit-negative';
+            if (value >= 2) return 'profit-neutral';
+            return 'profit-positive';
+        }
+        
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, pause updates
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+            } else {
+                // Page is visible, resume updates
+                startDashboard();
+            }
+        });
+        
+        // Handle window focus
+        window.addEventListener('focus', function() {
+            updateDashboard();
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+        
+        // Refresh MT5 data manually
+        function refreshMT5Data() {
+            const button = document.getElementById('refreshMT5');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+            
+            fetch('/api/refresh_mt5')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Force immediate dashboard update
+                        updateDashboard();
+                        
+                        // Show success message
+                        button.innerHTML = '<i class="fas fa-check"></i> Success!';
+                        button.classList.add('btn-success');
+                        button.classList.remove('btn-primary');
+                        
+                        setTimeout(() => {
+                            button.innerHTML = '<i class="fas fa-download"></i> Refresh MT5';
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-primary');
+                            button.disabled = false;
+                        }, 2000);
+                    } else {
+                        button.innerHTML = '<i class="fas fa-times"></i> Error';
+                        button.classList.add('btn-danger');
+                        button.classList.remove('btn-primary');
+                        
+                        setTimeout(() => {
+                            button.innerHTML = '<i class="fas fa-download"></i> Refresh MT5';
+                            button.classList.remove('btn-danger');
+                            button.classList.add('btn-primary');
+                            button.disabled = false;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing MT5 data:', error);
+                    button.innerHTML = '<i class="fas fa-times"></i> Error';
+                    button.disabled = false;
+                });
+        }
+    </script>
+</body>
+</html>
