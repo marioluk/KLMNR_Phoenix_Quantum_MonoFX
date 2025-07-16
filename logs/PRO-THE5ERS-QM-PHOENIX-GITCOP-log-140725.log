@@ -1,0 +1,335 @@
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1423 | Caricamento configurazione da PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1435 | Configurazione caricata con 4 simboli
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1460 | Connesso a FivePercentOnline-Real sulla porta 18889
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1407 | Sistema inizializzato correttamente
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1409 | Simboli configurati: ['EURUSD', 'SP500', 'NAS100', 'XAUUSD']
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1410 | Parametri buffer: size=1200, min_samples=50
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1494 | Avvio sistema con 4 simboli
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1500 | Sistema di trading avviato correttamente
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:635 | HEARTBEAT:
+EURUSD: Bid=1.16943 | Ask=1.16944 | Spread=1.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+SP500: Bid=6239.02000 | Ask=6239.49000 | Spread=47.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+NAS100: Bid=22705.84000 | Ask=22707.36000 | Spread=152.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+XAUUSD: Bid=3373.79000 | Ask=3374.06000 | Spread=27.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+2025-07-14 12:08:40 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:638 | Buffer insufficiente: EURUSD, SP500, NAS100
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | EURUSD buffer: 0/1200 | Min samples: 50
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | SP500 buffer: 0/1200 | Min samples: 50
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | NAS100 buffer: 0/1200 | Min samples: 50
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | XAUUSD buffer: 0/1200 | Min samples: 50
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:472 | Primo tick ricevuto per EURUSD: 1.1694499999999999
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:472 | Primo tick ricevuto per SP500: 6239.02
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:472 | Primo tick ricevuto per NAS100: 22705.84
+2025-07-14 12:08:40 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:472 | Primo tick ricevuto per XAUUSD: 3373.79
+2025-07-14 12:13:41 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:635 | HEARTBEAT:
+EURUSD: Bid=1.16945 | Ask=1.16946 | Spread=1.0p | Buffer=581 | E=0.94 | S=0.80 | C=1.00 | V=1.75
+SP500: Bid=6238.02000 | Ask=6238.49000 | Spread=47.0p | Buffer=581 | E=1.00 | S=0.96 | C=1.00 | V=1.96
+NAS100: Bid=22702.74000 | Ask=22704.26000 | Spread=152.0p | Buffer=581 | E=0.94 | S=0.70 | C=1.00 | V=1.66
+XAUUSD: Bid=3374.38000 | Ask=3374.64000 | Spread=26.0p | Buffer=581 | E=0.89 | S=0.24 | C=1.00 | V=1.21
+2025-07-14 12:13:41 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | EURUSD buffer: 581/1200 | Min samples: 50
+2025-07-14 12:13:41 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | SP500 buffer: 581/1200 | Min samples: 50
+2025-07-14 12:13:41 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | NAS100 buffer: 581/1200 | Min samples: 50
+2025-07-14 12:13:41 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2435 | XAUUSD buffer: 581/1200 | Min samples: 50
+2025-07-14 12:14:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1507 | Arresto richiesto dall'utente
+2025-07-14 12:14:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:1533 | Sistema arrestato correttamente
+2025-07-14 12:14:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py:2509 | Applicazione terminata
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1437 | Caricamento configurazione da PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1449 | Configurazione caricata con 4 simboli
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1474 | Connesso a FivePercentOnline-Real sulla porta 18889
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1421 | Sistema inizializzato correttamente
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1423 | Simboli configurati: ['EURUSD', 'SP500', 'NAS100', 'XAUUSD']
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1424 | Parametri buffer: size=1000, min_samples=40
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1508 | Avvio sistema con 4 simboli
+2025-07-14 18:33:59 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1514 | Sistema di trading avviato correttamente
+2025-07-14 18:34:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 00:05-23:55
+2025-07-14 18:34:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio EURUSD: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:34:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 13:30-16:30
+2025-07-14 18:34:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio SP500: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:34:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 13:30-17:00
+2025-07-14 18:34:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio NAS100: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:34:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 01:00-14:00
+2025-07-14 18:34:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio XAUUSD: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:649 | HEARTBEAT:
+EURUSD: Bid=1.16635 | Ask=1.16636 | Spread=1.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+SP500: Bid=6258.48000 | Ask=6258.95000 | Spread=47.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+NAS100: Bid=22833.74000 | Ask=22835.26000 | Spread=152.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+XAUUSD: Bid=3348.69000 | Ask=3348.95000 | Spread=26.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | EURUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | SP500 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | NAS100 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | XAUUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:486 | Primo tick ricevuto per EURUSD: 1.16627
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:486 | Primo tick ricevuto per SP500: 6258.48
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:486 | Primo tick ricevuto per NAS100: 22833.74
+2025-07-14 18:34:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:486 | Primo tick ricevuto per XAUUSD: 3348.69
+2025-07-14 18:39:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 00:05-23:55
+2025-07-14 18:39:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio EURUSD: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:39:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 13:30-16:30
+2025-07-14 18:39:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio SP500: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:39:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 13:30-17:00
+2025-07-14 18:39:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio NAS100: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:39:00 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:118 | Formato orario non valido: 01:00-14:00
+2025-07-14 18:39:00 | ERROR    | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:639 | Errore monitoraggio XAUUSD: cannot unpack non-iterable datetime.time object
+Traceback (most recent call last):
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 630, in check_tick_activity
+    if is_trading_hours(symbol, self._config_manager.config):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\KLMNR\The5ers\PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py", line 127, in is_trading_hours
+    start, end = parse_time(time_range)
+    ^^^^^^^^^^
+TypeError: cannot unpack non-iterable datetime.time object
+2025-07-14 18:39:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:649 | HEARTBEAT:
+EURUSD: Bid=1.16631 | Ask=1.16632 | Spread=1.0p | Buffer=581 | E=0.94 | S=0.71 | C=1.00 | V=1.67
+SP500: Bid=6258.98000 | Ask=6259.45000 | Spread=47.0p | Buffer=581 | E=0.97 | S=0.89 | C=1.00 | V=1.86
+NAS100: Bid=22833.34000 | Ask=22834.86000 | Spread=152.0p | Buffer=581 | E=0.96 | S=0.49 | C=1.00 | V=1.47
+XAUUSD: Bid=3348.02000 | Ask=3348.28000 | Spread=26.0p | Buffer=581 | E=0.88 | S=0.29 | C=1.00 | V=1.25
+2025-07-14 18:39:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | EURUSD buffer: 581/1000 | Min samples: 40
+2025-07-14 18:39:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | SP500 buffer: 581/1000 | Min samples: 40
+2025-07-14 18:39:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | NAS100 buffer: 581/1000 | Min samples: 40
+2025-07-14 18:39:00 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2449 | XAUUSD buffer: 581/1000 | Min samples: 40
+2025-07-14 18:43:50 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1521 | Arresto richiesto dall'utente
+2025-07-14 18:43:50 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1547 | Sistema arrestato correttamente
+2025-07-14 18:43:50 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2523 | Applicazione terminata
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1431 | Caricamento configurazione da PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1443 | Configurazione caricata con 4 simboli
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1468 | Connesso a FivePercentOnline-Real sulla porta 18889
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1415 | Sistema inizializzato correttamente
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1417 | Simboli configurati: ['EURUSD', 'SP500', 'NAS100', 'XAUUSD']
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1418 | Parametri buffer: size=1000, min_samples=40
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1502 | Avvio sistema con 4 simboli
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1508 | Sistema di trading avviato correttamente
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16651 | Ask=1.16652 | Spread=1.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+SP500: Bid=6261.68000 | Ask=6262.15000 | Spread=47.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+NAS100: Bid=22844.24000 | Ask=22845.76000 | Spread=152.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+XAUUSD: Bid=3348.58000 | Ask=3348.84000 | Spread=26.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+2025-07-14 18:44:12 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:646 | Buffer insufficiente: EURUSD, SP500, NAS100
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per EURUSD: 1.16651
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per SP500: 6261.68
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per NAS100: 22844.24
+2025-07-14 18:44:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per XAUUSD: 3348.58
+2025-07-14 18:49:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16641 | Ask=1.16641 | Spread=0.0p | Buffer=582 | E=0.91 | S=0.78 | C=1.00 | V=1.71
+SP500: Bid=6262.48000 | Ask=6262.95000 | Spread=47.0p | Buffer=582 | E=1.00 | S=0.93 | C=1.00 | V=1.93
+NAS100: Bid=22848.64000 | Ask=22850.16000 | Spread=152.0p | Buffer=582 | E=0.97 | S=0.51 | C=1.00 | V=1.49
+XAUUSD: Bid=3346.62000 | Ask=3346.88000 | Spread=26.0p | Buffer=582 | E=0.91 | S=0.07 | C=0.63 | V=1.06
+2025-07-14 18:49:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 582/1000 | Min samples: 40
+2025-07-14 18:49:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 582/1000 | Min samples: 40
+2025-07-14 18:49:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 582/1000 | Min samples: 40
+2025-07-14 18:49:12 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 582/1000 | Min samples: 40
+2025-07-14 18:54:05 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1515 | Arresto richiesto dall'utente
+2025-07-14 18:54:05 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1541 | Sistema arrestato correttamente
+2025-07-14 18:54:05 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2517 | Applicazione terminata
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1431 | Caricamento configurazione da PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1443 | Configurazione caricata con 5 simboli
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1468 | Connesso a FivePercentOnline-Real sulla porta 18889
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1415 | Sistema inizializzato correttamente
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1417 | Simboli configurati: ['EURUSD', 'SP500', 'NAS100', 'XAUUSD', 'BTCUSD']
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1418 | Parametri buffer: size=1000, min_samples=40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1502 | Avvio sistema con 5 simboli
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1508 | Sistema di trading avviato correttamente
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16662 | Ask=1.16663 | Spread=1.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+SP500: Bid=6264.98000 | Ask=6265.45000 | Spread=47.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+NAS100: Bid=22855.64000 | Ask=22857.16000 | Spread=152.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+XAUUSD: Bid=3347.25000 | Ask=3347.51000 | Spread=26.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+BTCUSD: Bid=120158.46000 | Ask=120186.05000 | Spread=2759.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+2025-07-14 18:54:07 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:646 | Buffer insufficiente: EURUSD, SP500, NAS100
+2025-07-14 18:54:07 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 0/1000 | Min samples: 40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per EURUSD: 1.16662
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per SP500: 6264.98
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per NAS100: 22855.64
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per XAUUSD: 3347.25
+2025-07-14 18:54:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per BTCUSD: 120158.46
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16632 | Ask=1.16632 | Spread=0.0p | Buffer=583 | E=0.92 | S=0.69 | C=1.00 | V=1.64
+SP500: Bid=6264.98000 | Ask=6265.45000 | Spread=47.0p | Buffer=583 | E=0.99 | S=0.93 | C=1.00 | V=1.92
+NAS100: Bid=22856.14000 | Ask=22857.66000 | Spread=152.0p | Buffer=583 | E=0.95 | S=0.40 | C=1.00 | V=1.38
+XAUUSD: Bid=3347.83000 | Ask=3348.09000 | Spread=26.0p | Buffer=583 | E=0.91 | S=0.31 | C=1.00 | V=1.28
+BTCUSD: Bid=120259.96000 | Ask=120287.55000 | Spread=2759.0p | Buffer=583 | E=0.92 | S=0.82 | C=1.00 | V=1.75
+2025-07-14 18:59:07 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 583/1000 | Min samples: 40
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 583/1000 | Min samples: 40
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 583/1000 | Min samples: 40
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 583/1000 | Min samples: 40
+2025-07-14 18:59:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 583/1000 | Min samples: 40
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16652 | Ask=1.16652 | Spread=0.0p | Buffer=1000 | E=0.97 | S=0.82 | C=1.00 | V=1.80
+SP500: Bid=6267.68000 | Ask=6268.15000 | Spread=47.0p | Buffer=1000 | E=0.99 | S=0.96 | C=1.00 | V=1.95
+NAS100: Bid=22865.14000 | Ask=22866.66000 | Spread=152.0p | Buffer=1000 | E=0.95 | S=0.49 | C=1.00 | V=1.47
+XAUUSD: Bid=3348.43000 | Ask=3348.70000 | Spread=27.0p | Buffer=1000 | E=0.90 | S=0.38 | C=1.00 | V=1.34
+BTCUSD: Bid=120402.76000 | Ask=120430.35000 | Spread=2759.0p | Buffer=1000 | E=0.84 | S=0.58 | C=1.00 | V=1.49
+2025-07-14 19:04:08 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:04:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16615 | Ask=1.16616 | Spread=1.0p | Buffer=1000 | E=0.91 | S=0.87 | C=1.00 | V=1.79
+SP500: Bid=6266.95000 | Ask=6267.67000 | Spread=72.0p | Buffer=1000 | E=0.82 | S=0.96 | C=1.00 | V=1.78
+NAS100: Bid=22866.84000 | Ask=22868.36000 | Spread=152.0p | Buffer=1000 | E=0.96 | S=0.44 | C=1.00 | V=1.43
+XAUUSD: Bid=3349.19000 | Ask=3349.45000 | Spread=26.0p | Buffer=1000 | E=0.88 | S=0.27 | C=1.00 | V=1.24
+BTCUSD: Bid=120462.96000 | Ask=120490.55000 | Spread=2759.0p | Buffer=1000 | E=0.92 | S=0.87 | C=1.00 | V=1.80
+2025-07-14 19:09:08 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:09:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16616 | Ask=1.16616 | Spread=0.0p | Buffer=1000 | E=0.96 | S=0.78 | C=1.00 | V=1.75
+SP500: Bid=6267.18000 | Ask=6267.65000 | Spread=47.0p | Buffer=1000 | E=0.99 | S=0.93 | C=1.00 | V=1.93
+NAS100: Bid=22870.34000 | Ask=22871.86000 | Spread=152.0p | Buffer=1000 | E=0.97 | S=0.53 | C=1.00 | V=1.52
+XAUUSD: Bid=3347.64000 | Ask=3347.91000 | Spread=27.0p | Buffer=1000 | E=0.88 | S=0.11 | C=1.00 | V=1.10
+BTCUSD: Bid=120441.06000 | Ask=120468.65000 | Spread=2759.0p | Buffer=1000 | E=0.94 | S=0.93 | C=1.00 | V=1.88
+2025-07-14 19:14:08 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:14:08 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16609 | Ask=1.16609 | Spread=0.0p | Buffer=1000 | E=0.80 | S=0.84 | C=1.00 | V=1.67
+SP500: Bid=6270.18000 | Ask=6270.65000 | Spread=47.0p | Buffer=1000 | E=0.99 | S=0.91 | C=1.00 | V=1.90
+NAS100: Bid=22880.94000 | Ask=22882.46000 | Spread=152.0p | Buffer=1000 | E=0.97 | S=0.49 | C=1.00 | V=1.47
+XAUUSD: Bid=3348.41000 | Ask=3348.67000 | Spread=26.0p | Buffer=1000 | E=0.90 | S=0.47 | C=1.00 | V=1.42
+BTCUSD: Bid=120354.96000 | Ask=120382.55000 | Spread=2759.0p | Buffer=1000 | E=0.91 | S=0.82 | C=1.00 | V=1.74
+2025-07-14 19:19:09 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:19:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16621 | Ask=1.16622 | Spread=1.0p | Buffer=1000 | E=0.93 | S=0.76 | C=1.00 | V=1.70
+SP500: Bid=6268.48000 | Ask=6268.95000 | Spread=47.0p | Buffer=1000 | E=0.95 | S=0.87 | C=1.00 | V=1.83
+NAS100: Bid=22874.14000 | Ask=22875.66000 | Spread=152.0p | Buffer=1000 | E=0.95 | S=0.42 | C=1.00 | V=1.40
+XAUUSD: Bid=3349.44000 | Ask=3349.70000 | Spread=26.0p | Buffer=1000 | E=0.90 | S=0.31 | C=1.00 | V=1.28
+BTCUSD: Bid=120216.26000 | Ask=120243.85000 | Spread=2759.0p | Buffer=1000 | E=0.90 | S=0.69 | C=1.00 | V=1.62
+2025-07-14 19:24:09 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:24:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16635 | Ask=1.16636 | Spread=1.0p | Buffer=1000 | E=0.93 | S=0.78 | C=1.00 | V=1.72
+SP500: Bid=6268.68000 | Ask=6269.15000 | Spread=47.0p | Buffer=1000 | E=0.98 | S=0.91 | C=1.00 | V=1.89
+NAS100: Bid=22871.74000 | Ask=22873.26000 | Spread=152.0p | Buffer=1000 | E=0.95 | S=0.24 | C=1.00 | V=1.23
+XAUUSD: Bid=3350.60000 | Ask=3350.86000 | Spread=26.0p | Buffer=1000 | E=0.89 | S=0.31 | C=1.00 | V=1.28
+BTCUSD: Bid=120086.16000 | Ask=120113.75000 | Spread=2759.0p | Buffer=1000 | E=0.88 | S=0.82 | C=1.00 | V=1.73
+2025-07-14 19:29:09 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:09 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 1000/1000 | Min samples: 40
+2025-07-14 19:29:42 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1515 | Arresto richiesto dall'utente
+2025-07-14 19:29:42 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1541 | Sistema arrestato correttamente
+2025-07-14 19:29:42 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2517 | Applicazione terminata
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1431 | Caricamento configurazione da PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1443 | Configurazione caricata con 5 simboli
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1468 | Connesso a FivePercentOnline-Real sulla porta 18889
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1415 | Sistema inizializzato correttamente
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1417 | Simboli configurati: ['EURUSD', 'SP500', 'NAS100', 'XAUUSD', 'BTCUSD']
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1418 | Parametri buffer: size=1000, min_samples=40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1502 | Avvio sistema con 5 simboli
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1508 | Sistema di trading avviato correttamente
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16634 | Ask=1.16635 | Spread=1.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+SP500: Bid=6268.68000 | Ask=6269.15000 | Spread=47.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+NAS100: Bid=22871.34000 | Ask=22872.86000 | Spread=152.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+XAUUSD: Bid=3350.68000 | Ask=3350.94000 | Spread=26.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+BTCUSD: Bid=120126.06000 | Ask=120153.65000 | Spread=2759.0p | Buffer=0 | E=0.00 | S=0.00 | C=0.00 | V=1.00
+2025-07-14 19:29:45 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:646 | Buffer insufficiente: EURUSD, SP500, NAS100
+2025-07-14 19:29:45 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 0/1000 | Min samples: 40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 0/1000 | Min samples: 40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 0/1000 | Min samples: 40
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per EURUSD: 1.16634
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per SP500: 6268.68
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per NAS100: 22871.34
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per XAUUSD: 3350.63
+2025-07-14 19:29:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:480 | Primo tick ricevuto per BTCUSD: 120126.06
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:643 | HEARTBEAT:
+EURUSD: Bid=1.16633 | Ask=1.16633 | Spread=0.0p | Buffer=582 | E=0.92 | S=0.71 | C=1.00 | V=1.65
+SP500: Bid=6270.18000 | Ask=6270.65000 | Spread=47.0p | Buffer=582 | E=0.92 | S=0.91 | C=1.00 | V=1.84
+NAS100: Bid=22879.14000 | Ask=22880.66000 | Spread=152.0p | Buffer=582 | E=0.93 | S=0.33 | C=1.00 | V=1.31
+XAUUSD: Bid=3350.63000 | Ask=3350.89000 | Spread=26.0p | Buffer=582 | E=0.89 | S=0.07 | C=0.63 | V=1.06
+BTCUSD: Bid=120018.46000 | Ask=120046.05000 | Spread=2759.0p | Buffer=582 | E=0.95 | S=0.56 | C=1.00 | V=1.53
+2025-07-14 19:34:45 | WARNING  | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:648 | Problemi: BTCUSD: Spread 2759.0p > max 2500.0p
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | EURUSD buffer: 582/1000 | Min samples: 40
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | SP500 buffer: 582/1000 | Min samples: 40
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | NAS100 buffer: 582/1000 | Min samples: 40
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | XAUUSD buffer: 582/1000 | Min samples: 40
+2025-07-14 19:34:45 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2443 | BTCUSD buffer: 582/1000 | Min samples: 40
+2025-07-14 19:36:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1515 | Arresto richiesto dall'utente
+2025-07-14 19:36:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:1541 | Sistema arrestato correttamente
+2025-07-14 19:36:07 | INFO     | PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py:2517 | Applicazione terminata
