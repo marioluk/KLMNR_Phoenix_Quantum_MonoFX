@@ -27,7 +27,7 @@
         "volatility_scale": 1.0
     },
     "risk_parameters": {
-		"magic_number": 147251,
+        "magic_number": 147251,
         "position_cooldown": 900,
         "max_daily_trades": 5,
         "max_positions": 1,
@@ -49,13 +49,13 @@
         },
         "profit_multiplier": 2.2,
         "max_position_hours": 6,
-        "risk_percent": 0.0015,            
-		"trailing_stop": {
-                "enable": true,
-                "activation_pips": 100,
-                "step_pips": 50,
-                "lock_percentage": 0.5
-            },
+        "risk_percent": 0.0015,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 100,
+            "step_pips": 50,
+            "lock_percentage": 0.5
+        },
         "max_spread": {
             "EURUSD": 12,
             "GBPUSD": 15,
@@ -78,8 +78,11 @@
                     "step_pips": 45
                 }
             },
-            "trading_hours": ["09:00-10:30", "14:00-16:00"],
-			"comment": "Major pair - high liquidity - avoid spread peaks",
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Major pair - high liquidity - avoid spread peaks",
             "quantum_params_override": {
                 "buffer_size": 600,
                 "spin_window": 70,
@@ -103,8 +106,11 @@
                     "step_pips": 50
                 }
             },
-            "trading_hours": ["09:00-10:30", "14:00-16:00"],
-			"comment": "Volatile major - avoid early morning spread spikes",
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Volatile major - avoid early morning spread spikes",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 65,
@@ -128,8 +134,11 @@
                     "step_pips": 35
                 }
             },
-            "trading_hours": ["02:00-04:00", "09:00-10:30"],
-			"comment": "Asian session specialist - adjusted hours",
+            "trading_hours": [
+                "02:00-04:00",
+                "09:00-10:30"
+            ],
+            "comment": "Asian session specialist - adjusted hours",
             "quantum_params_override": {
                 "buffer_size": 400,
                 "spin_window": 60,
@@ -153,8 +162,11 @@
                     "step_pips": 60
                 }
             },
-            "trading_hours": ["09:30-10:30", "14:30-15:30"],
-			"comment": "Gold - avoid high spread periods",
+            "trading_hours": [
+                "09:30-10:30",
+                "14:30-15:30"
+            ],
+            "comment": "Gold - avoid high spread periods",
             "quantum_params_override": {
                 "buffer_size": 300,
                 "spin_window": 50,
@@ -178,8 +190,10 @@
                     "step_pips": 75
                 }
             },
-            "trading_hours": ["14:30-16:00"],
-			"comment": "US tech index - high volatility",
+            "trading_hours": [
+                "14:30-16:00"
+            ],
+            "comment": "US tech index - high volatility",
             "quantum_params_override": {
                 "buffer_size": 250,
                 "spin_window": 45,
@@ -188,6 +202,33 @@
                 "entropy_thresholds": {
                     "buy_signal": 0.65,
                     "sell_signal": 0.35
+                }
+            }
+        },
+        "GBPJPY": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 35,
+                "base_sl_pips": 55,
+                "profit_multiplier": 2.0,
+                "risk_percent": 0.0012,
+                "trailing_stop": {
+                    "activation_pips": 100,
+                    "step_pips": 50
+                }
+            },
+            "trading_hours": [
+                "08:00-17:00"
+            ],
+            "comment": "Cross currency - medium volatility",
+            "quantum_params_override": {
+                "buffer_size": 400,
+                "spin_window": 60,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.60,
+                    "sell_signal": 0.40
                 }
             }
         }
