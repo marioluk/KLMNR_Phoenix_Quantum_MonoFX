@@ -1,0 +1,340 @@
+{
+    "logging": {
+        "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "metatrader5": {
+        "login": 25437097,
+        "password": "wkchTWEO_.00",
+        "server": "FivePercentOnline-Real",
+        "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+        "port": 18889
+    },
+    "account_currency": "USD",
+    "magic_number": 177251,
+    "quantum_params": {
+        "buffer_size": 590,
+        "signal_cooldown": 479,
+        "adaptive_threshold": 0.77,
+        "volatility_filter": 0.87,
+        "trend_strength_min": 0.72,
+        "confluence_threshold": 0.82,
+        "spin_window": 80,
+        "min_spin_samples": 30,
+        "spin_threshold": 0.32,
+        "entropy_thresholds": {
+            "buy_signal": 0.58,
+            "sell_signal": 0.42
+        },
+        "volatility_scale": 1.0
+    },
+    "risk_parameters": {
+        "risk_percent": 0.008,
+        "max_daily_trades": 7,
+        "max_concurrent_trades": 3,
+        "min_profit_target": 0.0152,
+        "stop_loss_atr_multiplier": 1.26,
+        "take_profit_atr_multiplier": 2.4,
+        "daily_loss_limit": 0.05,
+        "max_drawdown": 0.08399999999999999,
+        "magic_number": 147251,
+        "position_cooldown": 900,
+        "max_positions": 1,
+        "min_sl_distance_pips": {
+            "EURUSD": 30,
+            "GBPUSD": 35,
+            "USDJPY": 25,
+            "XAUUSD": 150,
+            "NAS100": 50,
+            "default": 40
+        },
+        "base_sl_pips": {
+            "EURUSD": 50,
+            "GBPUSD": 60,
+            "USDJPY": 40,
+            "XAUUSD": 220,
+            "NAS100": 100,
+            "default": 80
+        },
+        "profit_multiplier": 2.2,
+        "max_position_hours": 6,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 100,
+            "step_pips": 50,
+            "lock_percentage": 0.5
+        },
+        "max_spread": {
+            "EURUSD": 12,
+            "GBPUSD": 15,
+            "USDJPY": 10,
+            "XAUUSD": 40,
+            "NAS100": 180,
+            "default": 20
+        }
+    },
+    "symbols": {
+        "EURUSD": {
+            "enabled": true,
+            "lot_size": 0.046,
+            "stop_loss_pips": 13,
+            "take_profit_pips": 33,
+            "signal_buy_threshold": 0.6839999999999999,
+            "signal_sell_threshold": 0.316,
+            "max_spread": 2.0,
+            "trading_sessions": [
+                "London",
+                "NewYork"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.0015,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Major pair - high liquidity - avoid spread peaks",
+            "quantum_params_override": {
+                "buffer_size": 600,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        },
+        "USDJPY": {
+            "enabled": true,
+            "lot_size": 0.052,
+            "stop_loss_pips": 11,
+            "take_profit_pips": 23,
+            "signal_buy_threshold": 0.6799999999999999,
+            "signal_sell_threshold": 0.32,
+            "max_spread": 2.5,
+            "trading_sessions": [
+                "Tokyo",
+                "London"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 25,
+                "base_sl_pips": 40,
+                "profit_multiplier": 2.1,
+                "risk_percent": 0.0015,
+                "trailing_stop": {
+                    "activation_pips": 70,
+                    "step_pips": 35
+                }
+            },
+            "trading_hours": [
+                "02:00-04:00",
+                "09:00-10:30"
+            ],
+            "comment": "Asian session specialist - adjusted hours",
+            "quantum_params_override": {
+                "buffer_size": 400,
+                "spin_window": 60,
+                "min_spin_samples": 20,
+                "signal_cooldown": 700,
+                "entropy_thresholds": {
+                    "buy_signal": 0.55,
+                    "sell_signal": 0.45
+                }
+            }
+        },
+        "GBPUSD": {
+            "enabled": true,
+            "lot_size": 0.047,
+            "stop_loss_pips": 16,
+            "take_profit_pips": 33,
+            "signal_buy_threshold": 0.6900000000000001,
+            "signal_sell_threshold": 0.30999999999999994,
+            "max_spread": 3.0,
+            "trading_sessions": [
+                "London"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 35,
+                "base_sl_pips": 60,
+                "profit_multiplier": 2.3,
+                "risk_percent": 0.0015,
+                "trailing_stop": {
+                    "activation_pips": 100,
+                    "step_pips": 50
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Volatile major - avoid early morning spread spikes",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 65,
+                "min_spin_samples": 25,
+                "signal_cooldown": 900,
+                "entropy_thresholds": {
+                    "buy_signal": 0.6,
+                    "sell_signal": 0.4
+                }
+            }
+        },
+        "XAUUSD": {
+            "enabled": true,
+            "lot_size": 0.028,
+            "stop_loss_pips": 48,
+            "take_profit_pips": 114,
+            "signal_buy_threshold": 0.7360000000000001,
+            "signal_sell_threshold": 0.264,
+            "max_spread": 5.0,
+            "trading_sessions": [
+                "London",
+                "NewYork"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 150,
+                "base_sl_pips": 220,
+                "profit_multiplier": 2.4,
+                "risk_percent": 0.001,
+                "trailing_stop": {
+                    "activation_pips": 120,
+                    "step_pips": 60
+                }
+            },
+            "trading_hours": [
+                "09:30-10:30",
+                "14:30-15:30"
+            ],
+            "comment": "Gold - avoid high spread periods",
+            "quantum_params_override": {
+                "buffer_size": 300,
+                "spin_window": 50,
+                "min_spin_samples": 20,
+                "signal_cooldown": 1200,
+                "entropy_thresholds": {
+                    "buy_signal": 0.62,
+                    "sell_signal": 0.38
+                }
+            }
+        },
+        "NAS100": {
+            "enabled": true,
+            "lot_size": 0.018,
+            "stop_loss_pips": 29,
+            "take_profit_pips": 71,
+            "signal_buy_threshold": 0.74,
+            "signal_sell_threshold": 0.26,
+            "max_spread": 8.0,
+            "trading_sessions": [
+                "NewYork"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 50,
+                "base_sl_pips": 100,
+                "profit_multiplier": 2.5,
+                "risk_percent": 0.001,
+                "trailing_stop": {
+                    "activation_pips": 150,
+                    "step_pips": 75
+                }
+            },
+            "trading_hours": [
+                "14:30-16:00"
+            ],
+            "comment": "US tech index - high volatility",
+            "quantum_params_override": {
+                "buffer_size": 250,
+                "spin_window": 45,
+                "min_spin_samples": 15,
+                "signal_cooldown": 1500,
+                "entropy_thresholds": {
+                    "buy_signal": 0.65,
+                    "sell_signal": 0.35
+                }
+            }
+        },
+        "GBPJPY": {
+            "enabled": true,
+            "lot_size": 0.037,
+            "stop_loss_pips": 21,
+            "take_profit_pips": 52,
+            "signal_buy_threshold": 0.734,
+            "signal_sell_threshold": 0.266,
+            "max_spread": 4.0,
+            "trading_sessions": [
+                "London",
+                "Tokyo"
+            ],
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 35,
+                "base_sl_pips": 55,
+                "profit_multiplier": 2.0,
+                "risk_percent": 0.0012,
+                "trailing_stop": {
+                    "activation_pips": 100,
+                    "step_pips": 50
+                }
+            },
+            "trading_hours": [
+                "08:00-17:00"
+            ],
+            "comment": "Cross currency - medium volatility",
+            "quantum_params_override": {
+                "buffer_size": 400,
+                "spin_window": 60,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.6,
+                    "sell_signal": 0.4
+                }
+            }
+        }
+    },
+    "THE5ERS_specific": {
+        "step1_target": 8,
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
+        "drawdown_protection": {
+            "soft_limit": 0.02,
+            "hard_limit": 0.05
+        }
+    },
+    "initial_balance": 100000,
+    "HIGH_STAKES_specific": {
+        "challenge_type": "High Stakes Challenge",
+        "account_balance": 5000,
+        "target_daily_profit": 25,
+        "validation_days_required": 3,
+        "daily_loss_limit": 250,
+        "leverage": 100,
+        "aggressiveness_level": "aggressive",
+        "aggressiveness_score": 70,
+        "optimization_timestamp": "2025-07-18T02:57:29.996416",
+        "source_config": "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+    },
+    "optimization_metadata": {
+        "generated_by": "HighStakesOptimizer",
+        "generation_date": "2025-07-18T02:57:29.996519",
+        "source_file": "C:\\GitRepos\\The5ers\\PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+        "target_challenge": "High Stakes",
+        "aggressiveness": "aggressive",
+        "optimization_method": "rule_based_with_backtest_validation"
+    }
+}

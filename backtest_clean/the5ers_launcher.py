@@ -92,15 +92,16 @@ def show_menu():
     print("3. 📊 Backtest completo ottimizzato (30 giorni)")
     print("4. 🔥 NUOVO! Backtest comparativo multi-config")
     print("5. 📅 NUOVO! Backtest periodo personalizzato")
-    print("6. 🔧 Test parametri quantum")
-    print("7. 💰 Analisi position sizing")
-    print("8. 📈 Report configurazione attuale")
-    print("9. 🏆 Test compliance The5ers")
-    print("10. ⚙️ NUOVO! Selezione configurazione")
-    print("11. ❌ Esci")
+    print("6. � HIGH STAKES CHALLENGE (€25/giorno su €5000)")
+    print("7. �🔧 Test parametri quantum")
+    print("8. 💰 Analisi position sizing")
+    print("9. 📈 Report configurazione attuale")
+    print("10. 🏆 Test compliance The5ers")
+    print("11. ⚙️ NUOVO! Selezione configurazione")
+    print("12. ❌ Esci")
     print()
     
-    choice = input("👉 Seleziona opzione (1-11): ").strip()
+    choice = input("👉 Seleziona opzione (1-12): ").strip()
     return choice
 
 def run_integrated_backtest():
@@ -215,7 +216,76 @@ def run_custom_period_backtest():
         print(f"❌ Errore backtest personalizzato: {e}")
         return None
 
-def test_quantum_parameters():
+def run_high_stakes_challenge():
+    """Esegue High Stakes Challenge backtest con selezione aggressività"""
+    try:
+        from high_stakes_challenge_backtest import HighStakesChallengeBacktest
+        
+        print("🔥 AVVIO HIGH STAKES CHALLENGE")
+        print("="*50)
+        print("🎯 Target: 3 giorni con €25+ profit per VALIDAZIONE")
+        print("⏰ Tempo Step: ILLIMITATO dopo validazione")
+        print("⚠️ Daily Loss Limit: €250 (5%)")
+        print("📈 Leverage: 1:100")
+        print()
+        
+        # Selezione aggressività
+        print("🎯 SELEZIONE LIVELLO AGGRESSIVITÀ:")
+        print("1. 🟢 Conservative - Sicuro e stabile (6% risk, lot 0.03-0.04)")
+        print("2. 🟡 Moderate - Bilanciato risk/reward (7% risk, lot 0.035-0.045)")  
+        print("3. 🔴 Aggressive - Fast validation (8% risk, lot 0.04-0.05)")
+        
+        aggr_choice = input("👉 Scegli aggressività (1-3, Enter=2): ").strip()
+        
+        if aggr_choice == "1":
+            aggressiveness = "conservative"
+            print("✅ Selezionato: CONSERVATIVE")
+        elif aggr_choice == "3":
+            aggressiveness = "aggressive"
+            print("✅ Selezionato: AGGRESSIVE")
+        else:
+            aggressiveness = "moderate"
+            print("✅ Selezionato: MODERATE (raccomandato)")
+        
+        print()
+        
+        # Menu durata test
+        print("📅 DURATA TEST:")
+        print("1. 5 giorni (validation focus)")
+        print("2. 7 giorni (extended)")
+        print("3. 10 giorni (full challenge)")
+        
+        duration_choice = input("👉 Scegli durata (1-3, Enter=1): ").strip()
+        
+        if duration_choice == "2":
+            days = 7
+        elif duration_choice == "3":
+            days = 10
+        else:
+            days = 5
+        
+        backtest = HighStakesChallengeBacktest(aggressiveness=aggressiveness)
+        result = backtest.run_high_stakes_backtest(days=days)
+        
+        # Mostra risultato finale
+        print(f"\n🏆 HIGH STAKES CHALLENGE RESULT:")
+        print(f"⚙️ Aggressività usata: {aggressiveness.upper()}")
+        
+        if result['validation_completed']:
+            print(f"✅ VALIDATION COMPLETED! {result['profitable_days_achieved']} giorni profittevoli")
+            print(f"💰 Final Balance: €{result['final_balance']:,.2f}")
+            print(f"📈 Total Profit: €{result['total_pnl']:+,.2f}")
+            print(f"⏰ Ora hai TEMPO ILLIMITATO per completare lo step!")
+        else:
+            print(f"⏳ Validation in progress: {result['profitable_days_achieved']}/3 giorni")
+            print(f"💡 Consiglio: Prova livello più aggressivo o estendi durata test")
+        
+        print("✅ High Stakes Challenge completato!")
+        return result
+        
+    except Exception as e:
+        print(f"❌ Errore High Stakes Challenge: {e}")
+        return None
     """Test parametri quantum"""
     print("🔧 TEST PARAMETRI QUANTUM")
     print("="*50)
@@ -239,7 +309,29 @@ def test_quantum_parameters():
     except Exception as e:
         print(f"❌ Errore test parametri: {e}")
 
-def analyze_position_sizing():
+def test_quantum_parameters():
+    """Test parametri quantum"""
+    print("🔧 TEST PARAMETRI QUANTUM")
+    print("="*50)
+    
+    # Carica config
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                  'PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json')
+        
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        
+        quantum_params = config.get('quantum_params', {})
+        
+        print("🔬 Parametri Quantum attuali:")
+        for key, value in quantum_params.items():
+            print(f"   {key}: {value}")
+        
+        print("\n✅ Test parametri completato!")
+        
+    except Exception as e:
+        print(f"❌ Errore test parametri: {e}")
     """Analisi position sizing"""
     print("💰 ANALISI POSITION SIZING")
     print("="*50)
@@ -260,7 +352,30 @@ def analyze_position_sizing():
     
     print("✅ Analisi position sizing completata!")
 
-def show_current_config():
+def analyze_position_sizing():
+    """Analisi position sizing"""
+    print("💰 ANALISI POSITION SIZING")
+    print("="*50)
+    
+    # Simula diversi scenari
+    balances = [100000, 50000, 200000, 5000]  # Aggiungo €5000 per High Stakes
+    risk_percentages = [0.001, 0.0015, 0.002, 0.008]  # Aggiungo 0.8% per High Stakes
+    
+    print("📊 Simulazione Position Sizing:")
+    print()
+    
+    for balance in balances:
+        balance_type = "High Stakes" if balance == 5000 else "Standard"
+        print(f"💰 Balance: €{balance:,.2f} ({balance_type})")
+        for risk_pct in risk_percentages:
+            position_value = balance * risk_pct
+            if balance == 5000 and risk_pct == 0.008:
+                print(f"   🔥 Risk {risk_pct:.3%}: €{position_value:.2f} | Micro lots: {position_value/1000:.2f} (HIGH STAKES)")
+            else:
+                print(f"   Risk {risk_pct:.3%}: €{position_value:.2f} | Micro lots: {position_value/1000:.2f}")
+        print()
+    
+    print("✅ Analisi position sizing completata!")
     """Mostra configurazione attuale"""
     print("📈 REPORT CONFIGURAZIONE ATTUALE")
     print("="*50)
@@ -298,6 +413,132 @@ def show_current_config():
         
     except Exception as e:
         print(f"❌ Errore lettura configurazione: {e}")
+
+def show_current_config():
+    """Mostra configurazione attuale"""
+    print("📈 REPORT CONFIGURAZIONE ATTUALE")
+    print("="*50)
+    
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                  'PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json')
+        
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        
+        # Parametri chiave
+        quantum_params = config.get('quantum_params', {})
+        risk_params = config.get('risk_parameters', {})
+        symbols = config.get('symbols', {})
+        the5ers_params = config.get('THE5ERS_specific', {})
+        high_stakes_params = config.get('HIGH_STAKES_specific', {})
+        
+        print("🔬 QUANTUM PARAMETERS:")
+        for key, value in quantum_params.items():
+            print(f"   {key}: {value}")
+        
+        print("\n💰 RISK PARAMETERS:")
+        for key, value in risk_params.items():
+            print(f"   {key}: {value}")
+        
+        if high_stakes_params:
+            print("\n🔥 HIGH STAKES SETTINGS:")
+            for key, value in high_stakes_params.items():
+                print(f"   {key}: {value}")
+        elif the5ers_params:
+            print("\n🏆 THE5ERS SETTINGS:")
+            for key, value in the5ers_params.items():
+                print(f"   {key}: {value}")
+        
+        print(f"\n📊 SIMBOLI CONFIGURATI: {len(symbols)}")
+        for symbol in symbols.keys():
+            print(f"   • {symbol}")
+        
+        print("\n✅ Report configurazione completato!")
+        
+    except Exception as e:
+        print(f"❌ Errore lettura configurazione: {e}")
+    """Gestione selezione configurazione con dettagli"""
+    try:
+        selector = ConfigSelector()
+        
+        print("⚙️ GESTIONE CONFIGURAZIONI THE5ERS")
+        print("="*50)
+        
+        # Mostra menu opzioni
+        print("Opzioni disponibili:")
+        print("1. 📋 Mostra tutte le configurazioni disponibili")
+        print("2. 🔍 Seleziona configurazione interattiva")
+        print("3. 📊 Analizza configurazione specifica")
+        print("4. 📌 Mostra configurazione default")
+        print("5. ❌ Torna al menu principale")
+        
+        choice = input("\n👉 Scegli opzione (1-5): ").strip()
+        
+        if choice == "1":
+            # Mostra tutte le configurazioni
+            configs = selector.find_config_files()
+            if configs:
+                print(f"\n📁 CONFIGURAZIONI TROVATE ({len(configs)}):")
+                print("-" * 80)
+                for i, config in enumerate(configs, 1):
+                    print(f"{i}. {config['filename']}")
+                    print(f"   Tipo: {config['config_type']} | Simboli: {config['symbol_count']} | {config['aggressiveness']}")
+                    print(f"   Risk: {config['risk_percent']*100:.3f}% | Max Trades: {config['max_daily_trades']}")
+                    print()
+            else:
+                print("❌ Nessuna configurazione trovata")
+        
+        elif choice == "2":
+            # Selezione interattiva
+            selected = selector.show_interactive_menu()
+            if selected:
+                print(f"\n✅ Configurazione selezionata per prossimi backtest:")
+                print(f"📁 {selected}")
+                
+                # Opzione per impostare come default temporaneo
+                set_default = input("❓ Impostare come default per questa sessione? (y/n): ").strip().lower()
+                if set_default in ['y', 'yes', 's', 'si']:
+                    # Salva in variabile globale o file temporaneo
+                    with open('temp_config_selection.txt', 'w') as f:
+                        f.write(selected)
+                    print("✅ Configurazione impostata come default temporaneo")
+        
+        elif choice == "3":
+            # Analizza configurazione specifica
+            selected = selector.show_interactive_menu()
+            if selected:
+                selector.show_config_details(selected)
+        
+        elif choice == "4":
+            # Mostra default
+            default = selector.get_default_config()
+            if default:
+                print(f"\n📌 CONFIGURAZIONE DEFAULT:")
+                print(f"📁 {default}")
+                selector.show_config_details(default)
+            else:
+                print("❌ Nessuna configurazione default trovata")
+        
+        elif choice == "5":
+            return
+        else:
+            print("❌ Opzione non valida")
+        
+        input("\nPremi INVIO per continuare...")
+        
+    except Exception as e:
+        print(f"❌ Errore gestione configurazioni: {e}")
+
+def get_selected_config():
+    """Ottiene la configurazione selezionata temporaneamente"""
+    try:
+        if os.path.exists('temp_config_selection.txt'):
+            with open('temp_config_selection.txt', 'r') as f:
+                return f.read().strip()
+    except:
+        pass
+    return None
 
 def select_configuration():
     """Gestione selezione configurazione con dettagli"""
@@ -494,26 +735,29 @@ def main():
                 run_custom_period_backtest()
                 
             elif choice == "6":
-                test_quantum_parameters()
+                run_high_stakes_challenge()
                 
             elif choice == "7":
-                analyze_position_sizing()
+                test_quantum_parameters()
                 
             elif choice == "8":
-                show_current_config()
+                analyze_position_sizing()
                 
             elif choice == "9":
-                test_the5ers_compliance()
+                show_current_config()
                 
             elif choice == "10":
-                select_configuration()
+                test_the5ers_compliance()
                 
             elif choice == "11":
+                select_configuration()
+                
+            elif choice == "12":
                 print("👋 Arrivederci!")
                 break
                 
             else:
-                print("❌ Opzione non valida. Scegli 1-11.")
+                print("❌ Opzione non valida. Scegli 1-12.")
             
             # Pausa prima del prossimo menu
             input("\nPremi INVIO per continuare...")

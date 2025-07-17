@@ -1,10 +1,117 @@
-# 🎯 THE5ERS SYSTEM LAUNCHER - SISTEMA COMPLETO
+# 🎯 THE5ERS INTEGRATED OPTIMIZATION SYSTEM
 
-Il launcher ti offre un **men# 🔥 NUOVO! Backtest comparativo multi-config
+## 🚀 **QUICK START - SISTEMA CONFIGURABILE**
+
+### **🎯 LAUNCHER RACCOMANDATO (NUOVO!):**
+
+```powershell
+python the5ers_integrated_launcher.py
+```
+
+**✨ SISTEMA COMPLETAMENTE CONFIGURABILE:**
+- ✅ **File JSON sorgente selezionabile** 
+- ✅ **Parametri High Stakes personalizzabili**
+- ✅ **Date e periodi configurabili**
+- ✅ **Livelli aggressività modificabili**
+- ✅ **24 opzioni integrate**
+
+### **🔧 ALTRI LAUNCHER DISPONIBILI:**
+
+1. **`the5ers_super_launcher.py`** - 🏆 **SUPER COMPLETO** (21 opzioni)
+   - ✅ Tutte le funzionalità integrate (non configurabile)
+
+2. **`the5ers_simple_launcher.py`** - 🎯 **SEMPLIFICATO** (9 opzioni)
+   - ✅ Funzionalità essenziali
+
+3. **`the5ers_master_launcher.py`** - 🔧 **AVANZATO** (13 opzioni)
+   - ✅ Funzionalità avanzate originali
+
+## 📚 **DOCUMENTAZIONE COMPLETA**
+
+### **📄 GUIDA DETTAGLIATA (50+ PAGINE):**
+```
+📁 INTEGRATED_SYSTEM_README.md
+```
+
+**🎯 Include:**
+- Configurazione completa optimizer
+- 24 opzioni spiegate nel dettaglio
+- Workflow step-by-step
+- Esempi pratici
+- Troubleshooting
+- Performance benchmarks
+
+## 🔧 **WORKFLOW OTTIMIZZAZIONE CONFIGURABILE**
+
+### **🎯 NUOVO: SISTEMA COMPLETAMENTE CONFIGURABILE!**
+
+#### **🚀 INTEGRATED LAUNCHER (RACCOMANDATO!):**
+```powershell
+python the5ers_integrated_launcher.py
+```
+
+**✨ FUNZIONALITÀ:**
+- ✅ **Configurazione file JSON sorgente** - Scegli quale JSON ottimizzare
+- ✅ **Parametri High Stakes personalizzabili** - Account, target, giorni validazione
+- ✅ **Livelli aggressività configurabili** - Risk multiplier, trades, simboli
+- ✅ **Simboli preferiti personalizzabili** - Seleziona portfolio custom
+- ✅ **Date periodo personalizzabili** - Test su timeframe specifici
+- ✅ **Output directory configurabile** - Salva dove vuoi
+- ✅ **Generazione selettiva** - Solo i livelli che ti servono
+
+### **📋 PROCESSO OTTIMIZZAZIONE CONFIGURABILE:**
+
+1. **📁 SELEZIONE SOURCE**: Qualsiasi file JSON come sorgente
+2. **⚙️ CONFIGURAZIONE**: Parametri personalizzabili interattivi
+3. **🔧 OPTIMIZATION**: Sistema ottimizza parametri configurati
+4. **📄 OUTPUT**: Genera configurazioni su misura per le tue esigenze
+
+### **🚀 COMANDI PRINCIPALI:**
+
+```powershell
+# 🎯 INTEGRATED LAUNCHER - COMPLETAMENTE CONFIGURABILE (NUOVO!)
+python the5ers_integrated_launcher.py
+
+# 🏆 SUPER LAUNCHER - SISTEMA COMPLETO (21 opzioni)
+python the5ers_super_launcher.py
+
+# 🔧 GENERA CONFIGURAZIONI OTTIMIZZATE  
+python the5ers_super_launcher.py → Opzione 1
+
+# 🔥 HIGH STAKES CHALLENGE
+python the5ers_super_launcher.py → Opzione 4
+
+# 📊 BACKTEST COMPARATIVO MULTI-CONFIG
+python the5ers_super_launcher.py → Opzione 8
+
+# 📅 BACKTEST PERIODO PERSONALIZZATO
+python the5ers_super_launcher.py → Opzione 9
+
+# ⚙️ SELEZIONE CONFIGURAZIONE DINAMICA
+python the5ers_super_launcher.py → Opzione 10S SYSTEM LAUNCHER - SISTEMA COMPLETO
+
+## 🔧 **WORKFLOW OTTIMIZZAZIONE CORRETTO**
+
+### **📋 PROCESSO ORIGINALE RIPRISTINATO:**
+
+1. **📁 INPUT**: File JSON originale `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json`
+2. **� OPTIMIZATION**: Sistema ottimizza parametri tramite backtest  
+3. **📄 OUTPUT**: Genera 3 configurazioni High Stakes ottimizzate
+
+### **🚀 COMANDI PRINCIPALI:**
+
+```powershell
+# 🔧 GENERA CONFIGURAZIONI OTTIMIZZATE (NUOVO!)
+python high_stakes_optimizer.py
+
+# 🔥 BACKTEST CON CONFIGURAZIONI GENERATE  
+python high_stakes_challenge_backtest.py
+
+# 📅 BACKTEST PERIODO PERSONALIZZATO
+python custom_period_backtest.py
+
+# 🔥 BACKTEST COMPARATIVO MULTI-CONFIG
 python comparative_backtest.py
-
-# 📅 NUOVO! Backtest periodo personalizzato
-python cus---
 
 ## ⚙️ **NUOVO! SISTEMA SELEZIONE CONFIGURAZIONE DINAMICA**
 
