@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-# ==========================================================    print("📋 OPZIONI DISPONIBILI:")
-    print()
-    print("1. 🔍 Verifica sistema e configurazione")
-    print("2. 🚀 Backtest integrato veloce (15 giorni)")  
-    print("3. 📊 Backtest completo ottimizzato (30 giorni)")
-    print("4. 🔥 NUOVO! Backtest comparativo multi-config")
-    print("5. 🔧 Test parametri quantum")
-    print("6. 💰 Analisi position sizing")
-    print("7. 📈 Report configurazione attuale")
-    print("8. 🏆 Test compliance The5ers")
-    print("9. ❌ Esci")================
+# ====================================================================================
 # THE5ERS LAUNCHER - SISTEMA INTEGRATO PULITO
 # Launcher principale per il sistema The5ers ottimizzato
 # ====================================================================================
@@ -97,14 +87,15 @@ def show_menu():
     print("1. 🔍 Verifica sistema e configurazione")
     print("2. 🚀 Backtest integrato veloce (15 giorni)")
     print("3. 📊 Backtest completo ottimizzato (30 giorni)")
-    print("4. 🔧 Test parametri quantum")
-    print("5. 💰 Analisi position sizing")
-    print("6. 📈 Report configurazione attuale")
-    print("7. 🏆 Test compliance The5ers")
-    print("8. ❌ Esci")
+    print("4. � NUOVO! Backtest comparativo multi-config")
+    print("5. �🔧 Test parametri quantum")
+    print("6. 💰 Analisi position sizing")
+    print("7. 📈 Report configurazione attuale")
+    print("8. 🏆 Test compliance The5ers")
+    print("9. ❌ Esci")
     print()
     
-    choice = input("👉 Seleziona opzione (1-8): ").strip()
+    choice = input("👉 Seleziona opzione (1-9): ").strip()
     return choice
 
 def run_quick_verification():
@@ -208,6 +199,50 @@ def run_full_backtest():
         
     except Exception as e:
         print(f"❌ Errore backtest completo: {e}")
+        import traceback
+        traceback.print_exc()
+
+def run_comparative_backtest():
+    """Esegue backtest comparativo multi-config"""
+    
+    print("\n🔥 BACKTEST COMPARATIVO MULTI-CONFIG")
+    print("-" * 40)
+    
+    try:
+        sys.path.insert(0, os.path.dirname(__file__))
+        from comparative_backtest import The5ersComparativeBacktest
+        
+        print("✅ Sistema comparativo caricato")
+        
+        backtest = The5ersComparativeBacktest()
+        
+        # Carica configurazioni
+        configs_loaded = backtest.load_all_configs()
+        print(f"📊 Configurazioni caricate: {configs_loaded}")
+        
+        if configs_loaded == 0:
+            print("❌ Nessuna configurazione trovata!")
+            return
+        
+        print("🎯 Avvio analisi comparativa...")
+        
+        # Esegui backtest
+        results = backtest.run_comparative_backtest(days=30)
+        
+        # Genera report
+        rankings = backtest.generate_comparative_report()
+        
+        print(f"\n🏆 ANALISI COMPARATIVA COMPLETATA!")
+        print(f"🥇 Configurazione vincente: {rankings[0][0]}")
+        print(f"📊 Rating: {rankings[0][1]:.1f}/100")
+        
+        # Raccomandazione finale
+        print(f"\n💡 RACCOMANDAZIONE:")
+        print(f"   🎯 Usa configurazione: {rankings[0][0]}")
+        print(f"   📁 File: config_{rankings[0][0].lower()}.json")
+        
+    except Exception as e:
+        print(f"❌ Errore backtest comparativo: {e}")
         import traceback
         traceback.print_exc()
 
@@ -394,14 +429,16 @@ def main():
         elif choice == "3":
             run_full_backtest()
         elif choice == "4":
-            test_quantum_parameters()
+            run_comparative_backtest()
         elif choice == "5":
-            analyze_position_sizing()
+            test_quantum_parameters()
         elif choice == "6":
-            show_current_config()
+            analyze_position_sizing()
         elif choice == "7":
-            test_the5ers_compliance()
+            show_current_config()
         elif choice == "8":
+            test_the5ers_compliance()
+        elif choice == "9":
             print("\n👋 Arrivederci!")
             break
         else:
