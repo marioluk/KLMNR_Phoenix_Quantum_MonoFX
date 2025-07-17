@@ -194,9 +194,12 @@
     },
     "THE5ERS_specific": {
         "step1_target": 8,
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
         "drawdown_protection": {
-            "soft_limit": 2,
-            "hard_limit": 5
+            "soft_limit": 0.02,
+            "hard_limit": 0.05
         }
-    }
+    },
+    "initial_balance": 100000
 }

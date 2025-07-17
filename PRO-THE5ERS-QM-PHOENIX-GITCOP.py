@@ -1499,12 +1499,696 @@ class QuantumTradingSystem:
             logger.info(f"Configurazione caricata con {len(self.config.config['symbols'])} simboli")
             
         except Exception as e:
-            logger.critical(f"Errore caricamento configurazione: {str(e)}")
+            logger.error(f"Errore caricamento configurazione: {str(e)}")
             raise
             
             
 
     def _initialize_mt5(self) -> bool:
+        """Connessione a MetaTrader 5"""
+        try:
+            if not mt5.initialize():
+                logger.error("Inizializzazione MT5 fallita")
+                return False
+            
+            terminal_info = mt5.terminal_info()
+            if not terminal_info:
+                logger.error("Impossibile ottenere info terminal MT5")
+                return False
+                
+            logger.info(f"MT5 inizializzato: {terminal_info.company} - {terminal_info.name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Errore inizializzazione MT5: {str(e)}")
+            return False
+
+    """
+    2. Gestione Connessione e Ambiente
+    """
+
+    def _verify_connection(self) -> bool:
+        """Verifica/connessione MT5 - Verifica la connessione MT5 con ripristino automatico"""
+        try:
+            if not mt5.initialize() or not mt5.terminal_info().connected:
+                logger.warning("Connessione MT5 persa, tentativo di riconnessione...")
+                mt5.shutdown()
+                time.sleep(5)
+                return mt5.initialize()
+            return True
+        except Exception as e:
+            logger.error(f"Errore verifica connessione: {str(e)}")
+            return False
+
+    """
+    3. Core del Trading System            
+    """        
+        
+    def start(self):
+        """Avvia il sistema"""
+        try:
+            if not hasattr(self, 'config') or not hasattr(self.config, 'symbols'):
+                raise RuntimeError("Configurazione non valida - simboli mancanti")
+                
+            logger.info(f"Avvio sistema con {len(self.config.symbols)} simboli")
+            
+            if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
+                raise RuntimeError("Componenti critici non inizializzati")
+            
+            self.running = True
+            logger.info("Sistema di trading avviato correttamente")
+            
+            while self.running:
+                try:
+                    self._main_loop()
+                    time.sleep(0.1)
+                except KeyboardInterrupt:
+                    logger.info("Arresto richiesto dall'utente")
+                    self.running = False
+                except Exception as e:
+                    logger.error(f"Errore durante l'esecuzione: {str(e)}", exc_info=True)
+                    time.sleep(5)
+                    
+        except Exception as e:
+            logger.critical(f"Errore fatale: {str(e)}", exc_info=True)
+        finally:
+            self.stop()
+
+    def stop(self):
+        """Ferma il sistema"""
+        self.running = False
+        
+        if hasattr(self, 'last_position_check'):
+            del self.last_position_check
+        if hasattr(self, 'last_connection_check'):
+            del self.last_connection_check
+        if hasattr(self, 'last_account_update'):
+            del self.last_account_update
+        if hasattr(self, 'last_tick_check'):
+            del self.last_tick_check
+        
+        mt5.shutdown()
+        logger.info("Sistema arrestato correttamente")
+
+    def _main_loop(self):
+        """
+        cuore pulsante
+        Loop principale con variabili di tempo come attributi di istanza
+        Loop principale di trading
+        """
+        
+        while self.running:
+            # Verifica connessione MT5
+            if not mt5.terminal_info().connected:
+                logger.error("Connessione MT5 persa!")
+                time.sleep(5)
+                continue
+                
+            current_time = time.time()
+            
+            # Controlli periodici
+            if current_time - self.last_connection_check > 30:  # Check più frequente
+                if not self._verify_connection():
+                    time.sleep(5)
+                    continue
+                self.last_connection_check = current_time
+                
+            
+            if current_time - self.last_connection_check > 60:
+                self._verify_connection()
+                self.last_connection_check = current_time
+                
+            if current_time - self.last_account_update > 60:
+                self._update_account_info()
+                self.last_account_update = current_time
+                self._check_drawdown_limits()
+            
+            if current_time - self.last_tick_check > 300:
+                self.engine.check_tick_activity()  # Qui viene chiamato check_tick_activity()
+                self.last_tick_check = current_time
+                
+                # Debug periodico dello stato trading
+                for symbol in self.config_manager.symbols:
+                    self.debug_trade_status(symbol)
+                    break  # Solo il primo simbolo per non spammare
+                
+                
+            if time.time() - self.last_buffer_check > 300:  # 5 minuti
+                self.check_buffers()
+                self.last_buffer_check = time.time()
+            
+            
+            if current_time - self.last_position_check > 30:
+                self._monitor_open_positions()
+                self._validate_positions()
+                self.close_positions_before_weekend()  # <--- AGGIUNTO QUI
+                self.last_position_check = current_time
+                
+            for symbol in self.config_manager.symbols:
+                tick = mt5.symbol_info_tick(symbol)
+                if tick:
+                    self.engine.process_tick(symbol, tick.bid)
+                    buffer_size = len(self.engine.tick_buffer.get(symbol, []))
+                    logger.debug(f"{symbol} buffer: {buffer_size}")
+                
+            try:
+                # Timeout per process_symbols
+                start_time = time.time()
+                self._process_symbols()
+                process_time = time.time() - start_time
+                
+                # Log se il processamento è lento
+                if process_time > 5:
+                    logger.warning(f"Processamento simboli lento: {process_time:.2f}s")
+                
+                time.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Errore nel processamento simboli: {str(e)}", exc_info=True)
+                time.sleep(5)
+
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                logger.critical(f"Errore critico nel main loop: {str(e)}")
+                time.sleep(10)
+
+    def _process_symbols(self):
+        """Processa tutti i simboli configurati"""
+        current_positions = len(mt5.positions_get() or [])
+        
+        for symbol in self.config_manager.symbols:
+            try:
+                tick = mt5.symbol_info_tick(symbol)
+                if not tick:
+                    continue
+                    
+                if not self._validate_tick(tick):
+                    continue
+                    
+                self._process_single_symbol(symbol, tick, current_positions)
+                
+            except Exception as e:
+                logger.error(f"Errore processamento {symbol}: {str(e)}", exc_info=True)
+                
+    def _process_single_symbol(self, symbol: str, tick, current_positions: int):
+        """Processa un singolo simbolo per segnali di trading"""
+        try:
+            # 1. Verifica se possiamo fare trading
+            if not self.engine.can_trade(symbol):
+                return
+                
+            # 2. Verifica orari di trading
+            if not is_trading_hours(symbol, self.config_manager.config):
+                return
+                
+            # 3. Verifica posizioni esistenti
+            existing_positions = mt5.positions_get(symbol=symbol)
+            if existing_positions and len(existing_positions) > 0:
+                return
+                
+            # 4. Verifica limite posizioni totali
+            if current_positions >= self.max_positions:
+                return
+                
+            # 5. Ottieni segnale
+            signal, price = self.engine.get_signal(symbol)
+            
+            if signal in ["BUY", "SELL"]:
+                # 6. Calcola dimensione posizione
+                size = self.risk_manager.calculate_position_size(symbol, price, signal)
+                
+                if size > 0:
+                    # 7. Esegui il trade
+                    self._execute_trade(symbol, signal, tick, price, size)
+                    
+        except Exception as e:
+            logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)
+
+    def _execute_trade(self, symbol: str, signal: str, tick, price: float, size: float) -> bool:
+        """Esegue un trade con gestione completa degli errori"""
+        try:
+            # 1. Verifica finale pre-trade
+            if not self.engine.can_trade(symbol):
+                logger.debug(f"Trade bloccato per {symbol}: can_trade=False")
+                return False
+                
+            # 2. Determina tipo ordine
+            order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
+            
+            # 3. Calcola livelli SL/TP
+            sl_price, tp_price = self.risk_manager.calculate_dynamic_levels(
+                symbol, order_type, price
+            )
+            
+            # 4. Prepara richiesta ordine
+            symbol_info = mt5.symbol_info(symbol)
+            execution_price = symbol_info.ask if signal == "BUY" else symbol_info.bid
+            
+            request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": symbol,
+                "volume": size,
+                "type": order_type,
+                "price": execution_price,
+                "sl": sl_price,
+                "tp": tp_price,
+                "deviation": 10,
+                "magic": self.config.config['risk_parameters']['magic_number'],
+                "comment": "QTS-AUTO",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+            
+            # 5. Esegui ordine
+            logger.info(f"Esecuzione {signal} {symbol}: {size} lots @ {execution_price}")
+            result = mt5.order_send(request)
+            
+            # 6. Verifica risultato
+            if result.retcode != mt5.TRADE_RETCODE_DONE:
+                logger.error(f"Trade fallito {symbol}: {result.retcode} - {result.comment}")
+                return False
+                
+            logger.info(f"Trade eseguito {symbol} {size} lots a {execution_price} | SL: {sl_price:.2f} | TP: {tp_price:.2f}")
+            logger.info(f"Ticket: {result.order} | Deal: {result.deal}")
+            
+            # 7. Aggiornamento metriche con timeout
+            try:
+                with self.metrics_lock:
+                    self.trade_count[symbol] += 1
+                    self.engine.record_trade_close(symbol)
+                logger.info(f"Metriche aggiornate per {symbol}")
+            except Exception as e:
+                logger.error(f"Errore aggiornamento metriche per {symbol}: {str(e)}")
+            
+            # 8. Pausa di sicurezza post-trade
+            time.sleep(1)
+            return True
+            
+        except Exception as e:
+            logger.error(f"Errore esecuzione trade {symbol}: {str(e)}", exc_info=True)
+            return False
+
+    """
+    4. Gestione Ordini e Posizioni
+    """
+
+    def _close_position(self, position):
+        if self._check_position_closed(position.ticket):
+            return True
+            
+        # Aggiungere controllo durata minima
+        min_duration = 300  # 5 minuti
+        
+        # Converti position.time in datetime se necessario
+        if isinstance(position.time, (int, float)):
+            position_time = datetime.fromtimestamp(position.time)
+        else:
+            position_time = position.time
+        
+        if (datetime.now() - position_time) < timedelta(seconds=min_duration):
+            logger.warning(f"Posizione {position.ticket} chiusa troppo presto")
+            return False
+        
+        """Versione migliorata con verifica dello stato"""
+        if self._check_position_closed(position.ticket):
+            logger.debug(f"Posizione {position.ticket} già chiusa")
+            return True
+            
+        if not position or not hasattr(position, 'ticket'):
+            logger.error("Posizione non valida per la chiusura")
+            return False
+            
+        existing_positions = mt5.positions_get(ticket=position.ticket)
+        if not existing_positions or len(existing_positions) == 0:
+            logger.info(f"Posizione {position.ticket} già chiusa o non esistente")
+            return True
+            
+        try:
+            symbol_info = mt5.symbol_info(position.symbol)
+            if not symbol_info:
+                logger.error(f"Impossibile ottenere info simbolo {position.symbol}")
+                return False
+                
+            close_request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": position.symbol,
+                "volume": position.volume,
+                "type": mt5.ORDER_TYPE_SELL if position.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY,
+                "position": position.ticket,
+                "price": symbol_info.ask if position.type == mt5.ORDER_TYPE_BUY else symbol_info.bid,
+                "deviation": 10,
+                "magic": self.config.config['risk_parameters']['magic_number'],
+                "comment": "QTS-CLOSE",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_FOK,
+            }
+            
+            if not self._validate_close_request(close_request, position):
+                return False
+                
+            result = mt5.order_send(close_request)
+                
+            if result.retcode == mt5.TRADE_RETCODE_DONE:
+                profit = (position.price_current - position.price_open) * position.volume
+                self._update_trade_metrics(
+                    success=True, 
+                    symbol=position.symbol, 
+                    profit=profit
+                )
+                return True
+                
+            logger.info(f"Posizione {position.ticket} chiusa con successo a {close_request['price']}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Eccezione durante chiusura posizione {position.ticket if hasattr(position, 'ticket') else 'N/A'}: {str(e)}", exc_info=True)
+            return False
+
+    """
+    5. Monitoraggio Posizioni
+    """
+    
+    def _monitor_open_positions(self):
+        """Monitoraggio avanzato delle posizioni aperte"""
+        try:
+            positions = mt5.positions_get()
+            if not positions:
+                return
+                
+            for position in positions:
+                try:
+                    # Verifica che la posizione esista ancora
+                    current_pos = mt5.positions_get(ticket=position.ticket)
+                    if not current_pos or len(current_pos) == 0:
+                        continue
+                        
+                    tick = mt5.symbol_info_tick(position.symbol)
+                    if not tick:
+                        logger.debug(f"Nessun tick per {position.symbol}")
+                        continue
+                    
+                    current_price = tick.bid if position.type == mt5.ORDER_TYPE_BUY else tick.ask
+                    
+                    # Gestione trailing stop
+                    self._manage_trailing_stop(position, current_price)
+                    
+                    # Gestione timeout
+                    self._check_position_timeout(position)
+                    
+                except Exception as e:
+                    logger.error(f"Errore monitoraggio posizione {position.ticket}: {str(e)}")
+                    
+        except Exception as e:
+            logger.error(f"Errore critico in _monitor_open_positions: {str(e)}")
+
+    def _check_position_closed(self, ticket: int) -> bool:
+        """Verifica se una posizione è stata chiusa"""
+        try:
+            positions = mt5.positions_get(ticket=ticket)
+            return positions is None or len(positions) == 0
+        except Exception as e:
+            logger.error(f"Errore verifica posizione {ticket}: {str(e)}")
+            return False
+
+    def _manage_trailing_stop(self, position, current_price: float) -> bool:
+        """Gestione avanzata del trailing stop con gestione errori migliorata"""
+        try:
+            # Verifica se trailing stop è abilitato
+            risk_config = self.risk_manager.get_risk_config(position.symbol)
+            trailing_config = risk_config.get('trailing_stop', {})
+            
+            if not trailing_config.get('enable', False):
+                return False
+                
+            # Calcola profit corrente in pips
+            pip_size = self.engine._get_pip_size(position.symbol)
+            if position.type == mt5.ORDER_TYPE_BUY:
+                profit_pips = (current_price - position.price_open) / pip_size
+            else:
+                profit_pips = (position.price_open - current_price) / pip_size
+                
+            # Verifica soglia di attivazione
+            activation_pips = trailing_config.get('activation_pips', 150)
+            if profit_pips < activation_pips:
+                return False
+                
+            # Calcola nuovo SL
+            trailing_distance = trailing_config.get('distance_pips', 100)
+            
+            if position.type == mt5.ORDER_TYPE_BUY:
+                new_sl = current_price - (trailing_distance * pip_size)
+                # Solo se migliore del SL attuale
+                if position.sl == 0 or new_sl > position.sl:
+                    return self._modify_position(position, sl=new_sl)
+            else:
+                new_sl = current_price + (trailing_distance * pip_size)
+                # Solo se migliore del SL attuale
+                if position.sl == 0 or new_sl < position.sl:
+                    return self._modify_position(position, sl=new_sl)
+                    
+            return False
+            
+        except Exception as e:
+            logger.error(f"Errore trailing stop posizione {position.ticket}: {str(e)}")
+            return False
+
+    def _check_position_timeout(self, position):
+        """Controlla timeout posizione con gestione robusta dei timestamp"""
+        try:
+            # Ottieni configurazione timeout
+            risk_config = self.risk_manager.get_risk_config(position.symbol)
+            max_hours = risk_config.get('position_timeout_hours', 24)
+            
+            # Gestione robusta dei timestamp
+            if hasattr(position, 'time_setup'):
+                timestamp = position.time_setup
+            elif hasattr(position, 'time'):
+                timestamp = position.time
+            else:
+                logger.error(f"Posizione {position.ticket} senza timestamp valido")
+                return
+                
+            # Converti timestamp in datetime
+            if isinstance(timestamp, (int, float)):
+                if timestamp > 1e10:  # Assume milliseconds
+                    position_dt = datetime.fromtimestamp(timestamp / 1000)
+                else:  # Assume seconds
+                    position_dt = datetime.fromtimestamp(timestamp)
+            elif isinstance(timestamp, datetime):
+                position_dt = timestamp
+            else:
+                logger.error(f"Formato tempo non supportato per posizione {position.ticket}: {type(position.time)}")
+                return
+
+            # Calcolo della durata CORRETTO
+            current_dt = datetime.now()
+            duration = current_dt - position_dt
+            duration_hours = duration.total_seconds() / 3600
+
+            # DEBUG: Log dei tempi calcolati
+            logger.debug(f"Position {position.ticket} opened at: {position_dt}, current: {current_dt}, duration: {duration_hours:.2f}h")
+
+            if duration_hours > max_hours:
+                logger.info(f"Chiusura posizione {position.ticket} per timeout ({duration_hours:.1f}h > {max_hours}h)")
+                self._close_position(position)
+                
+        except Exception as e:
+            logger.error(f"Errore controllo timeout posizione {position.ticket}: {str(e)}", exc_info=True)
+
+    def _modify_position(self, position, sl=None, tp=None) -> bool:
+        """Modifica SL/TP di una posizione esistente con controlli avanzati"""
+        try:
+            # Verifica che la posizione esista ancora
+            current_pos = mt5.positions_get(ticket=position.ticket)
+            if not current_pos or len(current_pos) == 0:
+                logger.debug(f"Posizione {position.ticket} non più esistente")
+                return False
+                
+            # Prepara richiesta di modifica
+            request = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "symbol": position.symbol,
+                "position": position.ticket,
+                "sl": sl if sl is not None else position.sl,
+                "tp": tp if tp is not None else position.tp,
+            }
+            
+            # Validazione livelli
+            symbol_info = mt5.symbol_info(position.symbol)
+            if not symbol_info:
+                return False
+                
+            # Arrotonda ai decimali corretti
+            if request["sl"] != 0:
+                request["sl"] = round(request["sl"], symbol_info.digits)
+            if request["tp"] != 0:
+                request["tp"] = round(request["tp"], symbol_info.digits)
+                
+            # Esegui modifica
+            result = mt5.order_send(request)
+            
+            if result.retcode == mt5.TRADE_RETCODE_DONE:
+                logger.info(f"Posizione {position.ticket} modificata: SL={request['sl']}, TP={request['tp']}")
+                return True
+            else:
+                logger.warning(f"Modifica posizione {position.ticket} fallita: {result.retcode}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Errore modifica posizione {position.ticket}: {str(e)}")
+            return False
+
+    def _validate_positions(self):
+        """Verifica posizioni duplicate"""
+        try:
+            positions = mt5.positions_get()
+            if not positions:
+                return
+                
+            symbol_positions = defaultdict(list)
+            for pos in positions:
+                symbol_positions[pos.symbol].append(pos)
+                
+            for symbol, pos_list in symbol_positions.items():
+                if len(pos_list) > 1:
+                    logger.warning(f"Posizioni duplicate per {symbol}: {[p.ticket for p in pos_list]}")
+                    
+        except Exception as e:
+            logger.error(f"Errore validazione posizioni: {str(e)}")
+
+    """
+    6. Risk Management
+    """
+
+    def _update_account_info(self):
+        """Aggiorna info account"""
+        try:
+            self.account_info = mt5.account_info()
+            if self.account_info and hasattr(self, 'drawdown_tracker'):
+                self.drawdown_tracker.update(
+                    self.account_info.equity,
+                    self.account_info.balance
+                )
+        except Exception as e:
+            logger.error(f"Errore aggiornamento account: {str(e)}")
+                    
+    def _check_drawdown_limits(self):
+        """Controlla limiti drawdown"""
+        if not hasattr(self, 'drawdown_tracker') or not self.account_info:
+            return
+        
+        soft_hit, hard_hit = self.drawdown_tracker.check_limits(self.account_info.equity)
+        
+        if hard_hit:
+            logger.critical("Hard drawdown limit raggiunto!")
+            raise RuntimeError("Hard drawdown limit raggiunto")
+        
+        if soft_hit and not self.drawdown_tracker.protection_active:
+            logger.warning("Soft drawdown limit - riduzione esposizione")
+            self.drawdown_tracker.protection_active = True
+            self.max_positions = max(1, self.max_positions // 2)
+            logger.info(f"Max posizioni ridotto a {self.max_positions}")
+
+    """
+    7. Metriche e Reporting
+    """
+
+    def _update_trade_metrics(self, success: bool, symbol: str, profit: float = 0.0) -> None:
+        """Aggiorna metriche con controllo del limite giornaliero"""
+        try:
+            with self.metrics_lock:
+                self.trade_metrics['total_trades'] += 1
+                
+                if success:
+                    self.trade_metrics['successful_trades'] += 1
+                else:
+                    self.trade_metrics['failed_trades'] += 1
+                    
+                self.trade_metrics['total_profit'] += profit
+                
+                # Aggiorna statistiche per simbolo
+                if symbol not in self.trade_metrics['symbol_stats']:
+                    self.trade_metrics['symbol_stats'][symbol] = {
+                        'trades': 0,
+                        'profit': 0.0,
+                        'wins': 0,
+                        'losses': 0
+                    }
+                    
+                stats = self.trade_metrics['symbol_stats'][symbol]
+                stats['trades'] += 1
+                stats['profit'] += profit
+                
+                if profit > 0:
+                    stats['wins'] += 1
+                else:
+                    stats['losses'] += 1
+                    
+                logger.info(f"Metriche aggiornate: {symbol} P/L={profit:.2f}")
+                
+        except Exception as e:
+            logger.error(f"Errore aggiornamento metriche: {str(e)}")
+
+    """
+    8. Validazioni
+    """
+    
+    def _validate_tick(self, tick) -> bool:
+        """Aggiungi controllo per evitare bias di direzione"""
+        if not tick:
+            return False
+            
+        # Verifica che il prezzo sia valido
+        if tick.bid <= 0 or tick.ask <= 0:
+            return False
+            
+        # Verifica spread ragionevole
+        spread = tick.ask - tick.bid
+        if spread <= 0 or spread > tick.bid * 0.1:  # Max 10% spread
+            return False
+            
+        return True
+
+    def _validate_symbol(self, symbol: str) -> bool:
+        """Validazione avanzata per strategia tick-based"""
+        # 1. Verifica base simbolo
+        if not symbol or len(symbol) < 3:
+            return False
+            
+        # 2. Verifica MT5 info
+        symbol_info = mt5.symbol_info(symbol)
+        if not symbol_info:
+            logger.debug(f"Simbolo {symbol} non disponibile in MT5")
+            return False
+            
+        # 3. Verifica tick corrente
+        tick = mt5.symbol_info_tick(symbol)
+        if not tick:
+            logger.debug(f"Nessun tick disponibile per {symbol}")
+            return False
+        
+        if tick.time_msc < (time.time() - 60)*1000:  # Se il tick è più vecchio di 60s
+            logger.debug(f"Dati tick obsoleti per {symbol} ({(time.time()*1000 - tick.time_msc)/1000:.1f}s)")
+            return False
+
+        # 4. Controllo spread e liquidità
+        symbol_info = mt5.symbol_info(symbol)
+        if not symbol_info:
+            return False
+            
+        spread = (symbol_info.ask - symbol_info.bid) / self.engine._get_pip_size(symbol)
+        max_spread = self.config_manager._get_max_allowed_spread(symbol)
+        
+        if spread > max_spread * 1.2:  # Tolleranza +20%
+            logger.debug(f"Spread {spread:.1f}p troppo alto per {symbol} (max {max_spread:.1f}p)")
+            return False
+
+        # 6. Verifica buffer dati sufficiente
+        if len(self.engine.tick_buffer.get(symbol, [])) < self.engine.min_spin_samples:
+            logger.debug(f"Dati insufficienti nel buffer per {symbol}")
+            return False
+
+        return True
         """Connessione a MetaTrader 5"""
         try:
             mt5.shutdown()
@@ -2530,7 +3214,6 @@ class QuantumTradingSystem:
 
         return True
  
-    
     def _validate_close_request(self, request, position):
         """Controlla richiesta chiusura"""
         if not position or not hasattr(position, 'price_open'):
@@ -2538,7 +3221,6 @@ class QuantumTradingSystem:
             
         if position.price_open == 0:
             return False
-            
             
         price_diff = abs(request['price'] - position.price_open)
         if price_diff / position.price_open > 0.1:
@@ -2628,7 +3310,7 @@ class QuantumTradingSystem:
         # Calcola equity, balance, drawdown, profit
         equity = account_info.equity
         balance = account_info.balance
-        initial_balance = self.config.get('initial_balance', balance)
+        initial_balance = self.config.config.get('initial_balance', balance)
         max_daily_loss = initial_balance * self.config.config['THE5ERS_specific']['max_daily_loss_percent'] / 100
         max_total_loss = initial_balance * self.config.config['THE5ERS_specific']['max_total_loss_percent'] / 100
         profit_target = initial_balance * self.config.config['THE5ERS_specific']['step1_target'] / 100
@@ -2649,27 +3331,18 @@ class QuantumTradingSystem:
         # Profit target check
         if total_loss >= profit_target:
             logger.info(f"Profit target raggiunto: {total_loss} >= {profit_target}")
-            # Qui puoi gestire la logica di avanzamento step/scaling
             return False
 
         return True
 
     def get_daily_loss(self, day):
         """Calcola la perdita giornaliera (stub, da implementare con storico trades)"""
-        # TODO: Implementa la logica per calcolare la perdita giornaliera
         return 0
-
-    def can_trade(self, symbol: str) -> bool:
-        """Versione semplificata che rispetta solo i tuoi cooldown configurati"""
-        if not self.check_the5ers_limits():
-            logger.warning("Trading bloccato per limiti The5ers")
-            return False
-        return not self.is_in_cooldown_period(symbol)
 
     def close_positions_before_weekend(self):
         """Chiude tutte le posizioni aperte il venerdì sera prima della chiusura dei mercati"""
         now = datetime.now()
-        # Venerdì = 4 (lunedì=0), chiusura alle 21:00 (adatta l'orario secondo il broker)
+        # Venerdì = 4 (lunedì=0), chiusura alle 21:00
         if now.weekday() == 4 and now.hour >= 21:
             positions = mt5.positions_get()
             if positions:
