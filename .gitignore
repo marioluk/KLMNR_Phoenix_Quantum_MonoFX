@@ -1,3 +1,44 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+### AL ###
+#Template for AL projects for Dynamics 365 Business Central
+#launch.json folder
+.vscode/
+#Cache folder
+.alcache/
+#Symbols folder
+.alpackages/
+#Snapshots folder
+.snapshots/
+#Testing Output folder
+.output/
+#Extension App-file
+*.app
+#Rapid Application Development File
+rad.json
+#Translation Base-file
+*.g.xlf
+#License-file
+*.flf
+#Test results file
+TestResults.xml
+=======
+# Log files
+logs/
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+env/
+
+# IDE files
+.vscode/
+=======
 # Log files
 logs/
 *.log
@@ -16,8 +57,13 @@ env/
 
 # IDE files
 .vscode/
+>>>>>>> dev
 .idea/
 
 # OS files
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
+>>>>>>> 65953e69d3c98758e6b18f9f67f585b29cacc7cc
+=======
+>>>>>>> dev
