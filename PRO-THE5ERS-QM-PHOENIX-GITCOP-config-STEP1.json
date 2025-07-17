@@ -1,6 +1,6 @@
 {
     "logging": {
-        "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-140725-STEP1.log",
+        "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log",
         "max_size_mb": 50,
         "backup_count": 7,
         "log_level": "INFO"
@@ -13,7 +13,7 @@
         "port": 18889
     },
     "account_currency": "USD",
-    "magic_number": 147251,
+    "magic_number": 177251,
     "quantum_params": {
         "buffer_size": 500,
         "spin_window": 80,
