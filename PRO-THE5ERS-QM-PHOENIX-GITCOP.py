@@ -352,6 +352,8 @@ class QuantumEngine:
         if time.time() - last_signal < signal_cooldown:
             logger.debug(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
             return True
+            
+        return False
     
 
     def can_trade(self, symbol: str) -> bool:
@@ -389,22 +391,8 @@ class QuantumEngine:
             logger.debug(f"Massimo numero posizioni raggiunto: {len(positions)}")
             return False
             
-        # 4. Controlla trades giornalieri
-        today = datetime.now().date()
-        try:
-            # Conta i trades di oggi
-            history = mt5.history_deals_get(
-                datetime.combine(today, dt_time.min),
-                datetime.combine(today, dt_time.max)
-            )
-            if history:
-                today_trades = len([d for d in history if d.type in [0, 1]])  # Buy/Sell orders
-                max_daily = self.config.get('risk_parameters', {}).get('max_daily_trades', 6)
-                if today_trades >= max_daily:
-                    logger.debug(f"Limite trades giornalieri raggiunto: {today_trades}/{max_daily}")
-                    return False
-        except Exception as e:
-            logger.error(f"Errore controllo trades giornalieri: {e}")
+        # 4. Controlla trades giornalieri - RIMOSSO controllo qui per evitare duplicazione
+        # Il controllo viene fatto in _process_single_symbol
             
         return True
         
@@ -954,27 +942,45 @@ class QuantumRiskManager:
     2. Calcolo Dimensioni Posizione
     """
     def calculate_position_size(self, symbol: str, price: float, signal: str) -> float:
+        """Calcola dimensione posizione con gestione robusta degli errori"""
         try:
-            # 1. Ottieni parametri di rischio NORMALIZZATI
+            # 1. Verifica parametri iniziali
+            if not self._load_symbol_data(symbol):
+                logger.error(f"Impossibile caricare dati simbolo {symbol}")
+                return 0.0
+                
+            # 2. Ottieni parametri di rischio NORMALIZZATI
             risk_config = self.get_risk_config(symbol)
             account = mt5.account_info()
             
-            # 2. Calcola rischio assoluto in valuta base
-            risk_amount = account.equity * (risk_config['risk_percent'] / 100)
+            if not account:
+                logger.error("Impossibile ottenere info account")
+                return 0.0
             
-            # 3. Calcola SL in pips con volatilità
+            # 3. Calcola rischio assoluto in valuta base
+            risk_percent = risk_config.get('risk_percent', 0.02)  # 2% default
+            risk_amount = account.equity * risk_percent
+            
+            # 4. Calcola SL in pips con volatilità
             sl_pips = self._calculate_sl_pips(symbol)
             
-            # 4. Calcola PIP VALUE normalizzato
-            pip_value = self._get_normalized_pip_value(symbol, price)
+            # 5. Usa pip value dai dati caricati
+            symbol_data = self.symbol_data[symbol]
+            pip_value = symbol_data['pip_value']
             
-            # 5. Calcola size con protezioni
+            # 6. Calcola size base
+            if sl_pips <= 0 or pip_value <= 0:
+                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
+                return 0.0
+                
             size = risk_amount / (sl_pips * pip_value)
+            
+            # 7. Applica limiti
             size = self._apply_size_limits(symbol, size)
             
             logger.info(
                 f"Size calc {symbol}: "
-                f"Risk=${risk_amount:.2f} | "
+                f"Risk=${risk_amount:.2f}({risk_percent*100:.1f}%) | "
                 f"SL={sl_pips:.1f}pips | "
                 f"PipValue=${pip_value:.4f} | "
                 f"Size={size:.2f}"
@@ -983,7 +989,7 @@ class QuantumRiskManager:
             return size
             
         except Exception as e:
-            logger.error(f"Error calculating size: {str(e)}")
+            logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
             return 0.0
     
        
@@ -1137,6 +1143,14 @@ class QuantumRiskManager:
                 }
             }
             
+            # Aggiungi valori di default se mancanti
+            if 'risk_percent' not in merged_config:
+                merged_config['risk_percent'] = 0.02  # 2% default
+            if 'base_sl_pips' not in merged_config:
+                merged_config['base_sl_pips'] = 150  # 150 pips default
+            if 'profit_multiplier' not in merged_config:
+                merged_config['profit_multiplier'] = 2.0  # 2:1 default
+            
             # Log per debug
             logger.debug(f"Configurazione rischio per {symbol}: {merged_config}")
             
@@ -1144,7 +1158,13 @@ class QuantumRiskManager:
             
         except Exception as e:
             logger.error(f"Errore in get_risk_config: {str(e)}")
-            return {}
+            # Ritorna configurazione di fallback
+            return {
+                'risk_percent': 0.02,
+                'base_sl_pips': 150,
+                'profit_multiplier': 2.0,
+                'trailing_stop': {'enable': False}
+            }
     
     
     """
@@ -1595,6 +1615,11 @@ class QuantumTradingSystem:
                 self.engine.check_tick_activity()  # Qui viene chiamato check_tick_activity()
                 self.last_tick_check = current_time
                 
+                # Debug periodico dello stato trading
+                for symbol in self.config_manager.symbols:
+                    self.debug_trade_status(symbol)
+                    break  # Solo il primo simbolo per non spammare
+                
                 
             if time.time() - self.last_buffer_check > 300:  # 5 minuti
                 self.check_buffers()
@@ -1708,10 +1733,8 @@ class QuantumTradingSystem:
                 return
                 
         # 2. Verifica cooldown con logging migliorato
-        # 2. Verifica cooldown con logging migliorato
         if not self.engine.can_trade(symbol):
-            existing_pos = self._get_existing_position(symbol)
-            cooldown_left = self.engine.get_remaining_cooldown(symbol)  # Ora questo metodo esiste
+            cooldown_left = self.engine.get_remaining_cooldown(symbol)
             logger.debug(f"{symbol} in cooldown - {cooldown_left:.0f}s rimanenti")
             return
             
@@ -1723,14 +1746,17 @@ class QuantumTradingSystem:
             
         self.engine.process_tick(symbol, tick.bid)
         
-        # 4. Ottenimento segnale con timeout
+        # 4. Ottenimento segnale con timeout e logging
         try:
             signal, price = self.engine.get_signal(symbol)
-        except TimeoutError:
-            logger.error(f"Timeout ottenimento segnale per {symbol}")
+            if signal != "HOLD":
+                logger.info(f"Segnale {signal} generato per {symbol} a prezzo {price}")
+        except Exception as e:
+            logger.error(f"Errore ottenimento segnale per {symbol}: {str(e)}")
             return
             
         if signal == "HOLD":
+            logger.debug(f"Segnale HOLD per {symbol} - nessuna azione richiesta")
             return
             
         # 5. Gestione posizione esistente con lock
@@ -1757,17 +1783,11 @@ class QuantumTradingSystem:
             return
             
         # 7. Esecuzione trade con verifica finale limite
-        with self.metrics_lock:  # Double-check pattern
-            if self.trade_count.get(symbol, 0) >= daily_limit:
-                logger.debug(f"Limite raggiunto durante processing per {symbol}")
-                return
-
-                
-            if self._execute_trade(symbol, signal, tick, entry_price, position_size):
-                setattr(self, f'_last_trade_time_{symbol}', time.time())  # Aggiorna timestamp
-                self.trade_count[symbol] += 1  # Incremento solo qui!
-                self.engine.record_trade_close(symbol)
-                logger.info(f"Trade #{self.trade_count[symbol]}/{daily_limit} eseguito per {symbol}")
+        if self._execute_trade(symbol, signal, tick, entry_price, position_size):
+            setattr(self, f'_last_trade_time_{symbol}', time.time())  # Aggiorna timestamp
+            logger.info(f"Trade eseguito per {symbol} - Signal: {signal} - Size: {position_size}")
+        else:
+            logger.warning(f"Esecuzione trade fallita per {symbol}")
                 
                 
     def _handle_special_sessions(self, symbol: str):
@@ -1898,12 +1918,22 @@ class QuantumTradingSystem:
             logger.info(f"Trade eseguito {symbol} {size} lots a {execution_price} | SL: {sl:.2f} | TP: {tp:.2f}")
             logger.info(f"Ticket: {result.order} | Deal: {result.deal}")
             
-            # 7. Aggiornamento metriche con timeout
+            # 7. Aggiornamento metriche - UNA SOLA VOLTA
             try:
                 with self.metrics_lock:
+                    # Verifica finale del limite giornaliero
+                    daily_limit = self.config.config['risk_parameters']['max_daily_trades']
+                    if self.trade_count.get(symbol, 0) >= daily_limit:
+                        logger.warning(f"Limite giornaliero raggiunto per {symbol} dopo esecuzione")
+                        return True  # Trade eseguito ma limite raggiunto
+                        
+                    # Incrementa contatore UNA SOLA VOLTA
                     self.trade_count[symbol] += 1
-                    self.engine.record_trade_close(symbol)
-                logger.info(f"Metriche aggiornate per {symbol}")
+                    logger.info(f"Trade #{self.trade_count[symbol]}/{daily_limit} completato per {symbol}")
+                    
+                    # Aggiorna metriche
+                    self._update_trade_metrics(True, symbol, 0.0)
+                    
             except Exception as e:
                 logger.error(f"Errore aggiornamento metriche per {symbol}: {str(e)}")
             
@@ -1918,13 +1948,19 @@ class QuantumTradingSystem:
             return False
           
 
+    def _validate_levels(self, symbol: str, entry: float, sl: float, tp: float) -> bool:
+        """Valida i livelli SL/TP rispetto ai requisiti del broker"""
+        if sl == 0.0 or tp == 0.0:
+            logger.warning(f"Livelli SL/TP non validi per {symbol}: SL={sl}, TP={tp}")
+            return False
+            
         symbol_info = mt5.symbol_info(symbol)
         if not symbol_info:
             return False
             
         point = symbol_info.point
         min_distance = max(
-            self.get_risk_config(symbol).get('stops_level', 15) * point,
+            self.risk_manager.get_risk_config(symbol).get('stops_level', 15) * point,
             (symbol_info.ask - symbol_info.bid) * 1.5  # 1.5x spread corrente
         )
         
@@ -2019,16 +2055,13 @@ class QuantumTradingSystem:
             result = mt5.order_send(close_request)
                 
             if result.retcode == mt5.TRADE_RETCODE_DONE:
-                profit = (position.price_current - position.price_open) * position.volume
-                self._update_trade_metrics(
-                    success=True, 
-                    symbol=position.symbol, 
-                    profit=profit
-                )
+                logger.info(f"Posizione {position.ticket} chiusa con successo a {close_request['price']}")
+                # Registra la chiusura per il cooldown
+                self.engine.record_trade_close(position.symbol)
                 return True
-                
-            logger.info(f"Posizione {position.ticket} chiusa con successo a {close_request['price']}")
-            return True
+            else:
+                logger.error(f"Errore chiusura posizione {position.ticket}: {result.comment} (code: {result.retcode})")
+                return False
             
         except Exception as e:
             logger.error(f"Eccezione durante chiusura posizione {position.ticket if hasattr(position, 'ticket') else 'N/A'}: {str(e)}", exc_info=True)
@@ -2272,16 +2305,11 @@ class QuantumTradingSystem:
         with self.metrics_lock:
             # Reset counter if new day (deve essere la PRIMA operazione)
             if not hasattr(self, '_last_trade_day') or self._last_trade_day != today:
+                logger.info(f"Nuovo giorno rilevato - Reset contatori trade")
                 self._last_trade_day = today
                 self.trade_count = defaultdict(int)
                 
-            # Verifica limite PRIMA di incrementare
-            if self.trade_count[symbol] >= self.config.config['risk_parameters']['max_daily_trades']:
-                logger.warning(f"Raggiunto limite giornaliero per {symbol} - trade non conteggiato")
-                return
-                
-            # Solo ora incrementiamo il contatore
-            self.trade_count[symbol] += 1
+            # Aggiorna metriche senza modificare trade_count (già gestito altrove)
             self.trade_metrics['total_trades'] += 1
             
             if success:
@@ -2307,7 +2335,11 @@ class QuantumTradingSystem:
             else:
                 self.trade_metrics['failed_trades'] += 1
                 
-        logger.info(f"Trade {'successful' if success else 'failed'} | {symbol} | Profit: {profit:.2f}")
+        logger.info(f"Metriche aggiornate - Trade {'successful' if success else 'failed'} | {symbol} | Profit: {profit:.2f}")
+        
+        # Log status periodico
+        if self.trade_metrics['total_trades'] % 10 == 0:
+            logger.info(f"Status: {self.trade_metrics['successful_trades']}/{self.trade_metrics['total_trades']} trades successful")
 
 
     def _update_account_info(self):
