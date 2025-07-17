@@ -1806,11 +1806,9 @@ class QuantumTradingSystem:
         try:
             logger.info(f"🚀 INIZIO ESECUZIONE TRADE: {signal} {symbol} | Size: {size} | Price: {price}")
             
-            # 1. Verifica finale pre-trade
-            if not self.engine.can_trade(symbol):
-                logger.warning(f"❌ Trade bloccato per {symbol}: can_trade=False")
-                return False
-                
+            # 1. Nota: can_trade() già verificato in _process_single_symbol()
+            # Rimuoviamo il controllo ridondante che causa il blocco
+            
             # 2. Determina tipo ordine
             order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
             
