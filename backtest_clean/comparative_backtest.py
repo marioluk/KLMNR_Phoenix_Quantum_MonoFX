@@ -47,6 +47,25 @@ class The5ersComparativeBacktest:
         logger.info(f"📊 Totale configurazioni caricate: {len(self.configs)}")
         return len(self.configs)
     
+    def get_all_symbols_from_configs(self):
+        """Ottieni tutti i simboli presenti nelle configurazioni"""
+        all_symbols = set()
+        symbol_configs = {}
+        
+        for config_name, config in self.configs.items():
+            config_symbols = config.get('symbols', {})
+            for symbol in config_symbols.keys():
+                all_symbols.add(symbol)
+                if symbol not in symbol_configs:
+                    symbol_configs[symbol] = []
+                symbol_configs[symbol].append(config_name)
+        
+        logger.info(f"🔍 Simboli disponibili: {sorted(all_symbols)}")
+        for symbol, configs in symbol_configs.items():
+            logger.info(f"   {symbol}: presente in {len(configs)} configurazioni {configs}")
+        
+        return sorted(list(all_symbols)), symbol_configs
+    
     def extract_symbol_params(self, config, symbol):
         """Estrae parametri per simbolo da configurazione"""
         
@@ -181,7 +200,20 @@ class The5ersComparativeBacktest:
         
         logger.info(f"🚀 Avvio backtest comparativo - {days} giorni")
         
-        symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'XAUUSD', 'NAS100']
+        # Estrai automaticamente tutti i simboli dalle configurazioni
+        all_symbols = set()
+        for config_name, config in self.configs.items():
+            config_symbols = config.get('symbols', {})
+            all_symbols.update(config_symbols.keys())
+        
+        symbols = sorted(list(all_symbols))
+        logger.info(f"📊 Simboli trovati nelle configurazioni: {symbols}")
+        
+        if not symbols:
+            # Fallback ai simboli default se nessuno trovato nelle config
+            symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'XAUUSD', 'NAS100']
+            logger.warning(f"⚠️  Nessun simbolo trovato nelle config, uso default: {symbols}")
+        
         
         for config_name, config in self.configs.items():
             
@@ -291,9 +323,14 @@ class The5ersComparativeBacktest:
             
             for symbol, symbol_result in results['symbols'].items():
                 status = "ENABLED" if symbol_result['enabled'] else "DISABLED"
-                print(f"{symbol:<10} {status:<12} {symbol_result['trades']:<8} "
-                      f"${symbol_result['pnl']:>10.2f} {symbol_result['return']:>8.2%} "
-                      f"{symbol_result['win_rate']:>6.1%}")
+                return_pct = symbol_result.get('return', 0.0)  # Safe access con default
+                win_rate = symbol_result.get('win_rate', 0.0)  # Safe access con default
+                pnl = symbol_result.get('pnl', 0.0)  # Safe access con default
+                trades = symbol_result.get('trades', 0)  # Safe access con default
+                
+                print(f"{symbol:<10} {status:<12} {trades:<8} "
+                      f"${pnl:>10.2f} {return_pct:>8.2%} "
+                      f"{win_rate:>6.1%}")
             
             # The5ers compliance check
             print(f"\n🎯 THE5ERS COMPLIANCE:")
