@@ -1099,18 +1099,30 @@ class QuantumRiskManager:
         
         
     def _calculate_sl_pips(self, symbol: str) -> float:
-        """Calcola gli SL pips con volatilità adattiva"""
+        """Calcola gli SL pips con volatilità adattiva limitata"""
         min_sl = self._get_config(symbol, 'min_sl_distance_pips', 
                   {'default': 15, 'XAUUSD': 80, 'BTCUSD': 150}.get(symbol, 15))
         
         base_sl = self._get_config(symbol, 'base_sl_pips', 
                   {'default': 30, 'XAUUSD': 150, 'BTCUSD': 400}.get(symbol, 30))
         
-        # Ottieni la volatilità quantistica corrente
+        # Ottieni la volatilità quantistica corrente con limitazioni
         volatility = self.engine.calculate_quantum_volatility(symbol)
         
-        # Aggiusta gli SL in base alla volatilità
-        return max(base_sl * volatility, min_sl)  
+        # Limita l'amplificazione della volatilità per evitare SL eccessivi
+        # Massimo +20% di amplificazione per forex, +50% per oro/indici
+        if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
+            volatility_factor = min(volatility, 1.5)  # Max +50%
+        else:  # Forex
+            volatility_factor = min(volatility, 1.2)  # Max +20%
+        
+        adjusted_sl = base_sl * volatility_factor
+        final_sl = max(adjusted_sl, min_sl)
+        
+        logger.debug(f"SL calculation for {symbol}: base={base_sl}, volatility={volatility:.2f}, "
+                    f"factor={volatility_factor:.2f}, final={final_sl:.1f} pips")
+        
+        return final_sl  
 
     
     def _round_to_step(self, size: float, symbol: str) -> float:

@@ -32,20 +32,20 @@
         "max_daily_trades": 5,
         "max_positions": 1,
         "min_sl_distance_pips": {
-            "EURUSD": 120,
-            "GBPUSD": 130,
-            "USDJPY": 80,
+            "EURUSD": 30,
+            "GBPUSD": 35,
+            "USDJPY": 25,
             "XAUUSD": 150,
             "NAS100": 180,
-            "default": 150
+            "default": 40
         },
         "base_sl_pips": {
-            "EURUSD": 180,
-            "GBPUSD": 190,
-            "USDJPY": 120,
+            "EURUSD": 50,
+            "GBPUSD": 60,
+            "USDJPY": 40,
             "XAUUSD": 220,
             "NAS100": 250,
-            "default": 200
+            "default": 80
         },
         "profit_multiplier": 2.2,
         "max_position_hours": 6,
@@ -69,8 +69,8 @@
         "EURUSD": {
             "risk_management": {
                 "contract_size": 0.01,
-                "min_sl_distance_pips": 120,
-                "base_sl_pips": 180,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
                 "profit_multiplier": 2.2,
                 "risk_percent": 0.012,
                 "trailing_stop": {
@@ -94,8 +94,8 @@
         "GBPUSD": {
             "risk_management": {
                 "contract_size": 0.01,
-                "min_sl_distance_pips": 130,
-                "base_sl_pips": 190,
+                "min_sl_distance_pips": 35,
+                "base_sl_pips": 60,
                 "profit_multiplier": 2.3,
                 "risk_percent": 0.012,
                 "trailing_stop": {
@@ -119,8 +119,8 @@
         "USDJPY": {
             "risk_management": {
                 "contract_size": 0.01,
-                "min_sl_distance_pips": 80,
-                "base_sl_pips": 120,
+                "min_sl_distance_pips": 25,
+                "base_sl_pips": 40,
                 "profit_multiplier": 2.1,
                 "risk_percent": 0.012,
                 "trailing_stop": {
