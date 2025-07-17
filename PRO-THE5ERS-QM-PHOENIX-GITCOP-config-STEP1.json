@@ -36,7 +36,7 @@
             "GBPUSD": 35,
             "USDJPY": 25,
             "XAUUSD": 150,
-            "NAS100": 180,
+            "NAS100": 50,
             "default": 40
         },
         "base_sl_pips": {
@@ -44,7 +44,7 @@
             "GBPUSD": 60,
             "USDJPY": 40,
             "XAUUSD": 220,
-            "NAS100": 250,
+            "NAS100": 100,
             "default": 80
         },
         "profit_multiplier": 2.2,
@@ -169,10 +169,10 @@
         "NAS100": {
             "risk_management": {
                 "contract_size": 0.01,
-                "min_sl_distance_pips": 180,
-                "base_sl_pips": 250,
+                "min_sl_distance_pips": 50,
+                "base_sl_pips": 100,
                 "profit_multiplier": 2.5,
-                "risk_percent": 0.002,
+                "risk_percent": 0.001,
                 "trailing_stop": {
                     "activation_pips": 150,
                     "step_pips": 75

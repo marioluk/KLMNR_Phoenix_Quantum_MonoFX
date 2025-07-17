@@ -1229,7 +1229,9 @@ class QuantumRiskManager:
                 # Quindi 1 pip su 1 lotto = $1.00 (100 once x $0.01)
                 pip_value = 1.0 * contract_size  # $1.00 per pip per lotto
             elif symbol in ['SP500', 'NAS100', 'US30']:
-                pip_value = 0.1 * contract_size  # 1 pip = $0.1 per indice
+                # Per indici: 1 pip = $1.0 per lotto standard
+                # Con contract_size 0.01 = $1.0 * 0.01 = $0.01 per pip
+                pip_value = 1.0 * contract_size  # $1.0 per pip per lotto standard * contract_size
             else:  # Forex (EURUSD, GBPUSD, ecc.)
                 # Per forex standard: 1 pip = $10 per lotto standard (100,000 unità)
                 # contract_size 0.01 = mini lotto = $10 * 0.01 = $0.10 per pip
