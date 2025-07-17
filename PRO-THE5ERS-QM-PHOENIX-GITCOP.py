@@ -1589,7 +1589,7 @@ class QuantumTradingSystem:
                 raise RuntimeError("Configurazione non valida - simboli mancanti")
                 
             print(f"📋 Sistema con {len(self.config.symbols)} simboli configurati")
-            print(f"🎯 Simboli: {list(self.config.symbols.keys())}")
+            print(f"🎯 Simboli: {self.config.symbols}")  # Mostra la lista direttamente
             logger.info(f"Avvio sistema con {len(self.config.symbols)} simboli")
             
             if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
