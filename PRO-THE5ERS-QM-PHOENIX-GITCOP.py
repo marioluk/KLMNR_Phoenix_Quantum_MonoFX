@@ -975,6 +975,13 @@ class QuantumRiskManager:
                 
             size = risk_amount / (sl_pips * pip_value)
             
+            # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
+            max_size_limit = 1.0  # Massimo 1 lotto per qualsiasi posizione
+            if size > max_size_limit:
+                logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} "
+                              f"(Safety limit applicato)")
+                size = max_size_limit
+            
             # 7. Applica limiti
             size = self._apply_size_limits(symbol, size)
             

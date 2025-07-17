@@ -49,7 +49,7 @@
         },
         "profit_multiplier": 2.2,
         "max_position_hours": 6,
-        "risk_percent": 0.012,            
+        "risk_percent": 0.003,            
 		"trailing_stop": {
                 "enable": true,
                 "activation_pips": 100,
@@ -72,7 +72,7 @@
                 "min_sl_distance_pips": 30,
                 "base_sl_pips": 50,
                 "profit_multiplier": 2.2,
-                "risk_percent": 0.012,
+                "risk_percent": 0.003,
                 "trailing_stop": {
                     "activation_pips": 90,
                     "step_pips": 45
@@ -97,7 +97,7 @@
                 "min_sl_distance_pips": 35,
                 "base_sl_pips": 60,
                 "profit_multiplier": 2.3,
-                "risk_percent": 0.012,
+                "risk_percent": 0.003,
                 "trailing_stop": {
                     "activation_pips": 100,
                     "step_pips": 50
@@ -122,7 +122,7 @@
                 "min_sl_distance_pips": 25,
                 "base_sl_pips": 40,
                 "profit_multiplier": 2.1,
-                "risk_percent": 0.012,
+                "risk_percent": 0.003,
                 "trailing_stop": {
                     "activation_pips": 70,
                     "step_pips": 35
@@ -172,7 +172,7 @@
                 "min_sl_distance_pips": 180,
                 "base_sl_pips": 250,
                 "profit_multiplier": 2.5,
-                "risk_percent": 0.010,
+                "risk_percent": 0.002,
                 "trailing_stop": {
                     "activation_pips": 150,
                     "step_pips": 75
