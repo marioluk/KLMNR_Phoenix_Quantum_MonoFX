@@ -2451,6 +2451,57 @@ class QuantumTradingSystem:
             logger.info(f"{symbol} buffer: {buffer_size}/{self.engine.buffer_size} | "
                        f"Min samples: {self.engine.min_spin_samples}")
     
+    def debug_trade_status(self, symbol: str):
+        """Debug delle condizioni di trading per un simbolo"""
+        try:
+            # Verifica se il sistema può fare trading
+            can_trade = self.engine.can_trade(symbol)
+            
+            # Ottieni info sul simbolo
+            tick = mt5.symbol_info_tick(symbol)
+            if not tick:
+                logger.debug(f"DEBUG {symbol}: Nessun tick disponibile")
+                return
+                
+            # Verifica buffer
+            buffer_size = len(self.engine.tick_buffer.get(symbol, []))
+            
+            # Verifica cooldown
+            remaining_cooldown = self.engine.get_remaining_cooldown(symbol)
+            
+            # Verifica orari trading
+            in_trading_hours = is_trading_hours(symbol, self.config.config)
+            
+            # Verifica posizioni aperte
+            open_positions = mt5.positions_get(symbol=symbol)
+            pos_count = len(open_positions) if open_positions else 0
+            
+            # Verifica spread
+            symbol_info = mt5.symbol_info(symbol)
+            spread = 0
+            if symbol_info:
+                spread = (symbol_info.ask - symbol_info.bid) / self.engine._get_pip_size(symbol)
+                
+            # Verifica segnale se possibile
+            signal = "N/A"
+            if buffer_size >= self.engine.min_spin_samples:
+                signal, _ = self.engine.get_signal(symbol)
+            
+            logger.debug(
+                f"DEBUG {symbol}: "
+                f"CanTrade={can_trade} | "
+                f"Buffer={buffer_size}/{self.engine.buffer_size} | "
+                f"Cooldown={remaining_cooldown:.0f}s | "
+                f"TradingHours={in_trading_hours} | "
+                f"OpenPos={pos_count} | "
+                f"Spread={spread:.1f}p | "
+                f"Signal={signal} | "
+                f"Price={tick.bid:.5f}/{tick.ask:.5f}"
+            )
+            
+        except Exception as e:
+            logger.error(f"Errore debug_trade_status per {symbol}: {str(e)}")
+    
     def check_the5ers_limits(self):
         """Controlla i limiti imposti dal broker The5ers"""
         account_info = mt5.account_info()
