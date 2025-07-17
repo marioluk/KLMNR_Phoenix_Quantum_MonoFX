@@ -1,0 +1,229 @@
+{
+    "meta": {
+        "config_name": "THE5ERS_ULTRA_CONSERVATIVE",
+        "description": "Configurazione ultra-conservativa per Step 1 - Sicurezza massima",
+        "target": "Step 1 - 8% in 30 giorni",
+        "risk_level": "ULTRA_LOW",
+        "created": "2025-07-17",
+        "version": "1.0"
+    },
+    "logging": {
+        "log_file": "logs/PRO-THE5ERS-ULTRA-CONSERVATIVE.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "account_currency": "USD",
+    "magic_number": 177251,
+    "quantum_params": {
+        "buffer_size": 400,
+        "spin_window": 60,
+        "min_spin_samples": 25,
+        "spin_threshold": 0.35,
+        "signal_cooldown": 900,
+        "entropy_thresholds": {
+            "buy_signal": 0.68,
+            "sell_signal": 0.32
+        },
+        "volatility_scale": 0.8
+    },
+    "risk_parameters": {
+        "magic_number": 147251,
+        "position_cooldown": 1200,
+        "max_daily_trades": 2,
+        "max_positions": 1,
+        "min_sl_distance_pips": {
+            "EURUSD": 15,
+            "GBPUSD": 18,
+            "USDJPY": 12,
+            "XAUUSD": 60,
+            "NAS100": 25,
+            "default": 20
+        },
+        "base_sl_pips": {
+            "EURUSD": 20,
+            "GBPUSD": 25,
+            "USDJPY": 18,
+            "XAUUSD": 80,
+            "NAS100": 45,
+            "default": 25
+        },
+        "profit_multiplier": 1.5,
+        "max_position_hours": 4,
+        "risk_percent": 0.0008,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 60,
+            "step_pips": 30,
+            "lock_percentage": 0.7
+        },
+        "max_spread": {
+            "EURUSD": 8,
+            "GBPUSD": 10,
+            "USDJPY": 6,
+            "XAUUSD": 25,
+            "NAS100": 100,
+            "default": 12
+        }
+    },
+    "symbols": {
+        "EURUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 15,
+                "base_sl_pips": 20,
+                "profit_multiplier": 1.5,
+                "risk_percent": 0.0008,
+                "trailing_stop": {
+                    "activation_pips": 60,
+                    "step_pips": 30
+                }
+            },
+            "trading_hours": [
+                "09:30-10:30",
+                "14:30-15:30"
+            ],
+            "comment": "Ultra-conservative EURUSD - Step 1 optimized",
+            "quantum_params_override": {
+                "buffer_size": 400,
+                "spin_window": 60,
+                "min_spin_samples": 25,
+                "signal_cooldown": 900,
+                "entropy_thresholds": {
+                    "buy_signal": 0.68,
+                    "sell_signal": 0.32
+                }
+            },
+            "max_daily_trades": 2,
+            "enabled": true
+        },
+        "GBPUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 18,
+                "base_sl_pips": 25,
+                "profit_multiplier": 1.4,
+                "risk_percent": 0.0006,
+                "trailing_stop": {
+                    "activation_pips": 70,
+                    "step_pips": 35
+                }
+            },
+            "trading_hours": [
+                "09:30-10:30",
+                "14:30-15:30"
+            ],
+            "comment": "Ultra-conservative GBPUSD - Reduced volatility exposure",
+            "quantum_params_override": {
+                "buffer_size": 350,
+                "spin_window": 55,
+                "min_spin_samples": 30,
+                "signal_cooldown": 1200,
+                "entropy_thresholds": {
+                    "buy_signal": 0.72,
+                    "sell_signal": 0.28
+                }
+            },
+            "max_daily_trades": 1,
+            "enabled": true
+        },
+        "USDJPY": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 18,
+                "profit_multiplier": 1.6,
+                "risk_percent": 0.0008,
+                "trailing_stop": {
+                    "activation_pips": 50,
+                    "step_pips": 25
+                }
+            },
+            "trading_hours": [
+                "02:30-04:00",
+                "09:30-10:30"
+            ],
+            "comment": "Conservative USDJPY - Asian session specialist",
+            "quantum_params_override": {
+                "buffer_size": 380,
+                "spin_window": 55,
+                "min_spin_samples": 20,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.65,
+                    "sell_signal": 0.35
+                }
+            },
+            "max_daily_trades": 2,
+            "enabled": true
+        },
+        "XAUUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 60,
+                "base_sl_pips": 80,
+                "profit_multiplier": 1.8,
+                "risk_percent": 0.0005,
+                "trailing_stop": {
+                    "activation_pips": 100,
+                    "step_pips": 50
+                }
+            },
+            "trading_hours": [
+                "09:45-10:15",
+                "14:45-15:15"
+            ],
+            "comment": "Very conservative Gold - Limited exposure",
+            "quantum_params_override": {
+                "buffer_size": 450,
+                "spin_window": 50,
+                "min_spin_samples": 25,
+                "signal_cooldown": 2400,
+                "entropy_thresholds": {
+                    "buy_signal": 0.75,
+                    "sell_signal": 0.25
+                }
+            },
+            "max_daily_trades": 1,
+            "enabled": false
+        },
+        "NAS100": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 25,
+                "base_sl_pips": 45,
+                "profit_multiplier": 1.6,
+                "risk_percent": 0.0004,
+                "trailing_stop": {
+                    "activation_pips": 120,
+                    "step_pips": 60
+                }
+            },
+            "trading_hours": [
+                "15:00-15:30"
+            ],
+            "comment": "Very conservative NASDAQ - Minimal exposure",
+            "quantum_params_override": {
+                "buffer_size": 300,
+                "spin_window": 45,
+                "min_spin_samples": 30,
+                "signal_cooldown": 3600,
+                "entropy_thresholds": {
+                    "buy_signal": 0.78,
+                    "sell_signal": 0.22
+                }
+            },
+            "max_daily_trades": 1,
+            "enabled": false
+        }
+    },
+    "the5ers_compliance": {
+        "step": 1,
+        "target_profit_percent": 8.0,
+        "max_daily_loss_percent": 5.0,
+        "max_total_loss_percent": 10.0,
+        "max_trading_days": 30,
+        "weekend_trading": false,
+        "news_trading": false
+    }
+}
