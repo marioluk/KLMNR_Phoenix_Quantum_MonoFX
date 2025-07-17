@@ -147,7 +147,7 @@
                 "min_sl_distance_pips": 150,
                 "base_sl_pips": 220,
                 "profit_multiplier": 2.4,
-                "risk_percent": 0.010,
+                "risk_percent": 0.0010,
                 "trailing_stop": {
                     "activation_pips": 120,
                     "step_pips": 60
