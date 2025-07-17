@@ -537,7 +537,7 @@ class QuantumEngine:
             'time': time.time()
         })
 
-    def get_signal(self, symbol: str) -> Tuple[str, float]:
+    def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
         """
         Genera un segnale di trading ("BUY"/"SELL"/"HOLD") basato su:
         - Entropia dei tick recenti
@@ -612,7 +612,9 @@ class QuantumEngine:
 
         # 7. Registrazione segnale (senza influenzare cooldown posizioni)
         if signal != "HOLD":
-            self.last_signal_time[symbol] = time.time()
+            # Solo imposta il cooldown se stiamo effettivamente facendo trading
+            if for_trading:
+                self.last_signal_time[symbol] = time.time()
             
             # Monitora bias direzionale
             if not hasattr(self, 'signal_stats'):
@@ -1395,27 +1397,41 @@ class QuantumTradingSystem:
     
     def __init__(self, config_path: str):
         """Costruttore principale"""
+        print(f"🔧 Inizializzazione QuantumTradingSystem...")
+        print(f"📁 File configurazione: {config_path}")
+        
         # Inizializzazione base
         self._setup_logger(config_path)
+        print("✅ Logger configurato")
+        
         self._config_path = config_path
         self.running = False
         
         # Caricamento configurazione
+        print("📋 Caricamento configurazione...")
         self._load_configuration(config_path)  # Questo inizializza self.config
+        print("✅ Configurazione caricata")
         
         # Verifica configurazione minima
         if not hasattr(self.config, 'config') or 'symbols' not in self.config.config:
             logger.error("Configurazione simboli non valida nel file di configurazione")
             raise ValueError("Sezione symbols mancante nella configurazione")
         
+        print(f"🎯 Simboli trovati: {list(self.config.config['symbols'].keys())}")
+        
         # Inizializzazione componenti core
+        print("🔄 Inizializzazione componenti core...")
         self.config_manager = ConfigManager(config_path)
         self._config = self.config_manager.config
         
         # Attiva automaticamente i simboli in MT5
+        print("📡 Attivazione simboli in MT5...")
         self._activate_symbols()
+        print("✅ Simboli attivati")
         
+        print("🧠 Inizializzazione Quantum Engine...")
         self.engine = QuantumEngine(self.config_manager)
+        print("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self.config_manager, self.engine, self)  # Passa self come terzo parametro
         
         self.max_positions = self.config_manager.get_risk_params().get('max_positions', 4)
@@ -1567,17 +1583,23 @@ class QuantumTradingSystem:
         
     def start(self):
         """Avvia il sistema"""
+        print("🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀")
         try:
             if not hasattr(self, 'config') or not hasattr(self.config, 'symbols'):
                 raise RuntimeError("Configurazione non valida - simboli mancanti")
                 
+            print(f"📋 Sistema con {len(self.config.symbols)} simboli configurati")
+            print(f"🎯 Simboli: {list(self.config.symbols.keys())}")
             logger.info(f"Avvio sistema con {len(self.config.symbols)} simboli")
             
             if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
                 raise RuntimeError("Componenti critici non inizializzati")
             
+            print("✅ Componenti critici inizializzati correttamente")
             self.running = True
             logger.info("Sistema di trading avviato correttamente")
+            
+            print("🔄 Inizio loop principale...")
             
             while self.running:
                 try:
@@ -1588,10 +1610,14 @@ class QuantumTradingSystem:
                     self.running = False
                 except Exception as e:
                     logger.error(f"Errore durante l'esecuzione: {str(e)}", exc_info=True)
+                    print(f"❌ Errore nel loop: {e}")
                     time.sleep(5)
                     
         except Exception as e:
             logger.critical(f"Errore fatale: {str(e)}", exc_info=True)
+            print(f"💀 Errore fatale: {e}")
+            import traceback
+            traceback.print_exc()
         finally:
             self.stop()
 
@@ -1731,16 +1757,46 @@ class QuantumTradingSystem:
             if current_positions >= self.max_positions:
                 return
                 
-            # 5. Ottieni segnale
-            signal, price = self.engine.get_signal(symbol)
+            # 5. Ottieni segnale (senza attivare cooldown)
+            signal, price = self.engine.get_signal(symbol, for_trading=False)
+            
+            logger.debug(f"🔍 Segnale per {symbol}: {signal} (Price: {price})")
             
             if signal in ["BUY", "SELL"]:
-                # 6. Calcola dimensione posizione
-                size = self.risk_manager.calculate_position_size(symbol, price, signal)
+                logger.info(f"🎯 SEGNALE ATTIVO {signal} per {symbol} - Controllo condizioni trading")
                 
-                if size > 0:
-                    # 7. Esegui il trade
-                    self._execute_trade(symbol, signal, tick, price, size)
+                # 5.1 Verifica cooldown segnale PRIMA di procedere
+                if hasattr(self.engine, 'last_signal_time') and symbol in self.engine.last_signal_time:
+                    time_since_last = time.time() - self.engine.last_signal_time[symbol]
+                    if time_since_last < self.engine.signal_cooldown:
+                        logger.info(f"⏰ {symbol}: In cooldown, salto trade (tempo rimanente: {self.engine.signal_cooldown - time_since_last:.1f}s)")
+                        return
+                
+                # 5.2 Se tutto ok, ottieni segnale per trading (questo attiva il cooldown)
+                trading_signal, trading_price = self.engine.get_signal(symbol, for_trading=True)
+                
+                if trading_signal in ["BUY", "SELL"]:
+                    logger.info(f"✅ Segnale confermato per trading: {trading_signal}")
+                    
+                    # 6. Calcola dimensione posizione
+                    size = self.risk_manager.calculate_position_size(symbol, trading_price, trading_signal)
+                    
+                    logger.info(f"💰 Size calcolata per {symbol}: {size} lots")
+                    
+                    if size > 0:
+                        logger.info(f"✅ Esecuzione trade autorizzata per {symbol} - Size: {size}")
+                        # 7. Esegui il trade
+                        success = self._execute_trade(symbol, trading_signal, tick, trading_price, size)
+                        if success:
+                            logger.info(f"🎉 Trade {symbol} eseguito con successo!")
+                        else:
+                            logger.error(f"❌ Trade {symbol} fallito durante esecuzione")
+                    else:
+                        logger.warning(f"⚠️ Trade {symbol} bloccato: size = 0")
+                else:
+                    logger.warning(f"🚫 {symbol}: Segnale non confermato per trading effettivo")
+            else:
+                logger.debug(f"💤 {symbol}: HOLD - nessuna azione")
                     
         except Exception as e:
             logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)
@@ -1748,9 +1804,11 @@ class QuantumTradingSystem:
     def _execute_trade(self, symbol: str, signal: str, tick, price: float, size: float) -> bool:
         """Esegue un trade con gestione completa degli errori"""
         try:
+            logger.info(f"🚀 INIZIO ESECUZIONE TRADE: {signal} {symbol} | Size: {size} | Price: {price}")
+            
             # 1. Verifica finale pre-trade
             if not self.engine.can_trade(symbol):
-                logger.debug(f"Trade bloccato per {symbol}: can_trade=False")
+                logger.warning(f"❌ Trade bloccato per {symbol}: can_trade=False")
                 return False
                 
             # 2. Determina tipo ordine
@@ -2260,7 +2318,7 @@ class QuantumTradingSystem:
             buffer_size = len(self.engine.tick_buffer.get(symbol, []))
             min_samples = self.engine.min_spin_samples
             
-            logger.debug(f"DEBUG {symbol}: can_trade={can_trade}, trading_hours={trading_hours}, "
+            logger.info(f"🔍 TRADE STATUS {symbol}: can_trade={can_trade}, trading_hours={trading_hours}, "
                         f"has_position={has_position}, daily_trades={daily_count}/{daily_limit}, "
                         f"buffer={buffer_size}/{min_samples}")
                         
