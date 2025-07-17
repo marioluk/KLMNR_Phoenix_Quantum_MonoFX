@@ -1000,14 +1000,14 @@ class QuantumRiskManager:
         if symbol.upper().endswith("USD") or symbol.upper().startswith("EUR") or symbol.upper().startswith("GBP") or symbol.upper().startswith("AUD") or symbol.upper().startswith("NZD") or symbol.upper().startswith("CAD") or symbol.upper().startswith("CHF") or symbol.upper().startswith("JPY"):
             return 10.0  # $10 per pip per 1 lotto
         elif "XAUUSD" in symbol:
-            return 0.01  # $0.01 per pip per 1 lotto
+            return 1.0  # $1.00 per pip per 1 lotto (100 once x $0.01)
         elif "SP500" in symbol or "NAS100" in symbol or "US30" in symbol:
             return 0.1   # $0.1 per pip per 1 lotto
         else:
             return 1.0   # Default fallback
 
     def _apply_size_limits(self, symbol: str, size: float) -> float:
-        """Applica limiti di dimensione"""
+        """Applica limiti di dimensione con controllo margine"""
         info = mt5.symbol_info(symbol)
         if not info:
             return 0.0
@@ -1016,11 +1016,35 @@ class QuantumRiskManager:
         step = info.volume_step
         size = round(size / step) * step
         
-        # Applica minimi/massimi
+        # Applica minimi/massimi del broker
         size = max(size, info.volume_min)
         size = min(size, info.volume_max)
         
-        logger.info(f"Size finale per {symbol}: {size}")
+        # CONTROLLO MARGINE: Verifica che la posizione sia sostenibile
+        account = mt5.account_info()
+        if account and size > 0:
+            # Calcola margine richiesto per la posizione
+            margin_required = mt5.order_calc_margin(
+                mt5.ORDER_TYPE_BUY,
+                symbol,
+                size,
+                info.ask
+            )
+            
+            # Usa max 80% del margine libero per sicurezza
+            max_margin = account.margin_free * 0.8
+            
+            if margin_required and margin_required > max_margin:
+                # Riduci la dimensione per rispettare il margine
+                safe_size = size * (max_margin / margin_required)
+                safe_size = round(safe_size / step) * step
+                safe_size = max(safe_size, info.volume_min)
+                
+                logger.warning(f"Riduzione size per {symbol}: {size:.2f} -> {safe_size:.2f} "
+                             f"(Margine richiesto: ${margin_required:.2f}, disponibile: ${max_margin:.2f})")
+                size = safe_size
+        
+        logger.info(f"Size finale per {symbol}: {size:.2f}")
         
         return size
     
@@ -1192,7 +1216,9 @@ class QuantumRiskManager:
             
             # Calcolo preciso del pip value
             if symbol in ['XAUUSD', 'XAGUSD']:
-                pip_value = 0.01  # 1 pip = $0.01 per ounce
+                # Per XAUUSD: 1 lotto = 100 once, 1 pip = $0.01 per oncia
+                # Quindi 1 pip su 1 lotto = $1.00 (100 once x $0.01)
+                pip_value = 1.0 * contract_size  # $1.00 per pip per lotto
             elif symbol in ['SP500', 'NAS100', 'US30']:
                 pip_value = 0.1 * contract_size  # 1 pip = $0.1 per indice
             else:  # Forex (EURUSD, GBPUSD, ecc.)
@@ -1892,16 +1918,44 @@ class QuantumTradingSystem:
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
 
-            # Verifica margine sufficiente
+            # Verifica margine sufficiente con controllo doppio
             required_margin = mt5.order_calc_margin(
                 position_type,  # Usa position_type invece di rifare il check
                 symbol,
                 size,
                 execution_price
             )
-            if required_margin > self.account_info.margin_free:
-                logger.error(f"Margine insufficiente per {symbol}: {self.account_info.margin_free} < {required_margin}")
+            
+            available_margin = self.account_info.margin_free
+            
+            if required_margin is None:
+                logger.error(f"Impossibile calcolare margine richiesto per {symbol}")
                 return False
+                
+            if required_margin > available_margin:
+                logger.error(f"Margine insufficiente per {symbol}: "
+                           f"Disponibile=${available_margin:.2f} < Richiesto=${required_margin:.2f} "
+                           f"(Size: {size}, Price: {execution_price})")
+                return False
+                
+            # Controllo aggiuntivo: usa solo 75% del margine libero
+            if required_margin > available_margin * 0.75:
+                logger.warning(f"Margine troppo alto per {symbol}, riduzione size automatica")
+                # Ricalcola size con margine ridotto
+                safe_size = size * (available_margin * 0.75 / required_margin)
+                safe_size = self.risk_manager._apply_size_limits(symbol, safe_size)
+                
+                if safe_size < mt5.symbol_info(symbol).volume_min:
+                    logger.error(f"Size troppo piccola dopo riduzione per {symbol}")
+                    return False
+                    
+                size = safe_size
+                # Ricalcola margine con nuova size
+                required_margin = mt5.order_calc_margin(position_type, symbol, size, execution_price)
+                logger.info(f"Size ridotta per {symbol}: {size:.2f} (Margine: ${required_margin:.2f})")
+            
+            # Aggiorna request con size (potenzialmente) modificata
+            request["volume"] = size
 
             # 5. Esecuzione dell'ordine (UNA SOLA VOLTA!)
             result = mt5.order_send(request)
@@ -2214,15 +2268,69 @@ class QuantumTradingSystem:
                 logger.debug(f"Posizione {position.ticket} non trovata")
                 return False
 
+            # Ottieni informazioni aggiornate del simbolo
+            symbol_info = mt5.symbol_info(position.symbol)
+            if not symbol_info:
+                logger.error(f"Impossibile ottenere info simbolo {position.symbol}")
+                return False
+
+            # Ottieni tick corrente
+            tick = mt5.symbol_info_tick(position.symbol)
+            if not tick:
+                logger.error(f"Impossibile ottenere tick per {position.symbol}")
+                return False
+
             # Calcola le nuove valori solo se diversi dagli attuali
-            new_sl = round(sl, 5) if sl is not None else position.sl
-            new_tp = round(tp, 5) if tp is not None else position.tp
+            new_sl = round(sl, symbol_info.digits) if sl is not None else position.sl
+            new_tp = round(tp, symbol_info.digits) if tp is not None else position.tp
             
             # Verifica se ci sono effettivi cambiamenti
-            if (abs(new_sl - (position.sl or 0)) < 0.00001 and 
-                abs(new_tp - (position.tp or 0)) < 0.00001):
-                logger.debug(f"Nessun cambiamento necessario per posizione {position.ticket}")
+            sl_threshold = symbol_info.point * 2  # Soglia minima per considerare un cambiamento
+            tp_threshold = symbol_info.point * 2
+            
+            if (abs(new_sl - (position.sl or 0)) < sl_threshold and 
+                abs(new_tp - (position.tp or 0)) < tp_threshold):
+                logger.debug(f"Nessun cambiamento significativo per posizione {position.ticket}")
                 return True
+
+            # Validazione distanze minime dal prezzo corrente
+            current_price = tick.bid if position.type == mt5.ORDER_TYPE_BUY else tick.ask
+            min_distance = max(
+                symbol_info.stops_level * symbol_info.point,  # Distanza minima broker
+                symbol_info.freeze_level * symbol_info.point,  # Freeze level
+                (tick.ask - tick.bid) * 3  # 3x spread come buffer
+            )
+
+            # Validazione SL
+            if new_sl > 0:
+                if position.type == mt5.ORDER_TYPE_BUY:
+                    if new_sl >= current_price - min_distance:
+                        logger.warning(f"SL troppo vicino al prezzo corrente per {position.symbol}: {new_sl} vs {current_price}")
+                        return False
+                else:  # SELL
+                    if new_sl <= current_price + min_distance:
+                        logger.warning(f"SL troppo vicino al prezzo corrente per {position.symbol}: {new_sl} vs {current_price}")
+                        return False
+
+            # Validazione TP
+            if new_tp > 0:
+                if position.type == mt5.ORDER_TYPE_BUY:
+                    if new_tp <= current_price + min_distance:
+                        logger.warning(f"TP troppo vicino al prezzo corrente per {position.symbol}: {new_tp} vs {current_price}")
+                        return False
+                else:  # SELL
+                    if new_tp >= current_price - min_distance:
+                        logger.warning(f"TP troppo vicino al prezzo corrente per {position.symbol}: {new_tp} vs {current_price}")
+                        return False
+
+            # Verifica che SL sia nella direzione corretta rispetto al prezzo di apertura
+            if new_sl > 0:
+                if position.type == mt5.ORDER_TYPE_BUY and new_sl > position.price_open:
+                    logger.warning(f"SL BUY sopra prezzo apertura per {position.symbol}: {new_sl} > {position.price_open}")
+                    return False
+                elif position.type == mt5.ORDER_TYPE_SELL and new_sl < position.price_open:
+                    logger.warning(f"SL SELL sotto prezzo apertura per {position.symbol}: {new_sl} < {position.price_open}")
+                    return False
 
             # Prepara la richiesta di modifica
             request = {
@@ -2235,14 +2343,22 @@ class QuantumTradingSystem:
                 "type_time": mt5.ORDER_TIME_GTC,
             }
 
+            # Log dettagliato pre-modifica
+            logger.info(f"Tentativo modifica posizione {position.ticket}: "
+                       f"Current Price={current_price:.5f} | "
+                       f"Old SL={position.sl:.5f} -> New SL={new_sl:.5f} | "
+                       f"Old TP={position.tp:.5f} -> New TP={new_tp:.5f} | "
+                       f"Min Distance={min_distance:.5f}")
+
             # Invia la richiesta
             result = mt5.order_send(request)
             
             if result.retcode == mt5.TRADE_RETCODE_DONE:
-                logger.info(f"Posizione {position.ticket} modificata: SL={new_sl}, TP={new_tp}")
+                logger.info(f"Posizione {position.ticket} modificata con successo: SL={new_sl:.5f}, TP={new_tp:.5f}")
                 return True
             else:
-                logger.error(f"Errore modifica posizione {position.ticket}: {result.comment} (code: {result.retcode})")
+                logger.error(f"Errore modifica posizione {position.ticket}: {result.comment} (code: {result.retcode}) | "
+                            f"Stops Level={symbol_info.stops_level} | Freeze Level={symbol_info.freeze_level}")
                 return False
                 
         except Exception as e:
