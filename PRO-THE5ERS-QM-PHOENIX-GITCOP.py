@@ -994,18 +994,6 @@ class QuantumRiskManager:
     
        
 
-    def _get_normalized_pip_value(self, symbol: str, price: float) -> float:
-        """Restituisce il pip value normalizzato per 1 lotto"""
-        # Forex standard (EURUSD, GBPUSD, ecc.)
-        if symbol.upper().endswith("USD") or symbol.upper().startswith("EUR") or symbol.upper().startswith("GBP") or symbol.upper().startswith("AUD") or symbol.upper().startswith("NZD") or symbol.upper().startswith("CAD") or symbol.upper().startswith("CHF") or symbol.upper().startswith("JPY"):
-            return 10.0  # $10 per pip per 1 lotto
-        elif "XAUUSD" in symbol:
-            return 1.0  # $1.00 per pip per 1 lotto (100 once x $0.01)
-        elif "SP500" in symbol or "NAS100" in symbol or "US30" in symbol:
-            return 0.1   # $0.1 per pip per 1 lotto
-        else:
-            return 1.0   # Default fallback
-
     def _apply_size_limits(self, symbol: str, size: float) -> float:
         """Applica limiti di dimensione con controllo margine"""
         info = mt5.symbol_info(symbol)
@@ -1214,6 +1202,8 @@ class QuantumRiskManager:
             point = info.point
             contract_size = risk_config.get('contract_size', 1.0)
             
+            logger.debug(f"Raw data for {symbol}: point={point}, contract_size={contract_size}")
+            
             # Calcolo preciso del pip value
             if symbol in ['XAUUSD', 'XAGUSD']:
                 # Per XAUUSD: 1 lotto = 100 once, 1 pip = $0.01 per oncia
@@ -1222,7 +1212,9 @@ class QuantumRiskManager:
             elif symbol in ['SP500', 'NAS100', 'US30']:
                 pip_value = 0.1 * contract_size  # 1 pip = $0.1 per indice
             else:  # Forex (EURUSD, GBPUSD, ecc.)
-                pip_value = (point * 10000) * contract_size  # $10 per lotto standard
+                # Per forex standard: 1 pip = $10 per lotto standard (100,000 unità)
+                # contract_size 0.01 = mini lotto = $10 * 0.01 = $0.10 per pip
+                pip_value = 10.0 * contract_size  # $10 per pip per lotto standard * contract_size
             
             self.symbol_data[symbol] = {
                 'pip_value': pip_value,
@@ -1233,7 +1225,15 @@ class QuantumRiskManager:
                 'contract_size': contract_size
             }
             
-            logger.debug(f"Dati precisi per {symbol}: PipValue={pip_value:.2f}, ContractSize={contract_size}")
+            logger.debug(f"Dati caricati per {symbol}: PipValue=${pip_value:.2f}, ContractSize={contract_size}, Point={point}")
+            
+            # Log dettagliato per debug
+            logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
+                       f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
+                       f"ContractSize={contract_size} | "
+                       f"PipValue=${pip_value:.4f} | "
+                       f"Point={point}")
+            
             return True
             
         except Exception as e:
