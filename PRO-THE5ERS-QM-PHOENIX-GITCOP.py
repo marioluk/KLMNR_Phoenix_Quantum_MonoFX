@@ -1833,12 +1833,23 @@ class QuantumTradingSystem:
                 "magic": self.config.config['risk_parameters']['magic_number'],
                 "comment": "QTS-AUTO",
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": mt5.ORDER_FILLING_FOK,  # Prova FOK prima, poi IOC se fallisce
             }
             
-            # 5. Esegui ordine
+            # 5. Esegui ordine con fallback per filling mode
             logger.info(f"Esecuzione {signal} {symbol}: {size} lots @ {execution_price}")
             result = mt5.order_send(request)
+            
+            # Se fallisce per filling mode, prova con metodo alternativo
+            if result.retcode == 10030:  # Unsupported filling mode
+                logger.warning(f"Filling mode FOK non supportato per {symbol}, provo con IOC")
+                request["type_filling"] = mt5.ORDER_FILLING_IOC
+                result = mt5.order_send(request)
+                
+                if result.retcode == 10030:  # Ancora problemi
+                    logger.warning(f"Filling mode IOC non supportato per {symbol}, provo Return")
+                    request["type_filling"] = mt5.ORDER_FILLING_RETURN
+                    result = mt5.order_send(request)
             
             # 6. Verifica risultato
             if result.retcode != mt5.TRADE_RETCODE_DONE:
