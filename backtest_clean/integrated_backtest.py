@@ -12,6 +12,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import random
 from typing import Dict, List, Tuple, Optional
+from config_selector import ConfigSelector
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -37,16 +38,73 @@ class The5ersIntegratedBacktest:
         logger.info(f"⚠️  Max Daily Loss: {self.max_daily_loss:.1%}")
         logger.info(f"🔴 Max Total Loss: {self.max_total_loss:.1%}")
     
+class The5ersIntegratedBacktest:
+    """Sistema di backtest integrato con file principali The5ers"""
+    
+    def __init__(self, config_path: Optional[str] = None):
+        """
+        Inizializza utilizzando configurazione reale
+        
+        Args:
+            config_path: Percorso specifico del file config. Se None, usa selezione interattiva
+        """
+        self.config_path = config_path
+        self.config = self.load_main_config()
+        self.trades = []
+        self.equity_curve = []
+        
+        # Parametri The5ers dalla config
+        the5ers_config = self.config.get('THE5ERS_specific', {})
+        self.step1_target = the5ers_config.get('step1_target', 8) / 100  # 8%
+        self.max_daily_loss = the5ers_config.get('max_daily_loss_percent', 5) / 100  # 5%
+        self.max_total_loss = the5ers_config.get('max_total_loss_percent', 10) / 100  # 10%
+        
+        logger.info("🚀 The5ers Integrated Backtest inizializzato")
+        logger.info(f"🎯 Step 1 Target: {self.step1_target:.1%}")
+        logger.info(f"⚠️  Max Daily Loss: {self.max_daily_loss:.1%}")
+        logger.info(f"🔴 Max Total Loss: {self.max_total_loss:.1%}")
+        
+        # Mostra info configurazione caricata
+        config_name = os.path.basename(self.config_path) if self.config_path else "Default"
+        logger.info(f"📁 Configurazione: {config_name}")
+    
     def load_main_config(self):
-        """Carica configurazione dal file principale JSON"""
+        """Carica configurazione dal file principale JSON con selezione dinamica"""
         try:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                      'PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json')
+            if self.config_path:
+                # Usa configurazione specifica fornita
+                config_path = self.config_path
+                logger.info(f"📁 Usando configurazione specifica: {os.path.basename(config_path)}")
+            else:
+                # Selezione interattiva
+                selector = ConfigSelector()
+                
+                print("\n🎯 SELEZIONE CONFIGURAZIONE BACKTEST")
+                print("="*50)
+                print("Nessuna configurazione specificata. Scegli:")
+                print("1. Selezione interattiva")
+                print("2. Usa configurazione default")
+                
+                choice = input("👉 Scelta (1-2): ").strip()
+                
+                if choice == "1":
+                    config_path = selector.show_interactive_menu()
+                    if not config_path:
+                        logger.info("❌ Selezione annullata, uso default")
+                        config_path = selector.get_default_config()
+                else:
+                    config_path = selector.get_default_config()
+                
+                if not config_path:
+                    raise FileNotFoundError("Nessun file di configurazione trovato")
+                
+                self.config_path = config_path
+                logger.info(f"📁 Configurazione selezionata: {os.path.basename(config_path)}")
             
             with open(config_path, 'r') as f:
                 config = json.load(f)
             
-            logger.info("✅ Configurazione principale caricata correttamente")
+            logger.info("✅ Configurazione caricata correttamente")
             
             # Verifica parametri chiave
             quantum_params = config.get('quantum_params', {})

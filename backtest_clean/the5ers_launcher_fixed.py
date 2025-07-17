@@ -9,7 +9,6 @@ import sys
 import json
 import logging
 from datetime import datetime
-from config_selector import ConfigSelector
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -96,35 +95,21 @@ def show_menu():
     print("7. 💰 Analisi position sizing")
     print("8. 📈 Report configurazione attuale")
     print("9. 🏆 Test compliance The5ers")
-    print("10. ⚙️ NUOVO! Selezione configurazione")
-    print("11. ❌ Esci")
+    print("10. ❌ Esci")
     print()
     
-    choice = input("👉 Seleziona opzione (1-11): ").strip()
+    choice = input("👉 Seleziona opzione (1-10): ").strip()
     return choice
 
 def run_integrated_backtest():
-    """Esegue backtest integrato veloce con selezione configurazione"""
+    """Esegue backtest integrato veloce"""
     try:
         from integrated_backtest import The5ersIntegratedBacktest
         
         print("🚀 AVVIO BACKTEST INTEGRATO VELOCE")
         print("="*50)
         
-        # Chiedi se usare configurazione specifica
-        print("Opzioni configurazione:")
-        print("1. Selezione interattiva")
-        print("2. Usa configurazione default")
-        
-        config_choice = input("👉 Scelta (1-2, Enter=default): ").strip()
-        
-        if config_choice == "1":
-            selector = ConfigSelector()
-            config_path = selector.show_interactive_menu()
-            backtest = The5ersIntegratedBacktest(config_path=config_path)
-        else:
-            backtest = The5ersIntegratedBacktest()
-        
+        backtest = The5ersIntegratedBacktest()
         result = backtest.run_backtest(days=15)
         
         print("✅ Backtest completato!")
@@ -299,137 +284,10 @@ def show_current_config():
     except Exception as e:
         print(f"❌ Errore lettura configurazione: {e}")
 
-def select_configuration():
-    """Gestione selezione configurazione con dettagli"""
-    try:
-        selector = ConfigSelector()
-        
-        print("⚙️ GESTIONE CONFIGURAZIONI THE5ERS")
-        print("="*50)
-        
-        # Mostra menu opzioni
-        print("Opzioni disponibili:")
-        print("1. 📋 Mostra tutte le configurazioni disponibili")
-        print("2. 🔍 Seleziona configurazione interattiva")
-        print("3. 📊 Analizza configurazione specifica")
-        print("4. 📌 Mostra configurazione default")
-        print("5. ❌ Torna al menu principale")
-        
-        choice = input("\n👉 Scegli opzione (1-5): ").strip()
-        
-        if choice == "1":
-            # Mostra tutte le configurazioni
-            configs = selector.find_config_files()
-            if configs:
-                print(f"\n📁 CONFIGURAZIONI TROVATE ({len(configs)}):")
-                print("-" * 80)
-                for i, config in enumerate(configs, 1):
-                    print(f"{i}. {config['filename']}")
-                    print(f"   Tipo: {config['config_type']} | Simboli: {config['symbol_count']} | {config['aggressiveness']}")
-                    print(f"   Risk: {config['risk_percent']*100:.3f}% | Max Trades: {config['max_daily_trades']}")
-                    print()
-            else:
-                print("❌ Nessuna configurazione trovata")
-        
-        elif choice == "2":
-            # Selezione interattiva
-            selected = selector.show_interactive_menu()
-            if selected:
-                print(f"\n✅ Configurazione selezionata per prossimi backtest:")
-                print(f"📁 {selected}")
-                
-                # Opzione per impostare come default temporaneo
-                set_default = input("❓ Impostare come default per questa sessione? (y/n): ").strip().lower()
-                if set_default in ['y', 'yes', 's', 'si']:
-                    # Salva in variabile globale o file temporaneo
-                    with open('temp_config_selection.txt', 'w') as f:
-                        f.write(selected)
-                    print("✅ Configurazione impostata come default temporaneo")
-        
-        elif choice == "3":
-            # Analizza configurazione specifica
-            selected = selector.show_interactive_menu()
-            if selected:
-                selector.show_config_details(selected)
-        
-        elif choice == "4":
-            # Mostra default
-            default = selector.get_default_config()
-            if default:
-                print(f"\n📌 CONFIGURAZIONE DEFAULT:")
-                print(f"📁 {default}")
-                selector.show_config_details(default)
-            else:
-                print("❌ Nessuna configurazione default trovata")
-        
-        elif choice == "5":
-            return
-        else:
-            print("❌ Opzione non valida")
-        
-        input("\nPremi INVIO per continuare...")
-        
-    except Exception as e:
-        print(f"❌ Errore gestione configurazioni: {e}")
-
-def get_selected_config():
-    """Ottiene la configurazione selezionata temporaneamente"""
-    try:
-        if os.path.exists('temp_config_selection.txt'):
-            with open('temp_config_selection.txt', 'r') as f:
-                return f.read().strip()
-    except:
-        pass
-    return None
-
 def test_the5ers_compliance():
     """Test compliance The5ers"""
     print("🏆 TEST COMPLIANCE THE5ERS")
     print("="*50)
-    
-    # Usa configurazione selezionata o default
-    selected_config = get_selected_config()
-    
-    try:
-        if selected_config:
-            config_path = selected_config
-            print(f"📁 Usando configurazione: {os.path.basename(config_path)}")
-        else:
-            selector = ConfigSelector()
-            config_path = selector.get_default_config()
-            print(f"📁 Usando configurazione default: {os.path.basename(config_path)}")
-        
-        with open(config_path, 'r') as f:
-            config = json.load(f)
-        
-        the5ers_config = config.get('THE5ERS_specific', {})
-        risk_config = config.get('risk_parameters', {})
-        
-        print("🎯 VERIFICA COMPLIANCE:")
-        
-        # Step 1 target
-        step1_target = the5ers_config.get('step1_target', 8)
-        print(f"✅ Step 1 Target: {step1_target}%")
-        
-        # Daily loss limit
-        daily_loss = the5ers_config.get('max_daily_loss_percent', 5)
-        print(f"✅ Max Daily Loss: {daily_loss}%")
-        
-        # Total loss limit  
-        total_loss = the5ers_config.get('max_total_loss_percent', 10)
-        print(f"✅ Max Total Loss: {total_loss}%")
-        
-        # Risk per trade
-        risk_per_trade = risk_config.get('risk_percent', 0.0015) * 100
-        print(f"✅ Risk per Trade: {risk_per_trade:.3f}%")
-        
-        # Position sizing compliance
-        print("✅ Micro Lot Compliance: Attivo")
-        
-        print("\n🎉 COMPLIANCE THE5ERS: 100% ✅")
-        
-    except Exception as e:
-        print(f"❌ Errore test compliance: {e}")
     
     try:
         config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
@@ -506,14 +364,11 @@ def main():
                 test_the5ers_compliance()
                 
             elif choice == "10":
-                select_configuration()
-                
-            elif choice == "11":
                 print("👋 Arrivederci!")
                 break
                 
             else:
-                print("❌ Opzione non valida. Scegli 1-11.")
+                print("❌ Opzione non valida. Scegli 1-10.")
             
             # Pausa prima del prossimo menu
             input("\nPremi INVIO per continuare...")

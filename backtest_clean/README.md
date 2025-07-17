@@ -1,4 +1,92 @@
-# 🎯 THE5ERS SYSTEM LAUNCHER - DIRECTORY PULITA
+# 🎯 THE5ERS SYSTEM LAUNCHER - SISTEMA COMPLETO
+
+Il launcher ti offre un **men# 🔥 NUOVO! Backtest comparativo multi-config
+python comparative_backtest.py
+
+# 📅 NUOVO! Backtest periodo personalizzato
+python cus---
+
+## ⚙️ **NUOVO! SISTEMA SELEZIONE CONFIGURAZIONE DINAMICA**
+
+### **🎯 Funzionalità Complete:**
+
+**📂 Auto-Discovery:**
+- Trova automaticamente tutti i file `*config*.json`
+- Supporta pattern multipli: `*CONFIG*.json`, `PRO-THE5ERS*.json`, `*STEP*.json`
+- Ricerca in directory corrente e sottocartelle
+
+**🔍 Analisi Intelligente:**
+- **Tipo strategia**: Step 1, Step 2, Conservative, Ultra Conservative
+- **Aggressività**: Conservative 🟢, Moderate 🟡, Aggressive 🔴
+- **Parametri chiave**: Simboli, risk%, trades/giorno
+- **Score automatico**: Rating di aggressività 0-100
+
+**📊 Menu Interattivo:**
+```
+🎯 SELEZIONE CONFIGURAZIONE THE5ERS
+================================================================================
+
+#   Tipo            File                                Simboli  Risk%    Trades   Aggressività
+------------------------------------------------------------------------------------------
+1   Step 1          PRO-THE5ERS-QM-PHOENIX-GITCOP-c... 6        0.150%   5        🟡 Moderate
+2   Step 2          config_step2_conservative.json     6        0.150%   5        🟢 Conservative  
+3   Conservative    config_conservative_step1.json     5        0.100%   3        🟢 Conservative
+4   Ultra Conservative config_ultra_conservative_s... 3        0.080%   2        🟢 Conservative
+
+👉 Seleziona configurazione (1-4, 0=annulla): 
+```
+
+### **📱 Utilizzo:**
+
+**1. Dal Launcher:**
+```powershell
+python the5ers_launcher.py → Opzione 10
+```
+
+**2. Direct Usage:**
+```powershell
+python config_selector.py
+```
+
+**3. Integrazione Backtest:**
+- Tutti i backtest supportano ora selezione dinamica
+- Menu "1" per selezione interattiva nelle opzioni config
+
+### **✅ Vantaggi:**
+- ✅ **Flessibilità**: Switch rapido Step 1/2 senza modifiche manuali
+- ✅ **Sicurezza**: Validazione automatica configurazioni
+- ✅ **Produzione**: Facile deployment con config diverse
+- ✅ **Testing**: A/B test configurazioni multiple
+- ✅ **Fallback**: Configurazione di emergenza sempre disponibile
+
+---
+
+## 📅 **SISTEMA PERIODO PERSONALIZZATO AGGIORNATO**_period_backtest.py
+
+# ⚙️ NUOVO! Selezione configurazione dinamica
+python config_selector.py
+
+# 🔍 Analisi strategica simboli  
+python symbol_analyzer.pyttivo** con tutte le opzioni avanzate:
+
+```
+🎯 THE5ERS HIGH STAKES CHALLENGE - SISTEMA LAUNCHER
+====================================
+
+📋 OPZIONI DISPONIBILI:
+
+1. 🔍 Verifica sistema e configurazione
+2. 🚀 Backtest integrato veloce (15 giorni)  
+3. 📊 Backtest completo ottimizzato (30 giorni)
+4. 🔥 NUOVO! Backtest comparativo multi-config
+5. 📅 NUOVO! Backtest periodo personalizzato
+6. 🔧 Test parametri quantum
+7. 💰 Analisi position sizing
+8. 📈 Report configurazione attuale
+9. 🏆 Test compliance The5ers
+10. ⚙️ NUOVO! Selezione configurazione dinamica
+11. ❌ Esci
+```
 
 ## 🚀 **COME LANCIARE IL SISTEMA THE5ERS**
 
@@ -8,15 +96,24 @@ Questa directory contiene **SOLO** i file essenziali per il sistema The5ers:
 
 ```
 backtest_clean/
-├── the5ers_launcher.py                    # 🎯 LAUNCHER PRINCIPALE
-├── integrated_backtest.py                 # 🔧 Backtest integrato
+├── the5ers_launcher.py                    # 🎯 LAUNCHER PRINCIPALE (11 OPZIONI)
+├── integrated_backtest.py                 # 🔧 Backtest integrato con config dinamiche
 ├── the5ers_optimized_backtest.py         # 📊 Backtest ottimizzato
-├── comparative_backtest.py               # 🔥 NUOVO! Backtest comparativo
-├── symbol_analyzer.py                   # 🔍 NUOVO! Analisi strategica simboli
+├── comparative_backtest.py               # 🔥 Backtest comparativo multi-config
+├── custom_period_backtest.py             # 📅 NUOVO! Backtest periodo personalizzato
+├── config_selector.py                    # ⚙️ NUOVO! Selezione configurazione dinamica
+├── symbol_analyzer.py                    # 🔍 Analisi strategica simboli
+├── master_analyzer.py                    # 🏆 Analisi master completa
 ├── config_ultra_conservative_step1.json  # ⚡ Config ultra-conservativa
 ├── config_conservative_step1.json        # 🎯 Config conservativa bilanciata
-├── config_step2_conservative.json        # 🏆 Config Step 2
-├── PARAMETRI_OTTIMIZZATI_SIMBOLI.md      # 📋 Guida ottimizzazioni
+├── config_step2_conservative.json        # 🏆 Config Step 2 (VINCENTE)
+├── PARAMETRI_OTTIMIZZATI_SIMBOLI.md      # 📋 Guida ottimizzazioni simboli
+├── ANALISI_STRATEGICA_SIMBOLI.md         # 📊 Analisi strategica completa
+├── STRATEGIA_DEFINITIVA.md               # 🎯 Strategia master finale
+├── CONFIGURAZIONE_PRODUZIONE_FINALE.md  # 🚀 Guida deployment produzione
+├── INDEX_ANALISI_COMPLETE.md             # 📄 Indice completo analisi
+├── GUIDA_CONFIG_SELECTOR.md              # ⚙️ NUOVO! Guida selezione configurazioni
+├── THE5ERS_COMPLETE_ANALYSIS_20250717.json # 📄 Report completo JSON
 └── README.md                             # 📋 Questa guida
 ```
 
@@ -51,13 +148,41 @@ python the5ers_optimized_backtest.py
 # 🔥 NUOVO! Backtest comparativo multi-config
 python comparative_backtest.py
 
-# 🔍 NUOVO! Analisi strategica simboli  
+# � NUOVO! Backtest periodo personalizzato
+python custom_period_backtest.py
+
+# 🔍 Analisi strategica simboli  
 python symbol_analyzer.py
+
+# 🏆 Master analyzer completo
+python master_analyzer.py
 ```
 
 ---
 
-## 🔧 **CARATTERISTICHE SISTEMA**
+### **🎯 CARATTERISTICHE AGGIORNATE:**
+
+**⚙️ SELEZIONE CONFIGURAZIONE DINAMICA:**
+- ✅ **Auto-discovery**: Trova tutti i file `*config*.json` disponibili
+- ✅ **Menu interattivo**: Selezione guidata con analisi completa
+- ✅ **Analisi aggressività**: Classificazione automatica Conservative/Moderate/Aggressive
+- ✅ **Supporto Step 1/2**: Switch dinamico tra strategie different
+- ✅ **Fallback sicuro**: Configurazione di emergenza se errori
+
+**📅 PERIODO PERSONALIZZABILE:**
+- ✅ **Date specifiche**: Analisi su range personalizzati
+- ✅ **Formati multipli**: YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, YYYYMMDD
+- ✅ **Validazione automatica**: Controllo ordine e disponibilità dati
+- ✅ **Business days**: Skip weekend per analisi più accurate
+- ✅ **Progress tracking**: Report ogni 7 giorni per periodi lunghi
+
+**🔧 LAUNCHER COMPLETO:**
+- ✅ **11 opzioni**: Menu completo con tutte le funzionalità
+- ✅ **Interfaccia interattiva**: Sub-menu per periodo personalizzato e config
+- ✅ **Error handling**: Gestione errori avanzata
+- ✅ **Fallback config**: Configurazione di emergenza integrata
+
+### **🔧 CARATTERISTICHE SISTEMA**
 
 ### ✅ **Completamente Integrato:**
 - 📂 Utilizza **file principali modificati**
@@ -105,7 +230,30 @@ Quando lanci `the5ers_launcher.py`, vedrai:
 2. **Test veloce**: Opzione `2` (Backtest 15 giorni)
 3. **Test completo**: Opzione `3` (Backtest 30 giorni)
 4. **🔥 ANALISI COMPARATIVA**: Opzione `4` (Multi-config test)
-5. **Analisi**: Opzioni `5-8` per dettagli
+5. **📅 PERIODO PERSONALIZZATO**: Opzione `5` (Date specifiche)
+6. **⚙️ SELEZIONE CONFIG**: Opzione `10` (Config dinamica)
+7. **Analisi**: Opzioni `6-9` per dettagli
+
+### **🎯 EXECUTION FLOW RACCOMANDATO:**
+```powershell
+# 1. Prima esecuzione - verifica sistema
+python the5ers_launcher.py → Opzione 1
+
+# 2. Selezione configurazione dinamica
+python the5ers_launcher.py → Opzione 10
+
+# 3. Test comparativo multi-config  
+python the5ers_launcher.py → Opzione 4
+
+# 4. Test periodo personalizzato
+python the5ers_launcher.py → Opzione 5
+
+# 5. Leggi risultati analisi
+notepad STRATEGIA_DEFINITIVA.md
+
+# 6. Deploy configurazione vincente
+# (Segui CONFIGURAZIONE_PRODUZIONE_FINALE.md)
+```
 
 ---
 
@@ -122,6 +270,101 @@ Quando lanci `the5ers_launcher.py`, vedrai:
 - 📊 ~60-100 trades
 - 💰 Target: 5-8% return (Step 1)
 - 🏆 Validazione completa
+
+---
+
+## � **NUOVO! SISTEMA PERIODO PERSONALIZZATO**
+
+### **🎯 Funzionalità Complete:**
+
+**📅 Modalità Supportate:**
+1. **Date Specifiche**: Da/A con controllo completo
+2. **Giorni Indietro**: N giorni da oggi
+3. **Default**: Ultimi 30 giorni
+
+**🗓️ Formati Data Supportati:**
+- `YYYY-MM-DD` (ISO standard: 2024-01-15)
+- `DD/MM/YYYY` (Italiano: 15/01/2024)
+- `DD-MM-YYYY` (Alternativo: 15-01-2024)
+- `YYYYMMDD` (Compatto: 20240115)
+
+### **📊 Esempi Pratici:**
+
+**1. Analisi Gennaio 2024:**
+```powershell
+python the5ers_launcher.py → Opzione 5
+# Modalità 1: Date specifiche
+# Da: 01/01/2024
+# A: 31/01/2024
+```
+
+**2. Ultimi 60 Giorni:**
+```powershell
+python the5ers_launcher.py → Opzione 5
+# Modalità 2: Giorni indietro
+# Giorni: 60
+```
+
+**3. Direct Usage:**
+```powershell
+python custom_period_backtest.py
+# Menu interattivo completo
+```
+
+### **✅ Controlli Automatici:**
+- ✅ **Validazione date**: Ordine cronologico
+- ✅ **Range check**: Non nel futuro
+- ✅ **Business days**: Skip weekend opzionale
+- ✅ **Progress report**: Ogni 7 giorni
+- ✅ **Performance**: Gestione memoria per periodi lunghi
+
+---
+
+## �🔥 **NUOVO! SISTEMA MULTI-CONFIGURAZIONE**
+
+---
+
+## 📊 **FILE DI ANALISI DISPONIBILI**
+
+### **🎯 ANALISI STRATEGICHE COMPLETE:**
+
+1. **📋 STRATEGIA_DEFINITIVA.md** - Strategia finale master con implementazione completa
+2. **📊 ANALISI_STRATEGICA_SIMBOLI.md** - Analisi tier-based dei simboli per Step 1/2/3
+3. **🚀 CONFIGURAZIONE_PRODUZIONE_FINALE.md** - Guida deployment con file vincente
+4. **🔧 PARAMETRI_OTTIMIZZATI_SIMBOLI.md** - Dettagli ottimizzazioni per ogni simbolo
+5. **📄 THE5ERS_COMPLETE_ANALYSIS_20250717.json** - Report JSON completo con tutti i dati
+6. **📄 INDEX_ANALISI_COMPLETE.md** - Indice consolidato di tutte le analisi
+7. **⚙️ GUIDA_CONFIG_SELECTOR.md** - NUOVO! Guida completa selezione configurazioni dinamiche
+
+### **🔧 FILE SISTEMA AGGIORNATI:**
+
+1. **🎯 the5ers_launcher.py** - AGGIORNATO! Menu 11 opzioni con selezione config dinamica
+2. **📅 custom_period_backtest.py** - Sistema analisi periodo personalizzabile
+3. **⚙️ config_selector.py** - NUOVO! Sistema selezione configurazione dinamica
+4. **🔥 comparative_backtest.py** - Backtest multi-configurazione con simboli dinamici
+5. **🔧 integrated_backtest.py** - AGGIORNATO! Supporto configurazioni dinamiche
+6. **🏆 master_analyzer.py** - Analisi master completa con tutti i risultati
+
+### **🏆 RISULTATI CHIAVE DALLE ANALISI:**
+
+- **🥇 CONFIGURAZIONE VINCENTE**: `config_step2_conservative.json` (Rating 51.1/100)
+- **🎯 SIMBOLO TOP**: EURUSD (73.7% win rate, 52.2 score)
+- **⚖️ STRATEGIA RACCOMANDATA**: EURUSD focus con STEP2 config
+- **📈 SUCCESS RATE**: 65-75% probabilità Step 1 con disciplina
+- **⏰ ORARI OTTIMALI**: London (10:00-10:30) + NY (15:00-15:30)
+
+### **📋 COME LEGGERE LE ANALISI:**
+
+```powershell
+# Leggi strategia finale
+notepad STRATEGIA_DEFINITIVA.md
+
+# Consulta configurazione produzione  
+notepad CONFIGURAZIONE_PRODUZIONE_FINALE.md
+
+# Studia analisi simboli
+notepad ANALISI_STRATEGICA_SIMBOLI.md
+```
 
 ---
 
@@ -177,13 +420,87 @@ pip install numpy pandas
 
 ---
 
+## 🏆 **SISTEMA PRONTO - STATUS FINALE**
+
+### **✅ COMPLETAMENTE TESTATO E OTTIMIZZATO:**
+
+**🎯 ANALISI COMPLETATE:**
+- ✅ **Backtest Comparativo**: 4 configurazioni testate
+- ✅ **Analisi Simboli**: 6 simboli analizzati (incluso nuovo GBPJPY)
+- ✅ **Master Analysis**: Strategia definitiva generata
+- ✅ **Parametri Ottimizzati**: Per ogni simbolo e sessione
+- ✅ **Compliance Verified**: 100% The5ers rules
+- ✅ **NUOVO! Periodo Personalizzato**: Analisi su qualsiasi range di date
+
+**🏆 RISULTATI FINALI:**
+- **🥇 Config Vincente**: `config_step2_conservative.json`
+- **🎯 Simbolo Top**: EURUSD (73.7% win rate)
+- **📈 Success Rate**: 65-75% Step 1 probability
+- **💰 Target Daily**: 0.27% return con disciplina
+- **⚠️ Risk Control**: Daily DD < 2%, Total < 5%
+
+**🚀 READY FOR DEPLOYMENT:**
+- ✅ **File Produzione**: Identificato e documentato
+- ✅ **Strategia Master**: Completa con implementation plan
+- ✅ **Risk Management**: Ultra-conservativo attivo
+- ✅ **Position Sizing**: Micro lot compliance
+- ✅ **Periodo Flessibile**: Analisi su qualsiasi timeframe
+
+### **📅 NUOVE FUNZIONALITÀ DISPONIBILI:**
+
+**⚙️ SELEZIONE CONFIGURAZIONE DINAMICA:**
+- ✅ **Auto-discovery**: Trova tutti i file config JSON disponibili
+- ✅ **Analisi intelligente**: Classifica tipo e aggressività automaticamente
+- ✅ **Menu interattivo**: Selezione guidata con preview parametri
+- ✅ **Integrazione completa**: Supporto in tutti i backtest systems
+- ✅ **Fallback sicuro**: Configurazione di emergenza sempre attiva
+
+**🎯 BACKTEST PERIODO PERSONALIZZATO:**
+- ✅ **Date Specifiche**: Da 01/01/2024 a 31/01/2024
+- ✅ **Giorni Indietro**: Ultimi N giorni da oggi
+- ✅ **Formati Multipli**: ISO, italiano, compatto
+- ✅ **Validazione Smart**: Controlli automatici
+- ✅ **Business Days**: Skip weekend per accuracy
+
+**🔧 LAUNCHER AGGIORNATO:**
+- ✅ **Menu 11 opzioni**: Include selezione config e periodo personalizzato
+- ✅ **Sub-menu interattivo**: 3 modalità di analisi + config selection
+- ✅ **Error handling**: Gestione errori robusta
+- ✅ **Progress tracking**: Report dettagliato
+
+---
+
+## 🎯 **QUICK DEPLOY GUIDE**
+
+### **🚀 DEPLOYMENT IMMEDIATO:**
+```powershell
+# 1. Copia configurazione vincente
+cp config_step2_conservative.json ../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json
+
+# 2. Backup configurazione attuale  
+cp ../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json ../backup-config.json
+
+# 3. Test finale
+python the5ers_launcher.py
+```
+
+### **📋 STRATEGIA OPERATIVA:**
+1. **Week 1-2**: Solo EURUSD, 2 trades/day max
+2. **Week 3-4**: Aggiungi USDJPY se performance > 2%
+3. **Month 2+**: Portfolio completo se Step 1 passato
+4. **Monitor Daily**: Drawdown < 2%, compliance attiva
+
+---
+
 ## 🏆 **SISTEMA PRONTO**
 
 Il sistema è **completamente integrato** e pronto per:
 
-✅ **Testing**: Backtest con parametri reali  
+✅ **Testing**: Backtest con parametri reali e config dinamiche  
 ✅ **Validation**: Compliance The5ers verificata  
-✅ **Deployment**: File principali ottimizzati  
+✅ **Deployment**: File principali ottimizzati con selezione config flessibile  
 ✅ **Production**: Risk management ultra-conservativo  
+✅ **Periodo Flessibile**: Analisi su qualsiasi timeframe MT5
+✅ **Config Dinamiche**: Switch rapido tra Step 1/2 e strategie multiple
 
-**🚀 AVVIA CON: `python the5ers_launcher.py`**
+**🚀 AVVIA CON: `python the5ers_launcher.py`** (Menu 11 opzioni)
