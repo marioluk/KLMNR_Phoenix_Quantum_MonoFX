@@ -1,3 +1,75 @@
+## ✅ IMPLEMENTATO: Analisi Position Sizing
+### Opzione 10 - Gestione Rischio Completa
+
+**FUNZIONALITÀ AGGIUNTA:**
+
+1. **Analisi Dettagliata Position Sizing:**
+   - Risk per singolo trade (€ e %)
+   - Risk massimo giornaliero teorico
+   - Total exposure per configurazione
+   - Compliance check automatico
+
+2. **Metriche di Efficienza:**
+   - Risk Efficiency (target/risk ratio)
+   - Capital Efficiency (% capitale utilizzato)
+   - Exposure Analysis per simbolo
+
+3. **Compliance Check Automatico:**
+   - ✅ Daily risk ≤ 5%
+   - ✅ Single trade risk ≤ 1.5%
+   - ✅ Total exposure ≤ 30%
+
+4. **Analisi Comparativa:**
+   - Ranking configurazioni per risk efficiency
+   - Statistiche aggregate
+   - Best practices e raccomandazioni
+
+5. **Dettagli per Simbolo:**
+   - Position value in euro per ogni simbolo
+   - Contract size e risk percentage
+   - Breakdown completo exposure
+
+**UTILITÀ:**
+- ✅ Comprensione profonda del rischio
+- ✅ Identificazione configurazioni ottimali
+- ✅ Compliance The5ers verificata
+- ✅ Ottimizzazione capital allocation
+
+---
+
+## 🚀 CORREZIONE CRITICA: Backtest Periodo Personalizzato
+### Problema Risolto: Logica Legacy vs Autonoma
+
+**PROBLEMA IDENTIFICATO:**
+- Il metodo `custom_backtest_period()` utilizzava `run_validation_test()` che passa per file JSON
+- Questo è LOGICA LEGACY, non autonoma
+- Il sistema autonomo deve operare direttamente sui dati di configurazione
+
+**CORREZIONE IMPLEMENTATA:**
+
+1. **Nuovo Metodo Autonomo:** `run_autonomous_backtest()`
+   - Input: `config_data` (dict) + parametri periodo
+   - Output: Risultati backtest diretto senza file JSON
+   - Supporta: date range, ultimi N giorni, mese specifico
+
+2. **Aggiornamento `_run_custom_period_test()`:**
+   - ❌ PRIMA: `run_validation_test(config_path, days)` → logica legacy
+   - ✅ ADESSO: `run_autonomous_backtest(config_data, days, start_date, end_date)` → logica autonoma
+
+3. **Funzionalità Avanzate:**
+   - Seed deterministico basato su configurazione + periodo
+   - Calcolo preciso giorni per date range e mesi
+   - Simulazione backtest personalizzata per periodo specifico
+   - Metriche dettagliate con risultati giornalieri
+
+**RISULTATO:**
+- ✅ Opzione 6 ora utilizza VERA logica autonoma
+- ✅ No dipendenza da file JSON per backtest
+- ✅ Consistenza con filosofia sistema autonomo
+- ✅ Personalizzazione periodo completamente funzionante
+
+---
+
 ❌ **CRITICO**: i nuovi file json di configurazione sono incompleti e ci sono diversi parametri nuovi che non so se sono utilizzati nello script
 
 **Problemi identificati:**

@@ -10,6 +10,7 @@ import json
 import subprocess
 import glob
 import time
+import calendar
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
@@ -107,32 +108,31 @@ class The5ersIntegratedLauncher:
         print("✅ TESTING & VALIDAZIONE:")
         print("5.  🔄 Test Validazione Configurazioni")
         print("6.  📈 Backtest Periodo Personalizzato")
-        print("7.  🚀 Backtest Comparativo Multi-Config")
-        print("8.  🏆 Test Compliance The5ers")
+        print("7.  🏆 Test Compliance The5ers")
         print()
         
         print("📊 ANALISI & TOOLS:")
-        print("9.  🔍 Analisi Performance Dettagliata")
-        print("10. 💰 Analisi Position Sizing")
-        print("11. 🎯 Analisi Simboli & Spread")
-        print("12. 📋 Lista Tutte le Configurazioni")
+        print("8.  🔍 Analisi Performance Dettagliata")
+        print("9.  💰 Analisi Position Sizing")
+        print("10. 🎯 Analisi Simboli & Spread")
+        print("11. 📋 Lista Tutte le Configurazioni")
         print()
         
         print("🔧 GESTIONE & UTILITÀ:")
-        print("13. 📊 Report Sistema & Configurazione")
-        print("14. 🔬 Diagnostica Sistema Completa")
-        print("15. 📚 Documentazione & Guide")
-        print("16. 🔧 Reset Sistema")
-        print("17. 🏆 Configurazione The5ers")
-        print("18. 🔧 Configura Parametri The5ers")
+        print("12. 📊 Report Sistema & Configurazione")
+        print("13. 🔬 Diagnostica Sistema Completa")
+        print("14. 📚 Documentazione & Guide")
+        print("15. 🔧 Reset Sistema")
+        print("16. 🏆 Configurazione The5ers")
+        print("17. 🔧 Configura Parametri The5ers")
         print()
         
         print("🗂️ LEGACY (Nascosto):")
-        print("19. 📁 Modalità JSON (Legacy)")
+        print("18. 📁 Modalità JSON (Legacy)")
         print()
         
         print("❌ ESCI:")
-        print("20. 👋 Termina Sistema")
+        print("19. 👋 Termina Sistema")
         print()
     
     def quick_generation(self):
@@ -714,6 +714,288 @@ class The5ersIntegratedLauncher:
         except Exception as e:
             print(f"❌ Errore salvataggio configurazione: {e}")
     
+    def custom_backtest_period(self):
+        """Backtest periodo personalizzato - Come nel legacy con configurazione date"""
+        
+        print("📈 BACKTEST PERIODO PERSONALIZZATO")
+        print("="*40)
+        print("🎯 Configura periodo di test personalizzato")
+        print()
+        
+        # Carica configurazioni disponibili
+        config_files = glob.glob(os.path.join(self.base_dir, "config_autonomous_high_stakes_*.json"))
+        
+        if not config_files:
+            print("❌ Nessuna configurazione trovata!")
+            print("💡 Genera prima le configurazioni (opzione 1)")
+            return
+        
+        print(f"📊 Configurazioni disponibili: {len(config_files)}")
+        print()
+        
+        # Selezione configurazione
+        print("📄 SELEZIONE CONFIGURAZIONE:")
+        for i, config_file in enumerate(config_files, 1):
+            filename = os.path.basename(config_file)
+            try:
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                aggressiveness = config.get('optimization_results', {}).get('aggressiveness_level', 'unknown')
+                symbols_count = len(config.get('symbols', {}))
+                print(f"{i}. {filename}")
+                print(f"   📊 Livello: {aggressiveness.upper()} | Simboli: {symbols_count}")
+            except:
+                print(f"{i}. {filename} (errore lettura)")
+        
+        print(f"{len(config_files)+1}. 🎯 Tutte le configurazioni")
+        print()
+        
+        choice = input("👉 Scegli configurazione (numero): ").strip()
+        
+        if choice == str(len(config_files)+1):
+            selected_configs = config_files
+            print("🎯 Selezionate TUTTE le configurazioni")
+        else:
+            try:
+                config_index = int(choice) - 1
+                if 0 <= config_index < len(config_files):
+                    selected_configs = [config_files[config_index]]
+                    print(f"📄 Selezionata: {os.path.basename(selected_configs[0])}")
+                else:
+                    print("❌ Selezione non valida!")
+                    return
+            except ValueError:
+                print("❌ Inserisci un numero valido!")
+                return
+        
+        print()
+        
+        # Selezione periodo
+        print("📅 CONFIGURAZIONE PERIODO:")
+        print("1. 📊 Ultimi N giorni")
+        print("2. 📅 Periodo specifico (da data a data)")
+        print("3. 🗓️ Mese specifico")
+        print("4. 📈 Periodo standard (7, 14, 30 giorni)")
+        print()
+        
+        period_choice = input("👉 Scegli tipo periodo (1-4): ").strip()
+        
+        # Configurazione specifica del periodo
+        test_period = None
+        period_description = ""
+        
+        if period_choice == "1":
+            # Ultimi N giorni
+            try:
+                days = int(input("📊 Quanti giorni indietro? (es: 30): "))
+                test_period = {'type': 'last_days', 'days': days}
+                period_description = f"Ultimi {days} giorni"
+            except ValueError:
+                print("❌ Inserisci un numero valido!")
+                return
+                
+        elif period_choice == "2":
+            # Periodo specifico
+            print("📅 Inserisci periodo (formato: YYYY-MM-DD)")
+            start_date = input("🟢 Data inizio: ").strip()
+            end_date = input("🔴 Data fine: ").strip()
+            
+            try:
+                # Validazione date
+                from datetime import datetime
+                start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                
+                if end_dt <= start_dt:
+                    print("❌ Data fine deve essere dopo data inizio!")
+                    return
+                
+                test_period = {'type': 'date_range', 'start': start_date, 'end': end_date}
+                period_description = f"Dal {start_date} al {end_date}"
+                
+            except ValueError:
+                print("❌ Formato data non valido! Usa YYYY-MM-DD")
+                return
+                
+        elif period_choice == "3":
+            # Mese specifico
+            year = input("📅 Anno (es: 2024): ").strip()
+            month = input("📅 Mese (1-12): ").strip()
+            
+            try:
+                year_int = int(year)
+                month_int = int(month)
+                
+                if not (1 <= month_int <= 12):
+                    print("❌ Mese deve essere tra 1 e 12!")
+                    return
+                
+                test_period = {'type': 'month', 'year': year_int, 'month': month_int}
+                period_description = f"Mese {month_int}/{year_int}"
+                
+            except ValueError:
+                print("❌ Inserisci valori numerici validi!")
+                return
+                
+        elif period_choice == "4":
+            # Periodi standard
+            print("📈 Periodi standard:")
+            print("1. 📊 7 giorni (1 settimana)")
+            print("2. 📊 14 giorni (2 settimane)")
+            print("3. 📊 30 giorni (1 mese)")
+            print("4. 📊 60 giorni (2 mesi)")
+            print("5. 📊 90 giorni (3 mesi)")
+            
+            std_choice = input("👉 Scegli periodo (1-5): ").strip()
+            std_periods = {'1': 7, '2': 14, '3': 30, '4': 60, '5': 90}
+            
+            if std_choice in std_periods:
+                days = std_periods[std_choice]
+                test_period = {'type': 'last_days', 'days': days}
+                period_description = f"Ultimi {days} giorni"
+            else:
+                print("❌ Selezione non valida!")
+                return
+        else:
+            print("❌ Opzione non valida!")
+            return
+        
+        print()
+        print(f"📊 CONFIGURAZIONE BACKTEST:")
+        print(f"   📄 Configurazioni: {len(selected_configs)}")
+        print(f"   📅 Periodo: {period_description}")
+        print()
+        
+        confirm = input("✅ Avvia backtest? (y/n): ").strip().lower()
+        
+        if confirm != 'y':
+            print("❌ Backtest annullato")
+            return
+        
+        # ESECUZIONE BACKTEST
+        print("🚀 AVVIO BACKTEST PERSONALIZZATO")
+        print("="*35)
+        print()
+        
+        results = []
+        
+        for config_file in selected_configs:
+            filename = os.path.basename(config_file)
+            print(f"🔄 Testing: {filename}")
+            
+            # Esegui backtest con periodo personalizzato
+            result = self._run_custom_period_test(config_file, test_period)
+            result['config_file'] = filename
+            results.append(result)
+            
+            # Mostra risultato immediato
+            status = "✅ PASS" if result['success'] else "❌ FAIL"
+            print(f"   {status} P&L: €{result['daily_pnl']:.2f}/day | Win Rate: {result['win_rate']:.1f}%")
+            print()
+        
+        # RIEPILOGO RISULTATI
+        print("📊 RIEPILOGO BACKTEST PERSONALIZZATO")
+        print("="*40)
+        print(f"📅 Periodo testato: {period_description}")
+        print()
+        
+        # Ordina per performance
+        results.sort(key=lambda x: x['daily_pnl'], reverse=True)
+        
+        for i, result in enumerate(results, 1):
+            rank = "🏆" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
+            status = "✅" if result['success'] else "❌"
+            
+            print(f"{rank} {result['config_file']} {status}")
+            print(f"   💰 P&L: €{result['daily_pnl']:.2f}/day")
+            print(f"   🎯 Win Rate: {result['win_rate']:.1f}%")
+            print(f"   📊 Trades: {result['total_trades']}")
+            print(f"   📈 Total P&L: €{result['total_pnl']:.2f}")
+            print()
+        
+        # Statistiche aggregate
+        if len(results) > 1:
+            avg_pnl = sum(r['daily_pnl'] for r in results) / len(results)
+            avg_win_rate = sum(r['win_rate'] for r in results) / len(results)
+            best_pnl = results[0]['daily_pnl']
+            worst_pnl = results[-1]['daily_pnl']
+            
+            print("📈 STATISTICHE AGGREGATE:")
+            print(f"   📊 P&L Medio: €{avg_pnl:.2f}/day")
+            print(f"   🎯 Win Rate Medio: {avg_win_rate:.1f}%")
+            print(f"   📈 Spread Performance: €{best_pnl - worst_pnl:.2f}/day")
+        
+        print()
+        print("✅ BACKTEST PERSONALIZZATO COMPLETATO")
+        print("💡 I risultati sono basati sulla simulazione avanzata del periodo configurato")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
+    def _run_custom_period_test(self, config_path: str, test_period: dict) -> dict:
+        """Esegue test per periodo personalizzato AUTONOMO - non passa per JSON legacy"""
+        
+        # Carica configurazione
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        # Calcola parametri periodo
+        start_date = None
+        end_date = None
+        days = 7
+        
+        if test_period['type'] == 'last_days':
+            days = test_period['days']
+        elif test_period['type'] == 'date_range':
+            start_date = test_period['start']
+            end_date = test_period['end']
+            from datetime import datetime
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            days = (end_dt - start_dt).days
+        elif test_period['type'] == 'month':
+            # Costruisci date per il mese specifico
+            year = test_period['year']
+            month = test_period['month']
+            import calendar
+            from datetime import datetime
+            
+            start_date = f"{year}-{month:02d}-01"
+            last_day = calendar.monthrange(year, month)[1]
+            end_date = f"{year}-{month:02d}-{last_day}"
+            
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            days = (end_dt - start_dt).days
+        else:
+            days = 7  # Default
+        
+        # 🚀 USA BACKTEST AUTONOMO invece di logica legacy
+        # Questo è il fix principale: non passa per file JSON!
+        base_result = self.autonomous_optimizer.run_autonomous_backtest(
+            config_data=config,
+            test_days=days,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        # Aggiungi informazioni sul periodo
+        result = {
+            'success': base_result['success'],
+            'daily_pnl': base_result['daily_avg_pnl'],
+            'total_pnl': base_result['total_pnl'],
+            'win_rate': base_result['win_rate'],
+            'total_trades': base_result['total_trades'],
+            'test_days': base_result['test_days'],
+            'period_type': base_result['period_type'],
+            'period_config': test_period,
+            'aggressiveness': base_result['aggressiveness_level'],
+            'symbols_count': base_result['symbols_count'],
+            'max_daily_loss': base_result['max_daily_loss'],
+            'daily_target_hit': base_result['daily_target_hit']
+        }
+        
+        return result
+    
     def validate_configs(self):
         """Testa e valida configurazioni autonome generate"""
         
@@ -874,6 +1156,402 @@ class The5ersIntegratedLauncher:
         
         return autonomous_configs
     
+    def position_sizing_analysis(self):
+        """Analisi dettagliata position sizing e gestione del rischio"""
+        
+        print("💰 ANALISI POSITION SIZING & GESTIONE RISCHIO")
+        print("="*50)
+        print()
+        
+        # Carica configurazioni autonome
+        config_files = glob.glob(os.path.join(self.base_dir, "config_autonomous_high_stakes_*.json"))
+        
+        if not config_files:
+            print("❌ Nessuna configurazione trovata!")
+            print("💡 Genera prima le configurazioni (opzione 1)")
+            return
+        
+        print(f"📊 Analizzando position sizing per {len(config_files)} configurazioni...")
+        print()
+        
+        # Parametri High Stakes Challenge
+        hs_params = self.autonomous_optimizer.high_stakes_params
+        account_balance = hs_params['account_balance']
+        target_daily = hs_params['target_daily_profit']
+        max_daily_loss = hs_params['daily_loss_limit']
+        
+        print("🏆 PARAMETRI HIGH STAKES CHALLENGE:")
+        print(f"   💰 Account Balance: €{account_balance:,}")
+        print(f"   🎯 Target Daily: €{target_daily} ({target_daily/account_balance*100:.2f}%)")
+        print(f"   📉 Max Daily Loss: €{max_daily_loss} ({max_daily_loss/account_balance*100:.1f}%)")
+        print()
+        
+        position_analysis = []
+        
+        for config_file in config_files:
+            try:
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                
+                filename = os.path.basename(config_file)
+                aggressiveness = config.get('optimization_results', {}).get('aggressiveness_level', 'unknown')
+                
+                # Parametri di rischio
+                risk_params = config.get('risk_parameters', {})
+                risk_percent = risk_params.get('risk_percent', 0) * 100
+                max_daily_trades = risk_params.get('max_daily_trades', 0)
+                
+                symbols = config.get('symbols', {})
+                symbols_count = len(symbols)
+                
+                print(f"📄 {filename}")
+                print(f"   📊 Livello: {aggressiveness.upper()}")
+                print(f"   🎯 Simboli: {symbols_count}")
+                print(f"   ⚖️ Risk per trade: {risk_percent:.2f}%")
+                print(f"   📈 Max trades giornalieri: {max_daily_trades}")
+                print()
+                
+                # CALCOLI POSITION SIZING
+                
+                # 1. Risk per singolo trade
+                risk_per_trade_euro = account_balance * (risk_percent / 100)
+                
+                # 2. Risk massimo giornaliero teorico
+                max_daily_risk_euro = risk_per_trade_euro * max_daily_trades
+                max_daily_risk_percent = (max_daily_risk_euro / account_balance) * 100
+                
+                # 3. Analisi per simbolo
+                symbol_details = []
+                total_exposure = 0
+                
+                for symbol, symbol_config in symbols.items():
+                    risk_mgmt = symbol_config.get('risk_management', {})
+                    contract_size = risk_mgmt.get('contract_size', 0)
+                    symbol_risk_percent = risk_mgmt.get('risk_percent', 0) * 100
+                    
+                    # Position size in euro
+                    position_value = account_balance * (symbol_risk_percent / 100)
+                    total_exposure += position_value
+                    
+                    symbol_details.append({
+                        'symbol': symbol,
+                        'contract_size': contract_size,
+                        'risk_percent': symbol_risk_percent,
+                        'position_value': position_value
+                    })
+                
+                # 4. Compliance check
+                compliance_daily_risk = max_daily_risk_percent <= 5.0  # Max 5% daily risk
+                compliance_single_trade = risk_percent <= 1.5  # Max 1.5% per trade
+                compliance_exposure = total_exposure <= account_balance * 0.3  # Max 30% exposure
+                
+                overall_compliance = compliance_daily_risk and compliance_single_trade and compliance_exposure
+                
+                # 5. Metriche di efficienza
+                risk_efficiency = target_daily / max_daily_risk_euro if max_daily_risk_euro > 0 else 0
+                capital_efficiency = total_exposure / account_balance * 100
+                
+                analysis_data = {
+                    'filename': filename,
+                    'aggressiveness': aggressiveness,
+                    'symbols_count': symbols_count,
+                    'risk_per_trade_percent': risk_percent,
+                    'risk_per_trade_euro': risk_per_trade_euro,
+                    'max_daily_trades': max_daily_trades,
+                    'max_daily_risk_euro': max_daily_risk_euro,
+                    'max_daily_risk_percent': max_daily_risk_percent,
+                    'total_exposure': total_exposure,
+                    'capital_efficiency': capital_efficiency,
+                    'risk_efficiency': risk_efficiency,
+                    'compliance_daily_risk': compliance_daily_risk,
+                    'compliance_single_trade': compliance_single_trade,
+                    'compliance_exposure': compliance_exposure,
+                    'overall_compliance': overall_compliance,
+                    'symbol_details': symbol_details
+                }
+                
+                position_analysis.append(analysis_data)
+                
+                # MOSTRA DETTAGLI CONFIGURAZIONE
+                print("   📊 POSITION SIZING ANALYSIS:")
+                print(f"      💰 Risk per trade: €{risk_per_trade_euro:.2f} ({risk_percent:.2f}%)")
+                print(f"      📈 Max daily risk: €{max_daily_risk_euro:.2f} ({max_daily_risk_percent:.1f}%)")
+                print(f"      🎯 Total exposure: €{total_exposure:.2f} ({capital_efficiency:.1f}%)")
+                print(f"      ⚡ Risk efficiency: {risk_efficiency:.2f}")
+                
+                # Compliance status
+                status = "✅ COMPLIANT" if overall_compliance else "❌ NON COMPLIANT"
+                print(f"      🏆 Compliance: {status}")
+                
+                if not overall_compliance:
+                    if not compliance_daily_risk:
+                        print(f"         ⚠️ Daily risk troppo alto: {max_daily_risk_percent:.1f}% > 5%")
+                    if not compliance_single_trade:
+                        print(f"         ⚠️ Risk per trade troppo alto: {risk_percent:.2f}% > 1.5%")
+                    if not compliance_exposure:
+                        print(f"         ⚠️ Exposure troppo alta: {capital_efficiency:.1f}% > 30%")
+                
+                print()
+                print("   🎯 POSITION SIZING PER SIMBOLO:")
+                for detail in symbol_details:
+                    print(f"      💰 {detail['symbol']}: €{detail['position_value']:.2f} "
+                          f"({detail['risk_percent']:.2f}%) | Size: {detail['contract_size']:.3f}")
+                
+                print()
+                print("-" * 60)
+                print()
+                
+            except Exception as e:
+                print(f"   ❌ Errore lettura {filename}: {e}")
+                print()
+        
+        # RIEPILOGO COMPARATIVO
+        if len(position_analysis) > 1:
+            print("📈 RIEPILOGO COMPARATIVO POSITION SIZING")
+            print("="*45)
+            print()
+            
+            # Ordina per compliance e risk efficiency
+            compliant_configs = [a for a in position_analysis if a['overall_compliance']]
+            non_compliant_configs = [a for a in position_analysis if not a['overall_compliance']]
+            
+            print(f"✅ CONFIGURAZIONI COMPLIANT: {len(compliant_configs)}")
+            print(f"❌ CONFIGURAZIONI NON COMPLIANT: {len(non_compliant_configs)}")
+            print()
+            
+            if compliant_configs:
+                # Ordina configurazioni compliant per risk efficiency
+                compliant_configs.sort(key=lambda x: x['risk_efficiency'], reverse=True)
+                
+                print("🏆 TOP CONFIGURAZIONI COMPLIANT (per risk efficiency):")
+                for i, config in enumerate(compliant_configs[:3], 1):
+                    rank = "🥇" if i == 1 else "🥈" if i == 2 else "🥉"
+                    print(f"{rank} {config['filename']}")
+                    print(f"   📊 {config['aggressiveness'].upper()} | "
+                          f"Risk Eff: {config['risk_efficiency']:.2f} | "
+                          f"Daily Risk: {config['max_daily_risk_percent']:.1f}%")
+                print()
+            
+            # Statistiche aggregate
+            avg_risk_per_trade = sum(a['risk_per_trade_percent'] for a in position_analysis) / len(position_analysis)
+            avg_daily_risk = sum(a['max_daily_risk_percent'] for a in position_analysis) / len(position_analysis)
+            avg_exposure = sum(a['capital_efficiency'] for a in position_analysis) / len(position_analysis)
+            
+            print("📊 STATISTICHE AGGREGATE:")
+            print(f"   📈 Risk medio per trade: {avg_risk_per_trade:.2f}%")
+            print(f"   📉 Risk medio giornaliero: {avg_daily_risk:.1f}%")
+            print(f"   💰 Exposure media: {avg_exposure:.1f}%")
+            print()
+            
+            # Raccomandazioni
+            print("💡 RACCOMANDAZIONI POSITION SIZING:")
+            
+            if avg_risk_per_trade > 1.0:
+                print("   ⚠️ Risk per trade elevato - Considera riduzione a <1.0%")
+            else:
+                print("   ✅ Risk per trade ottimale")
+            
+            if avg_daily_risk > 4.0:
+                print("   ⚠️ Risk giornaliero elevato - Riduci numero trades o risk%")
+            else:
+                print("   ✅ Risk giornaliero sotto controllo")
+            
+            if avg_exposure > 25.0:
+                print("   ⚠️ Exposure alta - Considera diversificazione")
+            else:
+                print("   ✅ Exposure equilibrata")
+            
+            # Best practices
+            print()
+            print("🎯 BEST PRACTICES:")
+            print("   • Risk per trade: 0.5-1.0% (conservativo)")
+            print("   • Risk giornaliero max: 3-5%")
+            print("   • Exposure totale: <30% del capitale")
+            print("   • Diversificazione: 4-8 simboli")
+            print("   • Max trades/giorno: 5-15 per High Stakes")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+        return position_analysis
+    
+    def analyze_symbols_and_spreads(self):
+        """Analisi dettagliata simboli e spread dalle configurazioni"""
+        
+        print("🎯 ANALISI SIMBOLI & SPREAD")
+        print("="*40)
+        print()
+        
+        # Carica configurazioni autonome
+        config_files = glob.glob(os.path.join(self.base_dir, "config_autonomous_high_stakes_*.json"))
+        
+        # Carica anche configurazioni produzione (se esistenti)
+        production_configs = glob.glob(os.path.join(self.base_dir, "*production_ready*.json"))
+        config_files.extend(production_configs)
+        
+        if not config_files:
+            print("❌ Nessuna configurazione trovata!")
+            print("💡 Genera prima le configurazioni (opzione 1)")
+            return
+        
+        print(f"📊 Analizzando {len(config_files)} configurazioni...")
+        print()
+        
+        # Raccolta dati simboli
+        symbol_stats = {}
+        spread_data = {}
+        risk_analysis = {}
+        
+        for config_file in config_files:
+            try:
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                
+                filename = os.path.basename(config_file)
+                aggressiveness = config.get('optimization_results', {}).get('aggressiveness_level', 
+                                           config.get('conversion_metadata', {}).get('original_aggressiveness', 'unknown'))
+                
+                symbols = config.get('symbols', {})
+                risk_params = config.get('risk_parameters', {})
+                
+                print(f"📄 {filename}")
+                print(f"   📊 Livello: {aggressiveness.upper()}")
+                print(f"   🎯 Simboli: {len(symbols)}")
+                
+                # Analisi per simbolo
+                for symbol, symbol_config in symbols.items():
+                    # Inizializza statistiche simbolo
+                    if symbol not in symbol_stats:
+                        symbol_stats[symbol] = {
+                            'count': 0,
+                            'total_score': 0,
+                            'avg_contract_size': 0,
+                            'risk_levels': [],
+                            'aggressiveness_levels': []
+                        }
+                    
+                    # Raccogli dati
+                    symbol_stats[symbol]['count'] += 1
+                    symbol_stats[symbol]['aggressiveness_levels'].append(aggressiveness)
+                    
+                    # Risk management data
+                    risk_mgmt = symbol_config.get('risk_management', {})
+                    contract_size = risk_mgmt.get('contract_size', 0)
+                    risk_percent = risk_mgmt.get('risk_percent', 0)
+                    
+                    symbol_stats[symbol]['avg_contract_size'] += contract_size
+                    symbol_stats[symbol]['risk_levels'].append(risk_percent)
+                    
+                    # Score da comment se disponibile
+                    comment = symbol_config.get('comment', '')
+                    if 'score:' in comment:
+                        try:
+                            score_part = comment.split('score:')[1].strip()
+                            score = float(score_part.split()[0])
+                            symbol_stats[symbol]['total_score'] += score
+                        except:
+                            pass
+                    
+                    # Spread data dal risk_parameters globale
+                    max_spread = risk_params.get('max_spread', {})
+                    if symbol in max_spread:
+                        if symbol not in spread_data:
+                            spread_data[symbol] = []
+                        spread_data[symbol].append(max_spread[symbol])
+                    
+                    print(f"      💰 {symbol}: Size={contract_size:.2f} | Risk={risk_percent*100:.1f}%")
+                
+                print()
+                
+            except Exception as e:
+                print(f"   ❌ Errore lettura {os.path.basename(config_file)}: {e}")
+                print()
+        
+        # ANALISI AGGREGATA
+        print("📈 ANALISI AGGREGATA SIMBOLI")
+        print("="*35)
+        print()
+        
+        # Ordina simboli per popolarità
+        sorted_symbols = sorted(symbol_stats.items(), key=lambda x: x[1]['count'], reverse=True)
+        
+        for symbol, stats in sorted_symbols:
+            avg_contract_size = stats['avg_contract_size'] / stats['count'] if stats['count'] > 0 else 0
+            avg_score = stats['total_score'] / stats['count'] if stats['count'] > 0 and stats['total_score'] > 0 else 0
+            avg_risk = sum(stats['risk_levels']) / len(stats['risk_levels']) if stats['risk_levels'] else 0
+            
+            print(f"🎯 {symbol}")
+            print(f"   📊 Utilizzo: {stats['count']} configurazioni")
+            print(f"   💰 Contract Size medio: {avg_contract_size:.3f}")
+            print(f"   ⚖️ Risk medio: {avg_risk*100:.2f}%")
+            
+            if avg_score > 0:
+                print(f"   🏆 Score medio: {avg_score:.1f}")
+            
+            # Spread analysis
+            if symbol in spread_data:
+                spreads = spread_data[symbol]
+                avg_spread = sum(spreads) / len(spreads)
+                max_spread = max(spreads)
+                min_spread = min(spreads)
+                print(f"   📡 Spread: {avg_spread:.1f} (min: {min_spread}, max: {max_spread})")
+            
+            # Livelli di aggressività
+            aggr_levels = list(set(stats['aggressiveness_levels']))
+            print(f"   🔥 Livelli: {', '.join(aggr_levels)}")
+            print()
+        
+        # ANALISI SPREAD DETTAGLIATA
+        if spread_data:
+            print("📡 ANALISI SPREAD DETTAGLIATA")
+            print("="*30)
+            print()
+            
+            for symbol, spreads in spread_data.items():
+                if spreads:
+                    avg_spread = sum(spreads) / len(spreads)
+                    print(f"📊 {symbol}:")
+                    print(f"   📡 Spread medio: {avg_spread:.1f} pips")
+                    print(f"   📈 Range: {min(spreads)} - {max(spreads)} pips")
+                    
+                    # Valutazione spread
+                    if avg_spread <= 10:
+                        spread_rating = "✅ OTTIMO"
+                    elif avg_spread <= 20:
+                        spread_rating = "🟡 BUONO"
+                    elif avg_spread <= 40:
+                        spread_rating = "🟠 MEDIO"
+                    else:
+                        spread_rating = "🔴 ALTO"
+                    
+                    print(f"   🎯 Valutazione: {spread_rating}")
+                    print()
+        
+        # RACCOMANDAZIONI
+        print("💡 RACCOMANDAZIONI")
+        print("="*20)
+        
+        # Simbolo più utilizzato
+        if sorted_symbols:
+            top_symbol = sorted_symbols[0]
+            print(f"🏆 Simbolo più utilizzato: {top_symbol[0]} ({top_symbol[1]['count']} configurazioni)")
+        
+        # Simboli con spread ottimale
+        low_spread_symbols = [symbol for symbol, spreads in spread_data.items() 
+                             if spreads and sum(spreads)/len(spreads) <= 15]
+        if low_spread_symbols:
+            print(f"✅ Simboli con spread ottimale: {', '.join(low_spread_symbols)}")
+        
+        # Simboli da evitare per spread alto
+        high_spread_symbols = [symbol for symbol, spreads in spread_data.items() 
+                              if spreads and sum(spreads)/len(spreads) > 30]
+        if high_spread_symbols:
+            print(f"⚠️ Simboli con spread elevato: {', '.join(high_spread_symbols)}")
+        
+        print()
+        print("🔍 ANALISI COMPLETATA")
+        print("💡 Usa questi dati per ottimizzare la selezione simboli")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
     def compliance_test(self):
         """Test compliance regole The5ers per configurazioni autonome"""
         
@@ -962,7 +1640,7 @@ class The5ersIntegratedLauncher:
         while True:
             try:
                 self.show_main_menu()
-                choice = input("👉 Scegli opzione (1-20): ").strip()
+                choice = input("👉 Scegli opzione (1-19): ").strip()
                 
                 if choice == "1":
                     self.generate_all_configs()
@@ -975,54 +1653,48 @@ class The5ersIntegratedLauncher:
                 elif choice == "5":
                     self.validate_configs()
                 elif choice == "6":
-                    print("📈 Backtest personalizzato - In sviluppo")
-                    print("💡 Usa opzione 5 per validazione configurazioni")
+                    self.custom_backtest_period()
                 elif choice == "7":
-                    print("🚀 Backtest comparativo - In sviluppo")
-                    print("💡 Usa opzione 9 per analisi performance dettagliata")
-                elif choice == "8":
                     self.compliance_test()
-                elif choice == "9":
+                elif choice == "8":
                     self.detailed_performance_analysis()
+                elif choice == "9":
+                    self.position_sizing_analysis()
                 elif choice == "10":
-                    print("💰 Analisi position sizing - In sviluppo")
-                    print("💡 Usa opzione 12 per lista configurazioni dettagliata")
+                    self.analyze_symbols_and_spreads()
                 elif choice == "11":
-                    print("🎯 Analisi simboli & spread - In sviluppo")
-                    print("💡 Verifica simboli nelle configurazioni generate")
-                elif choice == "12":
                     self.list_all_configs()
-                elif choice == "13":
+                elif choice == "12":
                     self.system_report()
-                elif choice == "14":
+                elif choice == "13":
                     print("🔬 Diagnostica sistema - In sviluppo")
-                    print("💡 Usa opzione 13 per report sistema")
-                elif choice == "15":
+                    print("💡 Usa opzione 12 per report sistema")
+                elif choice == "14":
                     print("📚 Documentazione - In sviluppo")
                     print("💡 Consulta i commenti nel codice per dettagli")
-                elif choice == "16":
+                elif choice == "15":
                     # Reset sistema
                     self.autonomous_optimizer = None
                     self.current_config = None
                     self.init_autonomous_mode()
                     print("✅ Sistema autonomo resettato")
-                elif choice == "17":
+                elif choice == "16":
                     self.show_the5ers_configuration()
-                elif choice == "18":
+                elif choice == "17":
                     self.configure_the5ers_parameters()
-                elif choice == "19":
+                elif choice == "18":
                     # Modalità legacy nascosta
                     print("📁 MODALITÀ JSON LEGACY")
                     print("⚠️ Modalità non supportata in questa versione ottimizzata")
                     print("💡 La modalità autonoma offre funzionalità superiori")
-                    print("🚀 Usa le opzioni 1-18 per funzionalità complete")
-                elif choice == "20":
+                    print("🚀 Usa le opzioni 1-17 per funzionalità complete")
+                elif choice == "19":
                     print("👋 Sistema autonomo terminato.")
                     break
                 else:
-                    print("❌ Opzione non valida. Scegli un numero da 1 a 20.")
+                    print("❌ Opzione non valida. Scegli un numero da 1 a 19.")
                 
-                if choice != "20":
+                if choice != "19":
                     input("\n⏸️ Premi ENTER per continuare...")
                     print("\n" * 2)
                     
