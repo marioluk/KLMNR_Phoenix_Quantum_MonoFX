@@ -204,33 +204,6 @@
                     "sell_signal": 0.35
                 }
             }
-        },
-        "GBPJPY": {
-            "risk_management": {
-                "contract_size": 0.01,
-                "min_sl_distance_pips": 35,
-                "base_sl_pips": 55,
-                "profit_multiplier": 2.0,
-                "risk_percent": 0.0012,
-                "trailing_stop": {
-                    "activation_pips": 100,
-                    "step_pips": 50
-                }
-            },
-            "trading_hours": [
-                "08:00-17:00"
-            ],
-            "comment": "Cross currency - medium volatility",
-            "quantum_params_override": {
-                "buffer_size": 400,
-                "spin_window": 60,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.60,
-                    "sell_signal": 0.40
-                }
-            }
         }
     },
     "THE5ERS_specific": {

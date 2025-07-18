@@ -343,14 +343,14 @@ class QuantumEngine:
         last_close = self.position_cooldown.get(symbol, 0)
         position_cooldown = self.config.get('risk_parameters', {}).get('position_cooldown', 1800)
         if time.time() - last_close < position_cooldown:
-            logger.debug(f"Cooldown normale attivo per {symbol} - {position_cooldown - (time.time() - last_close):.0f}s rimanenti")
+            logger.info(f"Cooldown normale attivo per {symbol} - {position_cooldown - (time.time() - last_close):.0f}s rimanenti")
             return True
             
         # 2. Controlla cooldown segnali (900s)
         signal_cooldown = self.config.get('quantum_params', {}).get('signal_cooldown', 900)
         last_signal = self.last_signal_time.get(symbol, 0)
         if time.time() - last_signal < signal_cooldown:
-            logger.debug(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
+            logger.info(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
             return True
             
         return False
@@ -2327,9 +2327,13 @@ class QuantumTradingSystem:
             buffer_size = len(self.engine.tick_buffer.get(symbol, []))
             min_samples = self.engine.min_spin_samples
             
+            # non funziona stampa solo il primo simbolo EURUSD, non c'è un loop lo commento
+            """
             logger.info(f"🔍 TRADE STATUS {symbol}: can_trade={can_trade}, trading_hours={trading_hours}, "
                         f"has_position={has_position}, daily_trades={daily_count}/{daily_limit}, "
                         f"buffer={buffer_size}/{min_samples}")
+            """
+
                         
         except Exception as e:
             logger.error(f"Errore debug_trade_status per {symbol}: {str(e)}")
