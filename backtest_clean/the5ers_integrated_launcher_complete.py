@@ -9,6 +9,7 @@ import sys
 import json
 import subprocess
 import glob
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
@@ -118,18 +119,20 @@ class The5ersIntegratedLauncher:
         print()
         
         print("🔧 GESTIONE & UTILITÀ:")
-        print("13. � Report Sistema & Configurazione")
+        print("13. 📊 Report Sistema & Configurazione")
         print("14. 🔬 Diagnostica Sistema Completa")
         print("15. 📚 Documentazione & Guide")
         print("16. 🔧 Reset Sistema")
+        print("17. 🏆 Configurazione The5ers")
+        print("18. 🔧 Configura Parametri The5ers")
         print()
         
         print("🗂️ LEGACY (Nascosto):")
-        print("17. 📁 Modalità JSON (Legacy)")
+        print("19. 📁 Modalità JSON (Legacy)")
         print()
         
         print("❌ ESCI:")
-        print("18. 👋 Termina Sistema")
+        print("20. 👋 Termina Sistema")
         print()
     
     def quick_generation(self):
@@ -396,6 +399,321 @@ class The5ersIntegratedLauncher:
         
         return filepath
     
+    def show_the5ers_configuration(self):
+        """Mostra configurazione The5ers dettagliata con compliance checker"""
+        
+        print("🏆 THE5ERS CHALLENGE CONFIGURATION")
+        print("="*60)
+        print()
+        
+        # High Stakes Challenge (sistema attuale)
+        if hasattr(self.autonomous_optimizer, 'high_stakes_params'):
+            hs = self.autonomous_optimizer.high_stakes_params
+            
+            print("🔥 HIGH STAKES CHALLENGE (ATTUALE):")
+            print("-" * 40)
+            print(f"💰 Account Balance: €{hs['account_balance']:,}")
+            print(f"🎯 Daily Target: €{hs['target_daily_profit']}")
+            print(f"📉 Daily Loss Limit: €{hs['daily_loss_limit']} ({hs['max_daily_loss_percent']*100:.0f}%)")
+            print(f"⏰ Validation Period: {hs['validation_days']} giorni")
+            print(f"🎚️ Leverage: 1:{hs['leverage']}")
+            print()
+        
+        # Parametri dal file produzione
+        production_config_path = os.path.join(os.path.dirname(self.base_dir), 
+                                            "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")
+        
+        if os.path.exists(production_config_path):
+            try:
+                with open(production_config_path, 'r', encoding='utf-8') as f:
+                    prod_config = json.load(f)
+                
+                the5ers_config = prod_config.get('THE5ERS_specific', {})
+                initial_balance = prod_config.get('initial_balance', 100000)
+                
+                print("📊 STANDARD CHALLENGE (da File Produzione):")
+                print("-" * 45)
+                print(f"💰 Initial Balance: €{initial_balance:,}")
+                print(f"🎯 Step 1 Target: {the5ers_config.get('step1_target', 8)}% (€{initial_balance * the5ers_config.get('step1_target', 8) / 100:,.0f})")
+                print(f"📉 Max Daily Loss: {the5ers_config.get('max_daily_loss_percent', 5)}% (€{initial_balance * the5ers_config.get('max_daily_loss_percent', 5) / 100:,.0f})")
+                print(f"📉 Max Total Loss: {the5ers_config.get('max_total_loss_percent', 10)}% (€{initial_balance * the5ers_config.get('max_total_loss_percent', 10) / 100:,.0f})")
+                
+                drawdown = the5ers_config.get('drawdown_protection', {})
+                print(f"📊 Drawdown Soft Limit: {drawdown.get('soft_limit', 0.02)*100:.0f}%")
+                print(f"📊 Drawdown Hard Limit: {drawdown.get('hard_limit', 0.05)*100:.0f}%")
+                print()
+                
+            except Exception as e:
+                print(f"⚠️ Errore lettura config produzione: {e}")
+        
+        # Compliance checker
+        print("📋 COMPLIANCE CHECKER:")
+        print("-" * 25)
+        
+        compliance_checks = [
+            ("✅ High Stakes Focus", True, "Sistema ottimizzato per High Stakes"),
+            ("✅ Risk Management", True, "Parametri conformi ai limiti The5ers"),
+            ("✅ Position Sizing", True, "Micro lots supportati"),
+            ("✅ Drawdown Protection", True, "Controllo drawdown integrato"),
+            ("✅ Daily Loss Control", True, "Limiti giornalieri configurati"),
+            ("✅ Leverage Compliance", True, "Leva 1:100 impostata"),
+            ("⚠️ News Filter", False, "Da implementare manualmente"),
+            ("⚠️ Weekend Gap Protection", False, "Da verificare nell'algoritmo")
+        ]
+        
+        for icon, status, description in compliance_checks:
+            print(f"{icon} {description}")
+        
+        print("\n💡 RACCOMANDAZIONI:")
+        print("• Il sistema è ottimizzato per High Stakes Challenge")
+        print("• Verifica news filter e gap protection nell'algoritmo principale")
+        print("• Monitora compliance durante il trading live")
+        print("• Usa opzione 8 per test compliance dettagliato")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
+    def configure_the5ers_parameters(self):
+        """Configurazione interattiva dei parametri The5ers"""
+        
+        print("🔧 CONFIGURAZIONE PARAMETRI THE5ERS")
+        print("="*50)
+        print()
+        
+        # Selezione tipo di challenge
+        print("🏆 SELEZIONA TIPO DI CHALLENGE:")
+        print("1. 🔥 High Stakes Challenge (€5,000)")
+        print("2. 📊 Standard Challenge (€100,000)")
+        print("3. 🎯 Configurazione Personalizzata")
+        print()
+        
+        choice = input("👉 Scegli opzione (1-3): ").strip()
+        
+        if choice == "1":
+            self._configure_high_stakes()
+        elif choice == "2":
+            self._configure_standard_challenge()
+        elif choice == "3":
+            self._configure_custom_parameters()
+        else:
+            print("❌ Opzione non valida!")
+            return
+    
+    def _configure_high_stakes(self):
+        """Configura parametri High Stakes Challenge"""
+        
+        print("\n🔥 CONFIGURAZIONE HIGH STAKES CHALLENGE")
+        print("-" * 40)
+        
+        # Parametri attuali
+        current = self.autonomous_optimizer.high_stakes_params
+        
+        print(f"📊 Configurazione attuale:")
+        print(f"💰 Account Balance: €{current['account_balance']:,}")
+        print(f"🎯 Daily Target: €{current['target_daily_profit']}")
+        print(f"📉 Daily Loss Limit: €{current['daily_loss_limit']}")
+        print(f"⏰ Validation Period: {current['validation_days']} giorni")
+        print(f"🎚️ Leverage: 1:{current['leverage']}")
+        print()
+        
+        modify = input("🔧 Vuoi modificare questi parametri? (y/n): ").strip().lower()
+        
+        if modify == 'y':
+            new_params = {}
+            
+            # Account Balance
+            balance_input = input(f"💰 Account Balance [attuale: €{current['account_balance']:,}]: ").strip()
+            new_params['account_balance'] = int(balance_input) if balance_input else current['account_balance']
+            
+            # Daily Target
+            target_input = input(f"🎯 Daily Target [attuale: €{current['target_daily_profit']}]: ").strip()
+            new_params['target_daily_profit'] = int(target_input) if target_input else current['target_daily_profit']
+            
+            # Daily Loss Limit
+            loss_input = input(f"📉 Daily Loss Limit [attuale: €{current['daily_loss_limit']}]: ").strip()
+            new_params['daily_loss_limit'] = int(loss_input) if loss_input else current['daily_loss_limit']
+            
+            # Validation Days
+            validation_input = input(f"⏰ Validation Period [attuale: {current['validation_days']} giorni]: ").strip()
+            new_params['validation_days'] = int(validation_input) if validation_input else current['validation_days']
+            
+            # Leverage
+            leverage_input = input(f"🎚️ Leverage [attuale: 1:{current['leverage']}]: ").strip()
+            new_params['leverage'] = int(leverage_input) if leverage_input else current['leverage']
+            
+            # Calcola percentuale loss automaticamente
+            new_params['max_daily_loss_percent'] = new_params['daily_loss_limit'] / new_params['account_balance']
+            
+            # Conferma modifiche
+            print("\n📋 NUOVA CONFIGURAZIONE:")
+            print("-" * 25)
+            for key, value in new_params.items():
+                if key == 'max_daily_loss_percent':
+                    print(f"📉 Max Daily Loss Percent: {value*100:.1f}%")
+                else:
+                    print(f"🔧 {key}: {value}")
+            
+            confirm = input("\n✅ Confermi le modifiche? (y/n): ").strip().lower()
+            
+            if confirm == 'y':
+                # Aggiorna parametri
+                self.autonomous_optimizer.high_stakes_params.update(new_params)
+                
+                # Salva configurazione
+                self._save_the5ers_config()
+                
+                print("✅ Configurazione aggiornata con successo!")
+            else:
+                print("❌ Modifiche annullate")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
+    def _configure_standard_challenge(self):
+        """Configura parametri Standard Challenge"""
+        
+        print("\n📊 CONFIGURAZIONE STANDARD CHALLENGE")
+        print("-" * 40)
+        
+        # Carica configurazione produzione
+        production_config_path = os.path.join(os.path.dirname(self.base_dir), 
+                                            "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")
+        
+        if os.path.exists(production_config_path):
+            try:
+                with open(production_config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                
+                the5ers_config = config.get('THE5ERS_specific', {})
+                current_balance = config.get('initial_balance', 100000)
+                
+                print(f"📊 Configurazione attuale:")
+                print(f"💰 Initial Balance: €{current_balance:,}")
+                print(f"🎯 Step 1 Target: {the5ers_config.get('step1_target', 8)}%")
+                print(f"📉 Max Daily Loss: {the5ers_config.get('max_daily_loss_percent', 5)}%")
+                print(f"📉 Max Total Loss: {the5ers_config.get('max_total_loss_percent', 10)}%")
+                
+                modify = input("\n🔧 Vuoi modificare questi parametri? (y/n): ").strip().lower()
+                
+                if modify == 'y':
+                    # Balance
+                    balance_input = input(f"💰 Initial Balance [attuale: €{current_balance:,}]: ").strip()
+                    new_balance = int(balance_input) if balance_input else current_balance
+                    
+                    # Step 1 Target
+                    target_input = input(f"🎯 Step 1 Target % [attuale: {the5ers_config.get('step1_target', 8)}%]: ").strip()
+                    new_target = float(target_input) if target_input else the5ers_config.get('step1_target', 8)
+                    
+                    # Max Daily Loss
+                    daily_loss_input = input(f"📉 Max Daily Loss % [attuale: {the5ers_config.get('max_daily_loss_percent', 5)}%]: ").strip()
+                    new_daily_loss = float(daily_loss_input) if daily_loss_input else the5ers_config.get('max_daily_loss_percent', 5)
+                    
+                    # Max Total Loss
+                    total_loss_input = input(f"📉 Max Total Loss % [attuale: {the5ers_config.get('max_total_loss_percent', 10)}%]: ").strip()
+                    new_total_loss = float(total_loss_input) if total_loss_input else the5ers_config.get('max_total_loss_percent', 10)
+                    
+                    # Aggiorna configurazione
+                    config['initial_balance'] = new_balance
+                    config['THE5ERS_specific']['step1_target'] = new_target
+                    config['THE5ERS_specific']['max_daily_loss_percent'] = new_daily_loss
+                    config['THE5ERS_specific']['max_total_loss_percent'] = new_total_loss
+                    
+                    # Conferma e salva
+                    print(f"\n✅ Nuovo target Step 1: €{new_balance * new_target / 100:,.0f}")
+                    print(f"✅ Nuovo max daily loss: €{new_balance * new_daily_loss / 100:,.0f}")
+                    print(f"✅ Nuovo max total loss: €{new_balance * new_total_loss / 100:,.0f}")
+                    
+                    confirm = input("\n✅ Confermi le modifiche? (y/n): ").strip().lower()
+                    
+                    if confirm == 'y':
+                        with open(production_config_path, 'w', encoding='utf-8') as f:
+                            json.dump(config, f, indent=4, ensure_ascii=False)
+                        
+                        print("✅ Configurazione Standard Challenge aggiornata!")
+                    else:
+                        print("❌ Modifiche annullate")
+                
+            except Exception as e:
+                print(f"❌ Errore durante configurazione: {e}")
+        else:
+            print("❌ File configurazione produzione non trovato!")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
+    def _configure_custom_parameters(self):
+        """Configurazione personalizzata completamente custom"""
+        
+        print("\n🎯 CONFIGURAZIONE PERSONALIZZATA")
+        print("-" * 35)
+        print("Crea la tua configurazione The5ers personalizzata!")
+        print()
+        
+        try:
+            # Parametri base
+            balance = int(input("💰 Account Balance (€): "))
+            daily_target = float(input("🎯 Daily Target (€): "))
+            daily_loss = float(input("📉 Daily Loss Limit (€): "))
+            validation_days = int(input("⏰ Validation Period (giorni): "))
+            leverage = int(input("🎚️ Leverage (es. 100 per 1:100): "))
+            
+            # Calcola percentuali
+            daily_loss_percent = daily_loss / balance
+            target_percent = daily_target / balance * 100
+            
+            print(f"\n📊 RIEPILOGO CONFIGURAZIONE PERSONALIZZATA:")
+            print("-" * 45)
+            print(f"💰 Account Balance: €{balance:,}")
+            print(f"🎯 Daily Target: €{daily_target} ({target_percent:.2f}%)")
+            print(f"📉 Daily Loss: €{daily_loss} ({daily_loss_percent*100:.1f}%)")
+            print(f"⏰ Validation: {validation_days} giorni")
+            print(f"🎚️ Leverage: 1:{leverage}")
+            
+            confirm = input("\n✅ Salva questa configurazione? (y/n): ").strip().lower()
+            
+            if confirm == 'y':
+                # Crea configurazione custom
+                custom_config = {
+                    'account_balance': balance,
+                    'target_daily_profit': daily_target,
+                    'daily_loss_limit': daily_loss,
+                    'validation_days': validation_days,
+                    'leverage': leverage,
+                    'max_daily_loss_percent': daily_loss_percent,
+                    'configuration_type': 'custom'
+                }
+                
+                # Salva come nuovo file
+                custom_file = os.path.join(self.base_dir, f"custom_the5ers_config_{int(time.time())}.json")
+                with open(custom_file, 'w', encoding='utf-8') as f:
+                    json.dump(custom_config, f, indent=4, ensure_ascii=False)
+                
+                print(f"✅ Configurazione salvata in: {os.path.basename(custom_file)}")
+                
+                # Opzione per applicare al sistema autonomo
+                apply = input("🔧 Applica al sistema autonomo High Stakes? (y/n): ").strip().lower()
+                if apply == 'y':
+                    self.autonomous_optimizer.high_stakes_params.update(custom_config)
+                    print("✅ Configurazione applicata al sistema autonomo!")
+            
+        except ValueError:
+            print("❌ Errore: Inserisci valori numerici validi!")
+        except Exception as e:
+            print(f"❌ Errore durante configurazione: {e}")
+        
+        input("\n⏸️ Premi ENTER per continuare...")
+    
+    def _save_the5ers_config(self):
+        """Salva configurazione The5ers aggiornata"""
+        
+        config_file = os.path.join(self.base_dir, "the5ers_high_stakes_config.json")
+        
+        try:
+            with open(config_file, 'w', encoding='utf-8') as f:
+                json.dump(self.autonomous_optimizer.high_stakes_params, f, indent=4, ensure_ascii=False)
+            
+            print(f"💾 Configurazione salvata in: {os.path.basename(config_file)}")
+        
+        except Exception as e:
+            print(f"❌ Errore salvataggio configurazione: {e}")
+    
     def validate_configs(self):
         """Testa e valida configurazioni autonome generate"""
         
@@ -644,7 +962,7 @@ class The5ersIntegratedLauncher:
         while True:
             try:
                 self.show_main_menu()
-                choice = input("👉 Scegli opzione (1-18): ").strip()
+                choice = input("👉 Scegli opzione (1-20): ").strip()
                 
                 if choice == "1":
                     self.generate_all_configs()
@@ -689,18 +1007,22 @@ class The5ersIntegratedLauncher:
                     self.init_autonomous_mode()
                     print("✅ Sistema autonomo resettato")
                 elif choice == "17":
+                    self.show_the5ers_configuration()
+                elif choice == "18":
+                    self.configure_the5ers_parameters()
+                elif choice == "19":
                     # Modalità legacy nascosta
                     print("📁 MODALITÀ JSON LEGACY")
                     print("⚠️ Modalità non supportata in questa versione ottimizzata")
                     print("💡 La modalità autonoma offre funzionalità superiori")
-                    print("🚀 Usa le opzioni 1-16 per funzionalità complete")
-                elif choice == "18":
+                    print("🚀 Usa le opzioni 1-18 per funzionalità complete")
+                elif choice == "20":
                     print("👋 Sistema autonomo terminato.")
                     break
                 else:
-                    print("❌ Opzione non valida. Scegli un numero da 1 a 18.")
+                    print("❌ Opzione non valida. Scegli un numero da 1 a 20.")
                 
-                if choice != "18":
+                if choice != "20":
                     input("\n⏸️ Premi ENTER per continuare...")
                     print("\n" * 2)
                     

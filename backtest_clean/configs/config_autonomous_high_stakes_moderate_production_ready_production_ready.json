@@ -1,0 +1,226 @@
+{
+    "logging": {
+        "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "metatrader5": {
+        "login": 25437097,
+        "password": "wkchTWEO_.00",
+        "server": "FivePercentOnline-Real",
+        "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+        "port": 18889
+    },
+    "account_currency": "USD",
+    "magic_number": 177251,
+    "quantum_params": {
+        "buffer_size": 500,
+        "spin_window": 80,
+        "min_spin_samples": 30,
+        "spin_threshold": 0.32,
+        "signal_cooldown": 600,
+        "entropy_thresholds": {
+            "buy_signal": 0.65,
+            "sell_signal": 0.35
+        },
+        "volatility_scale": 1.0
+    },
+    "risk_parameters": {
+        "magic_number": 147251,
+        "position_cooldown": 900,
+        "max_daily_trades": 6,
+        "max_positions": 1,
+        "risk_percent": 0.007,
+        "profit_multiplier": 2.2,
+        "max_position_hours": 6,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 100,
+            "step_pips": 50,
+            "lock_percentage": 0.5
+        },
+        "min_sl_distance_pips": {
+            "EURUSD": 30,
+            "GBPUSD": 35,
+            "USDJPY": 25,
+            "XAUUSD": 150,
+            "NAS100": 50,
+            "default": 40
+        },
+        "base_sl_pips": {
+            "EURUSD": 50,
+            "GBPUSD": 60,
+            "USDJPY": 40,
+            "XAUUSD": 220,
+            "NAS100": 100,
+            "default": 80
+        },
+        "max_spread": {
+            "EURUSD": 12,
+            "GBPUSD": 15,
+            "USDJPY": 10,
+            "XAUUSD": 40,
+            "NAS100": 180,
+            "default": 20
+        }
+    },
+    "symbols": {
+        "EURUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 0.0",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        },
+        "USDJPY": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 0.0",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        },
+        "NAS100": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 0.0",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        },
+        "GBPUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 0.0",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        },
+        "USDCHF": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 30,
+                "base_sl_pips": 50,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "activation_pips": 90,
+                    "step_pips": 45
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 0.0",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.56,
+                    "sell_signal": 0.44
+                }
+            }
+        }
+    },
+    "THE5ERS_specific": {
+        "step1_target": 8,
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
+        "drawdown_protection": {
+            "soft_limit": 0.02,
+            "hard_limit": 0.05
+        }
+    },
+    "initial_balance": 100000,
+    "conversion_metadata": {
+        "converted_from": "config_autonomous_high_stakes_moderate_production_ready.json",
+        "conversion_date": "2025-07-18T22:33:02.475817",
+        "converter_version": "1.0",
+        "original_aggressiveness": "unknown"
+    }
+}
