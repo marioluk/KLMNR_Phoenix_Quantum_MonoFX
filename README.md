@@ -363,7 +363,7 @@ def execute_trade(symbol, signal, signal_strength):
         "magic": MAGIC_NUMBER,
         "comment": f"QTS_{signal}_{signal_strength:.2f}",
         "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_IOC,
+        "type_filling": mt5.ORDER_FILLING_FOK, # se non viene accettato prova ORDER_FILLING_IOC
     }
     
     # 4. Invio ordine
