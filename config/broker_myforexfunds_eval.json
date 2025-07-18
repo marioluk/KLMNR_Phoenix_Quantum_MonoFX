@@ -1,0 +1,76 @@
+{
+  "broker_name": "MYFOREXFUNDS",
+  "display_name": "MyForexFunds Evaluation Account",
+  "mt5_config": {
+    "server": "MyForexFunds-Demo",
+    "login": 555123456,
+    "password": "YourMFFPassword789",
+    "path": "C:\\Program Files\\MyForexFunds MT5\\terminal64.exe"
+  },
+  "risk_management": {
+    "account_type": "evaluation",
+    "max_daily_loss": 250.0,
+    "max_total_loss": 1250.0,
+    "profit_target": 1250.0,
+    "max_position_size": 0.08,
+    "max_positions": 4,
+    "risk_per_trade": 0.8,
+    "challenge_rules": {
+      "min_trading_days": 7,
+      "max_lot_size": 0.3,
+      "news_trading_allowed": true,
+      "weekend_holding": true,
+      "ea_allowed": true,
+      "scaling_plan": true
+    }
+  },
+  "trading_config": {
+    "symbols": [
+      "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "USDCAD", "NZDUSD",
+      "EURJPY", "EURGBP", "EURAUD", "GBPJPY", "AUDJPY", "XAUUSD", "XAGUSD",
+      "US30", "NAS100", "SPX500", "GER40", "USOIL", "UKOIL"
+    ],
+    "max_spread": {
+      "EURUSD": 1.8,
+      "GBPUSD": 2.2,
+      "USDJPY": 1.9,
+      "XAUUSD": 4.5,
+      "US30": 2.8,
+      "NAS100": 2.0
+    },
+    "timeframes": ["M1", "M5", "M15", "H1", "H4"],
+    "trading_hours": {
+      "forex_start": "00:00",
+      "forex_end": "23:59",
+      "indices_start": "01:00",
+      "indices_end": "22:00",
+      "metals_start": "01:00", 
+      "metals_end": "23:59"
+    }
+  },
+  "quantum_config": {
+    "algorithm_mode": "balanced_momentum",
+    "quantum_strength": 0.7,
+    "neural_network_depth": 4,
+    "fractal_analysis": true,
+    "sentiment_analysis": true,
+    "multi_timeframe_confluence": true,
+    "dynamic_sl_tp": true,
+    "smart_grid": true,
+    "martingale": false
+  },
+  "connection_config": {
+    "magic_base": 880001,
+    "timeout": 12000,
+    "retries": 4,
+    "retry_delay": 1.5,
+    "enable_monitoring": true,
+    "monitoring_interval": 45,
+    "auto_reconnect": true,
+    "health_check_interval": 90
+  },
+  "environment": "evaluation",
+  "active": true,
+  "created": "2025-01-17",
+  "notes": "MyForexFunds Evaluation - Balanced Quantum Strategy"
+}

@@ -1,0 +1,77 @@
+{
+  "broker_name": "FTMO",
+  "display_name": "FTMO Challenge Account", 
+  "mt5_config": {
+    "server": "FTMO-Server",
+    "login": 987654321,
+    "password": "YourFTMOPassword456",
+    "path": "C:\\Program Files\\FTMO MetaTrader 5\\terminal64.exe"
+  },
+  "risk_management": {
+    "account_type": "challenge",
+    "max_daily_loss": 500.0,
+    "max_total_loss": 1000.0,
+    "profit_target": 1000.0,
+    "max_position_size": 0.05,
+    "max_positions": 2,
+    "risk_per_trade": 0.5,
+    "challenge_rules": {
+      "min_trading_days": 10,
+      "max_lot_size": 0.2,
+      "news_trading_allowed": false,
+      "weekend_holding": false,
+      "ea_allowed": true,
+      "consistency_rule": true,
+      "max_daily_profit": 500.0
+    }
+  },
+  "trading_config": {
+    "symbols": [
+      "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "USDCAD", "NZDUSD",
+      "EURJPY", "EURGBP", "EURAUD", "GBPJPY", "AUDJPY", "XAUUSD", "XAGUSD",
+      "US30", "NAS100", "SPX500", "GER40", "UK100", "USOIL"
+    ],
+    "max_spread": {
+      "EURUSD": 1.5,
+      "GBPUSD": 2.0,
+      "USDJPY": 1.8,
+      "XAUUSD": 4.0,
+      "US30": 2.5,
+      "NAS100": 1.8
+    },
+    "timeframes": ["M5", "M15", "H1", "H4", "D1"],
+    "trading_hours": {
+      "forex_start": "00:00",
+      "forex_end": "23:59",
+      "indices_start": "07:00",
+      "indices_end": "21:00", 
+      "metals_start": "01:00",
+      "metals_end": "23:59"
+    }
+  },
+  "quantum_config": {
+    "algorithm_mode": "conservative_swing",
+    "quantum_strength": 0.6,
+    "neural_network_depth": 3,
+    "fractal_analysis": true,
+    "sentiment_analysis": false,
+    "multi_timeframe_confluence": true,
+    "dynamic_sl_tp": true,
+    "smart_grid": false,
+    "martingale": false
+  },
+  "connection_config": {
+    "magic_base": 740001,
+    "timeout": 15000,
+    "retries": 5,
+    "retry_delay": 2.0,
+    "enable_monitoring": true,
+    "monitoring_interval": 30,
+    "auto_reconnect": true,
+    "health_check_interval": 45
+  },
+  "environment": "challenge",
+  "active": true,
+  "created": "2025-01-17",
+  "notes": "FTMO Challenge Account - Conservative Quantum Trading Setup"
+}
