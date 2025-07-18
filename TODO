@@ -1,5 +1,0 @@
-i nuovi file json del backtest vengono salvati sulla cartella principale
-
-prende sempre lot size max 0.1 su vecchio file json
-
-i nuovi file json di configurazione non sono completi e ci sono molti parametri nuovi che non so se vengono utilizzati nello script
