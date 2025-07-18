@@ -978,11 +978,7 @@ class QuantumRiskManager:
             size = risk_amount / (sl_pips * pip_value)
             
             # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
-<<<<<<< HEAD
-            max_size_limit = 0.1  # Massimo 0.5 lotti per posizioni conservative
-=======
             max_size_limit = 0.1  # Massimo 0.1 lotti per posizioni conservative
->>>>>>> c5fbaa3172c07827454bc876239a2d9cfa22310b
             if size > max_size_limit:
                 logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} "
                               f"(Safety limit applicato)")
