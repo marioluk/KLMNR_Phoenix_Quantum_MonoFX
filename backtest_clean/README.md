@@ -1,25 +1,45 @@
-# 🎯 THE5ERS SYSTEM LAUNCHER - SISTEMA COMPLETO
+# 🎯 THE5ERS INTEGRATED OPTIMIZATION SYSTEM
 
-## 🚀 **SUPER LAUNCHER - TUTTE LE FUNZIONALITÀ INTEGRATE**
+## 🚀 **QUICK START - SISTEMA CONFIGURABILE**
 
-### **🎯 LAUNCHER DISPONIBILI:**
+### **🎯 LAUNCHER RACCOMANDATO (NUOVO!):**
 
-1. **`the5ers_super_launcher.py`** - 🏆 **COMPLETO** (21 opzioni!)
-   - ✅ Ottimizzazione e generazione configurazioni
-   - ✅ High Stakes Challenge (3 livelli) 
-   - ✅ Backtest comparativo multi-config
-   - ✅ Backtest periodo personalizzato
-   - ✅ Selezione configurazione dinamica
-   - ✅ Analisi simboli avanzata
-   - ✅ Position sizing e compliance
-   - ✅ Documentazione completa
+```powershell
+python the5ers_integrated_launcher.py
+```
+
+**✨ SISTEMA COMPLETAMENTE CONFIGURABILE:**
+- ✅ **File JSON sorgente selezionabile** 
+- ✅ **Parametri High Stakes personalizzabili**
+- ✅ **Date e periodi configurabili**
+- ✅ **Livelli aggressività modificabili**
+- ✅ **24 opzioni integrate**
+
+### **🔧 ALTRI LAUNCHER DISPONIBILI:**
+
+1. **`the5ers_super_launcher.py`** - 🏆 **SUPER COMPLETO** (21 opzioni)
+   - ✅ Tutte le funzionalità integrate (non configurabile)
 
 2. **`the5ers_simple_launcher.py`** - 🎯 **SEMPLIFICATO** (9 opzioni)
    - ✅ Funzionalità essenziali
-   - ✅ Menu pulito e veloce
 
 3. **`the5ers_master_launcher.py`** - 🔧 **AVANZATO** (13 opzioni)
    - ✅ Funzionalità avanzate originali
+
+## 📚 **DOCUMENTAZIONE COMPLETA**
+
+### **📄 GUIDA DETTAGLIATA (50+ PAGINE):**
+```
+📁 INTEGRATED_SYSTEM_README.md
+```
+
+**🎯 Include:**
+- Configurazione completa optimizer
+- 24 opzioni spiegate nel dettaglio
+- Workflow step-by-step
+- Esempi pratici
+- Troubleshooting
+- Performance benchmarks
 
 ## 🔧 **WORKFLOW OTTIMIZZAZIONE CONFIGURABILE**
 

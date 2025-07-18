@@ -288,12 +288,12 @@
         "leverage": 100,
         "aggressiveness_level": "moderate",
         "aggressiveness_score": 50,
-        "optimization_timestamp": "2025-07-18T02:05:01.370400",
+        "optimization_timestamp": "2025-07-18T02:57:29.988173",
         "source_config": "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
     },
     "optimization_metadata": {
         "generated_by": "HighStakesOptimizer",
-        "generation_date": "2025-07-18T02:05:01.370463",
+        "generation_date": "2025-07-18T02:57:29.988231",
         "source_file": "C:\\GitRepos\\The5ers\\PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
         "target_challenge": "High Stakes",
         "aggressiveness": "moderate",
