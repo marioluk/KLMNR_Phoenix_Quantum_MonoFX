@@ -1,0 +1,140 @@
+{
+    "metadata": {
+        "version": "2.0",
+        "created_by": "AutonomousHighStakesOptimizer",
+        "creation_date": "2025-07-18T09:14:13.103425",
+        "description": "Configurazione generata autonomamente per High Stakes Challenge",
+        "optimization_period_days": 30
+    },
+    "high_stakes_challenge": {
+        "account_balance": 5000,
+        "target_daily_profit": 25,
+        "validation_days": 3,
+        "daily_loss_limit": 250,
+        "leverage": 100,
+        "max_daily_loss_percent": 0.05
+    },
+    "trading_algorithm": {
+        "name": "PRO-THE5ERS-QM-PHOENIX-GITCOP",
+        "version": "2.0",
+        "description": "Algoritmo quantum ottimizzato per The5ers"
+    },
+    "quantum_params": {
+        "buffer_size": 500,
+        "signal_cooldown": 600,
+        "adaptive_threshold": 4.083712918801063,
+        "volatility_filter": 3.022475279200709,
+        "trend_strength_min": 0.6,
+        "confluence_threshold": 3.4369703350408503,
+        "quantum_boost": true,
+        "neural_enhancement": true
+    },
+    "risk_parameters": {
+        "risk_percent": 0.005,
+        "max_daily_trades": 4,
+        "max_concurrent_trades": 2,
+        "min_profit_target": 0.015,
+        "stop_loss_atr_multiplier": 1.5,
+        "take_profit_atr_multiplier": 2.5,
+        "daily_loss_limit": 0.05,
+        "max_drawdown": 0.08,
+        "risk_reward_ratio": 1.8
+    },
+    "symbols": {
+        "EURUSD": {
+            "enabled": true,
+            "lot_size": 0.08,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 2.0,
+            "trading_sessions": [
+                "London",
+                "NewYork"
+            ],
+            "optimization_score": 827.1126596228984,
+            "aggressiveness_applied": "conservative"
+        },
+        "USDJPY": {
+            "enabled": true,
+            "lot_size": 0.08,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 31,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 2.5,
+            "trading_sessions": [
+                "Tokyo",
+                "London"
+            ],
+            "optimization_score": 678.9350815704727,
+            "aggressiveness_applied": "conservative"
+        },
+        "NAS100": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 8.0,
+            "trading_sessions": [
+                "NewYork"
+            ],
+            "optimization_score": 655.3163869348548,
+            "aggressiveness_applied": "conservative"
+        },
+        "USDCHF": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 3.0,
+            "trading_sessions": [
+                "London"
+            ],
+            "optimization_score": 625.6062069126242,
+            "aggressiveness_applied": "conservative"
+        }
+    },
+    "trading_sessions": {
+        "london": {
+            "start": "08:00",
+            "end": "17:00",
+            "enabled": true
+        },
+        "newyork": {
+            "start": "13:00",
+            "end": "22:00",
+            "enabled": true
+        },
+        "tokyo": {
+            "start": "00:00",
+            "end": "09:00",
+            "enabled": false
+        },
+        "sydney": {
+            "start": "22:00",
+            "end": "07:00",
+            "enabled": false
+        }
+    },
+    "filters": {
+        "news_filter": true,
+        "spread_filter": true,
+        "volatility_filter": true,
+        "trend_filter": true,
+        "time_filter": true
+    },
+    "optimization_results": {
+        "aggressiveness_level": "conservative",
+        "symbols_count": 4,
+        "average_optimization_score": 696.74,
+        "total_optimization_score": 2786.97,
+        "optimization_period": "30 days",
+        "optimization_timestamp": "2025-07-18T09:14:14.428618"
+    }
+}
