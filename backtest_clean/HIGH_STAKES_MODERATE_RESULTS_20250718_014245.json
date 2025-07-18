@@ -1,0 +1,49 @@
+{
+  "timestamp": "20250718_014245",
+  "aggressiveness_level": "moderate",
+  "config_used": "C:\\GitRepos\\The5ers\\backtest_clean\\config_high_stakes_moderate.json",
+  "parameters": {
+    "starting_balance": 5000,
+    "target_daily_profit": 25,
+    "min_profitable_days": 3,
+    "days_tested": 10,
+    "validation_mode": true
+  },
+  "results": {
+    "final_balance": 8721.919405568959,
+    "total_pnl": 3721.9194055689586,
+    "profitable_days_achieved": 1,
+    "validation_completed": false,
+    "challenge_status": "IN_PROGRESS",
+    "daily_results": [
+      {
+        "day": 1,
+        "starting_balance": 5000,
+        "ending_balance": 9770.326362701928,
+        "daily_pnl": 4770.326362701928,
+        "daily_pnl_percent": 95.40652725403855,
+        "trades_count": 6,
+        "winners": 6,
+        "win_rate": 100.0,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "1/3"
+      },
+      {
+        "day": 2,
+        "starting_balance": 9770.326362701928,
+        "ending_balance": 8721.919405568959,
+        "daily_pnl": -1048.4069571329685,
+        "daily_pnl_percent": -10.730521358378017,
+        "trades_count": 1,
+        "winners": 0,
+        "win_rate": 0.0,
+        "is_profitable_day": false,
+        "target_met": false,
+        "validation_status": "1/3"
+      }
+    ],
+    "total_trades": 7,
+    "aggressiveness_used": "moderate"
+  }
+}
