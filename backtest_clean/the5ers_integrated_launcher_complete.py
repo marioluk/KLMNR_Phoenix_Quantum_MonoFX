@@ -120,19 +120,18 @@ class The5ersIntegratedLauncher:
         
         print("🔧 GESTIONE & UTILITÀ:")
         print("12. 📊 Report Sistema & Configurazione")
-        print("13. 🔬 Diagnostica Sistema Completa")
-        print("14. 📚 Documentazione & Guide")
-        print("15. 🔧 Reset Sistema")
-        print("16. 🏆 Configurazione The5ers")
-        print("17. 🔧 Configura Parametri The5ers")
+        print("13.  Documentazione & Guide (TODO)")
+        print("14. 🔧 Reset Sistema")
+        print("15. 🏆 Configurazione The5ers")
+        print("16. 🔧 Configura Parametri The5ers")
         print()
         
         print("🗂️ LEGACY (Nascosto):")
-        print("18. 📁 Modalità JSON (Legacy)")
+        print("17. 📁 Modalità JSON (Legacy)")
         print()
         
         print("❌ ESCI:")
-        print("19. 👋 Termina Sistema")
+        print("18. 👋 Termina Sistema")
         print()
     
     def quick_generation(self):
@@ -1640,7 +1639,7 @@ class The5ersIntegratedLauncher:
         while True:
             try:
                 self.show_main_menu()
-                choice = input("👉 Scegli opzione (1-19): ").strip()
+                choice = input("👉 Scegli opzione (1-18): ").strip()
                 
                 if choice == "1":
                     self.generate_all_configs()
@@ -1667,34 +1666,32 @@ class The5ersIntegratedLauncher:
                 elif choice == "12":
                     self.system_report()
                 elif choice == "13":
-                    print("🔬 Diagnostica sistema - In sviluppo")
-                    print("💡 Usa opzione 12 per report sistema")
+                    print("� Documentazione & Guide - TODO")
+                    print("💡 Funzionalità pianificata per quando il sistema sarà più maturo")
+                    print("� Nel frattempo consulta i commenti nel codice e i documenti forniti")
                 elif choice == "14":
-                    print("📚 Documentazione - In sviluppo")
-                    print("💡 Consulta i commenti nel codice per dettagli")
-                elif choice == "15":
                     # Reset sistema
                     self.autonomous_optimizer = None
                     self.current_config = None
                     self.init_autonomous_mode()
                     print("✅ Sistema autonomo resettato")
-                elif choice == "16":
+                elif choice == "15":
                     self.show_the5ers_configuration()
-                elif choice == "17":
+                elif choice == "16":
                     self.configure_the5ers_parameters()
-                elif choice == "18":
+                elif choice == "17":
                     # Modalità legacy nascosta
                     print("📁 MODALITÀ JSON LEGACY")
                     print("⚠️ Modalità non supportata in questa versione ottimizzata")
                     print("💡 La modalità autonoma offre funzionalità superiori")
-                    print("🚀 Usa le opzioni 1-17 per funzionalità complete")
-                elif choice == "19":
+                    print("🚀 Usa le opzioni 1-16 per funzionalità complete")
+                elif choice == "18":
                     print("👋 Sistema autonomo terminato.")
                     break
                 else:
-                    print("❌ Opzione non valida. Scegli un numero da 1 a 19.")
+                    print("❌ Opzione non valida. Scegli un numero da 1 a 18.")
                 
-                if choice != "19":
+                if choice != "18":
                     input("\n⏸️ Premi ENTER per continuare...")
                     print("\n" * 2)
                     
