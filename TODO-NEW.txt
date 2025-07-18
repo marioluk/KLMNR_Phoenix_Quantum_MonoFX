@@ -1,0 +1,32 @@
+❌ **CRITICO**: i nuovi file json di configurazione sono incompleti e ci sono diversi parametri nuovi che non so se sono utilizzati nello script
+
+**Problemi identificati:**
+- Campi mancanti: `symbol`, `timeframe`, `lookback`, `initial_balance`
+- Solo 3/10 configurazioni sono conformi ai requisiti The5ers
+- File di configurazione autonomi hanno balance=0 invece di €5000+
+- Validazione fallisce su tutti i file autonomi
+stiamo lavorando con timeframe m1, troppo veloce e troppo vicini sl e tp al prezzo d'ingresso
+prende sempre lot size max a 0.1, parametri di rischio troppo alti nel vecchio file config? controllare sui nuovi file config json
+✅ ~~i nuovi file bachtest vengono salvati nella root principale e non nella cartella configs~~ **RISOLTO**
+come distribuisco il rischio sui vari simboli?
+cosa succedeval backtest se modifico lo script dell'algoritmo?
+in white paper: Entropia Spin Volatilità Confidenza come vengono usate nell'algoritmo? Spiegarne la filosofia e la derivazione dalla fisica quantistica
+BUSINESS PLAN 
+WHITE PAPER THE5ERS
+Implementazione delle news più importanti
+condizioni di uscita: REVERSE???
+aggiungere data di creazione al nome del file json
+🚨 **DISASTRO**: Durante cleanup molti file sono diventati vuoti (0 byte)
+
+**File compromessi:**
+- 20+ file .md vuoti (guide, documentazione)
+- Launcher alternativi vuoti
+- Script di analisi vuoti
+- File di configurazione parzialmente corrotti
+
+**STRATEGIA SCELTA:** 
+✅ **Semplificazione SOLO SISTEMA AUTONOMO**
+- Rimuovere modalità JSON (troppo complessa)
+- Focus su AutonomousHighStakesOptimizer (funziona meglio)
+- Correggere validazione per struttura autonoma
+- Launcher semplificato senza dipendenze esterne
