@@ -5,7 +5,7 @@
 
 ## 📋 **OVERVIEW ARCHITETTURALE**
 
-Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo bassu su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
+Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo basato su su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
 
 ### **�️ ARCHITETTURA DELLE CLASSI:**
 1. **`ConfigManager`** - Gestione configurazione e validazione parametri
