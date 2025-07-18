@@ -2327,9 +2327,13 @@ class QuantumTradingSystem:
             buffer_size = len(self.engine.tick_buffer.get(symbol, []))
             min_samples = self.engine.min_spin_samples
             
+            # non funziona stampa solo il primo simbolo EURUSD, non c'è un loop lo commento
+            """
             logger.info(f"🔍 TRADE STATUS {symbol}: can_trade={can_trade}, trading_hours={trading_hours}, "
                         f"has_position={has_position}, daily_trades={daily_count}/{daily_limit}, "
                         f"buffer={buffer_size}/{min_samples}")
+            """
+            
                         
         except Exception as e:
             logger.error(f"Errore debug_trade_status per {symbol}: {str(e)}")
