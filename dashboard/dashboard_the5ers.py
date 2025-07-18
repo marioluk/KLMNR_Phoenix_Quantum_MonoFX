@@ -1053,7 +1053,7 @@ def main():
     """Funzione principale"""
     if len(sys.argv) < 2:
         print("Usage: python dashboard_the5ers.py <config_file> [log_file]")
-        print("Example: python dashboard_the5ers.py PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json")
+        print("Example: python dashboard_the5ers.py PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")
         sys.exit(1)
     
     config_file = sys.argv[1]

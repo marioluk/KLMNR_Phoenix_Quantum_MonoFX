@@ -14,7 +14,7 @@ def start_dashboard_debug():
     
     # Inizializza dashboard
     dashboard = The5ersGraphicalDashboard(
-        config_file="PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json",
+        config_file="PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
         use_mt5=True
     )
     
