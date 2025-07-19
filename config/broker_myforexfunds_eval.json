@@ -5,7 +5,7 @@
     "server": "MyForexFunds-Demo",
     "login": 555123456,
     "password": "YourMFFPassword789",
-    "path": "C:\\Program Files\\MyForexFunds MT5\\terminal64.exe"
+    "path": "C:\\MT5\\MyForexFundsMT5Terminal\\terminal64.exe"
   },
   "risk_management": {
     "account_type": "evaluation",
