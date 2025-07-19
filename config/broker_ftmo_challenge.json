@@ -2,7 +2,7 @@
   "broker_name": "FTMO",
   "display_name": "FTMO Challenge Account", 
   "mt5_config": {
-    "server": "FTMO-Server",
+    "server": "FTMO-Demo",
     "login": 1511188446,
     "password": "8bu?C!pQY@!",
     "path": "C:/MT5/FTMOGlobalMarketsMT5Terminal/terminal64.exe"
