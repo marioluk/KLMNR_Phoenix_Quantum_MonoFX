@@ -121,6 +121,11 @@ class MultiBrokerConfigLoader:
                 with open(config_file) as f:
                     broker_config = json.load(f)
                     
+                # 🎯 FILTRO BROKER ATTIVI - Salta se active = false
+                if not broker_config.get('active', True):
+                    logger.info(f"⏸️  Broker {config_file.name} disattivato (active: false)")
+                    continue
+                    
                 # Determina nome broker dal filename o config
                 broker_name = self._extract_broker_name(config_file, broker_config)
                 
