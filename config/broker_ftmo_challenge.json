@@ -5,7 +5,7 @@
     "server": "FTMO-Server",
     "login": 987654321,
     "password": "YourFTMOPassword456",
-    "path": "C:\\Program Files\\FTMO MetaTrader 5\\terminal64.exe"
+    "path": "C:\\MT5\\FTMOGlobalMarketsMT5Terminal\\terminal64.exe"
   },
   "risk_management": {
     "account_type": "challenge",
