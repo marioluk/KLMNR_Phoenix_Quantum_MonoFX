@@ -57,7 +57,7 @@ def is_trading_hours(symbol: str, config: Dict) -> bool:
     """
     try:
         symbol_config = config.get('symbols', {}).get(symbol, {})
-        trading_hours = symbol_config.get('trading_hours', ["00:00-24:00"])
+        trading_hours = symbol_config.get('trading_hours', ["00:00-23:59"])
         now = datetime.now().time()
         
         for time_range in trading_hours:

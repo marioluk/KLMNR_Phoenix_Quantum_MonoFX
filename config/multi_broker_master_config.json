@@ -1,103 +1,75 @@
 {
-  "multi_broker_config": {
-    "system_name": "Quantum Multi-Broker Trading System",
-    "version": "6.0.0",
-    "enabled": true,
-    "master_config": "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
-    
-    "broker_configs": [
-      "config/broker_the5ers_challenge.json",
-      "config/broker_ftmo_challenge.json", 
-      "config/broker_myforexfunds_eval.json"
-    ],
-    
-    "global_settings": {
-      "max_total_positions": 10,
-      "max_positions_per_broker": 5,
-      "enable_cross_broker_hedging": true,
-      "enable_cross_broker_arbitrage": false,
-      "position_correlation_check": true,
-      "global_risk_limit": 2000.0,
-      "emergency_stop_loss": 5000.0
+  "symbols": {
+    "EURUSD": {
+      "enabled": true,
+      "spread_limit": 2.0
     },
-    
-    "orchestration": {
-      "primary_broker": "THE5ERS",
-      "backup_brokers": ["FTMO", "MYFOREXFUNDS"],
-      "load_balancing": "round_robin",
-      "failover_enabled": true,
-      "sync_trading_hours": true,
-      "unified_logging": true
+    "GBPUSD": {
+      "enabled": true,
+      "spread_limit": 2.5
     },
-    
-    "risk_coordination": {
-      "shared_risk_pool": true,
-      "cross_broker_correlation": 0.3,
-      "diversification_bonus": 1.2,
-      "max_correlation_exposure": 0.7,
-      "risk_distribution": {
-        "THE5ERS": 0.5,
-        "FTMO": 0.3,
-        "MYFOREXFUNDS": 0.2
-      }
+    "USDJPY": {
+      "enabled": true,
+      "spread_limit": 2.0
     },
-    
-    "symbol_routing": {
-      "EURUSD": ["THE5ERS", "FTMO", "MYFOREXFUNDS"],
-      "GBPUSD": ["THE5ERS", "FTMO"],
-      "USDJPY": ["THE5ERS", "FTMO"],
-      "XAUUSD": ["THE5ERS", "FTMO", "MYFOREXFUNDS"],
-      "US30": ["THE5ERS", "FTMO"],
-      "NAS100": ["THE5ERS", "FTMO"],
-      "BTCUSD": ["THE5ERS"]
+    "XAUUSD": {
+      "enabled": true,
+      "spread_limit": 5.0
     },
-    
-    "execution_strategy": {
-      "best_spread_routing": true,
-      "latency_optimization": true,
-      "slippage_minimization": true,
-      "broker_selection_criteria": [
-        "spread",
-        "latency", 
-        "reliability",
-        "available_margin"
-      ]
+    "US30": {
+      "enabled": true,
+      "spread_limit": 3.0
     },
-    
-    "monitoring": {
-      "health_check_interval": 30,
-      "performance_tracking": true,
-      "broker_comparison": true,
-      "automated_reporting": true,
-      "alert_thresholds": {
-        "connection_loss": 60,
-        "high_latency": 1000,
-        "execution_failure_rate": 0.05,
-        "spread_deviation": 2.0
-      }
-    },
-    
-    "logging": {
-      "centralized_logging": true,
-      "log_level": "INFO",
-      "separate_broker_logs": true,
-      "log_rotation": true,
-      "max_log_size": "100MB",
-      "log_retention_days": 30
+    "NAS100": {
+      "enabled": true,
+      "spread_limit": 2.0
     }
   },
-  
-  "quantum_coordination": {
-    "algorithm_synchronization": true,
-    "shared_neural_network": false,
-    "cross_broker_signal_sharing": true,
-    "unified_sentiment_analysis": true,
-    "master_quantum_engine": true,
-    "broker_specific_tuning": true
+  "multi_broker_config": {
+    "system_name": "KLMNR Phoenix Quantum Multi-Broker",
+    "version": "6.0.0",
+    "enabled": true,
+    "use_separate_broker_configs": true
   },
-  
-  "environment": "multi_broker_production",
-  "created": "2025-01-17",
-  "last_updated": "2025-01-17",
-  "notes": "Master configuration for multi-broker quantum trading system supporting The5ers, FTMO, and MyForexFunds simultaneously"
+  "logging": {
+    "level": "INFO",
+    "file": "logs/multi_broker.log",
+    "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+  },
+  "trading": {
+    "mode": "live",
+    "portfolio_mode": true,
+    "max_concurrent_positions": 10,
+    "emergency_stop": false
+  },
+  "risk_management": {
+    "max_daily_drawdown_percent": 3.0,
+    "max_portfolio_risk_percent": 2.0,
+    "position_sizing_method": "fixed_percentage",
+    "default_position_size_percent": 1.0
+  },
+  "risk_parameters": {
+    "max_daily_loss_percent": 3.0,
+    "max_position_size_percent": 2.0,
+    "max_open_positions": 10,
+    "stop_loss_percent": 1.5,
+    "take_profit_percent": 3.0,
+    "emergency_stop_loss_percent": 5.0
+  },
+  "THE5ERS_specific": {
+    "drawdown_protection": {
+      "max_daily_drawdown_percent": 3.0,
+      "max_portfolio_drawdown_percent": 5.0,
+      "stop_trading_on_drawdown": true,
+      "auto_reduce_lot_size": true,
+      "emergency_close_all": false,
+      "soft_limit": 2.5,
+      "hard_limit": 5.0
+    },
+    "risk_profile": {
+      "aggressive_mode": false,
+      "position_sizing_factor": 1.0,
+      "max_correlation_limit": 0.7
+    }
+  }
 }

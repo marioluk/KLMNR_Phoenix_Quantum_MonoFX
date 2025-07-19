@@ -70,7 +70,7 @@
     "health_check_interval": 90
   },
   "environment": "evaluation",
-  "active": true,
+  "active": false,
   "created": "2025-01-17",
   "notes": "MyForexFunds Evaluation - Balanced Quantum Strategy"
 }

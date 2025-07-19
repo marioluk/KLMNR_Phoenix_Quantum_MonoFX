@@ -2,10 +2,10 @@
   "broker_name": "THE5ERS",
   "display_name": "The5ers Challenge Account",
   "mt5_config": {
-    "server": "The5ers-Demo",
-    "login": 123456789,
-    "password": "YourPassword123",
-    "path": "C:\\Program Files\\MetaTrader 5 The5ers\\terminal64.exe"
+    "server": "FivePercentOnline-Real",
+    "login": 25437097,
+    "password": "wkchTWEO_.00",
+    "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe"
   },
   "risk_management": {
     "account_type": "challenge",

@@ -52,6 +52,7 @@ class MultiBrokerConfigLoader:
             broker_configs.extend(self._load_from_main_config())
         
         # 2. Cerca file di configurazione separati
+        logger.info("🔍 Ricerca file di configurazione separati...")
         broker_configs.extend(self._load_from_separate_files())
         
         # 3. Se non trovate configurazioni multi-broker, usa quella principale
@@ -99,27 +100,44 @@ class MultiBrokerConfigLoader:
 
     def _load_from_separate_files(self) -> List[BrokerConfig]:
         """Cerca e carica file di configurazione separati per broker"""
+        logger.info("🔍 DEBUG: Inizio _load_from_separate_files()")
         configs = []
         config_dir = self.config_path.parent
+        logger.info(f"🗂️  DEBUG: Cerco in directory: {config_dir}")
         
         # Pattern di ricerca per file broker
         patterns = [
-            "*-broker-*.json",
-            "*_broker_*.json", 
-            "broker-*.json",
-            "*-FTMO-*.json",
-            "*-THE5ERS-*.json",
-            "*-TOPSTEP-*.json"
+            "broker_*.json"  # Pattern principale per i nostri file
         ]
         
         found_files = []
         for pattern in patterns:
-            found_files.extend(config_dir.glob(pattern))
+            pattern_files = list(config_dir.glob(pattern))
+            logger.info(f"🔍 Pattern '{pattern}' in '{config_dir}': trovati {len(pattern_files)} file")
+            for pf in pattern_files:
+                logger.info(f"   📄 {pf.name}")
+            found_files.extend(pattern_files)
+            
+        logger.info(f"🗂️  Totale file broker trovati: {len(found_files)}")
+        
+        if not found_files:
+            logger.warning(f"❌ NESSUN FILE broker_*.json trovato in {config_dir}")
+            # Elenchiamo tutti i file nella directory
+            all_files = list(config_dir.glob("*.json"))
+            logger.info(f"📁 File JSON presenti ({len(all_files)}):")
+            for af in all_files:
+                logger.info(f"   📄 {af.name}")
+            return configs
             
         for config_file in found_files:
             try:
                 with open(config_file) as f:
                     broker_config = json.load(f)
+                    
+                # 🎯 FILTRO BROKER ATTIVI - Salta se active = false
+                if not broker_config.get('active', True):
+                    logger.info(f"⏸️  Broker {config_file.name} disattivato (active: false)")
+                    continue
                     
                 # Determina nome broker dal filename o config
                 broker_name = self._extract_broker_name(config_file, broker_config)
@@ -127,16 +145,19 @@ class MultiBrokerConfigLoader:
                 # Merge con configurazione base se necessario
                 merged_config = self._merge_with_base(broker_config)
                 
+                # Gestisci entrambi i formati: 'metatrader5' e 'mt5_config'
+                mt5_section = merged_config.get('metatrader5') or merged_config.get('mt5_config', {})
+                
                 config = BrokerConfig(
                     name=broker_name,
-                    mt5_path=merged_config['metatrader5']['path'],
-                    login=int(merged_config['metatrader5']['login']),
-                    password=merged_config['metatrader5']['password'],
-                    server=merged_config['metatrader5']['server'],
-                    port=int(merged_config['metatrader5'].get('port', 18889)),
-                    symbols=list(merged_config.get('symbols', {}).keys()),
+                    mt5_path=mt5_section['path'],
+                    login=int(mt5_section['login']),
+                    password=mt5_section['password'],
+                    server=mt5_section['server'],
+                    port=int(mt5_section.get('port', 18889)),
+                    symbols=self._extract_symbols(merged_config),
                     account_currency=merged_config.get('account_currency', 'USD'),
-                    magic_base=merged_config.get('magic_number', 100000)
+                    magic_base=merged_config.get('magic_number', merged_config.get('connection_config', {}).get('magic_base', 100000))
                 )
                 
                 configs.append(config)
@@ -146,6 +167,32 @@ class MultiBrokerConfigLoader:
                 logger.error(f"Errore caricamento {config_file}: {str(e)}")
                 
         return configs
+
+    def _extract_symbols(self, config: Dict) -> List[str]:
+        """Estrae la lista symbols da vari formati di configurazione"""
+        
+        # 1. Formato standard: symbols come dizionario
+        if 'symbols' in config and isinstance(config['symbols'], dict):
+            return list(config['symbols'].keys())
+            
+        # 2. Formato trading_config: symbols come lista
+        if 'trading_config' in config and 'symbols' in config['trading_config']:
+            symbols = config['trading_config']['symbols']
+            if isinstance(symbols, list):
+                return symbols
+            elif isinstance(symbols, dict):
+                return list(symbols.keys())
+                
+        # 3. Formato risk_management con symbols
+        if 'risk_management' in config and 'symbols' in config['risk_management']:
+            symbols = config['risk_management']['symbols']
+            if isinstance(symbols, list):
+                return symbols
+            elif isinstance(symbols, dict):
+                return list(symbols.keys())
+                
+        # 4. Default symbols
+        return ['EURUSD', 'GBPUSD', 'XAUUSD']
 
     def _extract_broker_name(self, config_file: Path, broker_config: Dict) -> str:
         """Estrae il nome del broker dal file o configurazione"""
