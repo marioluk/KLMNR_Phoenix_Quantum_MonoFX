@@ -29,7 +29,7 @@
     "symbols": [
       "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "USDCAD", "NZDUSD",
       "EURJPY", "EURGBP", "EURAUD", "GBPJPY", "AUDJPY", "XAUUSD", "XAGUSD",
-      "US30", "NAS100", "SPX500", "GER40", "UK100", "USOIL"
+      "US30", "NAS100", "SPX500", "GER40", "UK100", "USOIL", "BTCUSD", "ETHUSD"
     ],
     "max_spread": {
       "EURUSD": 1.5,
