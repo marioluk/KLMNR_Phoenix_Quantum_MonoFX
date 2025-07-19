@@ -2,9 +2,9 @@
   "broker_name": "MYFOREXFUNDS",
   "display_name": "MyForexFunds Evaluation Account",
   "mt5_config": {
-    "server": "MyForexFunds-Demo",
-    "login": 555123456,
-    "password": "YourMFFPassword789",
+    "server": "FundedNext-Server4",
+    "login": 79108295,
+    "password": "afvHX82##",
     "path": "C:\\MT5\\MyForexFundsMT5Terminal\\terminal64.exe"
   },
   "risk_management": {
@@ -70,7 +70,7 @@
     "health_check_interval": 90
   },
   "environment": "evaluation",
-  "active": false,
+  "active": true,
   "created": "2025-01-17",
   "notes": "MyForexFunds Evaluation - Balanced Quantum Strategy"
 }
