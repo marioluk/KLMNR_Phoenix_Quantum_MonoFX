@@ -1,7 +1,7 @@
 @echo off
 REM ==============================================================================
 REM SETUP AUTO START DAILY CONFIG UPDATER
-REM Installazione automatica Task Scheduler per Daily Config Updater alle 06:00
+REM Installazione automatica Task Scheduler per Daily Config Updater alle 23:30
 REM ==============================================================================
 
 echo ===============================================================================
@@ -111,7 +111,7 @@ echo INSTALLAZIONE COMPLETATA!
 echo ===============================================================================
 echo.
 echo Il Daily Config Updater è ora configurato per eseguire:
-echo - OGNI GIORNO alle 06:00
+echo - OGNI GIORNO alle 23:30
 echo - Con restart automatico su errore (max 3 tentativi)
 echo - Con log dettagliati in legacy_system\logs\
 echo.
@@ -192,7 +192,7 @@ exit /b 1
 :exit_success
 echo.
 echo [INFO] Setup completato con successo!
-echo [INFO] Il Daily Config Updater si avvierà automaticamente alle 06:00
+echo [INFO] Il Daily Config Updater si avvierà automaticamente alle 23:30
 echo.
 pause
 exit /b 0

@@ -86,7 +86,7 @@ if %ERRORLEVEL% EQU 0 (
         set EXIT_CODE=!ERRORLEVEL!
     ) else (
         echo [INFO] Esecuzione diretta Python
-        python daily_config_updater.py --days 30
+        python daily_config_updater.py --days 60
         set EXIT_CODE=!ERRORLEVEL!
     )
     

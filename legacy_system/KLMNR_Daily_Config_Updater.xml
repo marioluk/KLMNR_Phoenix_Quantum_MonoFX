@@ -4,7 +4,7 @@
     <Date>2025-07-20T20:00:00.000000</Date>
     <Author>KLMNR_SYSTEM</Author>
     <Version>1.0</Version>
-    <Description>KLMNR Daily Config Updater - Aggiornamento automatico configurazioni alle 06:00</Description>
+    <Description>KLMNR Daily Config Updater - Aggiornamento automatico configurazioni alle 23:30</Description>
     <URI>\KLMNR_Daily_Config_Updater</URI>
   </RegistrationInfo>
   <Triggers>
@@ -13,7 +13,7 @@
         <Interval>P1D</Interval>
         <StopAtDurationEnd>false</StopAtDurationEnd>
       </Repetition>
-      <StartBoundary>2025-07-21T06:00:00</StartBoundary>
+      <StartBoundary>2025-07-21T23:30:00</StartBoundary>
       <Enabled>true</Enabled>
       <ScheduleByDay>
         <DaysInterval>1</DaysInterval>

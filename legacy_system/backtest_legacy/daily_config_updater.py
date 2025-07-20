@@ -235,7 +235,7 @@ class DailyConfigUpdater:
             self.converter = ConfigConverter(production_template)
             
             # Nome file output STANDARD (senza [BEST] per compatibilità sistema legacy)
-            output_name = "config_autonomous_high_stakes_conservative_production_ready.json"
+            output_name = "config_autonomous_high_stakes_production_ready.json"
             output_path = os.path.join(self.config_dir, output_name)
             
             logger.info(f"[TARGET] Target: {output_name} (nome standard per compatibilità legacy)")
