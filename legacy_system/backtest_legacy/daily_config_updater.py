@@ -49,10 +49,10 @@ class DailyConfigUpdater:
     Sistema automatizzato per aggiornamento giornaliero configurazioni
     """
     
-    def __init__(self, optimization_days: int = 30, backup_old_configs: bool = True):
+    def __init__(self, optimization_days: int = 60, backup_old_configs: bool = True):
         """
         Args:
-            optimization_days: Giorni di dati per ottimizzazione (default: 30)
+            optimization_days: Giorni di dati per ottimizzazione (default: 60)
             backup_old_configs: Se fare backup delle configurazioni precedenti
         """
         self.optimization_days = optimization_days
@@ -410,7 +410,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Daily Config Updater per The5ers')
-    parser.add_argument('--days', type=int, default=30, help='Giorni di ottimizzazione (default: 30)')
+    parser.add_argument('--days', type=int, default=60, help='Giorni di ottimizzazione (default: 60)')
     parser.add_argument('--no-backup', action='store_true', help='Disabilita backup configurazioni esistenti')
     parser.add_argument('--quiet', action='store_true', help='Solo log su file, niente output console')
     
