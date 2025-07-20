@@ -1,5 +1,6 @@
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
-## Sistema Monolitico Completo e Funzionante
+# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERS---
+
+## 📋 **OVERVIEW ARCHITETTURALE - SISTEMA LEGACY**## Sistema Monolitico Completo e Funzionante
 
 ---
 
@@ -60,7 +61,11 @@ KLMNR_Phoenix_Quantum/
 
 ---
 
-## 📋 **OVERVIEW ARCHITETTURALE - SISTEMA LEGACY**
+## � **SIMBOLI SUPPORTATI - AGGIORNATO 21 LUGLIO 2025**
+
+### **Portfolio Ottimizzato The5ers (16 Simboli)**
+
+## � **OVERVIEW ARCHITETTURALE - SISTEMA LEGACY**
 
 Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo basato su su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
 

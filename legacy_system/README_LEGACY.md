@@ -35,10 +35,11 @@
 ### **� DAILY CONFIG UPDATER - AUTONOMO:**
 ```bash
 # Automazione quotidiana alle 06:00:
-✅ Analisi performance ultimi 30 giorni
+✅ Analisi performance ultimi 60 giorni (finestra mobile)
 ✅ Ottimizzazione parametri intelligente  
 ✅ Backup configurazioni automatico
 ✅ Score-based selection (Attuale: 748.00 CONSERVATIVE)
+✅ Portfolio completo 16 simboli (7 Forex, 2 Commodities, 5 Indices, 2 Crypto)
 ✅ Validazione post-update completa
 ✅ Log dettagliato per troubleshooting
 ```
@@ -293,12 +294,35 @@ python -c "import json; print('OK' if json.load(open('PRO-THE5ERS-QM-PHOENIX-GIT
 - **Risk/Reward**: 1:2.2
 - **Max Drawdown**: <-3%
 
-### **Simboli Ottimizzati:**
-- **EURUSD**: Parametri conservativi, alta liquidità
-- **GBPUSD**: Gestione volatilità, spread premium
-- **USDJPY**: Specializzato sessione asiatica
-- **XAUUSD**: Risk ridotto, spread aumentati
-- **NAS100**: High volatility, parametri ristretti
+### **Simboli Ottimizzati (Portfolio Aggiornato - 21 Luglio 2025):**
+
+**Portfolio Completo:** 16 simboli ottimizzati per The5ers High Stakes Challenge
+
+#### **💰 FOREX MAJORS (7 simboli):**
+- **EURUSD**: 🥇 TOP PERFORMER (73.7% win rate, spread 1-2 pips)
+- **USDJPY**: 🥈 SECONDO MIGLIORE (trend follower, spread 2-3 pips)  
+- **GBPUSD**: 🥉 VOLATILE REDDITIZIO (spread 2-4 pips)
+- **USDCHF**: ✅ STABILE (spread 2-3 pips)
+- **USDCAD**: ✅ STABILE NORD AMERICA (spread 2-4 pips)
+- **AUDUSD**: ⚖️ MEDIA VOLATILITÀ (spread 2-4 pips)
+- **NZDUSD**: ⚠️ VOLATILE (spread 3-5 pips)
+
+#### **🏆 COMMODITIES (2 simboli):**
+- **XAUUSD**: 💰 GOLD - alta volatilità (spread 3-8 pips)
+- **XAGUSD**: 🥈 SILVER - commodities (spread 3-6 pips) **[NUOVO]**
+
+#### **📈 INDICES (5 simboli):**
+- **NAS100**: 📈 NASDAQ - solo esperti (spread 5-15 pips)
+- **US30**: 📊 DOW JONES - indice USA (spread 2-8 pips)
+- **SP500**: 📈 S&P 500 - indice USA (spread 2-6 pips)
+- **DAX40**: 🇩🇪 DAX - indice tedesco (spread 2-6 pips)
+- **UK100**: 🇬🇧 FTSE 100 - indice UK (spread 2-5 pips) **[NUOVO]**
+
+#### **💎 CRYPTO (2 simboli):**
+- **BTCUSD**: 💎 BITCOIN - crypto volatile (spread 10-50 pips)
+- **ETHUSD**: 🔷 ETHEREUM - crypto volatile (spread 5-30 pips)
+
+**Selezione Automatica:** Il daily_config_updater seleziona automaticamente i migliori 4-6 simboli basato su score di ottimizzazione, con configurazioni specifiche per spread limits, sessioni di trading e parametri di rischio.
 
 ---
 
@@ -335,9 +359,11 @@ cd backtest_legacy/
 
 ---
 
-## 🏆 **STATUS ATTUALE**
+## 🏆 **STATUS ATTUALE - PORTFOLIO ESPANSO 16 SIMBOLI**
 
 ✅ **Sistema Completo e Funzionante**  
+✅ **Portfolio Espanso**: 16 simboli (7 Forex, 2 Commodities, 5 Indices, 2 Crypto)
+✅ **Ottimizzazione Avanzata**: Finestra mobile 60 giorni per migliore significatività statistica
 ✅ **Sintassi Python Validata**  
 ✅ **Configurazione The5ers Pronta**  
 ✅ **Risk Management Ultra-Conservativo**  
@@ -345,6 +371,12 @@ cd backtest_legacy/
 ✅ **Protezioni Multi-Layer Attive**
 
 **🚀 PRONTO PER DEPLOYMENT IMMEDIATO SU THE5ERS HIGH STAKES CHALLENGE**
+
+**🎯 ENHANCEMENT 21 LUGLIO 2025:**
+- ✅ Aggiunto UK100 (FTSE 100) per copertura completa indici europei
+- ✅ Aggiunto XAGUSD (Silver) per diversificazione commodities
+- ✅ Ottimizzazione aumentata da 30 a 60 giorni per algoritmi quantum
+- ✅ Sistema autonomo con finestra mobile per adattabilità continua
 
 ---
 
