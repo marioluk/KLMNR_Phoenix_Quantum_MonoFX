@@ -214,43 +214,21 @@ class DailyConfigUpdater:
         logger.info("[PROCESS] Conversione a formato produzione...")
         
         try:
-            # Trova template produzione
-            template_paths = [
-                os.path.join(self.legacy_dir, "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"),
-                os.path.join(self.config_dir, "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")
-            ]
-            
-            production_template = None
-            for template_path in template_paths:
-                if os.path.exists(template_path):
-                    production_template = template_path
-                    break
-            
-            if production_template:
-                logger.info(f"[REPORT] Template trovato: {os.path.relpath(production_template)}")
-            else:
-                logger.warning("[WARNING] Template produzione non trovato, usando default")
-            
-            # Inizializza converter
-            self.converter = ConfigConverter(production_template)
-            
             # Nome file output STANDARD (senza [BEST] per compatibilità sistema legacy)
             output_name = "config_autonomous_high_stakes_production_ready.json"
             output_path = os.path.join(self.config_dir, output_name)
             
             logger.info(f"[TARGET] Target: {output_name} (nome standard per compatibilità legacy)")
             
-            # Converti
-            converted_path = self.converter.convert_autonomous_to_production(
-                autonomous_config_path, 
-                output_path
-            )
+            # Semplicemente copia il file ottimizzato al nome di produzione
+            import shutil
+            shutil.copy2(autonomous_config_path, output_path)
             
-            logger.info(f"[SUCCESS] Conversione completata: {os.path.relpath(converted_path)}")
+            logger.info(f"[SUCCESS] File di produzione creato: {os.path.relpath(output_path)}")
             logger.info(f"[LINK] Compatibile con sistema legacy (stesso path CONFIG_FILE)")
             
             # Rimuovi file autonomo originale se è diverso dal target
-            if autonomous_config_path != converted_path and os.path.exists(autonomous_config_path):
+            if autonomous_config_path != output_path and os.path.exists(autonomous_config_path):
                 try:
                     os.remove(autonomous_config_path)
                     logger.info(f"[CLEANUP] File autonomo temporaneo rimosso: {os.path.basename(autonomous_config_path)}")
@@ -258,9 +236,9 @@ class DailyConfigUpdater:
                     logger.warning(f"[WARNING] Non riuscito a rimuovere file temporaneo: {e}")
             
             # Valida file convertito
-            if self.validate_production_config(converted_path):
+            if self.validate_production_config(output_path):
                 logger.info("[SUCCESS] File produzione validato con successo")
-                return converted_path
+                return output_path
             else:
                 logger.error("[ERROR] Validazione file produzione fallita")
                 return None
