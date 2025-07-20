@@ -74,15 +74,15 @@
                 "profit_multiplier": 1.8,
                 "risk_percent": 0.009,
                 "trailing_stop": {
-                    "activation_pips": 48,
-                    "step_pips": 24
+                    "activation_pips": 42,
+                    "step_pips": 21
                 }
             },
             "trading_hours": [
                 "09:00-10:30",
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 952.5",
+            "comment": "Converted from autonomous - score: 826.4",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -110,7 +110,7 @@
                 "02:00-04:00",
                 "09:00-10:30"
             ],
-            "comment": "Converted from autonomous - score: 823.2",
+            "comment": "Converted from autonomous - score: 675.6",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -122,7 +122,7 @@
                 }
             }
         },
-        "USDCAD": {
+        "NZDUSD": {
             "risk_management": {
                 "contract_size": 0.07,
                 "min_sl_distance_pips": 8,
@@ -135,9 +135,10 @@
                 }
             },
             "trading_hours": [
+                "09:00-10:30",
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 663.7",
+            "comment": "Converted from autonomous - score: 654.2",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -157,14 +158,41 @@
                 "profit_multiplier": 1.8,
                 "risk_percent": 0.009,
                 "trailing_stop": {
-                    "activation_pips": 42,
-                    "step_pips": 21
+                    "activation_pips": 48,
+                    "step_pips": 24
                 }
             },
             "trading_hours": [
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 649.3",
+            "comment": "Converted from autonomous - score: 651.8",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.63,
+                    "sell_signal": 0.27
+                }
+            }
+        },
+        "USDCAD": {
+            "risk_management": {
+                "contract_size": 0.08,
+                "min_sl_distance_pips": 8,
+                "base_sl_pips": 8,
+                "profit_multiplier": 1.8,
+                "risk_percent": 0.009,
+                "trailing_stop": {
+                    "activation_pips": 48,
+                    "step_pips": 24
+                }
+            },
+            "trading_hours": [
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 649.8",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -176,7 +204,7 @@
                 }
             }
         },
-        "AUDUSD": {
+        "USDCHF": {
             "risk_management": {
                 "contract_size": 0.08,
                 "min_sl_distance_pips": 8,
@@ -192,35 +220,7 @@
                 "09:00-10:30",
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 642.2",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.675,
-                    "sell_signal": 0.225
-                }
-            }
-        },
-        "GBPJPY": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 8,
-                "base_sl_pips": 8,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.009,
-                "trailing_stop": {
-                    "activation_pips": 48,
-                    "step_pips": 24
-                }
-            },
-            "trading_hours": [
-                "09:00-10:30",
-                "14:00-16:00"
-            ],
-            "comment": "Converted from autonomous - score: 630.0",
+            "comment": "Converted from autonomous - score: 637.8",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -245,7 +245,7 @@
     "initial_balance": 100000,
     "conversion_metadata": {
         "converted_from": "config_autonomous_high_stakes_aggressive.json",
-        "conversion_date": "2025-07-20T12:38:45.832956",
+        "conversion_date": "2025-07-20T18:10:58.585708",
         "converter_version": "1.0",
         "original_aggressiveness": "aggressive"
     }

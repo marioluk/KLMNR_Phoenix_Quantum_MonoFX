@@ -737,114 +737,123 @@ def main():
     print("Genera configurazioni ottimizzate DA ZERO senza JSON sorgente")
     print("="*70)
     
-    print("📋 OPZIONI DISPONIBILI:")
-    print("1. 🚀 Genera tutte le configurazioni da zero")
-    print("2. 🎯 Genera singola configurazione")
-    print("3. ⚙️ Configurazione avanzata")
-    print("4. ✅ Test validazione configurazioni")
-    print("5. ❌ Esci")
-    
-    choice = input("\n👉 Scegli opzione (1-5): ").strip()
-    
-    try:
-        if choice == "1":
-            # Genera tutte da zero
-            print("\n🔧 Configurazione ottimizzazione:")
-            days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
-            optimization_days = int(days) if days.isdigit() else 30
-            
-            optimizer = AutonomousHighStakesOptimizer(optimization_days)
-            results = optimizer.generate_all_configs()
-            
-            print(f"\n📄 CONFIGURAZIONI GENERATE DA ZERO:")
-            for level, filepath in results.items():
-                print(f"   ✅ {level.upper()}: {os.path.basename(filepath)}")
+    # Loop continuo fino a "Esci"
+    while True:
+        print("\n📋 OPZIONI DISPONIBILI:")
+        print("1. 🚀 Genera tutte le configurazioni da zero")
+        print("2. 🎯 Genera singola configurazione")
+        print("3. ⚙️ Configurazione avanzata")
+        print("4. ✅ Test validazione configurazioni")
+        print("5. ❌ Esci")
+        
+        choice = input("\n👉 Scegli opzione (1-5): ").strip()
+        
+        try:
+            if choice == "1":
+                # Genera tutte da zero
+                print("\n🔧 Configurazione ottimizzazione:")
+                days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
                 
-        elif choice == "2":
-            # Genera singola
-            print("\n🎯 Scegli livello aggressività:")
-            print("1. 🟢 Conservative")
-            print("2. 🟡 Moderate")
-            print("3. 🔴 Aggressive")
-            
-            level_choice = input("👉 Scegli (1-3): ").strip()
-            level_map = {'1': 'conservative', '2': 'moderate', '3': 'aggressive'}
-            level = level_map.get(level_choice, 'moderate')
-            
-            days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
-            optimization_days = int(days) if days.isdigit() else 30
-            
-            optimizer = AutonomousHighStakesOptimizer(optimization_days)
-            config = optimizer.generate_optimized_config(level)
-            filepath = optimizer.save_config(config, level)
-            
-            print(f"\n✅ Generato da zero: {os.path.basename(filepath)}")
-            
-        elif choice == "3":
-            # Configurazione avanzata
-            print("\n⚙️ CONFIGURAZIONE AVANZATA:")
-            days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
-            optimization_days = int(days) if days.isdigit() else 30
-            
-            output_dir = input("📁 Directory output (ENTER per corrente): ").strip()
-            if not output_dir:
-                output_dir = None
-            
-            optimizer = AutonomousHighStakesOptimizer(optimization_days, output_dir)
-            
-            print("\n🎯 Scegli cosa generare:")
-            print("1. Tutte le configurazioni")
-            print("2. Solo Conservative + Moderate")
-            print("3. Solo Moderate + Aggressive")
-            
-            gen_choice = input("👉 Scegli (1-3): ").strip()
-            
-            if gen_choice == "1":
+                optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 results = optimizer.generate_all_configs()
-            elif gen_choice == "2":
-                results = {}
-                for level in ['conservative', 'moderate']:
-                    config = optimizer.generate_optimized_config(level)
-                    filepath = optimizer.save_config(config, level)
-                    results[level] = filepath
-            elif gen_choice == "3":
-                results = {}
-                for level in ['moderate', 'aggressive']:
-                    config = optimizer.generate_optimized_config(level)
-                    filepath = optimizer.save_config(config, level)
-                    results[level] = filepath
-            
-            print(f"\n📄 GENERATE: {len(results)} configurazioni")
-            
-        elif choice == "4":
-            # Test validazione
-            import glob
-            
-            config_files = glob.glob("config_autonomous_high_stakes_*.json")
-            if not config_files:
-                print("❌ Nessuna configurazione autonoma trovata!")
-                print("💡 Genera prima le configurazioni (opzione 1)")
-                return
-            
-            print("\n🔄 Test validazione configurazioni...")
-            
-            optimizer = AutonomousHighStakesOptimizer()
-            
-            for config_file in config_files:
-                results = optimizer.run_validation_test(config_file)
                 
-                status = "✅ PASS" if results['high_stakes_validation'] else "❌ FAIL"
-                print(f"{status} {os.path.basename(config_file)}: €{results['daily_avg_pnl']:.2f}/day")
-            
-        elif choice == "5":
-            print("👋 Optimizer terminato.")
-            
-        else:
-            print("❌ Opzione non valida.")
-            
-    except Exception as e:
-        print(f"❌ Errore: {e}")
-        logger.error(f"Errore main: {e}")
+                print(f"\n📄 CONFIGURAZIONI GENERATE DA ZERO:")
+                for level, filepath in results.items():
+                    print(f"   ✅ {level.upper()}: {os.path.basename(filepath)}")
+                    
+            elif choice == "2":
+                # Genera singola
+                print("\n🎯 Scegli livello aggressività:")
+                print("1. 🟢 Conservative")
+                print("2. 🟡 Moderate")
+                print("3. 🔴 Aggressive")
+                
+                level_choice = input("👉 Scegli (1-3): ").strip()
+                level_map = {'1': 'conservative', '2': 'moderate', '3': 'aggressive'}
+                level = level_map.get(level_choice, 'moderate')
+                
+                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
+                
+                optimizer = AutonomousHighStakesOptimizer(optimization_days)
+                config = optimizer.generate_optimized_config(level)
+                filepath = optimizer.save_config(config, level)
+                
+                print(f"\n✅ Generato da zero: {os.path.basename(filepath)}")
+                
+            elif choice == "3":
+                # Configurazione avanzata
+                print("\n⚙️ CONFIGURAZIONE AVANZATA:")
+                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
+                
+                output_dir = input("📁 Directory output (ENTER per corrente): ").strip()
+                if not output_dir:
+                    output_dir = None
+                
+                optimizer = AutonomousHighStakesOptimizer(optimization_days, output_dir)
+                
+                print("\n🎯 Scegli cosa generare:")
+                print("1. Tutte le configurazioni")
+                print("2. Solo Conservative + Moderate")
+                print("3. Solo Moderate + Aggressive")
+                
+                gen_choice = input("👉 Scegli (1-3): ").strip()
+                
+                if gen_choice == "1":
+                    results = optimizer.generate_all_configs()
+                elif gen_choice == "2":
+                    results = {}
+                    for level in ['conservative', 'moderate']:
+                        config = optimizer.generate_optimized_config(level)
+                        filepath = optimizer.save_config(config, level)
+                        results[level] = filepath
+                elif gen_choice == "3":
+                    results = {}
+                    for level in ['moderate', 'aggressive']:
+                        config = optimizer.generate_optimized_config(level)
+                        filepath = optimizer.save_config(config, level)
+                        results[level] = filepath
+                
+                print(f"\n📄 GENERATE: {len(results)} configurazioni")
+                
+            elif choice == "4":
+                # Test validazione
+                import glob
+                
+                config_files = glob.glob("config_autonomous_high_stakes_*.json")
+                if not config_files:
+                    print("❌ Nessuna configurazione autonoma trovata!")
+                    print("💡 Genera prima le configurazioni (opzione 1)")
+                    continue  # Torna al menu invece di return
+                
+                print("\n🔄 Test validazione configurazioni...")
+                
+                optimizer = AutonomousHighStakesOptimizer()
+                
+                for config_file in config_files:
+                    results = optimizer.run_validation_test(config_file)
+                    
+                    status = "✅ PASS" if results['high_stakes_validation'] else "❌ FAIL"
+                    print(f"{status} {os.path.basename(config_file)}: €{results['daily_avg_pnl']:.2f}/day")
+                
+            elif choice == "5":
+                print("👋 Optimizer terminato.")
+                break  # Esce dal loop
+                
+            else:
+                print("❌ Opzione non valida.")
+                
+        except Exception as e:
+            print(f"❌ Errore: {e}")
+            logger.error(f"Errore main: {e}")
+            print("💡 Premi ENTER per tornare al menu...")
+            input()
+
+    # COMPORTAMENTO ORIGINALE (COMMENTATO):
+    # Lo script terminava automaticamente dopo ogni operazione.
+    # Ora rimane aperto fino a quando l'utente sceglie "Esci" (opzione 5).
 
 if __name__ == "__main__":
     main()

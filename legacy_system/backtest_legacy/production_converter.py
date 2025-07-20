@@ -28,11 +28,17 @@ def find_autonomous_configs() -> List[str]:
         Lista di percorsi assoluti ai file trovati
     """
     
+    # Determina percorsi assoluti basati sulla posizione del file corrente
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
     search_dirs = [
-        "configs",                          # backtest_legacy/configs/
-        "../config",                        # legacy_system/config/
-        ".",                               # backtest_legacy/ (directory corrente)
-        "../../config",                     # root/config/ (se esistesse)
+        os.path.join(script_dir, "configs"),                    # backtest_legacy/configs/
+        os.path.join(script_dir, "..", "config"),               # legacy_system/config/
+        script_dir,                                             # backtest_legacy/ (directory script)
+        os.path.join(script_dir, "..", "..", "config"),         # root/config/ (se esistesse)
+        os.getcwd(),                                           # Directory corrente (da dove viene eseguito)
+        os.path.join(os.getcwd(), "legacy_system", "backtest_legacy"),  # Se eseguito da root
+        os.path.join(os.getcwd(), "legacy_system", "config")    # Se eseguito da root
     ]
     
     all_files = []
@@ -40,9 +46,13 @@ def find_autonomous_configs() -> List[str]:
     print("🔍 Ricerca file config_autonomous_*.json in:")
     
     for search_dir in search_dirs:
-        print(f"   📁 {search_dir}:", end=" ")
-        if os.path.exists(search_dir):
-            pattern = os.path.join(search_dir, "config_autonomous_*.json")
+        # Converti in percorso assoluto e normalizza
+        abs_search_dir = os.path.abspath(search_dir)
+        display_path = os.path.relpath(abs_search_dir) if len(os.path.relpath(abs_search_dir)) < len(abs_search_dir) else abs_search_dir
+        
+        print(f"   📁 {display_path}:", end=" ")
+        if os.path.exists(abs_search_dir):
+            pattern = os.path.join(abs_search_dir, "config_autonomous_*.json")
             found_files = glob.glob(pattern)
             
             # Filtra solo i file non convertiti (esclude _production_ready)
@@ -57,7 +67,8 @@ def find_autonomous_configs() -> List[str]:
             if filtered_files:
                 print(f"✅ {len(filtered_files)} file trovati (su {len(found_files)} totali)")
                 for file_path in filtered_files:
-                    print(f"      • {os.path.relpath(file_path)}")
+                    display_file = os.path.relpath(file_path) if len(os.path.relpath(file_path)) < len(file_path) else file_path
+                    print(f"      • {display_file}")
             else:
                 total_found = len(found_files)
                 if total_found > 0:
@@ -246,13 +257,24 @@ def main():
             # Lista file con ricerca intelligente
             autonomous_files = find_autonomous_configs()
             
-            # Trova anche i file _production_ready
+            # Trova anche i file _production_ready usando percorsi assoluti
             production_files = []
-            search_dirs = ["configs", "../config", "."]
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            search_dirs = [
+                os.path.join(script_dir, "configs"),                    # backtest_legacy/configs/
+                os.path.join(script_dir, "..", "config"),               # legacy_system/config/
+                script_dir,                                             # backtest_legacy/
+                os.path.join(script_dir, "..", "..", "config"),         # root/config/
+                os.getcwd(),                                           # Directory corrente
+                os.path.join(os.getcwd(), "legacy_system", "backtest_legacy"),  # Se eseguito da root
+                os.path.join(os.getcwd(), "legacy_system", "config")    # Se eseguito da root
+            ]
             
             for search_dir in search_dirs:
-                if os.path.exists(search_dir):
-                    pattern = os.path.join(search_dir, "*_production_ready.json")
+                abs_search_dir = os.path.abspath(search_dir)
+                if os.path.exists(abs_search_dir):
+                    pattern = os.path.join(abs_search_dir, "*_production_ready.json")
                     found_files = glob.glob(pattern)
                     for file_path in found_files:
                         abs_path = os.path.abspath(file_path)
@@ -262,14 +284,16 @@ def main():
             print(f"\n📋 CONFIG AUTONOMI ({len(autonomous_files)}):")
             if autonomous_files:
                 for file_path in autonomous_files:
-                    print(f"   • {os.path.relpath(file_path)}")
+                    display_path = os.path.relpath(file_path) if len(os.path.relpath(file_path)) < len(file_path) else file_path
+                    print(f"   • {display_path}")
             else:
                 print("   Nessun file trovato")
             
             print(f"\n📋 CONFIG PRODUZIONE ({len(production_files)}):")
             if production_files:
                 for file_path in production_files:
-                    print(f"   • {os.path.relpath(file_path)}")
+                    display_path = os.path.relpath(file_path) if len(os.path.relpath(file_path)) < len(file_path) else file_path
+                    print(f"   • {display_path}")
             else:
                 print("   Nessun file trovato")
         elif choice == "4":

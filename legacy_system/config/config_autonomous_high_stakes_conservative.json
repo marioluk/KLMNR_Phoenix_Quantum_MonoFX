@@ -2,7 +2,7 @@
     "metadata": {
         "version": "2.0",
         "created_by": "AutonomousHighStakesOptimizer",
-        "creation_date": "2025-07-20T12:21:14.497556",
+        "creation_date": "2025-07-20T18:09:28.574122",
         "description": "Configurazione generata autonomamente per High Stakes Challenge",
         "optimization_period_days": 30
     },
@@ -22,10 +22,10 @@
     "quantum_params": {
         "buffer_size": 500,
         "signal_cooldown": 600,
-        "adaptive_threshold": 4.4608116827708395,
-        "volatility_filter": 3.27387445518056,
+        "adaptive_threshold": 4.110020673769195,
+        "volatility_filter": 3.040013782512797,
         "trend_strength_min": 0.6,
-        "confluence_threshold": 3.738649346216672,
+        "confluence_threshold": 3.458016539015356,
         "quantum_boost": true,
         "neural_enhancement": true
     },
@@ -45,7 +45,7 @@
             "enabled": true,
             "lot_size": 0.07,
             "stop_loss_pips": 12,
-            "take_profit_pips": 36,
+            "take_profit_pips": 31,
             "signal_buy_threshold": 0.825,
             "signal_sell_threshold": 0.275,
             "max_spread": 2.0,
@@ -53,7 +53,7 @@
                 "London",
                 "NewYork"
             ],
-            "optimization_score": 952.4702224259856,
+            "optimization_score": 826.3944581076126,
             "aggressiveness_applied": "conservative"
         },
         "USDJPY": {
@@ -68,35 +68,35 @@
                 "Tokyo",
                 "London"
             ],
-            "optimization_score": 823.1812706444224,
+            "optimization_score": 675.6279526994399,
             "aggressiveness_applied": "conservative"
         },
-        "USDCAD": {
+        "NZDUSD": {
             "enabled": true,
             "lot_size": 0.07,
             "stop_loss_pips": 12,
             "take_profit_pips": 36,
             "signal_buy_threshold": 0.825,
             "signal_sell_threshold": 0.275,
-            "max_spread": 3.5,
+            "max_spread": 4.0,
             "trading_sessions": [
-                "NewYork"
+                "Sydney"
             ],
-            "optimization_score": 663.6644242588859,
+            "optimization_score": 654.1732327269144,
             "aggressiveness_applied": "conservative"
         },
         "NAS100": {
             "enabled": true,
             "lot_size": 0.07,
             "stop_loss_pips": 12,
-            "take_profit_pips": 31,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.77,
+            "signal_sell_threshold": 0.33,
             "max_spread": 8.0,
             "trading_sessions": [
                 "NewYork"
             ],
-            "optimization_score": 649.3334288873782,
+            "optimization_score": 651.8208954813889,
             "aggressiveness_applied": "conservative"
         }
     },
@@ -132,9 +132,9 @@
     "optimization_results": {
         "aggressiveness_level": "conservative",
         "symbols_count": 4,
-        "average_optimization_score": 772.16,
-        "total_optimization_score": 3088.65,
+        "average_optimization_score": 702.0,
+        "total_optimization_score": 2808.02,
         "optimization_period": "30 days",
-        "optimization_timestamp": "2025-07-20T12:21:16.864560"
+        "optimization_timestamp": "2025-07-20T18:09:30.450626"
     }
 }
