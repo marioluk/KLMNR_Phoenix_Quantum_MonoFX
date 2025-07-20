@@ -9,6 +9,7 @@ import sys
 import glob
 import json
 from datetime import datetime
+from typing import List
 
 # Import del converter
 try:
@@ -18,34 +19,103 @@ except ImportError:
     print("💡 Assicurati che config_converter.py sia nella directory corrente")
     sys.exit(1)
 
-def convert_all_autonomous_configs(source_dir: str = "../config", production_template: str = None):
+def find_autonomous_configs() -> List[str]:
+    """
+    Trova tutti i file config_autonomous_*.json in tutte le possibili ubicazioni
+    Esclude i file già convertiti (_production_ready)
+    
+    Returns:
+        Lista di percorsi assoluti ai file trovati
+    """
+    
+    search_dirs = [
+        "configs",                          # backtest_legacy/configs/
+        "../config",                        # legacy_system/config/
+        ".",                               # backtest_legacy/ (directory corrente)
+        "../../config",                     # root/config/ (se esistesse)
+    ]
+    
+    all_files = []
+    
+    print("🔍 Ricerca file config_autonomous_*.json in:")
+    
+    for search_dir in search_dirs:
+        print(f"   📁 {search_dir}:", end=" ")
+        if os.path.exists(search_dir):
+            pattern = os.path.join(search_dir, "config_autonomous_*.json")
+            found_files = glob.glob(pattern)
+            
+            # Filtra solo i file non convertiti (esclude _production_ready)
+            filtered_files = []
+            for file_path in found_files:
+                if "_production_ready" not in os.path.basename(file_path):
+                    abs_path = os.path.abspath(file_path)
+                    if abs_path not in [os.path.abspath(f) for f in all_files]:
+                        all_files.append(file_path)
+                        filtered_files.append(file_path)
+            
+            if filtered_files:
+                print(f"✅ {len(filtered_files)} file trovati (su {len(found_files)} totali)")
+                for file_path in filtered_files:
+                    print(f"      • {os.path.relpath(file_path)}")
+            else:
+                total_found = len(found_files)
+                if total_found > 0:
+                    print(f"⚠️ {total_found} file trovati ma tutti già convertiti")
+                else:
+                    print("❌ nessun file")
+        else:
+            print("❌ directory non esiste")
+    
+    print(f"\n📊 TOTALE: {len(all_files)} file autonomi non convertiti")
+    return sorted(all_files)
+
+def convert_all_autonomous_configs(source_dir: str = None, production_template: str = None):
     """
     Converte tutte le configurazioni autonome in formato produzione
     
     Args:
-        source_dir: Directory contenente i config autonomi
+        source_dir: Directory contenente i config autonomi (deprecato, usa ricerca automatica)
         production_template: Path al template produzione
     """
     
     print("🔄 CONVERSIONE AUTOMATICA CONFIG AUTONOMI")
     print("="*50)
     
-    # Trova tutti i file autonomi
-    autonomous_files = glob.glob(os.path.join(source_dir, "config_autonomous_*.json"))
+    # Trova tutti i file autonomi in tutte le possibili ubicazioni
+    autonomous_files = find_autonomous_configs()
     
     if not autonomous_files:
-        print(f"❌ Nessun file autonomo trovato in {source_dir}")
+        print("❌ Nessun file config_autonomous_*.json trovato")
+        print("🔍 Ricerca effettuata in:")
+        print("   • configs/ (backtest_legacy/configs/)")
+        print("   • ../config/ (legacy_system/config/)")
+        print("   • . (directory corrente)")
         return
     
-    print(f"📁 Trovati {len(autonomous_files)} file autonomi")
+    print(f"📁 Trovati {len(autonomous_files)} file autonomi:")
+    for file_path in autonomous_files:
+        rel_path = os.path.relpath(file_path)
+        print(f"   • {rel_path}")
+    print()
     
-    # Template produzione
+    # Template produzione - cerca in diverse ubicazioni
     if not production_template:
-        production_template = "../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        template_paths = [
+            "../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",  # legacy_system/
+            "../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",  # legacy_system/config/
+            "configs/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"     # backtest_legacy/configs/
+        ]
+        
+        for template_path in template_paths:
+            if os.path.exists(template_path):
+                production_template = template_path
+                break
     
-    if not os.path.exists(production_template):
-        print(f"⚠️ Template produzione non trovato: {production_template}")
-        print("💡 Usando template di default")
+    if production_template and os.path.exists(production_template):
+        print(f"📋 Template produzione: {os.path.relpath(production_template)}")
+    else:
+        print("⚠️ Template produzione non trovato, usando template di default")
         production_template = None
     
     # Inizializza converter
@@ -56,12 +126,13 @@ def convert_all_autonomous_configs(source_dir: str = "../config", production_tem
     # Converti ogni file
     for autonomous_file in autonomous_files:
         try:
-            print(f"\n🔄 Convertendo: {os.path.basename(autonomous_file)}")
+            print(f"🔄 Convertendo: {os.path.relpath(autonomous_file)}")
             
-            # Nome file output
+            # Nome file output - salva nella stessa directory dell'originale
+            file_dir = os.path.dirname(autonomous_file)
             base_name = os.path.splitext(os.path.basename(autonomous_file))[0]
             output_name = f"{base_name}_production_ready.json"
-            output_path = os.path.join(source_dir, output_name)
+            output_path = os.path.join(file_dir, output_name)
             
             # Converti
             converted_path = converter.convert_autonomous_to_production(
@@ -70,20 +141,19 @@ def convert_all_autonomous_configs(source_dir: str = "../config", production_tem
             )
             
             converted_files.append(converted_path)
-            print(f"✅ Convertito: {os.path.basename(converted_path)}")
+            print(f"✅ Convertito: {os.path.relpath(converted_path)}")
             
         except Exception as e:
-            print(f"❌ Errore conversione {autonomous_file}: {e}")
+            print(f"❌ Errore conversione {os.path.relpath(autonomous_file)}: {e}")
     
     # Riepilogo
     print(f"\n🎯 CONVERSIONE COMPLETATA")
     print(f"✅ {len(converted_files)} file convertiti con successo")
-    print(f"📁 File disponibili in: {source_dir}")
     
     if converted_files:
         print("\n📋 FILE PRONTI PER PRODUZIONE:")
         for file_path in converted_files:
-            print(f"   • {os.path.basename(file_path)}")
+            print(f"   • {os.path.relpath(file_path)}")
         
         print("\n💡 PROSSIMI PASSI:")
         print("1. Testa i file convertiti in ambiente sicuro")
@@ -96,20 +166,21 @@ def convert_single_config():
     print("🔄 CONVERSIONE SINGOLA CONFIG")
     print("="*40)
     
-    # Lista file autonomi disponibili
-    configs_dir = "../config"
-    if os.path.exists(configs_dir):
-        autonomous_files = glob.glob(os.path.join(configs_dir, "config_autonomous_*.json"))
-    else:
-        autonomous_files = glob.glob("config_autonomous_*.json")
+    # Trova file autonomi disponibili con ricerca intelligente
+    autonomous_files = find_autonomous_configs()
     
     if not autonomous_files:
-        print("❌ Nessun file autonomo trovato")
+        print("❌ Nessun file config_autonomous_*.json trovato")
+        print("🔍 Ricerca effettuata in:")
+        print("   • configs/ (backtest_legacy/configs/)")
+        print("   • ../config/ (legacy_system/config/)")
+        print("   • . (directory corrente)")
         return
     
     print("📋 File autonomi disponibili:")
     for i, file_path in enumerate(autonomous_files, 1):
-        print(f"{i}. {os.path.basename(file_path)}")
+        rel_path = os.path.relpath(file_path)
+        print(f"{i}. {rel_path}")
     
     # Selezione utente
     try:
@@ -121,17 +192,28 @@ def convert_single_config():
         
         selected_file = autonomous_files[choice]
         
-        # Template produzione
-        production_template = input("📁 Path template produzione (ENTER per default): ").strip()
+        # Template produzione - cerca automaticamente
+        production_template = input("📁 Path template produzione (ENTER per ricerca automatica): ").strip()
         if not production_template:
-            production_template = "../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+            # Ricerca automatica template
+            template_paths = [
+                "../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+                "../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+                "configs/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+            ]
+            
+            for template_path in template_paths:
+                if os.path.exists(template_path):
+                    production_template = template_path
+                    print(f"📋 Template trovato: {os.path.relpath(template_path)}")
+                    break
         
         # Converti
-        converter = ConfigConverter(production_template if os.path.exists(production_template) else None)
+        converter = ConfigConverter(production_template if production_template and os.path.exists(production_template) else None)
         converted_path = converter.convert_autonomous_to_production(selected_file)
         
         print(f"\n✅ Conversione completata!")
-        print(f"📁 File convertito: {converted_path}")
+        print(f"📁 File convertito: {os.path.relpath(converted_path)}")
         
     except ValueError:
         print("❌ Input non valido")
@@ -161,18 +243,35 @@ def main():
         elif choice == "2":
             convert_single_config()
         elif choice == "3":
-            # Lista file
-            configs_dir = "configs"
-            autonomous_files = glob.glob(os.path.join(configs_dir, "config_autonomous_*.json"))
-            production_files = glob.glob(os.path.join(configs_dir, "*_production_ready.json"))
+            # Lista file con ricerca intelligente
+            autonomous_files = find_autonomous_configs()
+            
+            # Trova anche i file _production_ready
+            production_files = []
+            search_dirs = ["configs", "../config", "."]
+            
+            for search_dir in search_dirs:
+                if os.path.exists(search_dir):
+                    pattern = os.path.join(search_dir, "*_production_ready.json")
+                    found_files = glob.glob(pattern)
+                    for file_path in found_files:
+                        abs_path = os.path.abspath(file_path)
+                        if abs_path not in [os.path.abspath(f) for f in production_files]:
+                            production_files.append(file_path)
             
             print(f"\n📋 CONFIG AUTONOMI ({len(autonomous_files)}):")
-            for file_path in autonomous_files:
-                print(f"   • {os.path.basename(file_path)}")
+            if autonomous_files:
+                for file_path in autonomous_files:
+                    print(f"   • {os.path.relpath(file_path)}")
+            else:
+                print("   Nessun file trovato")
             
             print(f"\n📋 CONFIG PRODUZIONE ({len(production_files)}):")
-            for file_path in production_files:
-                print(f"   • {os.path.basename(file_path)}")
+            if production_files:
+                for file_path in production_files:
+                    print(f"   • {os.path.relpath(file_path)}")
+            else:
+                print("   Nessun file trovato")
         elif choice == "4":
             print("👋 Converter terminato.")
             break
