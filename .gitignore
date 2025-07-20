@@ -69,3 +69,6 @@ Thumbs.db
 >>>>>>> dev
 
 .gait/custom-merge-driver.sh
+
+# Gait extension files
+.gait/
