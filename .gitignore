@@ -34,6 +34,7 @@ logs/daily_config_updater_*.log
 
 # Auto-start system logs
 **/auto_start_*.log
+**/auto_start_daily_updater_*.log
 
 # Backup files
 *.backup
