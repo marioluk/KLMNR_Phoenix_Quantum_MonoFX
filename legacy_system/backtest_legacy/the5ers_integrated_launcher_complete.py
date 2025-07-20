@@ -143,15 +143,15 @@ class The5ersIntegratedLauncher:
         print()
         
         print("� Opzioni disponibili:")
-        print("1. 🏆 Auto-Best (Sceglie automaticamente il migliore)")
-        print("2. � Conservative Best")
-        print("3. 🟡 Moderate Best") 
-        print("4. 🔴 Aggressive Best")
+        print("1. 🏆 Auto-Best (Genera tutti, confronta, mantiene solo il migliore)")
+        print("2. � Conservative Best (Solo Conservative)")
+        print("3. 🟡 Moderate Best (Solo Moderate)") 
+        print("4. 🔴 Aggressive Best (Solo Aggressive)")
         
         choice = input("👉 Scegli opzione (1-4): ").strip()
         
         if choice == "1":
-            # Auto-best: genera tutti e sceglie il migliore
+            # Auto-best: genera tutti, sceglie il migliore, elimina gli altri
             print("🔄 Generando tutte le configurazioni per confronto...")
             results = self.autonomous_optimizer.generate_all_configs()
             
@@ -178,6 +178,21 @@ class The5ersIntegratedLauncher:
             
             print(f"\n🥇 MIGLIORE: {best_level.upper()} (Score: {best_score:.2f})")
             print(f"📄 File: {os.path.basename(best_config)}")
+            
+            # 🆕 PULIZIA: Elimina le configurazioni non scelte per mantenere solo la migliore
+            print(f"\n🧹 Pulizia file non ottimali...")
+            files_removed = 0
+            for level, filepath in results.items():
+                if filepath != best_config and os.path.exists(filepath):
+                    try:
+                        os.remove(filepath)
+                        files_removed += 1
+                        print(f"   🗑️ Rimosso: {os.path.basename(filepath)} ({level.upper()})")
+                    except Exception as e:
+                        print(f"   ⚠️ Errore rimozione {os.path.basename(filepath)}: {e}")
+            
+            print(f"✅ Mantenuto solo il migliore: {os.path.basename(best_config)}")
+            print(f"🧹 Rimossi {files_removed} file non ottimali")
             
         elif choice in ["2", "3", "4"]:
             level_map = {"2": "conservative", "3": "moderate", "4": "aggressive"}

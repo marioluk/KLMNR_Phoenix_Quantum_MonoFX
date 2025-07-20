@@ -74,62 +74,6 @@
                 "profit_multiplier": 1.8,
                 "risk_percent": 0.005,
                 "trailing_stop": {
-                    "activation_pips": 31,
-                    "step_pips": 15
-                }
-            },
-            "trading_hours": [
-                "09:00-10:30",
-                "14:00-16:00"
-            ],
-            "comment": "Converted from autonomous - score: 826.4",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
-        },
-        "USDJPY": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
-                    "activation_pips": 36,
-                    "step_pips": 18
-                }
-            },
-            "trading_hours": [
-                "02:00-04:00",
-                "09:00-10:30"
-            ],
-            "comment": "Converted from autonomous - score: 675.6",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
-        },
-        "NZDUSD": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
                     "activation_pips": 36,
                     "step_pips": 18
                 }
@@ -138,7 +82,7 @@
                 "09:00-10:30",
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 654.2",
+            "comment": "Converted from autonomous - score: 924.9",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
@@ -165,15 +109,71 @@
             "trading_hours": [
                 "14:00-16:00"
             ],
-            "comment": "Converted from autonomous - score: 651.8",
+            "comment": "Converted from autonomous - score: 723.3",
             "quantum_params_override": {
                 "buffer_size": 500,
                 "spin_window": 70,
                 "min_spin_samples": 25,
                 "signal_cooldown": 800,
                 "entropy_thresholds": {
-                    "buy_signal": 0.77,
-                    "sell_signal": 0.33
+                    "buy_signal": 0.825,
+                    "sell_signal": 0.275
+                }
+            }
+        },
+        "GBPUSD": {
+            "risk_management": {
+                "contract_size": 0.07,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 1.8,
+                "risk_percent": 0.005,
+                "trailing_stop": {
+                    "activation_pips": 36,
+                    "step_pips": 18
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Converted from autonomous - score: 697.7",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.825,
+                    "sell_signal": 0.275
+                }
+            }
+        },
+        "USDJPY": {
+            "risk_management": {
+                "contract_size": 0.08,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 1.8,
+                "risk_percent": 0.005,
+                "trailing_stop": {
+                    "activation_pips": 36,
+                    "step_pips": 18
+                }
+            },
+            "trading_hours": [
+                "02:00-04:00",
+                "09:00-10:30"
+            ],
+            "comment": "Converted from autonomous - score: 682.5",
+            "quantum_params_override": {
+                "buffer_size": 500,
+                "spin_window": 70,
+                "min_spin_samples": 25,
+                "signal_cooldown": 800,
+                "entropy_thresholds": {
+                    "buy_signal": 0.825,
+                    "sell_signal": 0.275
                 }
             }
         }
@@ -190,7 +190,7 @@
     "initial_balance": 100000,
     "conversion_metadata": {
         "converted_from": "config_autonomous_high_stakes_conservative.json",
-        "conversion_date": "2025-07-20T18:10:58.594047",
+        "conversion_date": "2025-07-20T19:30:47.064641",
         "converter_version": "1.0",
         "original_aggressiveness": "conservative"
     }

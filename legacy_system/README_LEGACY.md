@@ -1,38 +1,52 @@
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
-## Sistema Monolitico di Trading Algoritmico Quantistico
+# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY VERSION [PRODUZIONE]
+## Sistema Monolitico di Trading Algoritmico Quantistico - STATO: ATTIVO IN PRODUZIONE
 
 ---
 
-## 📋 **OVERVIEW DEL SISTEMA LEGACY**
+## 📋 **OVERVIEW DEL SISTEMA LEGACY - PRODUZIONE 2025**
 
-Questo è il **sistema legacy monolitico** completamente funzionante e testato. Il file principale `PRO-THE5ERS-QM-PHOENIX-GITCOP.py` contiene tutto il codice necessario per il trading automatico quantistico su The5ers.
+⚠️ **SISTEMA IN PRODUZIONE ATTIVA** - Questo è il sistema legacy completamente testato e validato, attualmente utilizzato per trading live su The5ers High Stakes Challenge. Non modificare senza adeguati test.
 
 ### **🔥 CARATTERISTICHE PRINCIPALI:**
-- ✅ **Sistema Monolitico Completo** - Un singolo file Python con tutte le funzionalità
-- ✅ **Pronto per Produzione** - Testato e ottimizzato per The5ers High Stakes Challenge
-- ✅ **Algoritmi Quantistici** - Calcoli di entropia, spin quantistico e volatilità adattiva
-- ✅ **Risk Management Ultra-Conservativo** - Protezioni multiple e compliance The5ers
-- ✅ **Performance Ottimizzate** - Buffer ridotti e parametri debug-friendly
+- ✅ **Sistema Monolitico Completamente Testato** - Un singolo file Python con tutte le funzionalità validate
+- ✅ **PRODUZIONE ATTIVA** - Operativo su The5ers High Stakes Challenge dal Luglio 2025
+- ✅ **Algoritmi Quantistici Validati** - Calcoli di entropia, spin quantistico e volatilità adattiva ottimizzati
+- ✅ **Risk Management Ultra-Conservativo** - Protezioni multiple testate e compliance The5ers verificata
+- ✅ **Performance Ottimizzate per Produzione** - Configurazione con daily config updater automatico
+- ✅ **Automazione Completa** - Sistema di aggiornamento configurazioni daily implementato
 
 ---
 
-## 🚀 **AVVIO RAPIDO**
+## 🚀 **SISTEMA PRODUZIONE - CONFIGURAZIONE ATTUALE**
 
-### **Prerequisiti:**
+### **⚠️ IMPORTANTE - SISTEMA IN USO ATTIVO:**
+```bash
+# File di configurazione attivo in produzione:
+CONFIG_FILE = "config/config_autonomous_high_stakes_conservative_production_ready.json"
+
+# Sistema di aggiornamento automatico configurazioni:
+- Daily Config Updater implementato e attivo
+- Backup automatico configurazioni
+- Ottimizzazione autonoma parametri
+- Validazione automatica dopo aggiornamenti
+```
+
+### **Prerequisiti Produzione:**
 ```bash
 pip install MetaTrader5 numpy
 ```
 
-### **Avvio del Sistema:**
+### **Avvio Sistema Legacy (Produzione):**
 ```bash
-cd c:\KLMNR_Projects\KLMNR_Phoenix_Quantum
+cd c:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system
 python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
 ```
 
-### **File di Configurazione:**
-- `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json` - Configurazione principale
-- Modifica i parametri MT5: login, password, server
-- Simboli configurati: EURUSD, GBPUSD, USDJPY, XAUUSD, NAS100
+### **File di Configurazione Attivi:**
+- ✅ `config/config_autonomous_high_stakes_conservative_production_ready.json` - **CONFIGURAZIONE PRODUZIONE ATTIVA**
+- ⚙️ `daily_config_updater.py` - Sistema di aggiornamento automatico (esegue daily alle 06:00)
+- 🔄 `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json` - Configurazione legacy di backup
+- 📊 Simboli ottimizzati: 4 strumenti selezionati automaticamente, risk 0.5%
 
 ---
 
