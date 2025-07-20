@@ -8,9 +8,15 @@
   },
   "kv_store": {
     "unique_matched_lines_count": 0,
-    "total_repo_line_count": 24534,
+    "total_repo_line_count": 55730,
     "best_prompt_response": null,
     "file_statistics": [
+      {
+        "file": "CHAT_HISTORY_LOG.md",
+        "total_lines": 31,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
       {
         "file": "CONFIGURAZIONE_BROKER_GUIDE.md",
         "total_lines": 53,
@@ -86,6 +92,12 @@
       {
         "file": "README_MULTI_BROKER.md",
         "total_lines": 361,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "README_PROJECT_OVERVIEW.md",
+        "total_lines": 271,
         "ai_generated_lines": 0,
         "ai_generated_percentage": 0
       },
@@ -234,6 +246,12 @@
         "ai_generated_percentage": 0
       },
       {
+        "file": "dashboard/README.md",
+        "total_lines": 87,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
         "file": "dashboard/dashboard_the5ers.py",
         "total_lines": 1089,
         "ai_generated_lines": 0,
@@ -278,6 +296,726 @@
       {
         "file": "docs/RISOLUZIONE_GRAFICI.md",
         "total_lines": 110,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/CHANGELOG_CONFIG_FIX.md",
+        "total_lines": 119,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/CONFIG_ORGANIZATION_GUIDE.md",
+        "total_lines": 77,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+        "total_lines": 219,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/PRO-THE5ERS-QM-PHOENIX-GITCOP.py",
+        "total_lines": 2438,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/QUICK_START.md",
+        "total_lines": 54,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/README_LEGACY.md",
+        "total_lines": 316,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/TODO_LEGACY.md",
+        "total_lines": 191,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/DOCUMENTATION_INDEX.md",
+        "total_lines": 166,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/QUICK_START_BACKTEST.md",
+        "total_lines": 54,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/README.md",
+        "total_lines": 179,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/TODO-NEW.txt",
+        "total_lines": 104,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/TODO.ipynb",
+        "total_lines": 1178,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/autonomous_high_stakes_optimizer.py",
+        "total_lines": 851,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/cleanup_workspace.bat",
+        "total_lines": 72,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/config_autonomous_high_stakes_aggressive.json",
+        "total_lines": 169,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/config_autonomous_high_stakes_conservative.json",
+        "total_lines": 140,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/config_autonomous_high_stakes_conservative_production_ready.json",
+        "total_lines": 197,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/config_autonomous_high_stakes_moderate.json",
+        "total_lines": 155,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/config_converter.py",
+        "total_lines": 276,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_aggressive.json",
+        "total_lines": 168,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_aggressive_production_ready.json",
+        "total_lines": 252,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_aggressive_production_ready_production_ready.json",
+        "total_lines": 254,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_balanced.json",
+        "total_lines": 155,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_balanced_production_ready.json",
+        "total_lines": 224,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_balanced_production_ready_production_ready.json",
+        "total_lines": 226,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_conservative.json",
+        "total_lines": 140,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_conservative_production_ready.json",
+        "total_lines": 197,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_conservative_production_ready_production_ready.json",
+        "total_lines": 198,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_moderate.json",
+        "total_lines": 154,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_moderate_production_ready.json",
+        "total_lines": 225,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_autonomous_high_stakes_moderate_production_ready_production_ready.json",
+        "total_lines": 226,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_conservative_step1.json",
+        "total_lines": 229,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_high_stakes_aggressive.json",
+        "total_lines": 340,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_high_stakes_conservative.json",
+        "total_lines": 265,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_high_stakes_moderate.json",
+        "total_lines": 302,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_step2_conservative.json",
+        "total_lines": 229,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/configs/config_ultra_conservative_step1.json",
+        "total_lines": 229,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/ANALISI_STRATEGICA_SIMBOLI.md",
+        "total_lines": 227,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/AUTONOMOUS_OPTIMIZER_GUIDE.md",
+        "total_lines": 297,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/CLEANUP_COMPLETED.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/CLEANUP_PLAN.md",
+        "total_lines": 118,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/CONFIGURAZIONE_PRODUZIONE_FINALE.md",
+        "total_lines": 130,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/DOCUMENTATION_INDEX.md",
+        "total_lines": 138,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/GUIDA_CONFIG_SELECTOR.md",
+        "total_lines": 140,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/HIGH_STAKES_3_LEVELS_GUIDE.md",
+        "total_lines": 190,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/HIGH_STAKES_CHALLENGE_GUIDE.md",
+        "total_lines": 180,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/INDEX_ANALISI_COMPLETE.md",
+        "total_lines": 132,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/INTEGRATED_SYSTEM_README.md",
+        "total_lines": 1043,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/PARAMETRI_OTTIMIZZATI_SIMBOLI.md",
+        "total_lines": 190,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/README_LAUNCHER_AGGIORNATO.md",
+        "total_lines": 207,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/SISTEMA_INTEGRATO_COMPLETO.md",
+        "total_lines": 189,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/STRATEGIA_DEFINITIVA.md",
+        "total_lines": 187,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/SUPER_LAUNCHER_GUIDE.md",
+        "total_lines": 294,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/docs/WORKFLOW_OPTIMIZATION_GUIDE.md",
+        "total_lines": 232,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/high_stakes_optimizer.py",
+        "total_lines": 560,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/integrated_backtest.py",
+        "total_lines": 549,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/ANALISI_STRATEGICA_SIMBOLI.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/AUTONOMOUS_OPTIMIZER_GUIDE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/CLEANUP_COMPLETED.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/CLEANUP_PLAN.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/CONFIGURAZIONE_PRODUZIONE_FINALE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/DOCUMENTATION_INDEX.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/GUIDA_CONFIG_SELECTOR.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/HIGH_STAKES_3_LEVELS_GUIDE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/HIGH_STAKES_CHALLENGE_GUIDE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/INDEX_ANALISI_COMPLETE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/INTEGRATED_SYSTEM_README.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/PARAMETRI_OTTIMIZZATI_SIMBOLI.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/README_LAUNCHER_AGGIORNATO.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/SISTEMA_INTEGRATO_COMPLETO.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/STRATEGIA_DEFINITIVA.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/SUPER_LAUNCHER_GUIDE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/WORKFLOW_OPTIMIZATION_GUIDE.md",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/comparative_backtest.py",
+        "total_lines": 412,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_conservative_step1.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_high_stakes_aggressive.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_high_stakes_conservative.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_high_stakes_moderate.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_selector.py",
+        "total_lines": 359,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_step2_conservative.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/config_ultra_conservative_step1.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/custom_period_backtest.py",
+        "total_lines": 587,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/high_stakes_challenge_backtest.py",
+        "total_lines": 478,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/test_integrated.bat",
+        "total_lines": 6,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/test_launcher.py",
+        "total_lines": 51,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_integrated_launcher.py",
+        "total_lines": 1197,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_integrated_launcher_backup.py",
+        "total_lines": 1197,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_launcher.py",
+        "total_lines": 774,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_launcher_fixed.py",
+        "total_lines": 385,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_master_launcher.py",
+        "total_lines": 683,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_optimized_backtest.py",
+        "total_lines": 377,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_simple_launcher.py",
+        "total_lines": 406,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/legacy/the5ers_super_launcher.py",
+        "total_lines": 959,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/master_analyzer.py",
+        "total_lines": 297,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/production_converter.py",
+        "total_lines": 188,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/quick_test_fix.py",
+        "total_lines": 44,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/results/HIGH_STAKES_AGGRESSIVE_RESULTS_20250718_015053.json",
+        "total_lines": 153,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/results/HIGH_STAKES_MODERATE_RESULTS_20250718_014245.json",
+        "total_lines": 49,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/results/HIGH_STAKES_RESULTS_20250718_010925.json",
+        "total_lines": 55,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/results/THE5ERS_COMPLETE_ANALYSIS_20250717_203903.json",
+        "total_lines": 1295,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/symbol_analyzer.py",
+        "total_lines": 403,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_autonomous_backtest.py",
+        "total_lines": 67,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_config_paths.py",
+        "total_lines": 62,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_integration.py",
+        "total_lines": 35,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_position_sizing.py",
+        "total_lines": 47,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_symbols_analysis.py",
+        "total_lines": 53,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_system_report.py",
+        "total_lines": 15,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/test_validation_fix.py",
+        "total_lines": 34,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/the5ers_high_stakes_config.json",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/backtest_legacy/the5ers_integrated_launcher_complete.py",
+        "total_lines": 1716,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+        "total_lines": 219,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/README.md",
+        "total_lines": 171,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/dashboard_the5ers.py",
+        "total_lines": 1089,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/start_dashboard.bat",
+        "total_lines": 51,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/start_dashboard_debug.py",
+        "total_lines": 32,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/start_dashboard_remote.bat",
+        "total_lines": 25,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/templates/dashboard.html",
+        "total_lines": 640,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/dashboard_legacy/test_autodetect.py",
+        "total_lines": 54,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/start_legacy.bat",
+        "total_lines": 50,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "legacy_system/start_legacy.py",
+        "total_lines": 89,
         "ai_generated_lines": 0,
         "ai_generated_percentage": 0
       },
