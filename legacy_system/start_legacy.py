@@ -63,7 +63,7 @@ def main():
     print()
     print("🚀 Avvio sistema legacy...")
     print("💡 Usa Ctrl+C per fermare il sistema")
-    print("📊 Monitor log: logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log")
+    print("📊 Monitor log: logs/log_autonomous_high_stakes_conservative_production_ready.log")
     print("=" * 60)
     print()
     

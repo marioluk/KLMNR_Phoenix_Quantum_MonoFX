@@ -33,7 +33,7 @@ class ConfigConverter:
         """Restituisce template produzione di default"""
         return {
             "logging": {
-                "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log",
+                "log_file": "logs/log_autonomous_high_stakes_conservative_production_ready.log",
                 "max_size_mb": 50,
                 "backup_count": 7,
                 "log_level": "INFO"

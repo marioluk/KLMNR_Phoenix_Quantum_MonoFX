@@ -207,7 +207,7 @@ def calculate_quantum_volatility(self, symbol: str, window: int = 50) -> float:
 ## 📊 **MONITORAGGIO E LOGGING**
 
 ### **Log File:**
-- Posizione: `logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log`
+- Posizione: `logs/log_autonomous_high_stakes_conservative_production_ready.log`
 - Rotazione: 50MB, 7 backup
 - Livello: INFO con debug dettagliato
 

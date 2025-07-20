@@ -108,7 +108,7 @@ schtasks /query /tn "KLMNR_Daily_Config_Updater"
 ### Log di Sistema
 - **Auto-Start Legacy**: `logs/auto_start_YYYYMMDD.log`
 - **Daily Config Updater**: `logs/auto_start_daily_updater_YYYYMMDD.log`  
-- **Trading System**: `logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log`
+- **Trading System**: `logs/log_autonomous_high_stakes_conservative_production_ready.log`
 - **Daily Config Generator**: `logs/daily_config_updater_YYYYMMDD.log`
 
 ### Controllo Rapido Stato

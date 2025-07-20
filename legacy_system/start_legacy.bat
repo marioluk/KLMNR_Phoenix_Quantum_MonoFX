@@ -37,7 +37,7 @@ echo.
 
 echo 🚀 Avvio sistema legacy...
 echo 💡 Usa Ctrl+C per fermare il sistema
-echo 📊 Monitor log: logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log
+echo 📊 Monitor log: logs/log_autonomous_high_stakes_conservative_production_ready.log
 echo 🔗 Connessione: The5ers FivePercentOnline-Real
 echo ================================================================
 echo.

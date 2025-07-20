@@ -74,7 +74,7 @@ def clean_old_logs(log_file: Optional[str] = None, max_backups: int = 5) -> None
         max_backups: Numero massimo di backup da mantenere
     """
     if log_file is None:
-        log_file = "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log"
+        log_file = "logs/log_autonomous_high_stakes_conservative_production_ready.log"
         
     try:
         for i in range(max_backups + 1, 10):

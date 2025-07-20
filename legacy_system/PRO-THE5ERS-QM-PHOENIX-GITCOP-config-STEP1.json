@@ -1,5 +1,6 @@
-{
-    "logging": {
+{    "logging": {
+        "log_file": "logs/log_autonomous_high_stakes_conservative_production_ready.log",
+        "max_size_mb": 10,   "logging": {
         "log_file": "logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log",
         "max_size_mb": 50,
         "backup_count": 7,

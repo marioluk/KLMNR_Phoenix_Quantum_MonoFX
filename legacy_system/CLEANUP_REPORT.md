@@ -51,7 +51,7 @@
 - ✅ `CONFIG_ORGANIZATION_GUIDE.md` - Guida organizzazione config
 
 ### **📊 Monitoraggio:**
-- ✅ `logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log` - Log principale
+- ✅ `logs/log_autonomous_high_stakes_conservative_production_ready.log` - Log principale
 - ✅ `logs/daily_config_updater_*.log` - Log automazione
 
 ### **🔧 Utility:**
