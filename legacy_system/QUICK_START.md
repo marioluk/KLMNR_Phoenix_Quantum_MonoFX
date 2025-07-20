@@ -70,7 +70,7 @@ legacy_system\auto_start_daily_updater.bat
 ### Status Attivo:
 - **Sistema**: ✅ PRODUZIONE ATTIVA su The5ers High Stakes Challenge
 - **Configurazione**: ✅ Auto-ottimizzata daily (4 simboli, risk 0.5%)
-- **Log File**: `logs/log_autonomous_high_stakes_conservative_production_ready.log`
+- **Log File**: `logs/PRO-THE5ERS-QM-PHOENIX-GITCOP-log-STEP1.log`
 - **Console Output**: Messaggi in tempo reale con heartbeat ogni 5 minuti
 - **Automazione**: Daily config update alle 06:00
 
