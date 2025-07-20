@@ -22,5 +22,16 @@ env/
 .DS_Store
 Thumbs.db
 
-# Gait AI files
+# Gait files (extension removed)
 .gait/
+
+# Backup files
+*.backup
+*~
+
+# Temporary files
+temp_*
+*.tmp
+
+# Config backup files
+config/*.backup
