@@ -351,19 +351,21 @@ class HighStakesOptimizer:
     
     def save_optimized_config(self, config: Dict, aggressiveness_level: str, output_dir: str = None) -> str:
         """
-        Salva configurazione ottimizzata su file
+        Salva configurazione ottimizzata nella cartella config del sistema legacy
         
         Args:
             config: Configurazione da salvare
             aggressiveness_level: Livello di aggressività
-            output_dir: Directory di output (default: directory corrente)
+            output_dir: Directory di output (se None, usa cartella config del sistema legacy)
             
         Returns:
             Percorso file salvato
         """
         
         if output_dir is None:
-            output_dir = self.base_dir
+            # Salva nella cartella config del sistema legacy
+            output_dir = os.path.join(os.path.dirname(self.base_dir), "config")
+            os.makedirs(output_dir, exist_ok=True)
         
         filename = f"config_high_stakes_{aggressiveness_level}.json"
         filepath = os.path.join(output_dir, filename)

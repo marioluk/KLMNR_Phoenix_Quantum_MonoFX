@@ -2,7 +2,7 @@
     "metadata": {
         "version": "2.0",
         "created_by": "AutonomousHighStakesOptimizer",
-        "creation_date": "2025-07-18T23:26:00.568654",
+        "creation_date": "2025-07-20T10:15:51.866924",
         "description": "Configurazione generata autonomamente per High Stakes Challenge",
         "optimization_period_days": 30
     },
@@ -22,17 +22,17 @@
     "quantum_params": {
         "buffer_size": 500,
         "signal_cooldown": 600,
-        "adaptive_threshold": 4.393707199783754,
-        "volatility_filter": 3.2291381331891698,
+        "adaptive_threshold": 4.222554090314402,
+        "volatility_filter": 3.1150360602096017,
         "trend_strength_min": 0.6,
-        "confluence_threshold": 3.684965759827003,
+        "confluence_threshold": 3.5480432722515216,
         "quantum_boost": true,
         "neural_enhancement": true
     },
     "risk_parameters": {
-        "risk_percent": 0.005,
-        "max_daily_trades": 4,
-        "max_concurrent_trades": 2,
+        "risk_percent": 0.007,
+        "max_daily_trades": 6,
+        "max_concurrent_trades": 3,
         "min_profit_target": 0.015,
         "stop_loss_atr_multiplier": 1.5,
         "take_profit_atr_multiplier": 2.5,
@@ -44,60 +44,75 @@
         "EURUSD": {
             "enabled": true,
             "lot_size": 0.07,
-            "stop_loss_pips": 12,
-            "take_profit_pips": 36,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
+            "stop_loss_pips": 10,
+            "take_profit_pips": 40,
+            "signal_buy_threshold": 0.75,
+            "signal_sell_threshold": 0.25,
             "max_spread": 2.0,
             "trading_sessions": [
                 "London",
                 "NewYork"
             ],
-            "optimization_score": 823.7817658833715,
-            "aggressiveness_applied": "conservative"
-        },
-        "NAS100": {
-            "enabled": true,
-            "lot_size": 0.07,
-            "stop_loss_pips": 12,
-            "take_profit_pips": 36,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
-            "max_spread": 8.0,
-            "trading_sessions": [
-                "NewYork"
-            ],
-            "optimization_score": 775.5826299831489,
-            "aggressiveness_applied": "conservative"
+            "optimization_score": 899.7253971965478,
+            "aggressiveness_applied": "moderate"
         },
         "USDJPY": {
             "enabled": true,
-            "lot_size": 0.08,
-            "stop_loss_pips": 12,
-            "take_profit_pips": 36,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
+            "lot_size": 0.07,
+            "stop_loss_pips": 10,
+            "take_profit_pips": 40,
+            "signal_buy_threshold": 0.75,
+            "signal_sell_threshold": 0.25,
             "max_spread": 2.5,
             "trading_sessions": [
                 "Tokyo",
                 "London"
             ],
-            "optimization_score": 763.5911520432456,
-            "aggressiveness_applied": "conservative"
+            "optimization_score": 797.5810779905368,
+            "aggressiveness_applied": "moderate"
         },
-        "USDCHF": {
+        "NAS100": {
             "enabled": true,
             "lot_size": 0.07,
-            "stop_loss_pips": 12,
-            "take_profit_pips": 36,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
-            "max_spread": 3.0,
+            "stop_loss_pips": 10,
+            "take_profit_pips": 40,
+            "signal_buy_threshold": 0.7,
+            "signal_sell_threshold": 0.3,
+            "max_spread": 8.0,
             "trading_sessions": [
-                "London"
+                "NewYork"
             ],
-            "optimization_score": 672.0102119172375,
-            "aggressiveness_applied": "conservative"
+            "optimization_score": 663.7946250851164,
+            "aggressiveness_applied": "moderate"
+        },
+        "NZDUSD": {
+            "enabled": true,
+            "lot_size": 0.08,
+            "stop_loss_pips": 10,
+            "take_profit_pips": 40,
+            "signal_buy_threshold": 0.75,
+            "signal_sell_threshold": 0.25,
+            "max_spread": 4.0,
+            "trading_sessions": [
+                "Sydney"
+            ],
+            "optimization_score": 646.8406330549359,
+            "aggressiveness_applied": "moderate"
+        },
+        "GBPJPY": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 10,
+            "take_profit_pips": 40,
+            "signal_buy_threshold": 0.7,
+            "signal_sell_threshold": 0.3,
+            "max_spread": 4.5,
+            "trading_sessions": [
+                "London",
+                "Tokyo"
+            ],
+            "optimization_score": 614.6123569872651,
+            "aggressiveness_applied": "moderate"
         }
     },
     "trading_sessions": {
@@ -130,11 +145,11 @@
         "time_filter": true
     },
     "optimization_results": {
-        "aggressiveness_level": "conservative",
-        "symbols_count": 4,
-        "average_optimization_score": 758.74,
-        "total_optimization_score": 3034.97,
+        "aggressiveness_level": "moderate",
+        "symbols_count": 5,
+        "average_optimization_score": 724.51,
+        "total_optimization_score": 3622.55,
         "optimization_period": "30 days",
-        "optimization_timestamp": "2025-07-18T23:26:02.216007"
+        "optimization_timestamp": "2025-07-20T10:15:54.320022"
     }
 }

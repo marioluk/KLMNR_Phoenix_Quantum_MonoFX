@@ -1,0 +1,544 @@
+{
+  "panelChats": [],
+  "inlineChats": [],
+  "schemaVersion": "1.0",
+  "deletedChats": {
+    "deletedMessageIDs": [],
+    "deletedPanelChatIDs": []
+  },
+  "kv_store": {
+    "unique_matched_lines_count": 0,
+    "total_repo_line_count": 24534,
+    "best_prompt_response": null,
+    "file_statistics": [
+      {
+        "file": "CONFIGURAZIONE_BROKER_GUIDE.md",
+        "total_lines": 53,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "Git_Workflow_Optimization.ipynb",
+        "total_lines": 1323,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "LICENSE",
+        "total_lines": 22,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "MIGRATION_COMMAND.bat",
+        "total_lines": 22,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "MIGRATION_README.md",
+        "total_lines": 28,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "MT5_PATH_UPDATE_GUIDE.txt",
+        "total_lines": 29,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "PATH_CONFIG.txt",
+        "total_lines": 3,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
+        "total_lines": 219,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "PRO-THE5ERS-QM-PHOENIX-GITCOP.py",
+        "total_lines": 2438,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "PROJECT_RENAMED.txt",
+        "total_lines": 2,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "README.md",
+        "total_lines": 649,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "README_AVVIO_AUTOMATICO.md",
+        "total_lines": 138,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "README_MULTI_BROKER.md",
+        "total_lines": 361,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "REFACTORING_COMPARISON.md",
+        "total_lines": 128,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "REFACTORING_GUIDE.md",
+        "total_lines": 212,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "THE5ERS_BACKTEST_PROCESS_GUIDE.ipynb",
+        "total_lines": 729,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "archive/PRO-THE5ERS-QM-PHOENIX-GITCOP-110725.py",
+        "total_lines": 2509,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "archive/PRO-THE5ERS-QM-PHOENIX-GITCOP-140725.py",
+        "total_lines": 2485,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "archive/PRO-THE5ERS-QM-PHOENIX-GITCOP-150725.py",
+        "total_lines": 2369,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "backtest/README.md",
+        "total_lines": 50,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_ftmo_challenge.json",
+        "total_lines": 78,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_fundednext_demo.json",
+        "total_lines": 77,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_myforexfunds_eval.json",
+        "total_lines": 77,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_symbol_mapping.json",
+        "total_lines": 2,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_the5ers_challenge.json",
+        "total_lines": 80,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_the5ers_updated.json",
+        "total_lines": 36,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/broker_topstep_challenge.json",
+        "total_lines": 77,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/formatted_config.json",
+        "total_lines": 1,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-110725 - Copia.json",
+        "total_lines": 231,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-110725.json",
+        "total_lines": 206,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1 - Copia.json",
+        "total_lines": 137,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json",
+        "total_lines": 202,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP2.json",
+        "total_lines": 167,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/legacy/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725.json",
+        "total_lines": 272,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/multi_broker_master_config.json",
+        "total_lines": 75,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "config/multi_broker_master_config.json.backup",
+        "total_lines": 104,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "configure_broker_wizard.bat",
+        "total_lines": 38,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "dashboard/dashboard_the5ers.py",
+        "total_lines": 1089,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "dashboard/start_dashboard.bat",
+        "total_lines": 50,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "dashboard/start_dashboard_debug.py",
+        "total_lines": 31,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "dashboard/start_dashboard_remote.bat",
+        "total_lines": 24,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "dashboard/templates/dashboard.html",
+        "total_lines": 597,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "docs/README_ACCESSO_REMOTO.md",
+        "total_lines": 84,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "docs/README_MONITORING.md",
+        "total_lines": 186,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "docs/RISOLUZIONE_GRAFICI.md",
+        "total_lines": 110,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "migrate_to_klmnr_phoenix.bat",
+        "total_lines": 22,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "migrate_to_klmnr_phoenix.sh",
+        "total_lines": 4,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "migrate_to_new_pc.bat",
+        "total_lines": 54,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "monitor_multi_broker.bat",
+        "total_lines": 83,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "multi_broker_launcher.py",
+        "total_lines": 222,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_main_refactored.py",
+        "total_lines": 58,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/__init__.py",
+        "total_lines": 40,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/brokers/__init__.py",
+        "total_lines": 17,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/brokers/config_loader.py",
+        "total_lines": 333,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/brokers/connection.py",
+        "total_lines": 342,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/brokers/manager.py",
+        "total_lines": 430,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/config/__init__.py",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/config/manager.py",
+        "total_lines": 189,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/engine/__init__.py",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/engine/quantum_engine.py",
+        "total_lines": 479,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/logging/__init__.py",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/logging/setup.py",
+        "total_lines": 96,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/metrics/__init__.py",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/metrics/trading_metrics.py",
+        "total_lines": 239,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/risk/__init__.py",
+        "total_lines": 9,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/risk/drawdown_tracker.py",
+        "total_lines": 130,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/risk/manager.py",
+        "total_lines": 452,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/trading/__init__.py",
+        "total_lines": 8,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/trading/main_system.py",
+        "total_lines": 597,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/trading/multi_system.py",
+        "total_lines": 502,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/utils/__init__.py",
+        "total_lines": 22,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/utils/helpers.py",
+        "total_lines": 150,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "quantum_trading_system/utils/symbol_mapper.py",
+        "total_lines": 21,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "start_multi_broker.bat",
+        "total_lines": 123,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "start_multi_broker_production.bat",
+        "total_lines": 64,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "start_multi_broker_service.bat",
+        "total_lines": 47,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "stop_multi_broker.bat",
+        "total_lines": 50,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "temp_symbols.json",
+        "total_lines": 2,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/analyze_complete_challenge.bat",
+        "total_lines": 30,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/analyze_complete_challenge.py",
+        "total_lines": 471,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/analyze_results.bat",
+        "total_lines": 36,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/analyze_the5ers.py",
+        "total_lines": 536,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/check_positions.py",
+        "total_lines": 32,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/diagnosi_tick.py",
+        "total_lines": 49,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/monitor_the5ers_live.py",
+        "total_lines": 503,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/start_monitor.bat",
+        "total_lines": 34,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "tools/test_trading_system.py",
+        "total_lines": 169,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      },
+      {
+        "file": "watchdog_multi_broker.bat",
+        "total_lines": 57,
+        "ai_generated_lines": 0,
+        "ai_generated_percentage": 0
+      }
+    ]
+  }
+}

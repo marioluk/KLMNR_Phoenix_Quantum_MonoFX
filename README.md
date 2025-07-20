@@ -1,9 +1,41 @@
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM
-## Analisi Tecnica Dettagliata del Core Engine (`PRO-THE5ERS-QM-PHOENIX-GITCOP.py`)
+# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
+## Sistema Monolitico Completo e Funzionante
 
 ---
 
-## 📋 **OVERVIEW ARCHITETTURALE**
+## 🚨 **IMPORTANTE - SISTEMA LEGACY**
+
+⚠️ **Questo README documenta il SISTEMA LEGACY MONOLITICO** contenuto nel file `PRO-THE5ERS-QM-PHOENIX-GITCOP.py`
+
+🔄 **Per panoramica completa del progetto** → vedi `README_PROJECT_OVERVIEW.md`  
+🏗️ **Per sistema modulare refactorizzato** → vedi cartella `quantum_trading_system/`  
+📚 **Per documentazione legacy dedicata** → vedi `legacy_system/README_LEGACY.md`
+
+## 📁 **NUOVA ORGANIZZAZIONE PROJECT**
+
+### Sistema Reorganizzato (Gennaio 2025)
+```
+KLMNR_Phoenix_Quantum/
+├── legacy_system/              # 🏛️ Sistema Legacy Completo
+│   ├── PRO-THE5ERS-QM-PHOENIX-GITCOP.py  # Main legacy system
+│   ├── config/                 # Configurazioni centralizzate
+│   ├── backtest_legacy/        # Tools di backtest legacy
+│   ├── dashboard_legacy/       # Dashboard web legacy
+│   └── logs/                   # Log files
+├── quantum_trading_system/     # 🚀 Sistema Moderno (In sviluppo)
+├── dashboard/                  # 🎨 Dashboard Moderna (Futura)
+├── backtest_clean/            # 🧪 Tools di testing e analisi
+└── docs/                      # 📚 Documentazione
+```
+
+### Quick Start
+- **Sistema Legacy**: `cd legacy_system && start_legacy.bat`
+- **Dashboard Legacy**: `cd legacy_system/dashboard_legacy && start_dashboard.bat`
+- **Backtest Tools**: `cd backtest_clean`
+
+---
+
+## 📋 **OVERVIEW ARCHITETTURALE - SISTEMA LEGACY**
 
 Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo basato su su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
 

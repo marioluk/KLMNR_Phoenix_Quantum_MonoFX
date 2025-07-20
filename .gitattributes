@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+.gait/** -diff linguist-generated
+
+.gait/state.json merge=custom-stashed-state

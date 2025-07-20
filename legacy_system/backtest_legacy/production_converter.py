@@ -18,7 +18,7 @@ except ImportError:
     print("💡 Assicurati che config_converter.py sia nella directory corrente")
     sys.exit(1)
 
-def convert_all_autonomous_configs(source_dir: str = "configs", production_template: str = None):
+def convert_all_autonomous_configs(source_dir: str = "../config", production_template: str = None):
     """
     Converte tutte le configurazioni autonome in formato produzione
     
@@ -97,7 +97,7 @@ def convert_single_config():
     print("="*40)
     
     # Lista file autonomi disponibili
-    configs_dir = "configs"
+    configs_dir = "../config"
     if os.path.exists(configs_dir):
         autonomous_files = glob.glob(os.path.join(configs_dir, "config_autonomous_*.json"))
     else:

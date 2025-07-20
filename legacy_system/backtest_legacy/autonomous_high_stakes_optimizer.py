@@ -418,7 +418,7 @@ class AutonomousHighStakesOptimizer:
     
     def save_config(self, config: Dict, aggressiveness: str) -> str:
         """
-        Salva configurazione ottimizzata
+        Salva configurazione ottimizzata nella cartella config del sistema legacy
         
         Args:
             config: Configurazione da salvare
@@ -428,8 +428,12 @@ class AutonomousHighStakesOptimizer:
             Percorso file salvato
         """
         
+        # Salva nella cartella config del sistema legacy
+        config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
+        os.makedirs(config_dir, exist_ok=True)
+        
         filename = f"config_autonomous_high_stakes_{aggressiveness}.json"
-        filepath = os.path.join(self.output_dir, filename)
+        filepath = os.path.join(config_dir, filename)
         
         try:
             with open(filepath, 'w', encoding='utf-8') as f:

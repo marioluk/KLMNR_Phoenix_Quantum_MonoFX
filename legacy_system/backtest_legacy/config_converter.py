@@ -91,10 +91,12 @@ class ConfigConverter:
             "original_aggressiveness": autonomous_config.get('optimization_results', {}).get('aggressiveness_level', 'unknown')
         }
         
-        # Salva file convertito
+        # Salva file convertito nella cartella config del sistema legacy
         if not output_path:
             base_name = os.path.splitext(os.path.basename(autonomous_config_path))[0]
-            output_path = f"{base_name}_production_ready.json"
+            config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
+            os.makedirs(config_dir, exist_ok=True)
+            output_path = os.path.join(config_dir, f"{base_name}_production_ready.json")
         
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(production_config, f, indent=4, ensure_ascii=False)
