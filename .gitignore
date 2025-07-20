@@ -32,6 +32,9 @@ legacy_system/config/backups/
 **/*_production_ready_production_ready.json
 logs/daily_config_updater_*.log
 
+# Auto-start system logs
+**/auto_start_*.log
+
 # Backup files
 *.backup
 *~
