@@ -35,3 +35,5 @@ temp_*
 
 # Config backup files
 config/*.backup
+
+.gait/custom-merge-driver.sh
