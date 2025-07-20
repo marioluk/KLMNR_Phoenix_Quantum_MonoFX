@@ -1571,10 +1571,24 @@ class QuantumTradingSystem:
             
 
     def _initialize_mt5(self) -> bool:
-        """Connessione a MetaTrader 5"""
+        """Connessione a MetaTrader 5 con configurazione specifica The5ers"""
         try:
-            if not mt5.initialize():
-                logger.error("Inizializzazione MT5 fallita")
+            # Chiudi eventuali connessioni precedenti
+            mt5.shutdown()
+            
+            # Ottieni configurazione MT5 specifica
+            mt5_config = self.config.config.get('metatrader5', {})
+            
+            # Inizializza con parametri specifici The5ers
+            if not mt5.initialize(
+                path=mt5_config.get('path', 'C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe'),
+                login=int(mt5_config.get('login', 0)),
+                password=mt5_config.get('password', ''),
+                server=mt5_config.get('server', 'FivePercentOnline-Real'),
+                timeout=60000,
+                port=int(mt5_config.get('port', 18889))
+            ):
+                logger.error(f"Inizializzazione MT5 The5ers fallita: {mt5.last_error()}")
                 return False
             
             terminal_info = mt5.terminal_info()
@@ -1582,11 +1596,12 @@ class QuantumTradingSystem:
                 logger.error("Impossibile ottenere info terminal MT5")
                 return False
                 
-            logger.info(f"MT5 inizializzato: {terminal_info.company} - {terminal_info.name}")
+            logger.info(f"MT5 The5ers inizializzato: {terminal_info.company} - {terminal_info.name}")
+            logger.info(f"Server: {mt5_config.get('server')} | Porta: {mt5_config.get('port')} | Login: {mt5_config.get('login')}")
             return True
             
         except Exception as e:
-            logger.error(f"Errore inizializzazione MT5: {str(e)}")
+            logger.error(f"Errore inizializzazione MT5 The5ers: {str(e)}")
             return False
 
     """
@@ -1596,14 +1611,24 @@ class QuantumTradingSystem:
     def _verify_connection(self) -> bool:
         """Verifica/connessione MT5 - Verifica la connessione MT5 con ripristino automatico"""
         try:
-            if not mt5.initialize() or not mt5.terminal_info().connected:
-                logger.warning("Connessione MT5 persa, tentativo di riconnessione...")
+            if not mt5.terminal_info() or not mt5.terminal_info().connected:
+                logger.warning("Connessione MT5 The5ers persa, tentativo di riconnessione...")
                 mt5.shutdown()
-                time.sleep(5)
-                return mt5.initialize()
+                time.sleep(2)
+                
+                # Usa la stessa logica di _initialize_mt5 per riconnessione
+                mt5_config = self.config.config.get('metatrader5', {})
+                return mt5.initialize(
+                    path=mt5_config.get('path', 'C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe'),
+                    login=int(mt5_config.get('login', 0)),
+                    password=mt5_config.get('password', ''),
+                    server=mt5_config.get('server', 'FivePercentOnline-Real'),
+                    timeout=60000,
+                    port=int(mt5_config.get('port', 18889))
+                )
             return True
         except Exception as e:
-            logger.error(f"Errore verifica connessione: {str(e)}")
+            logger.error(f"Errore verifica connessione The5ers: {str(e)}")
             return False
 
     """
@@ -2306,30 +2331,6 @@ class QuantumTradingSystem:
             return False
 
         return True
-
-    def _initialize_connection(self) -> bool:
-        """Connessione a MetaTrader 5"""
-        try:
-            mt5.shutdown()
-            
-            config = self.config.config.get('metatrader5', {})
-            if not mt5.initialize(
-                path=config.get('path'),
-                login=int(config.get('login', 0)),
-                password=config.get('password', ''),
-                server=config.get('server', ''),
-                timeout=60000,
-                port=int(config.get('port', 18889))  # Default a 18889 se non specificato
-            ):
-                logger.error(f"Errore inizializzazione MT5: {mt5.last_error()}")
-                return False
-                
-            logger.info(f"Connesso a {config.get('server', '')} sulla porta {config.get('port', 18889)}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Eccezione durante inizializzazione MT5: {str(e)}")
-            return False
 
     """
     6. Utility e Helper Methods
