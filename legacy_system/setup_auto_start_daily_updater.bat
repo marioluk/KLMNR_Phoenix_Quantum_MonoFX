@@ -123,9 +123,15 @@ echo [3] Modifica orario esecuzione
 echo [4] Disabilita task temporaneamente
 echo [5] Esci
 echo.
+echo [INFO] Premi ENTER per uscire automaticamente
 
 :menu
-set /p choice="Scegli opzione (1-5): "
+echo.
+echo Scegli un'opzione (1-5) oppure premi ENTER per uscire:
+set /p choice="Opzione: "
+
+REM Se non viene inserita nessuna opzione, esce con successo
+if "%choice%"=="" goto :exit_success
 
 if "%choice%"=="1" goto :test_task
 if "%choice%"=="2" goto :show_details
@@ -133,7 +139,7 @@ if "%choice%"=="3" goto :modify_schedule
 if "%choice%"=="4" goto :disable_task
 if "%choice%"=="5" goto :exit_success
 
-echo [ERROR] Opzione non valida. Riprova.
+echo [WARNING] Opzione '%choice%' non valida. Riprova.
 goto :menu
 
 :test_task
