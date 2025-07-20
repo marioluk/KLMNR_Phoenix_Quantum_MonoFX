@@ -1,43 +1,58 @@
-# 🎯 LEGACY SYSTEM - QUICK START GUIDE [PRODUZIONE ATTIVA]
+# 🎯 LEGACY ENTERPRISE SYSTEM - QUICK START GUIDE
 
-## ⚠️ SISTEMA IN PRODUZIONE - LUGLIO 2025
+## 🏆 SISTEMA ENTERPRISE AUTOMATIZZATO - AGGIORNAMENTO 20 LUGLIO 2025
 
-**IMPORTANTE:** Questo sistema è attualmente operativo in produzione su The5ers High Stakes Challenge. 
-Non modificare senza test approfonditi su demo account.
+**ENTERPRISE-GRADE OPERATIVO:** Sistema completamente automatizzato con auto-start al boot, daily updates autonomi, MT5 headless, e monitoring multi-dispositivo verificato e funzionante.
 
-## 🚀 Avvio Rapido Sistema Produzione
+## 🚀 Sistema Già Operativo (Zero Setup Richiesto)
 
-### Windows (Metodo Raccomandato):
+### ✅ ENTERPRISE AUTOMATION ATTIVA:
 ```cmd
-cd legacy_system
-start_legacy.bat
+Sistema COMPLETAMENTE AUTONOMO in esecuzione:
+✅ Auto-start al boot verificato (Task Scheduler)
+✅ Daily config updates alle 06:00 operativo  
+✅ MT5 headless background attivo (terminal64.exe + python.exe)
+✅ Multi-device monitoring funzionante
+✅ Git workflow PC → GitHub → Server attivo
 ```
 
-### Avvio Diretto Produzione:
-```bash
-cd legacy_system
-python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
+### 🎛️ CONTROLLI DISPONIBILI:
+
+#### 🤖 **Stato Sistema** (Controllo Rapido):
+```cmd
+# Verifica processi attivi:
+tools\mt5_manual_mode_manager.bat  # -> Opzione [3] Status check
+
+# Verifica log ultimo avvio:
+logs\auto_start_20250720.log
+logs\daily_config_updater_20250720.log
 ```
 
-### Linux/Mac:
-```bash
-cd legacy_system
-python start_legacy.py
+#### � **Restart Manuale** (Solo se necessario):
+```cmd
+# Stop/Start sicuro sistema:
+tools\mt5_manual_mode_manager.bat  # -> Gestione completa
+
+# Restart daily updater:
+legacy_system\auto_start_daily_updater.bat
 ```
 
-## ⚙️ Configurazione Produzione Attiva
+## ⚙️ Configurazione Enterprise Operativa
 
-### 🔥 CONFIGURAZIONE AUTOMATICA ATTIVA:
-Il sistema utilizza ora la configurazione ottimizzata automaticamente:
+### 🏆 **SISTEMA ENTERPRISE VERIFICATO (20/07/2025):**
 ```json
-CONFIG_FILE = "config/config_autonomous_high_stakes_conservative_production_ready.json"
+{
+  "enterprise_status": "✅ FULLY_OPERATIONAL",
+  "auto_start_boot": "✅ Task Scheduler verified",
+  "daily_optimization": "✅ 06:00 UTC autonomous (Score: 748.00)",
+  "mt5_integration": "✅ Headless API (PID: 10392, 10720)",
+  "broker_connection": "✅ FivePercentOnline-Real active",
+  "config_active": "config_autonomous_high_stakes_conservative_production_ready.json",
+  "symbols_trading": ["EURUSD", "USDJPY", "GBPUSD", "AUDUSD"],
+  "multi_device_sync": "✅ Laptop/smartphone monitoring safe",
+  "git_workflow": "✅ PC Dev → GitHub → Server pipeline"
+}
 ```
-
-### Daily Config Updater:
-- ✅ **Attivo**: Sistema di aggiornamento configurazioni daily alle 06:00
-- ✅ **Backup automatico**: Configurazioni precedenti salvate
-- ✅ **Validazione**: Controlli automatici post-aggiornamento
-- ✅ **Ottimizzazione autonoma**: Selezione simboli e parametri automatica
 
 ### Configurazione MT5 (se necessario modificare):
 ```json

@@ -1,34 +1,56 @@
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY VERSION [PRODUZIONE]
-## Sistema Monolitico di Trading Algoritmico Quantistico - STATO: ATTIVO IN PRODUZIONE
+# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY ENTERPRISE VERSION
+## Sistema Enterprise con Automazione Completa - STATO: PRODUZIONE 24/7 ✅
 
 ---
 
-## 📋 **OVERVIEW DEL SISTEMA LEGACY - PRODUZIONE 2025**
+## 📋 **OVERVIEW SISTEMA ENTERPRISE - AUTOMAZIONE 2025**
 
-⚠️ **SISTEMA IN PRODUZIONE ATTIVA** - Questo è il sistema legacy completamente testato e validato, attualmente utilizzato per trading live su The5ers High Stakes Challenge. Non modificare senza adeguati test.
+🏆 **SISTEMA ENTERPRISE-GRADE IN PRODUZIONE** - Sistema legacy completamente automatizzato con infrastruttura enterprise Windows, auto-start, daily updates e monitoring multi-dispositivo.
 
-### **🔥 CARATTERISTICHE PRINCIPALI:**
-- ✅ **Sistema Monolitico Completamente Testato** - Un singolo file Python con tutte le funzionalità validate
-- ✅ **PRODUZIONE ATTIVA** - Operativo su The5ers High Stakes Challenge dal Luglio 2025
-- ✅ **Algoritmi Quantistici Validati** - Calcoli di entropia, spin quantistico e volatilità adattiva ottimizzati
-- ✅ **Risk Management Ultra-Conservativo** - Protezioni multiple testate e compliance The5ers verificata
-- ✅ **Performance Ottimizzate per Produzione** - Configurazione con daily config updater automatico
-- ✅ **Automazione Completa** - Sistema di aggiornamento configurazioni daily implementato
+### **� IMPLEMENTAZIONI ENTERPRISE COMPLETATE (20 LUGLIO 2025):**
+- ✅ **Auto-Start Infrastructure** - Task Scheduler + PowerShell automation 
+- ✅ **Daily Autonomous Updates** - Config optimization alle 06:00
+- ✅ **MT5 Headless Integration** - API trading background 24/7
+- ✅ **Multi-Device Architecture** - Server + monitoring devices
+- ✅ **Professional Workflow** - PC Dev → GitHub → Server pipeline
+- ✅ **Safety Tools** - MT5 Manual Mode Manager
+- ✅ **Enterprise Logging** - Comprehensive monitoring system
+- ✅ **Git Version Control** - Professional development lifecycle
 
 ---
 
-## 🚀 **SISTEMA PRODUZIONE - CONFIGURAZIONE ATTUALE**
+## 🤖 **AUTOMAZIONE ENTERPRISE - INFRASTRUCTURE**
 
-### **⚠️ IMPORTANTE - SISTEMA IN USO ATTIVO:**
+### **🔧 AUTO-START AL BOOT (Task Scheduler):**
+```powershell
+# Task configurati automaticamente:
+- KLMNR_Legacy_System_AutoStart (06:05 al boot)
+- KLMNR_Daily_Config_Updater (06:00 daily)
+
+# Scripts PowerShell enterprise:
+- AutoStartLegacy.ps1 -> Sistema trading principale
+- AutoStartDailyUpdater.ps1 -> Daily optimization
+```
+
+### **� DAILY CONFIG UPDATER - AUTONOMO:**
 ```bash
-# File di configurazione attivo in produzione:
-CONFIG_FILE = "config/config_autonomous_high_stakes_conservative_production_ready.json"
+# Automazione quotidiana alle 06:00:
+✅ Analisi performance ultimi 30 giorni
+✅ Ottimizzazione parametri intelligente  
+✅ Backup configurazioni automatico
+✅ Score-based selection (Attuale: 748.00 CONSERVATIVE)
+✅ Validazione post-update completa
+✅ Log dettagliato per troubleshooting
+```
 
-# Sistema di aggiornamento automatico configurazioni:
-- Daily Config Updater implementato e attivo
-- Backup automatico configurazioni
-- Ottimizzazione autonoma parametri
-- Validazione automatica dopo aggiornamenti
+### **🖥️ MT5 HEADLESS INTEGRATION:**
+```bash
+# MT5 Background API (senza GUI):
+✅ Trading via Python API MetaTrader5
+✅ Nessuna interferenza GUI
+✅ Processi: terminal64.exe (background) + python.exe
+✅ Multi-device monitoring (laptop/smartphone safe)
+✅ Connection: FivePercentOnline-Real server
 ```
 
 ### **Prerequisiti Produzione:**
