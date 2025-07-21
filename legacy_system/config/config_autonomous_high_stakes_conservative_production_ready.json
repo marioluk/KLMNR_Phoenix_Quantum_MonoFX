@@ -18,10 +18,10 @@
     "quantum_params": {
         "buffer_size": 500,
         "signal_cooldown": 600,
-        "adaptive_threshold": 4.474618467261703,
-        "volatility_filter": 3.2830789781744683,
+        "adaptive_threshold": 4.307973874643097,
+        "volatility_filter": 3.1719825830953985,
         "trend_strength_min": 0.6,
-        "confluence_threshold": 3.7496947738093622,
+        "confluence_threshold": 3.616379099714478,
         "quantum_boost": true,
         "neural_enhancement": true
     },
@@ -49,12 +49,12 @@
                 "09:00-10:30",
                 "14:00-16:00"
             ],
-            "optimization_score": 869.4667171934922,
+            "optimization_score": 904.2684790454633,
             "aggressiveness_applied": "conservative"
         },
         "USDJPY": {
             "enabled": true,
-            "lot_size": 0.07,
+            "lot_size": 0.05,
             "stop_loss_pips": 12,
             "take_profit_pips": 36,
             "signal_buy_threshold": 0.825,
@@ -64,21 +64,7 @@
                 "08:00-09:30",
                 "13:00-15:00"
             ],
-            "optimization_score": 832.0248180587971,
-            "aggressiveness_applied": "conservative"
-        },
-        "NAS100": {
-            "enabled": true,
-            "lot_size": 0.07,
-            "stop_loss_pips": 12,
-            "take_profit_pips": 36,
-            "signal_buy_threshold": 0.825,
-            "signal_sell_threshold": 0.275,
-            "max_spread": 8.0,
-            "trading_hours": [
-                "14:00-16:00"
-            ],
-            "optimization_score": 735.1655004925791,
+            "optimization_score": 721.3645839165688,
             "aggressiveness_applied": "conservative"
         },
         "USDCHF": {
@@ -92,14 +78,28 @@
             "trading_hours": [
                 "09:00-11:00"
             ],
-            "optimization_score": 663.0377380644939,
+            "optimization_score": 696.2402631292767,
+            "aggressiveness_applied": "conservative"
+        },
+        "AUDUSD": {
+            "enabled": true,
+            "lot_size": 0.08,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 3.5,
+            "trading_hours": [
+                "22:00-23:30"
+            ],
+            "optimization_score": 644.5057736231694,
             "aggressiveness_applied": "conservative"
         }
     },
     "THE5ERS_specific": {},
     "conversion_metadata": {
         "created_by": "AutonomousHighStakesOptimizer",
-        "creation_date": "2025-07-21T17:03:14.021973",
+        "creation_date": "2025-07-21T18:33:08.595551",
         "aggressiveness": "conservative"
     }
 }
