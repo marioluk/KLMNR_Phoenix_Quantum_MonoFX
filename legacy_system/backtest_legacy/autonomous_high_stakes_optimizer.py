@@ -55,16 +55,9 @@ class AutonomousHighStakesOptimizer:
         
         # Simboli disponibili per ottimizzazione (ordinati per stabilità)
         self.available_symbols = [
-            'EURUSD',   # Più stabile
-            'USDJPY',   # Stabile
-            'GBPUSD',   # Media volatilità
-            'USDCHF',   # Stabile
-            'AUDUSD',   # Media volatilità  
-            'USDCAD',   # Stabile
-            'NZDUSD',   # Volatile
-            'XAUUSD',   # Molto volatile
-            'NAS100',   # Indice volatile
-            'GBPJPY'    # Molto volatile
+            'EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD',
+            'BTCUSD', 'ETHUSD', 'XAUUSD', 'XAGUSD',
+            'SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'
         ]
         
         # Range parametri per ottimizzazione
@@ -225,8 +218,20 @@ class AutonomousHighStakesOptimizer:
             'EURUSD': {'volatility': 0.7, 'trend': 0.8, 'spread': 1.2},
             'USDJPY': {'volatility': 0.6, 'trend': 0.7, 'spread': 1.5},
             'GBPUSD': {'volatility': 0.8, 'trend': 0.6, 'spread': 2.0},
+            'USDCHF': {'volatility': 0.6, 'trend': 0.7, 'spread': 1.8},
+            'AUDUSD': {'volatility': 0.7, 'trend': 0.6, 'spread': 2.0},
+            'USDCAD': {'volatility': 0.7, 'trend': 0.6, 'spread': 2.0},
+            'NZDUSD': {'volatility': 0.9, 'trend': 0.5, 'spread': 2.5},
+            'BTCUSD': {'volatility': 3.5, 'trend': 0.4, 'spread': 25.0},
+            'ETHUSD': {'volatility': 2.8, 'trend': 0.4, 'spread': 15.0},
             'XAUUSD': {'volatility': 1.5, 'trend': 0.5, 'spread': 3.5},
-            'NAS100': {'volatility': 1.8, 'trend': 0.7, 'spread': 5.0}
+            'XAGUSD': {'volatility': 2.0, 'trend': 0.4, 'spread': 4.0},
+            'SP500': {'volatility': 1.2, 'trend': 0.7, 'spread': 1.5},
+            'NAS100': {'volatility': 1.8, 'trend': 0.7, 'spread': 5.0},
+            'US30': {'volatility': 1.5, 'trend': 0.6, 'spread': 6.0},
+            'DAX40': {'volatility': 1.4, 'trend': 0.7, 'spread': 2.5},
+            'FTSE100': {'volatility': 1.1, 'trend': 0.6, 'spread': 2.0},
+            'JP225': {'volatility': 1.3, 'trend': 0.6, 'spread': 3.0}
         }
         
         char = symbol_characteristics.get(symbol, {'volatility': 1.0, 'trend': 0.6, 'spread': 2.5})
@@ -265,9 +270,16 @@ class AutonomousHighStakesOptimizer:
             'AUDUSD': ["22:00-23:30"],
             'USDCAD': ["14:00-16:00"],
             'NZDUSD': ["21:00-22:30"],
+            'BTCUSD': ["00:00-23:59"],
+            'ETHUSD': ["00:00-23:59"],
             'XAUUSD': ["13:00-15:00", "16:00-18:00"],
-            'NAS100': ["14:00-16:00"],
-            'GBPJPY': ["09:00-10:30", "15:00-16:30"]
+            'XAGUSD': ["13:00-15:00"],
+            'SP500': ["15:30-22:00"],
+            'NAS100': ["15:30-22:00"],
+            'US30': ["15:30-22:00"],
+            'DAX40': ["09:00-17:30"],
+            'FTSE100': ["09:00-17:30"],
+            'JP225': ["02:00-08:00"]
         }
         return trading_hours_mapping.get(symbol, ["14:00-16:00"])
 
@@ -316,7 +328,10 @@ class AutonomousHighStakesOptimizer:
         spread_limits = {
             'EURUSD': 2.0, 'USDJPY': 2.5, 'GBPUSD': 3.0, 'USDCHF': 3.0,
             'AUDUSD': 3.5, 'USDCAD': 3.5, 'NZDUSD': 4.0,
-            'XAUUSD': 5.0, 'NAS100': 8.0, 'GBPJPY': 4.5
+            'BTCUSD': 25.0, 'ETHUSD': 15.0,
+            'XAUUSD': 5.0, 'XAGUSD': 4.0,
+            'SP500': 1.5, 'NAS100': 8.0, 'US30': 6.0,
+            'DAX40': 2.5, 'FTSE100': 2.0, 'JP225': 3.0
         }
         return spread_limits.get(symbol, 4.0)
     
@@ -330,9 +345,16 @@ class AutonomousHighStakesOptimizer:
             'AUDUSD': ['Sydney', 'Tokyo'],
             'USDCAD': ['NewYork'],
             'NZDUSD': ['Sydney'],
+            'BTCUSD': ['Crypto'],
+            'ETHUSD': ['Crypto'],
             'XAUUSD': ['London', 'NewYork'],
+            'XAGUSD': ['London'],
+            'SP500': ['NewYork'],
             'NAS100': ['NewYork'],
-            'GBPJPY': ['London', 'Tokyo']
+            'US30': ['NewYork'],
+            'DAX40': ['Frankfurt'],
+            'FTSE100': ['London'],
+            'JP225': ['Tokyo']
         }
         return session_mapping.get(symbol, ['London', 'NewYork'])
     
