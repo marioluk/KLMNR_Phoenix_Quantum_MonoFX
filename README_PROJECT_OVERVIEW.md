@@ -10,7 +10,6 @@ Questo repository contiene **due implementazioni** del sistema di trading quanti
 1. 🏛️ **SISTEMA LEGACY** (Monolitico) - Pronto per produzione immediata
 2. 🏗️ **SISTEMA MODULARE** (Refactorizzato) - Architettura moderna in testing
 
----
 
 ## 🏛️ **SISTEMA LEGACY - READY FOR PRODUCTION**
 
@@ -26,21 +25,9 @@ python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
 ```
 
 #### **📚 Documentazione Legacy:**
-- `README_LEGACY.md` - Documentazione completa sistema monolitico
-- `TODO_LEGACY.md` - Lista prioritizzata task e testing
-- `PRO-THE5ERS-QM-PHOENIX-GITCOP.py` - File principale (2438 righe)
-- `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json` - Configurazione
 
 #### **✅ Caratteristiche Sistema Legacy:**
-- ✅ Sistema completo in singolo file
-- ✅ Algoritmi quantistici ottimizzati
-- ✅ Risk management ultra-conservativo
-- ✅ Protezioni The5ers integrate
-- ✅ Logging e monitoraggio avanzato
-- ✅ Sintassi Python validata
-- ✅ Configurazione produzione-ready
 
----
 
 ## 🏗️ **SISTEMA MODULARE - IN DEVELOPMENT**
 
