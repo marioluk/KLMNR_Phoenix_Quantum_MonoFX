@@ -475,7 +475,7 @@ class AutonomousHighStakesOptimizer:
             "quantum_params": config.get("quantum_params", {}),
             "risk_parameters": config.get("risk_parameters", {}),
             "symbols": config.get("symbols", {}),
-            "THE5ERS_specific": config.get("THE5ERS_specific", {}),
+            "THE5ERS_specific": {"drawdown_protection": {"soft_limit": 0.03, "hard_limit": 0.05}},
             "conversion_metadata": {
                 "created_by": "AutonomousHighStakesOptimizer",
                 "creation_date": datetime.now().isoformat(),
@@ -578,8 +578,10 @@ class AutonomousHighStakesOptimizer:
         import random
         import hashlib
         
-        # Usa un seed diverso per ogni configurazione basato sul contenuto
-        random.seed(42)
+        # Usa un seed unico per ogni configurazione: dipende da aggressiveness e nome file
+        seed_str = f"{aggressiveness}_{os.path.basename(config_path)}"
+        seed = int(hashlib.md5(seed_str.encode()).hexdigest()[:8], 16)
+        random.seed(seed)
         
         # Parametri diversi per ogni livello di aggressività
         if aggressiveness == 'conservative':
@@ -740,6 +742,18 @@ class AutonomousHighStakesOptimizer:
         # Validazione High Stakes
         target_daily = self.high_stakes_params['target_daily_profit']
         daily_loss_limit = self.high_stakes_params['daily_loss_limit']
+        # Calcola valori drawdown protection (default o semplici calcoli)
+        # Soft limit: 3% - Hard limit: 5% (valori tipici The5ers)
+        drawdown_protection = {
+            "soft_limit": 0.03,
+            "hard_limit": 0.05
+        }
+        # Puoi aggiungere logica per calcolo dinamico qui se vuoi
+
+        # Sezione THE5ERS_specific sempre presente
+        the5ers_specific = config_data.get("THE5ERS_specific", {})
+        the5ers_specific["drawdown_protection"] = drawdown_protection
+
         
         # Controllo compliance
         max_daily_loss = min(d['pnl'] for d in daily_results)
@@ -761,7 +775,7 @@ class AutonomousHighStakesOptimizer:
             'total_wins': total_wins,
             'total_losses': total_losses,
             'test_days': actual_days,
-            'period_type': period_type,
+            "THE5ERS_specific": the5ers_specific,
             'aggressiveness_level': aggressiveness,
             'symbols_count': len(symbols),
             'daily_target_hit': daily_target_hit,
@@ -808,6 +822,21 @@ def main():
                 print(f"\n📄 CONFIGURAZIONI GENERATE DA ZERO:")
                 for level, filepath in results.items():
                     print(f"   ✅ {level.upper()}: {os.path.basename(filepath)}")
+                # Esegui test di validazione su ciascuna configurazione e mostra i risultati
+                validation_results = {}
+                best_level = None
+                best_score = float('-inf')
+                for level, filepath in results.items():
+                    val = optimizer.run_validation_test(filepath)
+                    validation_results[level] = val
+                    print(f"   {level.upper()}: P&L medio giornaliero €{val['daily_avg_pnl']:.2f} | Win Rate {val['win_rate']:.1f}% | {'✅ PASS' if val['high_stakes_validation'] else '❌ FAIL'}")
+                    if val['high_stakes_validation'] and val['daily_avg_pnl'] > best_score:
+                        best_score = val['daily_avg_pnl']
+                        best_level = level
+                if best_level:
+                    print(f"\n🏆 MIGLIORE CONFIGURAZIONE: {best_level.upper()} (P&L €{best_score:.2f}/day)")
+                else:
+                    print("\n❌ Nessuna configurazione valida trovata")
             elif choice == "2":
                 # Genera singola
                 print("\n🎯 Scegli livello aggressività:")
