@@ -164,6 +164,11 @@ class AutonomousHighStakesOptimizer:
         
         logger.info(f"🔄 Ottimizzazione parametrica per {symbol} su {days} giorni...")
         
+        # Seed pseudo-deterministico: dipende da simbolo e periodo
+        import random, hashlib
+        seed_str = f"{symbol}_{days}"
+        seed = int(hashlib.md5(seed_str.encode()).hexdigest()[:8], 16)
+        random.seed(seed)
         # Simulazione ottimizzazione (in production usare backtest reale)
         best_params = {}
         best_score = 0
@@ -212,10 +217,8 @@ class AutonomousHighStakesOptimizer:
         Returns:
             Score combinato (profit factor * win rate * consistency)
         """
-        
-        # Simulazione realistica basata su caratteristiche simbolo
         import random
-        random.seed(hash(f"{symbol}{risk}{trades}{sl_pips}{tp_pips}{signal_th}"))
+        # Simulazione realistica basata su caratteristiche simbolo
         
         # Parametri base per simbolo
         symbol_characteristics = {
@@ -576,8 +579,7 @@ class AutonomousHighStakesOptimizer:
         import hashlib
         
         # Usa un seed diverso per ogni configurazione basato sul contenuto
-        config_hash = hashlib.md5(str(config).encode()).hexdigest()
-        random.seed(int(config_hash[:8], 16))
+        random.seed(42)
         
         # Parametri diversi per ogni livello di aggressività
         if aggressiveness == 'conservative':
@@ -669,9 +671,7 @@ class AutonomousHighStakesOptimizer:
         import hashlib
         
         # Seed basato su configurazione + periodo per consistenza
-        config_str = f"{aggressiveness}_{len(symbols)}_{risk_pct}_{actual_days}_{start_dt.date()}"
-        seed = int(hashlib.md5(config_str.encode()).hexdigest()[:8], 16)
-        random.seed(seed)
+        random.seed(42)
         
         # Parametri simulazione basati su aggressività E periodo
         base_multiplier = actual_days / 7.0  # Normalizza su base settimanale
@@ -803,206 +803,128 @@ def main():
                 print("\n🔧 Configurazione ottimizzazione:")
                 days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
                 optimization_days = int(days) if days.isdigit() else 30
-                
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 results = optimizer.generate_all_configs()
-                
                 print(f"\n📄 CONFIGURAZIONI GENERATE DA ZERO:")
                 for level, filepath in results.items():
                     print(f"   ✅ {level.upper()}: {os.path.basename(filepath)}")
-                    
             elif choice == "2":
                 # Genera singola
                 print("\n🎯 Scegli livello aggressività:")
                 print("1. 🟢 Conservative")
                 print("2. 🟡 Moderate")
                 print("3. 🔴 Aggressive")
-                
                 level_choice = input("👉 Scegli (1-3): ").strip()
-                level_map = {'1': 'conservative', '2': 'moderate', '3': 'aggressive'}
-                level = level_map.get(level_choice, 'moderate')
                 
-                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
-                optimization_days = int(days) if days.isdigit() else 30
+                aggressiveness = {
+                    "1": "conservative",
+                    "2": "moderate",
+                    "3": "aggressive"
+                }.get(level_choice, "moderate")
                 
-                optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                config = optimizer.generate_optimized_config(level)
-                filepath = optimizer.save_config(config, level)
+                # Genera configurazione ottimizzata
+                optimizer = AutonomousHighStakesOptimizer()
+                config = optimizer.generate_optimized_config(aggressiveness)
                 
-                print(f"\n✅ Generato da zero: {os.path.basename(filepath)}")
+                # Salva configurazione
+                filepath = optimizer.save_config(config, aggressiveness)
                 
+                print(f"✅ Configurazione {aggressiveness} generata e salvata: {os.path.basename(filepath)}")
             elif choice == "3":
-                # Auto-Best: genera tutti, sceglie il migliore, elimina gli altri
-                print("\n🏆 AUTO-BEST GENERATION")
-                print("Genera tutte le configurazioni, confronta e mantiene solo la migliore")
-                print("-" * 60)
-                
-                days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
-                optimization_days = int(days) if days.isdigit() else 30
-                
-                optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                
-                print("\n🔄 Generando tutte le configurazioni per confronto...")
+                # Auto-Best
+                print("\n🏆 Esecuzione Auto-Best (tutte le configurazioni, solo migliore mantenuta)...")
+                optimizer = AutonomousHighStakesOptimizer()
                 results = optimizer.generate_all_configs()
-                
-                print("\n🏆 ANALISI BEST CONFIGURATION:")
-                
+                # Trova migliore configurazione
                 best_config = None
                 best_score = 0
-                best_level = None
-                
                 for level, filepath in results.items():
-                    # Carica e analizza configurazione
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        config = json.load(f)
-                    
-                    score = config.get('optimization_results', {}).get('average_optimization_score', 0)
-                    symbols_count = len(config.get('symbols', {}))
-                    
-                    print(f"   📊 {level.upper()}: Score={score:.2f}, Simboli={symbols_count}")
-                    
-                    if score > best_score:
-                        best_score = score
-                        best_level = level
-                        best_config = filepath
-                
-                # FINE CICLO FOR: ora controllo se è stato trovato un best_config valido
-                if best_config is None or best_level is None:
-                    print("\n❌ Nessuna configurazione valida trovata (score > 0).")
+                    validation_results = optimizer.run_validation_test(filepath)
+                    if validation_results['high_stakes_validation']:
+                        if validation_results['daily_avg_pnl'] > best_score:
+                            best_score = validation_results['daily_avg_pnl']
+                            best_config = filepath
+                # Elimina tutti i file tranne il migliore
+                for level, filepath in results.items():
+                    if filepath != best_config and os.path.exists(filepath):
+                        try:
+                            os.remove(filepath)
+                            print(f"   🗑️ Rimosso: {os.path.basename(filepath)} ({level.upper()})")
+                        except Exception as e:
+                            print(f"   ⚠️ Errore rimozione {os.path.basename(filepath)}: {e}")
+                if best_config:
+                    print(f"🏆 Migliore configurazione trovata: {os.path.basename(best_config)} con P&L medio giornaliero €{best_score:.2f}")
                 else:
-                    print(f"\n🥇 MIGLIORE: {best_level.upper()} (Score: {best_score:.2f})")
-                    print(f"📄 File: {os.path.basename(best_config)}")
-                    # Pulizia: Elimina le configurazioni non scelte
-                    print(f"\n🧹 Pulizia file non ottimali...")
-                    files_removed = 0
-                    for level, filepath in results.items():
-                        if filepath != best_config and os.path.exists(filepath):
-                            try:
-                                os.remove(filepath)
-                                files_removed += 1
-                                print(f"   🗑️ Rimosso: {os.path.basename(filepath)} ({level.upper()})")
-                            except Exception as e:
-                                print(f"   ⚠️ Errore rimozione {os.path.basename(filepath)}: {e}")
-                    print(f"✅ Mantenuto solo il migliore: {os.path.basename(best_config)}")
-                    print(f"🧹 Rimossi {files_removed} file non ottimali")
-                
+                    print("❌ Nessuna configurazione valida trovata")
             elif choice == "4":
                 # Configurazione avanzata
-                print("\n⚙️ CONFIGURAZIONE AVANZATA:")
-                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
-                optimization_days = int(days) if days.isdigit() else 30
+                print("\n⚙️ Configurazione avanzata (modifica parametri specifici)...")
                 
-                output_dir = input("📁 Directory output (ENTER per corrente): ").strip()
-                if not output_dir:
-                    output_dir = None
+                # Chiedi file configurazione esistente
+                config_file = input("📂 Percorso file configurazione esistente: ").strip()
                 
-                optimizer = AutonomousHighStakesOptimizer(optimization_days, output_dir)
+                if not os.path.isfile(config_file):
+                    print("❌ File configurazione non trovato")
+                    continue
                 
-                print("\n🎯 Scegli cosa generare:")
-                print("1. Tutte le configurazioni")
-                print("2. Solo Conservative + Moderate")
-                print("3. Solo Moderate + Aggressive")
+                # Carica configurazione esistente
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
                 
-                gen_choice = input("👉 Scegli (1-3): ").strip()
+                # Mostra parametri attuali
+                print(json.dumps(config, indent=4, ensure_ascii=False))
                 
-                if gen_choice == "1":
-                    results = optimizer.generate_all_configs()
-                elif gen_choice == "2":
-                    results = {}
-                    for level in ['conservative', 'moderate']:
-                        config = optimizer.generate_optimized_config(level)
-                        filepath = optimizer.save_config(config, level)
-                        results[level] = filepath
-                elif gen_choice == "3":
-                    results = {}
-                    for level in ['moderate', 'aggressive']:
-                        config = optimizer.generate_optimized_config(level)
-                        filepath = optimizer.save_config(config, level)
-                        results[level] = filepath
+                # Chiedi modifiche
+                risk_percent = input("📉 Nuovo risk percent (lascia vuoto per mantenere): ").strip()
+                max_daily_trades = input("📊 Nuovo max daily trades (lascia vuoto per mantenere): ").strip()
                 
-                print(f"\n📄 GENERATE: {len(results)} configurazioni")
+                # Applica modifiche se fornite
+                if risk_percent:
+                    config['risk_parameters']['risk_percent'] = float(risk_percent) / 100
                 
+                if max_daily_trades:
+                    config['risk_parameters']['max_daily_trades'] = int(max_daily_trades)
+                
+                # Salva configurazione modificata
+                with open(config_file, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, indent=4, ensure_ascii=False)
+                
+                print("✅ Configurazione aggiornata e salvata")
             elif choice == "5":
-                # Test validazione
-                import glob
+                # Test validazione configurazioni
+                print("\n✅ Esecuzione test di validazione su configurazioni esistenti...")
                 
-                # Cerca nella cartella config del sistema legacy (dove vengono salvati i file)
-                base_dir = os.path.dirname(os.path.abspath(__file__))  # backtest_legacy
-                legacy_dir = os.path.dirname(base_dir)  # legacy_system
-                config_dir = os.path.join(legacy_dir, "config")
-                search_pattern = os.path.join(config_dir, "config_autonomous_high_stakes_*.json")
+                # Chiedi directory configurazioni
+                config_dir = input("📂 Percorso directory configurazioni: ").strip()
                 
-                print(f"🔍 DEBUG PATHS:")
-                print(f"   Script dir: {base_dir}")
-                print(f"   Legacy dir: {legacy_dir}")
-                print(f"   Config dir: {config_dir}")
-                print(f"   Search pattern: {search_pattern}")
-                print()
+                if not os.path.isdir(config_dir):
+                    print("❌ Directory non trovata")
+                    continue
                 
-                config_files = glob.glob(search_pattern)
+                results = {}
                 
-                # Fallback: cerca anche nella directory corrente
-                if not config_files:
-                    print("🔍 Nessun file trovato in config/, provo directory corrente...")
-                    local_pattern = "config_autonomous_high_stakes_*.json"
-                    config_files = glob.glob(local_pattern)
-                    if config_files:
-                        print(f"   ✅ Trovati {len(config_files)} file in directory corrente")
+                # Elenca file JSON nella directory
+                for filename in os.listdir(config_dir):
+                    if filename.endswith(".json"):
+                        file_path = os.path.join(config_dir, filename)
+                        # Esegui test di validazione su ciascuna configurazione
+                        optimizer = AutonomousHighStakesOptimizer()
+                        validation_results = optimizer.run_validation_test(file_path, 7)
+                        results[filename] = validation_results
                 
-                # Fallback 2: cerca nella directory backtest_legacy
-                if not config_files:
-                    print("🔍 Provo anche in backtest_legacy...")
-                    backtest_pattern = os.path.join(base_dir, "config_autonomous_high_stakes_*.json")
-                    config_files = glob.glob(backtest_pattern)
-                    if config_files:
-                        print(f"   ✅ Trovati {len(config_files)} file in backtest_legacy")
-                
-                if not config_files:
-                    print("❌ Nessuna configurazione autonoma trovata in NESSUNA location!")
-                    print("💡 Genera prima le configurazioni (opzione 1 o 3)")
-                    print()
-                    print("� Locations cercate:")
-                    print(f"   1. {config_dir}")
-                    print(f"   2. {os.getcwd()}")
-                    print(f"   3. {base_dir}")
-                    continue  # Torna al menu invece di return
-                
-                print(f"\n🔄 Test validazione configurazioni...")
-                print(f"📁 Trovati {len(config_files)} file in: {os.path.dirname(config_files[0])}")
-                print()
-                
-                optimizer = AutonomousHighStakesOptimizer()
-                
-                for config_file in config_files:
-                    results = optimizer.run_validation_test(config_file)
-                    
-                    status = "✅ PASS" if results['high_stakes_validation'] else "❌ FAIL"
-                    filename = os.path.basename(config_file)
-                    aggressiveness = results.get('aggressiveness_level', 'unknown')
-                    
-                    print(f"{status} {filename}")
-                    print(f"   📊 Livello: {aggressiveness.upper()}")
-                    print(f"   💰 P&L: €{results['daily_avg_pnl']:.2f}/day")
-                    print(f"   🎯 Win Rate: {results['win_rate']:.1f}%")
-                    print(f"   📈 Trades: {results['total_trades']}")
-                    print()
-                
+                # Report risultati
+                for filename, result in results.items():
+                    status = "✅ PASS" if result['high_stakes_validation'] else "❌ FAIL"
+                    print(f"   {status} {filename}: P&L €{result['daily_avg_pnl']:.2f}/day")
             elif choice == "6":
-                print("👋 Optimizer terminato.")
-                break  # Esce dal loop
-                
+                # Esci
+                print("❌ Uscita dal programma")
+                sys.exit(0)
             else:
-                print("❌ Opzione non valida.")
-                
+                print("❌ Scelta non valida, riprova")
         except Exception as e:
+            logger.error(f"❌ Errore: {e}")
             print(f"❌ Errore: {e}")
-            logger.error(f"Errore main: {e}")
-            print("💡 Premi ENTER per tornare al menu...")
-            input()
-
-    # COMPORTAMENTO ORIGINALE (COMMENTATO):
-    # Lo script terminava automaticamente dopo ogni operazione.
-    # Ora rimane aperto fino a quando l'utente sceglie "Esci" (opzione 6).
 
 if __name__ == "__main__":
     main()
