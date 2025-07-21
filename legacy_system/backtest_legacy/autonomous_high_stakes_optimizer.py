@@ -252,6 +252,22 @@ class AutonomousHighStakesOptimizer:
         
         return max(0, score)
     
+    def get_symbol_trading_hours(self, symbol: str) -> List[str]:
+        """Restituisce trading_hours ottimizzati per simbolo (dummy, da backtest)"""
+        trading_hours_mapping = {
+            'EURUSD': ["09:00-10:30", "14:00-16:00"],
+            'USDJPY': ["08:00-09:30", "13:00-15:00"],
+            'GBPUSD': ["10:00-12:00"],
+            'USDCHF': ["09:00-11:00"],
+            'AUDUSD': ["22:00-23:30"],
+            'USDCAD': ["14:00-16:00"],
+            'NZDUSD': ["21:00-22:30"],
+            'XAUUSD': ["13:00-15:00", "16:00-18:00"],
+            'NAS100': ["14:00-16:00"],
+            'GBPJPY': ["09:00-10:30", "15:00-16:30"]
+        }
+        return trading_hours_mapping.get(symbol, ["14:00-16:00"])
+
     def optimize_symbol_parameters(self, symbol: str, aggressiveness: str) -> Dict:
         """
         Ottimizza parametri specifici per simbolo e livello aggressività
@@ -285,7 +301,7 @@ class AutonomousHighStakesOptimizer:
             'signal_buy_threshold': round(base_params['signal_threshold'] * multipliers['signal'], 3),
             'signal_sell_threshold': round((1 - base_params['signal_threshold']) * multipliers['signal'], 3),
             'max_spread': self.get_symbol_max_spread(symbol),
-            'trading_sessions': self.get_symbol_sessions(symbol),
+            'trading_hours': self.get_symbol_trading_hours(symbol),
             'optimization_score': base_params['score'],
             'aggressiveness_applied': aggressiveness
         }

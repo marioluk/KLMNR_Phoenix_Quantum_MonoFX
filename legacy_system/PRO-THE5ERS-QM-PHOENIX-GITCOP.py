@@ -19,8 +19,7 @@ from functools import lru_cache
 
 
 # Configurazioni globali
-# CONFIG_FILE = "config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
-CONFIG_FILE = "config/config_autonomous_high_stakes_conservative_production_ready.json"
+CONFIG_FILE = "legacy_system/config/config_autonomous_high_stakes_production_ready.json"
 
 # Carica la configurazione JSON all'avvio
 def load_config(config_path=CONFIG_FILE):

@@ -4,7 +4,7 @@
 ```
 legacy_system/
 ├── config/                                      # 📁 TUTTE LE CONFIGURAZIONI
-│   ├── PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json  # Config originale
+│   ├── config_autonomous_high_stakes_production_ready.json  # Config attuale
 │   ├── config_autonomous_high_stakes_conservative.json   # Generated autonomi
 │   ├── config_autonomous_high_stakes_moderate.json
 │   ├── config_autonomous_high_stakes_aggressive.json

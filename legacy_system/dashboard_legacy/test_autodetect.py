@@ -21,13 +21,13 @@ config_file = None
 # Auto-detect config file (come nel codice dashboard)
 if config_file is None:
     # Cerca prima nella cartella config del sistema legacy
-    legacy_config = "../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+    legacy_config = "../config/config_autonomous_high_stakes_production_ready.json"
     if os.path.exists(legacy_config):
         config_file = legacy_config
         print(f"✅ Config trovato: {config_file}")
     else:
         # Fallback alla directory corrente
-        config_file = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        config_file = "config_autonomous_high_stakes_production_ready.json"
         print(f"⚠️  Fallback config: {config_file}")
 
 # Test esistenza file

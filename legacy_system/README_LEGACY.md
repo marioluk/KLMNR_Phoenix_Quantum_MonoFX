@@ -1,3 +1,47 @@
+# 📦 STRUTTURA DEL SISTEMA LEGACY E MANUTENZIONE
+
+
+## Struttura consigliata
+
+```
+legacy_system/
+│
+├── config/                # Solo file di configurazione attivi e centralizzati
+├── dashboard_legacy/      # Dashboard e tool di visualizzazione
+├── backtest_legacy/       # Script e tool di backtest
+│   ├── legacy/            # Script legacy non più usati, da archiviare o eliminare
+│   ├── docs/              # Documentazione tecnica e guide
+│   └── configs/           # Config di test/backtest (se necessario, altrimenti centralizza in config/)
+├── logs/                  # Solo log attuali, archivia o elimina quelli vecchi
+├── scripts/               # Batch, PowerShell, automazione (unifica qui tutti gli script di avvio/stop)
+├── README_LEGACY.md       # Un solo README chiaro per tutto il sistema legacy
+├── archive/               # Tutto ciò che è obsoleto, non più usato, ma che vuoi conservare per storico
+└── ... altri file/documenti legacy
+```
+
+
+## Pulizia automatica
+
+Utilizza lo script `scripts/cleanup_universal.bat` per:
+- Rimuovere file di test, debug, temporanei, notebook, cache Python, script di cleanup obsoleti e backup vecchi
+- Mantenere solo i file essenziali per la produzione
+- La variabile `CLEAN_DIRS` nello script può essere personalizzata per aggiungere/rimuovere directory
+
+### Personalizzazione avanzata
+- Se vuoi che una directory (es. `archive`) non venga mai pulita, basta rimuoverla da `CLEAN_DIRS` oppure aggiungere un controllo:
+  ```bat
+  if "%%D"=="archive" goto :SKIP_ARCHIVE
+  ...comandi di pulizia...
+  :SKIP_ARCHIVE
+  ```
+- Puoi aggiungere pattern specifici per ogni sottocartella, oppure escludere file che vuoi sempre conservare.
+- Aggiorna lo script e questa documentazione ogni volta che modifichi la struttura o le regole di pulizia.
+
+## Best practice
+- Centralizza tutte le configurazioni legacy in `config/`
+- Mantieni la dashboard, i backtest e i log separati
+- Usa la cartella `scripts/` per tutti gli script di automazione e manutenzione
+- Aggiorna questa documentazione se modifichi la struttura
 # 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY ENTERPRISE VERSION
 ## Sistema Enterprise con Automazione Completa - STATO: PRODUZIONE 24/7 ✅
 
@@ -65,23 +109,16 @@ python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
 ```
 
 ### **File di Configurazione Attivi:**
-- ✅ `config/config_autonomous_high_stakes_conservative_production_ready.json` - **CONFIGURAZIONE PRODUZIONE ATTIVA**
-- ⚙️ `daily_config_updater.py` - Sistema di aggiornamento automatico (esegue daily alle 06:00)
-- 🔄 `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json` - Configurazione legacy di backup
-- 📊 Simboli ottimizzati: 4 strumenti selezionati automaticamente, risk 0.5%
+ 🔄 `config/config_autonomous_high_stakes_production_ready.json` - Configurazione legacy aggiornata
 
 ---
 
 ## 🏗️ **ARCHITETTURA MONOLITICA**
 
 Il sistema è strutturato in **6 classi principali** all'interno del singolo file:
-
-### **1. ConfigManager** 
-Gestione e validazione della configurazione JSON
-```python
 config_manager = ConfigManager("config-STEP1.json")
 ```
-
+python -c "import json; print('OK' if json.load(open('config/config_autonomous_high_stakes_production_ready.json')) else 'ERROR')"
 ### **2. QuantumEngine**
 Motore di calcolo quantistico per analisi tick e generazione segnali
 ```python

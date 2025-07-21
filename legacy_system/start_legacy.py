@@ -21,8 +21,8 @@ def main():
     
     # Verifica file configurazione (cerca prima in config/, poi nella directory corrente)
     config_paths = [
-        "config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json",
-        "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        "config/config_autonomous_high_stakes_production_ready.json",
+        "config/config_autonomous_high_stakes_production_ready.json"
     ]
     
     config_file = None

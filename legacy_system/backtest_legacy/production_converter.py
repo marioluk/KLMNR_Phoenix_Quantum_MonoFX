@@ -115,14 +115,14 @@ def deploy_best_config() -> bool:
                 backup_dir = os.path.join(config_dir, "backup")
                 if not os.path.exists(backup_dir):
                     os.makedirs(backup_dir)
-                backup_filename = f"config_autonomous_high_stakes_conservative_production_ready.json.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                backup_filename = f"config_autonomous_high_stakes_production_ready.json.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
                 backup_path = os.path.join(backup_dir, backup_filename)
                 shutil.copy2(main_config_path, backup_path)
                 print(f"💾 Backup creato: backup/{backup_filename}")
             # Deploy del nuovo file
             shutil.copy2(best_file, main_config_path)
             print(f"✅ Deploy completato!")
-            print(f"📁 File principale aggiornato: config_autonomous_high_stakes_conservative_production_ready.json")
+            print(f"📁 File principale aggiornato: config_autonomous_high_stakes_production_ready.json")
             return True
         except Exception as e:
             if hasattr(e, 'winerror') and e.winerror == 32:

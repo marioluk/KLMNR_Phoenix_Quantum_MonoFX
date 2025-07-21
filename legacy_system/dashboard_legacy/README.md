@@ -34,7 +34,7 @@ dashboard_legacy/
 
 La dashboard utilizza **auto-detect** per la configurazione:
 
-1. **Prima scelta**: `../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json`
+1. **Prima scelta**: `../config/config_autonomous_high_stakes_production_ready.json`
 2. **Fallback**: File config nella directory corrente
 
 ## 🎮 AVVIO
@@ -90,7 +90,7 @@ pip install flask plotly pandas MetaTrader5
 ```
 
 ### File Necessari
-- Configurazione legacy: `../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json`
+- Configurazione legacy: `../config/config_autonomous_high_stakes_production_ready.json`
 - Log file (auto-detect da config)
 - Template HTML
 
@@ -124,7 +124,7 @@ pip install flask plotly pandas MetaTrader5
 ### Config Non Trovato
 ```
 ❌ Config file non trovato
-💡 Verificare: ../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json
+💡 Verificare: ../config/config_autonomous_high_stakes_production_ready.json
 ```
 
 ### MT5 Non Connesso

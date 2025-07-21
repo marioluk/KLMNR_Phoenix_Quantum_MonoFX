@@ -43,7 +43,7 @@ function Start-LegacySystem {
         return $false
     }
     
-    if (!(Test-Path "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")) {
+    if (!(Test-Path "config/config_autonomous_high_stakes_production_ready.json")) {
         Write-Log "ERRORE: File configurazione non trovato!" "ERROR"
         return $false
     }

@@ -7,9 +7,9 @@ echo THE5ERS GRAPHICAL DASHBOARD - LEGACY
 echo ==========================================
 
 REM Controlla se esiste il file di config nella cartella parent
-if not exist "../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json" (
+if not exist "../config/config_autonomous_high_stakes_production_ready.json" (
     echo ERROR: Config file not found!
-    echo Please ensure ../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json exists
+    echo Please ensure ../config/config_autonomous_high_stakes_production_ready.json exists
     pause
     exit /b 1
 )

@@ -26,6 +26,24 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    @staticmethod
+    def get_default_config_path():
+        """Restituisce il path centralizzato del file di configurazione legacy."""
+        legacy_config = os.path.join(os.path.dirname(__file__), '..', '..', 'config', 'config_autonomous_high_stakes_production_ready.json')
+        legacy_config = os.path.normpath(legacy_config)
+        if os.path.exists(legacy_config):
+            return legacy_config
+        # Fallback: cerca nella directory corrente
+        fallback = os.path.join(os.getcwd(), 'config_autonomous_high_stakes_production_ready.json')
+        return fallback
+
+    @staticmethod
+    def get_default_log_path(config: dict = None):
+        """Restituisce il path centralizzato del file di log legacy."""
+        if config:
+            return config.get('logging', {}).get('log_file', os.path.join(os.getcwd(), 'logs', 'trading.log'))
+        return os.path.join(os.getcwd(), 'logs', 'trading.log')
+
     def __init__(self, config_file: str = None, log_file: str = None, use_mt5: bool = True):
         """
         Inizializza la dashboard grafica The5ers
@@ -37,13 +55,7 @@ class The5ersGraphicalDashboard:
         """
         # Auto-detect config file se non specificato (per sistema legacy)
         if config_file is None:
-            # Cerca prima nella cartella config del sistema legacy
-            legacy_config = "../config/PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
-            if os.path.exists(legacy_config):
-                config_file = legacy_config
-            else:
-                # Fallback alla directory corrente
-                config_file = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+            config_file = self.get_default_config_path()
         
         self.config_file = config_file
         self.config = self.load_config()
@@ -51,7 +63,7 @@ class The5ersGraphicalDashboard:
         
         # Auto-detect log file se non specificato
         if log_file is None:
-            self.log_file = self.config.get('logging', {}).get('log_file', 'logs/trading.log')
+            self.log_file = self.get_default_log_path(self.config)
         else:
             self.log_file = log_file
             
