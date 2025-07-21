@@ -24,38 +24,8 @@ CONFIG_FILE = "config/config_autonomous_high_stakes_production_ready.json"
 # Carica la configurazione JSON all'avvio
 def auto_correct_symbols(config):
     """
-    Verifica e corregge i nomi dei simboli in base a quelli disponibili su MT5.
-    Aggiorna la configurazione e logga le correzioni.
+    Versione semplificata: non effettua correzioni automatiche, restituisce la configurazione invariata.
     """
-    try:
-        # Ottieni la lista dei simboli disponibili su MT5
-        available = [s.name for s in mt5.symbols_get()]
-        corrected = {}
-        for symbol in config.get('symbols', {}):
-            # Match esatto
-            if symbol in available:
-                corrected[symbol] = symbol
-                continue
-            # Match con suffissi (es. .pro, .cash, .m, .i, .idx)
-            matches = [s for s in available if s.startswith(symbol)]
-            if not matches:
-                # Prova anche senza maiuscole/minuscole
-                matches = [s for s in available if s.lower().startswith(symbol.lower())]
-            if matches:
-                corrected[symbol] = matches[0]
-                logger.info(f"Correzione simbolo: {symbol} -> {matches[0]}")
-            else:
-                corrected[symbol] = symbol
-                logger.warning(f"Simbolo {symbol} non trovato su MT5, nessuna correzione applicata.")
-        # Aggiorna la configurazione con i simboli corretti
-        # Sostituisce solo la chiave, mantiene la configurazione del simbolo
-        new_symbols = {}
-        for old, new in corrected.items():
-            new_symbols[new] = config['symbols'][old]
-        config['symbols'] = new_symbols
-        logger.info(f"Simboli corretti: {list(config['symbols'].keys())}")
-    except Exception as e:
-        logger.error(f"Errore correzione simboli: {str(e)}", exc_info=True)
     return config
 def load_config(config_path=CONFIG_FILE):
     with open(config_path) as f:
