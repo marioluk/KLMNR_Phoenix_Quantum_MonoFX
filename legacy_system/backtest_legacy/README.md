@@ -1,28 +1,19 @@
 # 🎯 THE5ERS COMPLETE INTEGRATED SYSTEM
 
-## 🚀 AGGIORNAMENTO SISTEMA - 21 LUGLIO 2025
+## 🚀 AGGIORNAMENTO SISTEMA - 20 LUGLIO 2025
 
-### 📊 **PORTFOLIO SYMBOLS EXPANSION + OPTIMIZATION ENHANCEMENT:**
-1. **🎯 Portfolio Ampliato**: Da 14 a 16 simboli per copertura completa mercati
-2. **🇬🇧 UK100 (FTSE 100)**: Aggiunto indice UK per completare copertura europea
-3. **🥈 XAGUSD (Silver)**: Aggiunta commodities per diversificazione Gold/Silver
-4. **⚙️ Optimization Period**: Aumentato da 30 a 60 giorni per migliore significatività statistica
-5. **🔄 Finestra Mobile**: Adattamento continuo con periodo sliding 60 giorni
-6. **⚙️ Optimizer Aggiornato**: Autonomous High Stakes Optimizer con parametri ottimizzati
-7. **📚 Documentazione**: README files aggiornati con portfolio completo
-
-### ✅ **PROBLEMI RISOLTI (20 LUGLIO 2025):**
+### ✅ **PROBLEMI RISOLTI OGGI:**
 1. **🔧 Git Repository**: Corretti problemi dopo rimozione estensione Gait
 2. **🔌 MT5 Connection**: Fix connessione The5ers nel sistema legacy  
 3. **📁 File Path Management**: Ricerca intelligente configurazioni autonome
 4. **🛠️ Production Converter**: Funziona ora da qualsiasi directory
 5. **🔄 Menu Loops**: Aggiunto loop continuo nell'optimizer autonomo
 
-### 🎯 **Portfolio Completo (16 Simboli):**
-- **7 Forex Majors**: EURUSD, USDJPY, GBPUSD, USDCHF, USDCAD, AUDUSD, NZDUSD
-- **2 Commodities**: XAUUSD (Gold), XAGUSD (Silver) 
-- **5 Indices**: NAS100, US30, SP500, DAX40, UK100
-- **2 Crypto**: BTCUSD, ETHUSD
+### 🎯 **NUOVE FUNZIONALITÀ:**
+- **Smart File Discovery**: Il `production_converter.py` trova automaticamente i file config da qualsiasi directory
+- **Absolute Path Support**: Sistema robusto per gestione percorsi
+- **Enhanced Menu**: Loop continuo nell'autonomous optimizer
+- **Improved Git Workflow**: Repository pulito e ottimizzato
 
 ---
 

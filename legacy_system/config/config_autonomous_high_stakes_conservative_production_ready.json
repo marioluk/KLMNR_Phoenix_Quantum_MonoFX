@@ -14,184 +14,92 @@
     },
     "account_currency": "USD",
     "magic_number": 177251,
+    "initial_balance": 100000,
     "quantum_params": {
         "buffer_size": 500,
-        "spin_window": 80,
-        "min_spin_samples": 30,
-        "spin_threshold": 0.32,
         "signal_cooldown": 600,
-        "entropy_thresholds": {
-            "buy_signal": 0.5,
-            "sell_signal": 0.5
-        },
-        "volatility_scale": 1.0
+        "adaptive_threshold": 4.370451817756949,
+        "volatility_filter": 3.2136345451713,
+        "trend_strength_min": 0.6,
+        "confluence_threshold": 3.6663614542055596,
+        "quantum_boost": true,
+        "neural_enhancement": true
     },
     "risk_parameters": {
-        "magic_number": 147251,
-        "position_cooldown": 900,
-        "max_daily_trades": 4,
-        "max_positions": 2,
         "risk_percent": 0.005,
-        "profit_multiplier": 2.2,
-        "max_position_hours": 6,
-        "trailing_stop": {
-            "enable": true,
-            "activation_pips": 100,
-            "step_pips": 50,
-            "lock_percentage": 0.5
-        },
-        "min_sl_distance_pips": {
-            "EURUSD": 30,
-            "GBPUSD": 35,
-            "USDJPY": 25,
-            "XAUUSD": 150,
-            "NAS100": 50,
-            "default": 40
-        },
-        "base_sl_pips": {
-            "EURUSD": 50,
-            "GBPUSD": 60,
-            "USDJPY": 40,
-            "XAUUSD": 220,
-            "NAS100": 100,
-            "default": 80
-        },
-        "max_spread": {
-            "EURUSD": 12,
-            "GBPUSD": 15,
-            "USDJPY": 10,
-            "XAUUSD": 40,
-            "NAS100": 180,
-            "default": 20
-        }
+        "max_daily_trades": 4,
+        "max_concurrent_trades": 2,
+        "min_profit_target": 0.015,
+        "stop_loss_atr_multiplier": 1.5,
+        "take_profit_atr_multiplier": 2.5,
+        "daily_loss_limit": 0.05,
+        "max_drawdown": 0.08,
+        "risk_reward_ratio": 1.8
     },
     "symbols": {
         "EURUSD": {
-            "risk_management": {
-                "contract_size": 0.08,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
-                    "activation_pips": 36,
-                    "step_pips": 18
-                }
-            },
-            "trading_hours": [
-                "09:00-10:30",
-                "14:00-16:00"
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 2.0,
+            "trading_sessions": [
+                "London",
+                "NewYork"
             ],
-            "comment": "Converted from autonomous - score: 841.7",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
+            "optimization_score": 869.128214726534,
+            "aggressiveness_applied": "conservative"
         },
         "USDJPY": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
-                    "activation_pips": 36,
-                    "step_pips": 18
-                }
-            },
-            "trading_hours": [
-                "02:00-04:00",
-                "09:00-10:30"
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 2.5,
+            "trading_sessions": [
+                "Tokyo",
+                "London"
             ],
-            "comment": "Converted from autonomous - score: 822.9",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
-        },
-        "GBPJPY": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
-                    "activation_pips": 36,
-                    "step_pips": 18
-                }
-            },
-            "trading_hours": [
-                "09:00-10:30",
-                "14:00-16:00"
-            ],
-            "comment": "Converted from autonomous - score: 678.7",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
+            "optimization_score": 820.943306784219,
+            "aggressiveness_applied": "conservative"
         },
         "NAS100": {
-            "risk_management": {
-                "contract_size": 0.07,
-                "min_sl_distance_pips": 12,
-                "base_sl_pips": 12,
-                "profit_multiplier": 1.8,
-                "risk_percent": 0.005,
-                "trailing_stop": {
-                    "activation_pips": 31,
-                    "step_pips": 15
-                }
-            },
-            "trading_hours": [
-                "14:00-16:00"
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.77,
+            "signal_sell_threshold": 0.33,
+            "max_spread": 8.0,
+            "trading_sessions": [
+                "NewYork"
             ],
-            "comment": "Converted from autonomous - score: 648.8",
-            "quantum_params_override": {
-                "buffer_size": 500,
-                "spin_window": 70,
-                "min_spin_samples": 25,
-                "signal_cooldown": 800,
-                "entropy_thresholds": {
-                    "buy_signal": 0.825,
-                    "sell_signal": 0.275
-                }
-            }
+            "optimization_score": 677.4453742208447,
+            "aggressiveness_applied": "conservative"
+        },
+        "USDCAD": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 3.5,
+            "trading_sessions": [
+                "NewYork"
+            ],
+            "optimization_score": 648.844558473962,
+            "aggressiveness_applied": "conservative"
         }
     },
-    "THE5ERS_specific": {
-        "step1_target": 8,
-        "max_daily_loss_percent": 0.05,
-        "max_total_loss_percent": 10,
-        "drawdown_protection": {
-            "soft_limit": 0.02,
-            "hard_limit": 0.05
-        }
-    },
-    "initial_balance": 100000,
+    "THE5ERS_specific": {},
     "conversion_metadata": {
-        "converted_from": "config_autonomous_high_stakes_conservative.json",
-        "conversion_date": "2025-07-20T20:26:18.123223",
-        "converter_version": "1.0",
-        "original_aggressiveness": "conservative"
+        "created_by": "AutonomousHighStakesOptimizer",
+        "creation_date": "2025-07-21T12:05:37.181086",
+        "aggressiveness": "conservative"
     }
 }

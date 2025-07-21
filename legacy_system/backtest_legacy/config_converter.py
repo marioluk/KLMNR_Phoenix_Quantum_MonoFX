@@ -109,16 +109,27 @@ class ConfigConverter:
         return output_path
     
     def _convert_quantum_params(self, autonomous_config: Dict) -> Dict:
-        """Converte parametri quantum dal formato autonomo"""
+        """Converte parametri quantum dal formato autonomo al formato produzione"""
         
         autonomous_quantum = autonomous_config.get('quantum_params', {})
         
-        # Converte adaptive_threshold e volatility_filter in entropy_thresholds
+        # CORREZIONE: Gestisce correttamente i parametri del formato autonomo
+        # Il file autonomo ha: adaptive_threshold, volatility_filter, confluence_threshold, buffer_size, signal_cooldown
+        
+        # Usa adaptive_threshold per calcolare le soglie entropiche
         adaptive_threshold = autonomous_quantum.get('adaptive_threshold', 0.65)
+        volatility_filter = autonomous_quantum.get('volatility_filter', 0.75)
         
         # Normalizza i valori se sono fuori range [0,1]
         if adaptive_threshold > 1.0:
-            adaptive_threshold = adaptive_threshold / 10.0  # Scala se necessario
+            adaptive_threshold = adaptive_threshold / 10.0
+        if volatility_filter > 1.0:
+            volatility_filter = volatility_filter / 10.0
+        
+        # Calcola soglie equilibrate per buy e sell
+        # Usa volatility_filter per bilanciare le soglie
+        buy_threshold = min(0.85, max(0.50, adaptive_threshold + (volatility_filter - 0.75) * 0.1))
+        sell_threshold = min(0.50, max(0.15, (1.0 - adaptive_threshold) - (volatility_filter - 0.75) * 0.1))
         
         return {
             "buffer_size": autonomous_quantum.get('buffer_size', 500),
@@ -127,8 +138,8 @@ class ConfigConverter:
             "spin_threshold": 0.32,  # Default produzione
             "signal_cooldown": autonomous_quantum.get('signal_cooldown', 600),
             "entropy_thresholds": {
-                "buy_signal": min(0.65, max(0.5, adaptive_threshold)),
-                "sell_signal": min(0.5, max(0.35, 1.0 - adaptive_threshold))
+                "buy_signal": buy_threshold,
+                "sell_signal": sell_threshold
             },
             "volatility_scale": 1.0
         }
@@ -165,39 +176,54 @@ class ConfigConverter:
         }
     
     def _convert_symbols(self, autonomous_config: Dict) -> Dict:
-        """Converte configurazione simboli"""
+        """Converte configurazione simboli dal formato autonomo al formato produzione"""
         
         autonomous_symbols = autonomous_config.get('symbols', {})
         production_symbols = {}
         
-        # Mapping delle sessioni
+        # Mapping delle sessioni corretto per il formato autonomo
         session_mapping = {
             "London": ["09:00-10:30", "14:00-16:00"],
             "NewYork": ["14:00-16:00"], 
-            "Tokyo": ["02:00-04:00", "09:00-10:30"]
+            "Tokyo": ["02:00-04:00", "09:00-10:30"],
+            "Sydney": ["22:00-07:00"]
         }
         
         for symbol, data in autonomous_symbols.items():
             if not data.get('enabled', True):
                 continue
                 
+            # CORREZIONE: Usa i campi corretti dal formato autonomo
+            # Il file autonomo ha questi campi: lot_size, stop_loss_pips, take_profit_pips, trading_sessions (list), signal_*_threshold
+            
+            # Ottieni sessioni di trading - ora è una lista di stringhe
+            trading_sessions = data.get('trading_sessions', ['London'])
+            if isinstance(trading_sessions, list) and trading_sessions:
+                # Prendi la prima sessione e mappa agli orari
+                primary_session = trading_sessions[0]
+                trading_hours = session_mapping.get(primary_session, ["09:00-10:30", "14:00-16:00"])
+            else:
+                trading_hours = ["09:00-10:30", "14:00-16:00"]  # Default
+            
+            # Calcola activation e step pips per trailing stop
+            take_profit_pips = data.get('take_profit_pips', 90)
+            activation_pips = max(int(take_profit_pips * 0.4), 20)  # 40% del TP, minimo 20
+            step_pips = max(int(activation_pips * 0.5), 10)        # 50% dell'activation, minimo 10
+            
             # Converti in formato produzione
             production_symbols[symbol] = {
                 "risk_management": {
-                    "contract_size": data.get('lot_size', 0.01),
-                    "min_sl_distance_pips": data.get('stop_loss_pips', 30),
-                    "base_sl_pips": data.get('stop_loss_pips', 50),
-                    "profit_multiplier": autonomous_config.get('risk_parameters', {}).get('risk_reward_ratio', 2.2),
-                    "risk_percent": autonomous_config.get('risk_parameters', {}).get('risk_percent', 0.0015),
+                    "contract_size": data.get('lot_size', 0.01),  # Campo corretto
+                    "min_sl_distance_pips": max(data.get('stop_loss_pips', 30) // 2, 12),  # Metà dello SL, minimo 12
+                    "base_sl_pips": max(data.get('stop_loss_pips', 30) // 2, 12),          # Stesso valore del min
+                    "profit_multiplier": autonomous_config.get('risk_parameters', {}).get('risk_reward_ratio', 1.8),
+                    "risk_percent": autonomous_config.get('risk_parameters', {}).get('risk_percent', 0.005),
                     "trailing_stop": {
-                        "activation_pips": data.get('take_profit_pips', 90),
-                        "step_pips": data.get('take_profit_pips', 45) // 2 if data.get('take_profit_pips') else 45
+                        "activation_pips": activation_pips,
+                        "step_pips": step_pips
                     }
                 },
-                "trading_hours": session_mapping.get(
-                    data.get('trading_sessions', ['London'])[0], 
-                    ["09:00-10:30", "14:00-16:00"]
-                ),
+                "trading_hours": trading_hours,
                 "comment": f"Converted from autonomous - score: {data.get('optimization_score', 0):.1f}",
                 "quantum_params_override": {
                     "buffer_size": 500,
@@ -205,8 +231,9 @@ class ConfigConverter:
                     "min_spin_samples": 25,
                     "signal_cooldown": 800,
                     "entropy_thresholds": {
-                        "buy_signal": data.get('signal_buy_threshold', 0.56),
-                        "sell_signal": data.get('signal_sell_threshold', 0.44)
+                        # CORREZIONE: Usa i campi corretti per le soglie
+                        "buy_signal": data.get('signal_buy_threshold', 0.825),   # Campo corretto
+                        "sell_signal": data.get('signal_sell_threshold', 0.275) # Campo corretto
                     }
                 }
             }

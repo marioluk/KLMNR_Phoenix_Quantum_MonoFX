@@ -49,10 +49,10 @@ class DailyConfigUpdater:
     Sistema automatizzato per aggiornamento giornaliero configurazioni
     """
     
-    def __init__(self, optimization_days: int = 60, backup_old_configs: bool = True):
+    def __init__(self, optimization_days: int = 30, backup_old_configs: bool = True):
         """
         Args:
-            optimization_days: Giorni di dati per ottimizzazione (default: 60)
+            optimization_days: Giorni di dati per ottimizzazione (default: 30)
             backup_old_configs: Se fare backup delle configurazioni precedenti
         """
         self.optimization_days = optimization_days
@@ -214,21 +214,43 @@ class DailyConfigUpdater:
         logger.info("[PROCESS] Conversione a formato produzione...")
         
         try:
+            # Trova template produzione
+            template_paths = [
+                os.path.join(self.legacy_dir, "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"),
+                os.path.join(self.config_dir, "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json")
+            ]
+            
+            production_template = None
+            for template_path in template_paths:
+                if os.path.exists(template_path):
+                    production_template = template_path
+                    break
+            
+            if production_template:
+                logger.info(f"[REPORT] Template trovato: {os.path.relpath(production_template)}")
+            else:
+                logger.warning("[WARNING] Template produzione non trovato, usando default")
+            
+            # Inizializza converter
+            self.converter = ConfigConverter(production_template)
+            
             # Nome file output STANDARD (senza [BEST] per compatibilità sistema legacy)
-            output_name = "config_autonomous_high_stakes_production_ready.json"
+            output_name = "config_autonomous_high_stakes_conservative_production_ready.json"
             output_path = os.path.join(self.config_dir, output_name)
             
             logger.info(f"[TARGET] Target: {output_name} (nome standard per compatibilità legacy)")
             
-            # Semplicemente copia il file ottimizzato al nome di produzione
-            import shutil
-            shutil.copy2(autonomous_config_path, output_path)
+            # Converti
+            converted_path = self.converter.convert_autonomous_to_production(
+                autonomous_config_path, 
+                output_path
+            )
             
-            logger.info(f"[SUCCESS] File di produzione creato: {os.path.relpath(output_path)}")
+            logger.info(f"[SUCCESS] Conversione completata: {os.path.relpath(converted_path)}")
             logger.info(f"[LINK] Compatibile con sistema legacy (stesso path CONFIG_FILE)")
             
             # Rimuovi file autonomo originale se è diverso dal target
-            if autonomous_config_path != output_path and os.path.exists(autonomous_config_path):
+            if autonomous_config_path != converted_path and os.path.exists(autonomous_config_path):
                 try:
                     os.remove(autonomous_config_path)
                     logger.info(f"[CLEANUP] File autonomo temporaneo rimosso: {os.path.basename(autonomous_config_path)}")
@@ -236,9 +258,9 @@ class DailyConfigUpdater:
                     logger.warning(f"[WARNING] Non riuscito a rimuovere file temporaneo: {e}")
             
             # Valida file convertito
-            if self.validate_production_config(output_path):
+            if self.validate_production_config(converted_path):
                 logger.info("[SUCCESS] File produzione validato con successo")
-                return output_path
+                return converted_path
             else:
                 logger.error("[ERROR] Validazione file produzione fallita")
                 return None
@@ -388,7 +410,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Daily Config Updater per The5ers')
-    parser.add_argument('--days', type=int, default=60, help='Giorni di ottimizzazione (default: 60)')
+    parser.add_argument('--days', type=int, default=30, help='Giorni di ottimizzazione (default: 30)')
     parser.add_argument('--no-backup', action='store_true', help='Disabilita backup configurazioni esistenti')
     parser.add_argument('--quiet', action='store_true', help='Solo log su file, niente output console')
     

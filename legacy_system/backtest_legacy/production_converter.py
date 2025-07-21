@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """
-PRODUCTION CONVERTER - Integrazione con Sistema Autonomo
-Aggiunti al sistema autonomo le funzionalità di conversione automatica
+PRODUCTION CONVERTER - Sistema di Gestione Configurazioni Ottimizzate
+Gestisce la conversione dei file ottimizzati in configurazione di produzione
+Logica CORRETTA:
+1. L'ottimizzatore genera: config_autonomous_high_stakes_[STRATEGY]_production_ready.json
+2. Il sistema seleziona il migliore e lo copia in: config_autonomous_high_stakes_conservative_production_ready.json
+3. Il software di trading legge: config_autonomous_high_stakes_conservative_production_ready.json
 """
 
 import os
 import sys
 import glob
 import json
+import shutil
 from datetime import datetime
-from typing import List
+from typing import List, Dict, Optional
 
 # Import del converter
 try:
@@ -18,6 +23,116 @@ except ImportError:
     print("❌ Errore: ConfigConverter non trovato")
     print("💡 Assicurati che config_converter.py sia nella directory corrente")
     sys.exit(1)
+
+def find_production_ready_configs() -> List[str]:
+    """
+    Trova tutti i file config_autonomous_*_production_ready.json
+    
+    Returns:
+        Lista di percorsi assoluti ai file trovati
+    """
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_dir = os.path.join(script_dir, "..", "config")
+    
+    if not os.path.exists(config_dir):
+        return []
+    
+    pattern = os.path.join(config_dir, "config_autonomous_high_stakes_*_production_ready.json")
+    found_files = glob.glob(pattern)
+    
+    return sorted(found_files)
+
+def select_best_config(production_ready_files: List[str]) -> Optional[str]:
+    """
+    Seleziona il miglior file di configurazione basato su criteri prestazionali
+    
+    Args:
+        production_ready_files: Lista dei file production-ready
+        
+    Returns:
+        Path del miglior file o None se nessuno trovato
+    """
+    
+    if not production_ready_files:
+        return None
+    
+    # Ordine di preferenza: conservative > moderate > aggressive
+    strategy_priority = ["conservative", "moderate", "aggressive"]
+    
+    for strategy in strategy_priority:
+        for file_path in production_ready_files:
+            if f"_{strategy}_production_ready.json" in file_path:
+                return file_path
+    
+    # Se non trova nessuna strategia specifica, prende il primo disponibile
+    return production_ready_files[0]
+
+def deploy_best_config() -> bool:
+    """
+    Trova il miglior config production-ready e lo deploy come file principale
+    
+    Returns:
+        True se deploy riuscito, False altrimenti
+    """
+    
+    print("🎯 DEPLOY MIGLIOR CONFIGURAZIONE")
+    print("="*50)
+    
+    # Trova file production-ready
+    production_files = find_production_ready_configs()
+    
+    if not production_files:
+        print("❌ Nessun file *_production_ready.json trovato")
+        print("💡 Esegui prima l'ottimizzazione autonoma")
+        return False
+    
+    print(f"📁 Trovati {len(production_files)} file production-ready:")
+    for file_path in production_files:
+        filename = os.path.basename(file_path)
+        print(f"   • {filename}")
+    
+    # Seleziona il migliore
+    best_file = select_best_config(production_files)
+    best_filename = os.path.basename(best_file)
+    
+    print(f"\n🏆 Migliore selezionato: {best_filename}")
+    
+    # Path del file principale
+    # Usa sempre path assoluto per legacy_system/config
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_dir = os.path.abspath(os.path.join(script_dir, "..", "config"))
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+    main_config_path = os.path.join(config_dir, "config_autonomous_high_stakes_conservative_production_ready.json")
+    
+    import time
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            # Backup del file esistente nella cartella backup
+            if os.path.exists(main_config_path):
+                backup_dir = os.path.join(config_dir, "backup")
+                if not os.path.exists(backup_dir):
+                    os.makedirs(backup_dir)
+                backup_filename = f"config_autonomous_high_stakes_conservative_production_ready.json.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                backup_path = os.path.join(backup_dir, backup_filename)
+                shutil.copy2(main_config_path, backup_path)
+                print(f"💾 Backup creato: backup/{backup_filename}")
+            # Deploy del nuovo file
+            shutil.copy2(best_file, main_config_path)
+            print(f"✅ Deploy completato!")
+            print(f"📁 File principale aggiornato: config_autonomous_high_stakes_conservative_production_ready.json")
+            return True
+        except Exception as e:
+            if hasattr(e, 'winerror') and e.winerror == 32:
+                print(f"⚠️ File bloccato da un altro processo (tentativo {attempt}/{max_attempts}). Riprovo tra 2 secondi...")
+                time.sleep(2)
+            else:
+                print(f"❌ Errore durante il deploy: {e}")
+                return False
+    print("❌ Errore: il file rimane bloccato dopo 3 tentativi. Chiudi tutte le applicazioni che lo usano e riprova.")
+    return False
 
 def find_autonomous_configs() -> List[str]:
     """
@@ -221,8 +336,11 @@ def convert_single_config():
         
         # Converti
         converter = ConfigConverter(production_template if production_template and os.path.exists(production_template) else None)
-        converted_path = converter.convert_autonomous_to_production(selected_file)
-        
+        # Il file finale deve essere sempre config_autonomous_high_stakes_production_ready.json
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        config_dir = os.path.join(script_dir, "..", "config")
+        output_path = os.path.join(config_dir, "config_autonomous_high_stakes_production_ready.json")
+        converted_path = converter.convert_autonomous_to_production(selected_file, output_path)
         print(f"\n✅ Conversione completata!")
         print(f"📁 File convertito: {os.path.relpath(converted_path)}")
         
@@ -235,25 +353,28 @@ def main():
     """Menu principale converter"""
     
     print("🎯 THE5ERS CONFIG CONVERTER")
-    print("Converte configurazioni autonome in formato produzione")
+    print("Gestione configurazioni ottimizzate per produzione")
     print("="*60)
     print()
     
     while True:
-        print("OPZIONI CONVERSIONE:")
+        print("OPZIONI DISPONIBILI:")
         print("1. 🔄 Converti TUTTI i config autonomi")
         print("2. 📋 Converti SINGOLO config")
-        print("3. 📊 Lista config disponibili")
-        print("4. 👋 Esci")
+        print("3. 🎯 DEPLOY miglior configurazione (NUOVO)")
+        print("4. 📊 Lista config disponibili")
+        print("5. 👋 Esci")
         print()
         
-        choice = input("👉 Scegli opzione (1-4): ").strip()
+        choice = input("👉 Scegli opzione (1-5): ").strip()
         
         if choice == "1":
             convert_all_autonomous_configs()
         elif choice == "2":
             convert_single_config()
         elif choice == "3":
+            deploy_best_config()
+        elif choice == "4":
             # Lista file con ricerca intelligente
             autonomous_files = find_autonomous_configs()
             
@@ -296,13 +417,13 @@ def main():
                     print(f"   • {display_path}")
             else:
                 print("   Nessun file trovato")
-        elif choice == "4":
+        elif choice == "5":
             print("👋 Converter terminato.")
             break
         else:
             print("❌ Opzione non valida.")
         
-        if choice != "4":
+        if choice != "5":
             input("\n⏸️ Premi ENTER per continuare...")
             print("\n" * 2)
 

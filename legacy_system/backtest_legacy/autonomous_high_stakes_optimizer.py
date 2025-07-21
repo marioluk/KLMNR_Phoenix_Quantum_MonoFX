@@ -34,7 +34,7 @@ class AutonomousHighStakesOptimizer:
         Inizializza ottimizzatore autonomo
         
         Args:
-            optimization_days: Giorni di dati storici per ottimizzazione (default: 60)
+            optimization_days: Giorni di dati storici per ottimizzazione
             output_dir: Directory di output personalizzata
         """
         
@@ -53,24 +53,18 @@ class AutonomousHighStakesOptimizer:
             'max_daily_loss_percent': 0.05
         }
         
-        # Simboli disponibili per ottimizzazione (ordinati per performance The5ers)
+        # Simboli disponibili per ottimizzazione (ordinati per stabilità)
         self.available_symbols = [
-            'EURUSD',   # 🥇 TOP PERFORMER (73.7% win rate, spread 1-2 pips)
-            'USDJPY',   # 🥈 SECONDO MIGLIORE (trend follower, spread 2-3 pips)
-            'GBPUSD',   # 🥉 VOLATILE REDDITIZIO (spread 2-4 pips)
-            'USDCHF',   # ✅ STABILE (spread 2-3 pips)
-            'USDCAD',   # ✅ STABILE (spread 2-4 pips)
-            'AUDUSD',   # ⚖️ MEDIA VOLATILITÀ (spread 2-4 pips)
-            'NZDUSD',   # ⚠️ VOLATILE (spread 3-5 pips)
-            'XAUUSD',   # 💰 GOLD - ALTA VOLATILITÀ (spread 3-8 pips)
-            'XAGUSD',   # 🥈 SILVER - COMMODITIES (spread 3-6 pips)
-            'NAS100',   # 📈 NASDAQ - SOLO ESPERTI (spread 5-15 pips)
-            'US30',     # 📊 DOW JONES - INDICE USA (spread 2-8 pips)
-            'SP500',    # 📈 S&P 500 - INDICE USA (spread 2-6 pips)
-            'DAX40',    # 🇩🇪 DAX - INDICE TEDESCO (spread 2-6 pips)
-            'UK100',    # 🇬🇧 FTSE 100 - INDICE UK (spread 2-5 pips)
-            'BTCUSD',   # 💎 BITCOIN - CRYPTO VOLATILE (spread 10-50 pips)
-            'ETHUSD'    # 🔷 ETHEREUM - CRYPTO VOLATILE (spread 5-30 pips)
+            'EURUSD',   # Più stabile
+            'USDJPY',   # Stabile
+            'GBPUSD',   # Media volatilità
+            'USDCHF',   # Stabile
+            'AUDUSD',   # Media volatilità  
+            'USDCAD',   # Stabile
+            'NZDUSD',   # Volatile
+            'XAUUSD',   # Molto volatile
+            'NAS100',   # Indice volatile
+            'GBPJPY'    # Molto volatile
         ]
         
         # Range parametri per ottimizzazione
@@ -223,31 +217,13 @@ class AutonomousHighStakesOptimizer:
         import random
         random.seed(hash(f"{symbol}{risk}{trades}{sl_pips}{tp_pips}{signal_th}"))
         
-        # Parametri base per simbolo (aggiornato con nuovi simboli)
+        # Parametri base per simbolo
         symbol_characteristics = {
-            # FOREX MAJORS (basato su analisi strategica The5ers)
-            'EURUSD': {'volatility': 0.7, 'trend': 0.8, 'spread': 1.2},  # 🥇 Top performer
-            'USDJPY': {'volatility': 0.6, 'trend': 0.7, 'spread': 1.5},  # 🥈 Trend follower
-            'GBPUSD': {'volatility': 0.8, 'trend': 0.6, 'spread': 2.0},  # 🥉 Volatile redditizio
-            'USDCHF': {'volatility': 0.5, 'trend': 0.6, 'spread': 1.8},  # ✅ Stabile
-            'USDCAD': {'volatility': 0.6, 'trend': 0.6, 'spread': 2.2},  # ✅ Stabile Nord America
-            'AUDUSD': {'volatility': 0.9, 'trend': 0.5, 'spread': 2.5},  # ⚖️ Media volatilità
-            'NZDUSD': {'volatility': 1.0, 'trend': 0.5, 'spread': 3.0},  # ⚠️ Volatile
-            
-            # COMMODITIES
-            'XAUUSD': {'volatility': 1.5, 'trend': 0.5, 'spread': 3.5},  # 💰 Gold
-            'XAGUSD': {'volatility': 1.8, 'trend': 0.5, 'spread': 3.0},  # 🥈 Silver (più volatile del gold)
-            
-            # INDICES (nomenclatura corretta The5ers)
-            'NAS100': {'volatility': 1.8, 'trend': 0.7, 'spread': 5.0},  # 📈 NASDAQ
-            'US30': {'volatility': 1.2, 'trend': 0.7, 'spread': 4.0},    # 📊 DOW (più stabile del NASDAQ)
-            'SP500': {'volatility': 1.1, 'trend': 0.7, 'spread': 3.5},   # 📈 S&P 500 (stabile)
-            'DAX40': {'volatility': 1.0, 'trend': 0.6, 'spread': 3.5},   # 🇩🇪 DAX (europeo stabile)
-            'UK100': {'volatility': 0.9, 'trend': 0.6, 'spread': 3.0},   # 🇬🇧 FTSE 100 (stabile UK)
-            
-            # CRYPTO (supportate da The5ers in produzione)
-            'BTCUSD': {'volatility': 2.5, 'trend': 0.6, 'spread': 8.0},  # 💎 Bitcoin (molto volatile)
-            'ETHUSD': {'volatility': 2.2, 'trend': 0.6, 'spread': 6.0},  # 🔷 Ethereum (volatile)
+            'EURUSD': {'volatility': 0.7, 'trend': 0.8, 'spread': 1.2},
+            'USDJPY': {'volatility': 0.6, 'trend': 0.7, 'spread': 1.5},
+            'GBPUSD': {'volatility': 0.8, 'trend': 0.6, 'spread': 2.0},
+            'XAUUSD': {'volatility': 1.5, 'trend': 0.5, 'spread': 3.5},
+            'NAS100': {'volatility': 1.8, 'trend': 0.7, 'spread': 5.0}
         }
         
         char = symbol_characteristics.get(symbol, {'volatility': 1.0, 'trend': 0.6, 'spread': 2.5})
@@ -317,60 +293,27 @@ class AutonomousHighStakesOptimizer:
         return optimized_params
     
     def get_symbol_max_spread(self, symbol: str) -> float:
-        """Ritorna max spread consigliato per simbolo (aggiornato con nuovi simboli)"""
+        """Ritorna max spread consigliato per simbolo"""
         spread_limits = {
-            # FOREX MAJORS (The5ers preferiti)
-            'EURUSD': 2.0,  # 🥇 Migliore spread
-            'USDJPY': 2.5,  # 🥈 Ottimo spread
-            'GBPUSD': 3.0,  # 🥉 Buono spread
-            'USDCHF': 3.0,  # ✅ Stabile
-            'USDCAD': 3.5,  # ✅ Buono
-            'AUDUSD': 3.5,  # ⚖️ Medio
-            'NZDUSD': 4.0,  # ⚠️ Più alto
-            
-            # COMMODITIES
-            'XAUUSD': 5.0,  # 💰 Gold - spread alto ma gestibile
-            'XAGUSD': 4.0,  # 🥈 Silver - spread medio per commodities
-            
-            # INDICES (nomenclatura corretta The5ers)
-            'NAS100': 8.0,   # 📈 NASDAQ - spread variabile
-            'US30': 6.0,     # 📊 DOW JONES - buono per indice
-            'SP500': 5.0,    # 📈 S&P 500 - spread decente
-            'DAX40': 5.0,    # 🇩🇪 DAX (nomenclatura corretta) - spread decente
-            'UK100': 4.0,    # 🇬🇧 FTSE 100 - spread buono per indice UK
-            
-            # CRYPTO (supportate da The5ers)
-            'BTCUSD': 50.0,  # 💎 Bitcoin - spread molto variabile
-            'ETHUSD': 30.0,  # 🔷 Ethereum - spread alto ma gestibile
+            'EURUSD': 2.0, 'USDJPY': 2.5, 'GBPUSD': 3.0, 'USDCHF': 3.0,
+            'AUDUSD': 3.5, 'USDCAD': 3.5, 'NZDUSD': 4.0,
+            'XAUUSD': 5.0, 'NAS100': 8.0, 'GBPJPY': 4.5
         }
         return spread_limits.get(symbol, 4.0)
     
     def get_symbol_sessions(self, symbol: str) -> List[str]:
-        """Ritorna sessioni ottimali per simbolo (aggiornato con nuovi simboli)"""
+        """Ritorna sessioni ottimali per simbolo"""
         session_mapping = {
-            # FOREX MAJORS
-            'EURUSD': ['London', 'NewYork'],     # 🥇 Overlap London-NY ottimale
-            'USDJPY': ['Tokyo', 'London'],       # 🥈 Asian + London
-            'GBPUSD': ['London'],                # 🥉 Solo London per volatilità controllata
-            'USDCHF': ['London'],                # ✅ Europeo
-            'USDCAD': ['NewYork'],               # ✅ Nord America
-            'AUDUSD': ['Sydney', 'Tokyo'],       # ⚖️ Pacifico
-            'NZDUSD': ['Sydney'],                # ⚠️ Solo Pacifico
-            
-            # COMMODITIES
-            'XAUUSD': ['London', 'NewYork'],     # 💰 London + NY per news
-            'XAGUSD': ['London', 'NewYork'],     # 🥈 Silver segue oro per liquidità
-            
-            # INDICES (sessioni specifiche per performance)
-            'NAS100': ['NewYork'],               # 📈 Solo NY (orario USA)
-            'US30': ['NewYork'],                 # 📊 Solo NY (mercato USA)
-            'SP500': ['NewYork'],                # 📈 Solo NY (mercato USA)
-            'DAX40': ['London'],                 # 🇩🇪 Solo London (orario EU)
-            'UK100': ['London'],                 # 🇬🇧 Solo London (mercato UK)
-            
-            # CRYPTO (24/7 ma con sessioni preferenziali)
-            'BTCUSD': ['London', 'NewYork'],     # 💎 Maggior liquidità London/NY
-            'ETHUSD': ['London', 'NewYork'],     # 🔷 Maggior liquidità London/NY
+            'EURUSD': ['London', 'NewYork'],
+            'USDJPY': ['Tokyo', 'London'],
+            'GBPUSD': ['London'],
+            'USDCHF': ['London'],
+            'AUDUSD': ['Sydney', 'Tokyo'],
+            'USDCAD': ['NewYork'],
+            'NZDUSD': ['Sydney'],
+            'XAUUSD': ['London', 'NewYork'],
+            'NAS100': ['NewYork'],
+            'GBPJPY': ['London', 'Tokyo']
         }
         return session_mapping.get(symbol, ['London', 'NewYork'])
     
@@ -489,16 +432,43 @@ class AutonomousHighStakesOptimizer:
         config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
         os.makedirs(config_dir, exist_ok=True)
         
-        filename = f"config_autonomous_high_stakes_{aggressiveness}.json"
+        filename = f"config_autonomous_high_stakes_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
-        
+
+        # Struttura production-ready
+        production_config = {
+            "logging": {
+                "log_file": f"logs/log_autonomous_high_stakes_{aggressiveness}_production_ready.log",
+                "max_size_mb": 50,
+                "backup_count": 7,
+                "log_level": "INFO"
+            },
+            "metatrader5": {
+                "login": 25437097,
+                "password": "wkchTWEO_.00",
+                "server": "FivePercentOnline-Real",
+                "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+                "port": 18889
+            },
+            "account_currency": "USD",
+            "magic_number": 177251,
+            "initial_balance": 100000,
+            "quantum_params": config.get("quantum_params", {}),
+            "risk_parameters": config.get("risk_parameters", {}),
+            "symbols": config.get("symbols", {}),
+            "THE5ERS_specific": config.get("THE5ERS_specific", {}),
+            "conversion_metadata": {
+                "created_by": "AutonomousHighStakesOptimizer",
+                "creation_date": datetime.now().isoformat(),
+                "aggressiveness": aggressiveness
+            }
+        }
+
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=4, ensure_ascii=False)
-            
-            logger.info(f"💾 Configurazione salvata: {filepath}")
+                json.dump(production_config, f, indent=4, ensure_ascii=False)
+            logger.info(f"💾 Configurazione production-ready salvata: {filepath}")
             return filepath
-            
         except Exception as e:
             logger.error(f"❌ Errore salvataggio {filepath}: {e}")
             raise
@@ -815,8 +785,8 @@ def main():
             if choice == "1":
                 # Genera tutte da zero
                 print("\n🔧 Configurazione ottimizzazione:")
-                days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
-                optimization_days = int(days) if days.isdigit() else 60
+                days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
                 
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 results = optimizer.generate_all_configs()
@@ -836,8 +806,8 @@ def main():
                 level_map = {'1': 'conservative', '2': 'moderate', '3': 'aggressive'}
                 level = level_map.get(level_choice, 'moderate')
                 
-                days = input("📅 Giorni ottimizzazione (default: 60): ").strip()
-                optimization_days = int(days) if days.isdigit() else 60
+                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
                 
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 config = optimizer.generate_optimized_config(level)
@@ -851,8 +821,8 @@ def main():
                 print("Genera tutte le configurazioni, confronta e mantiene solo la migliore")
                 print("-" * 60)
                 
-                days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
-                optimization_days = int(days) if days.isdigit() else 60
+                days = input("📅 Giorni per ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
                 
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 
@@ -880,29 +850,31 @@ def main():
                         best_level = level
                         best_config = filepath
                 
-                print(f"\n🥇 MIGLIORE: {best_level.upper()} (Score: {best_score:.2f})")
-                print(f"📄 File: {os.path.basename(best_config)}")
-                
-                # Pulizia: Elimina le configurazioni non scelte
-                print(f"\n🧹 Pulizia file non ottimali...")
-                files_removed = 0
-                for level, filepath in results.items():
-                    if filepath != best_config and os.path.exists(filepath):
-                        try:
-                            os.remove(filepath)
-                            files_removed += 1
-                            print(f"   🗑️ Rimosso: {os.path.basename(filepath)} ({level.upper()})")
-                        except Exception as e:
-                            print(f"   ⚠️ Errore rimozione {os.path.basename(filepath)}: {e}")
-                
-                print(f"✅ Mantenuto solo il migliore: {os.path.basename(best_config)}")
-                print(f"🧹 Rimossi {files_removed} file non ottimali")
+                # FINE CICLO FOR: ora controllo se è stato trovato un best_config valido
+                if best_config is None or best_level is None:
+                    print("\n❌ Nessuna configurazione valida trovata (score > 0).")
+                else:
+                    print(f"\n🥇 MIGLIORE: {best_level.upper()} (Score: {best_score:.2f})")
+                    print(f"📄 File: {os.path.basename(best_config)}")
+                    # Pulizia: Elimina le configurazioni non scelte
+                    print(f"\n🧹 Pulizia file non ottimali...")
+                    files_removed = 0
+                    for level, filepath in results.items():
+                        if filepath != best_config and os.path.exists(filepath):
+                            try:
+                                os.remove(filepath)
+                                files_removed += 1
+                                print(f"   🗑️ Rimosso: {os.path.basename(filepath)} ({level.upper()})")
+                            except Exception as e:
+                                print(f"   ⚠️ Errore rimozione {os.path.basename(filepath)}: {e}")
+                    print(f"✅ Mantenuto solo il migliore: {os.path.basename(best_config)}")
+                    print(f"🧹 Rimossi {files_removed} file non ottimali")
                 
             elif choice == "4":
                 # Configurazione avanzata
                 print("\n⚙️ CONFIGURAZIONE AVANZATA:")
-                days = input("📅 Giorni ottimizzazione (default: 60): ").strip()
-                optimization_days = int(days) if days.isdigit() else 60
+                days = input("📅 Giorni ottimizzazione (default: 30): ").strip()
+                optimization_days = int(days) if days.isdigit() else 30
                 
                 output_dir = input("📁 Directory output (ENTER per corrente): ").strip()
                 if not output_dir:

@@ -1,7 +1,7 @@
 @echo off
 REM ==============================================================================
 REM SETUP AUTO START DAILY CONFIG UPDATER
-REM Installazione automatica Task Scheduler per Daily Config Updater alle 23:30 + al riavvio
+REM Installazione automatica Task Scheduler per Daily Config Updater alle 23:30
 REM ==============================================================================
 
 echo ===============================================================================
@@ -111,7 +111,7 @@ echo INSTALLAZIONE COMPLETATA!
 echo ===============================================================================
 echo.
 echo Il Daily Config Updater è ora configurato per eseguire:
-echo - OGNI GIORNO alle 23:30 + AL RIAVVIO SERVER (2 min delay)
+echo - OGNI GIORNO alle 06:00
 echo - Con restart automatico su errore (max 3 tentativi)
 echo - Con log dettagliati in legacy_system\logs\
 echo.
@@ -123,15 +123,9 @@ echo [3] Modifica orario esecuzione
 echo [4] Disabilita task temporaneamente
 echo [5] Esci
 echo.
-echo [INFO] Premi ENTER per uscire automaticamente
 
 :menu
-echo.
-echo Scegli un'opzione (1-5) oppure premi ENTER per uscire:
-set /p choice="Opzione: "
-
-REM Se non viene inserita nessuna opzione, esce con successo
-if "%choice%"=="" goto :exit_success
+set /p choice="Scegli opzione (1-5): "
 
 if "%choice%"=="1" goto :test_task
 if "%choice%"=="2" goto :show_details
@@ -139,7 +133,7 @@ if "%choice%"=="3" goto :modify_schedule
 if "%choice%"=="4" goto :disable_task
 if "%choice%"=="5" goto :exit_success
 
-echo [WARNING] Opzione '%choice%' non valida. Riprova.
+echo [ERROR] Opzione non valida. Riprova.
 goto :menu
 
 :test_task
@@ -198,7 +192,7 @@ exit /b 1
 :exit_success
 echo.
 echo [INFO] Setup completato con successo!
-echo [INFO] Il Daily Config Updater si avvierà automaticamente alle 23:30 + al riavvio server
+echo [INFO] Il Daily Config Updater si avvierà automaticamente alle 06:00
 echo.
 pause
 exit /b 0

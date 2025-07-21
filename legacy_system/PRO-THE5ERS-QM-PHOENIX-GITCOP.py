@@ -29,6 +29,22 @@ def load_config(config_path=CONFIG_FILE):
 
 config = load_config()
 
+# Reload automatico della configurazione ogni 15 minuti
+import threading
+def periodic_reload_config(interval=900):
+    global config
+    while True:
+        time.sleep(interval)
+        try:
+            config = load_config()
+            print(f"[{datetime.now()}] Configurazione ricaricata.")
+        except Exception as e:
+            print(f"Errore reload config: {e}")
+
+# Avvia il thread di reload all’avvio
+reload_thread = threading.Thread(target=periodic_reload_config, daemon=True)
+reload_thread.start()
+
 # Ora puoi ottenere il percorso del log dal JSON
 LOG_FILE = config["logging"]["log_file"]
 
