@@ -18,10 +18,10 @@
     "quantum_params": {
         "buffer_size": 500,
         "signal_cooldown": 600,
-        "adaptive_threshold": 4.370451817756949,
-        "volatility_filter": 3.2136345451713,
+        "adaptive_threshold": 4.319857708938798,
+        "volatility_filter": 3.179905139292533,
         "trend_strength_min": 0.6,
-        "confluence_threshold": 3.6663614542055596,
+        "confluence_threshold": 3.6258861671510387,
         "quantum_boost": true,
         "neural_enhancement": true
     },
@@ -39,7 +39,7 @@
     "symbols": {
         "EURUSD": {
             "enabled": true,
-            "lot_size": 0.07,
+            "lot_size": 0.08,
             "stop_loss_pips": 12,
             "take_profit_pips": 36,
             "signal_buy_threshold": 0.825,
@@ -49,7 +49,7 @@
                 "London",
                 "NewYork"
             ],
-            "optimization_score": 869.128214726534,
+            "optimization_score": 868.7603797241644,
             "aggressiveness_applied": "conservative"
         },
         "USDJPY": {
@@ -64,42 +64,42 @@
                 "Tokyo",
                 "London"
             ],
-            "optimization_score": 820.943306784219,
+            "optimization_score": 778.6227886959143,
             "aggressiveness_applied": "conservative"
         },
         "NAS100": {
             "enabled": true,
-            "lot_size": 0.07,
+            "lot_size": 0.08,
             "stop_loss_pips": 12,
             "take_profit_pips": 36,
-            "signal_buy_threshold": 0.77,
-            "signal_sell_threshold": 0.33,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
             "max_spread": 8.0,
             "trading_sessions": [
                 "NewYork"
             ],
-            "optimization_score": 677.4453742208447,
+            "optimization_score": 668.015321743168,
             "aggressiveness_applied": "conservative"
         },
-        "USDCAD": {
+        "GBPUSD": {
             "enabled": true,
             "lot_size": 0.07,
             "stop_loss_pips": 12,
             "take_profit_pips": 36,
             "signal_buy_threshold": 0.825,
             "signal_sell_threshold": 0.275,
-            "max_spread": 3.5,
+            "max_spread": 3.0,
             "trading_sessions": [
-                "NewYork"
+                "London"
             ],
-            "optimization_score": 648.844558473962,
+            "optimization_score": 660.4876769877923,
             "aggressiveness_applied": "conservative"
         }
     },
     "THE5ERS_specific": {},
     "conversion_metadata": {
         "created_by": "AutonomousHighStakesOptimizer",
-        "creation_date": "2025-07-21T12:05:37.181086",
+        "creation_date": "2025-07-21T15:56:46.608792",
         "aggressiveness": "conservative"
     }
 }
