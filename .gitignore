@@ -26,8 +26,12 @@ Thumbs.db
 .gait/
 
 # Daily Config Updater - Auto-generated files
-config/backups/
-legacy_system/config/backups/
+
+# Config e backup (non versionare)
+config/backup/
+legacy_system/config/backup/
+config/*.json
+legacy_system/config/*.json
 **/config_autonomous_high_stakes_*.json
 **/*_production_ready_production_ready.json
 logs/daily_config_updater_*.log
