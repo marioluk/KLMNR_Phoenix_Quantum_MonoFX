@@ -55,9 +55,23 @@ class AutonomousHighStakesOptimizer:
         
         # Simboli disponibili per ottimizzazione (ordinati per stabilità)
         self.available_symbols = [
-            'EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD',
-            'BTCUSD', 'ETHUSD', 'XAUUSD', 'XAGUSD',
-            'SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'
+            'EURUSD', 
+            'USDJPY', 
+            'GBPUSD', 
+            'USDCHF', 
+            #'AUDUSD', 
+            #'USDCAD', 
+            #'NZDUSD',
+            'BTCUSD', 
+            'ETHUSD', 
+            'XAUUSD', 
+            #'XAGUSD',
+            'SP500', 
+            'NAS100', 
+            'US30'
+            #'DAX40', 
+            #'FTSE100', 
+            #'JP225'
         ]
         
         # Range parametri per ottimizzazione
