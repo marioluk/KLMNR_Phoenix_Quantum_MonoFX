@@ -66,16 +66,18 @@ class AutonomousHighStakesOptimizer:
             'USDJPY', 
             'GBPUSD', 
             'USDCHF', 
+            'SP500', 
+            'NAS100', 
+            'US30',
+            'BTCUSD', 
+            'ETHUSD', 
+            'XAUUSD'
             #'AUDUSD', 
             #'USDCAD', 
             #'NZDUSD',
-            'BTCUSD', 
-            'ETHUSD', 
-            'XAUUSD', 
+            
             #'XAGUSD',
-            'SP500', 
-            'NAS100', 
-            'US30'
+            
             #'DAX40', 
             #'FTSE100', 
             #'JP225'
@@ -621,11 +623,15 @@ class AutonomousHighStakesOptimizer:
             },
             "max_spread": {
                 "EURUSD": 12,
-                "GBPUSD": 15,
                 "USDJPY": 10,
-                "XAUUSD": 40,
+                "GBPUSD": 15,
+                "USDCHF": 15,
+                "SP500": 50,
                 "NAS100": 180,
-                "default": 20
+                "US30": 60,
+                "BTCUSD": 250,
+                "ETHUSD": 150,
+                "XAUUSD": 40
             }
         }
 
