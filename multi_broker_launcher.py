@@ -14,7 +14,7 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from quantum_trading_system.trading.multi_system import MultiQuantumTradingSystem
+from KlmnR_Phoenix_Quantum_Pro.trading.multi_system import MultiQuantumTradingSystem
 
 
 def setup_console_logging():

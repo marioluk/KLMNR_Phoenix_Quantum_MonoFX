@@ -11,8 +11,8 @@ from pathlib import Path
 # Aggiungi il path del modulo quantum_trading_system
 sys.path.insert(0, str(Path(__file__).parent))
 
-from quantum_trading_system import QuantumTradingSystem
-from quantum_trading_system.logging import setup_logger
+from KlmnR_Phoenix_Quantum_Pro import QuantumTradingSystem
+from KlmnR_Phoenix_Quantum_Pro.logging import setup_logger
 
 # Configurazione predefinita
 CONFIG_FILE = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
