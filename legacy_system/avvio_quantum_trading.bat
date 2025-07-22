@@ -3,7 +3,7 @@ REM Avvio automatico MT5 e script Python
 REM Modifica i percorsi qui sotto secondo la tua installazione
 
 set MT5_PATH="C:\MT5\FivePercentOnlineMetaTrader5\terminal64.exe"
-set PY_SCRIPT="PRO-THE5ERS-QM-PHOENIX-GITCOP.py"
+set PY_SCRIPT="C:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system\PRO-THE5ERS-QM-PHOENIX-GITCOP.py"
 
 REM Avvia MT5
 start "MT5" %MT5_PATH%
