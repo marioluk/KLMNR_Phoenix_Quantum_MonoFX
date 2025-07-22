@@ -53,6 +53,13 @@ class AutonomousHighStakesOptimizer:
             'max_daily_loss_percent': 0.05
         }
         
+        # =============================================================
+        # 🔴 AREA MODIFICABILE: SIMBOLI E PARAMETRI DI DEFAULT
+        # Qui puoi modificare la lista dei simboli disponibili per l'ottimizzazione
+        # e personalizzare i parametri e i valori di default usati nella generazione
+        # delle configurazioni production-ready e backtest.
+        # Esempio: aggiungi/rimuovi simboli, cambia l'ordine, aggiorna parametri.
+        # =============================================================
         # Simboli disponibili per ottimizzazione (ordinati per stabilità)
         self.available_symbols = [
             'EURUSD', 
@@ -89,6 +96,20 @@ class AutonomousHighStakesOptimizer:
         # Configurazioni ottimizzate (verranno calcolate)
         self.optimized_configs = {}
         
+
+    def generate_all_configs(self) -> Dict[str, str]:
+        """
+        Genera e salva tutte le configurazioni per i livelli di aggressività.
+        Restituisce un dizionario {aggressiveness: filepath}
+        """
+        levels = ["conservative", "moderate", "aggressive"]
+        results = {}
+        for level in levels:
+            config = self.generate_optimized_config(level)
+            filepath = self.save_config(config, level)
+            results[level] = filepath
+        return results
+
     def create_base_config_template(self) -> Dict:
         """
         Crea template configurazione base senza parametri ottimizzati
@@ -490,7 +511,134 @@ class AutonomousHighStakesOptimizer:
         filename = f"config_autonomous_high_stakes_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
 
-        # Struttura production-ready
+        # =============================================================
+        # 🔴 AREA MODIFICABILE: STRUTTURA E PARAMETRI DEL FILE DI CONFIG
+        # Qui puoi personalizzare la struttura e i parametri generati nel file JSON
+        # Puoi aggiungere, rimuovere o modificare sezioni e parametri come nel template manuale
+        # =============================================================
+        # Override dinamico per simbolo: genera la struttura usando i parametri ottimizzati
+        symbols = {}
+        for symbol, params in config.get('symbols', {}).items():
+            # Override risk_management
+            risk_management = {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": params.get("stop_loss_pips", 40),
+                "base_sl_pips": params.get("stop_loss_pips", 40),
+                "profit_multiplier": 2.2,
+                "risk_percent": params.get("lot_size", 0.0015),
+                "trailing_stop": {
+                    "activation_pips": int(params.get("stop_loss_pips", 40) * 2),
+                    "step_pips": int(params.get("stop_loss_pips", 40) * 1)
+                }
+            }
+
+            # Override quantum_params_override - ora dinamico per simbolo, senza buffer_size
+            score = params.get("optimization_score", 50)
+            idx = list(config.get('symbols', {}).keys()).index(symbol)
+            spin_window = int(60 + idx * 7 + score / 20)
+            min_spin_samples = int(20 + idx * 2 + score / 40)
+            signal_cooldown = int(600 + (score * 2) + idx * 10)
+            buy_entropy = round(params.get("signal_buy_threshold", 0.6) + score / 500, 3)
+            sell_entropy = round(params.get("signal_sell_threshold", 0.4) + score / 700, 3)
+            quantum_params_override = {
+                "spin_window": spin_window,
+                "min_spin_samples": min_spin_samples,
+                "signal_cooldown": signal_cooldown,
+                "entropy_thresholds": {
+                    "buy_signal": buy_entropy,
+                    "sell_signal": sell_entropy
+                }
+            }
+
+            # Comment personalizzato
+            comment = f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}"
+
+            # Struttura finale per simbolo
+            symbols[symbol] = {
+                "risk_management": risk_management,
+                "trading_hours": params.get("trading_hours", ["09:00-10:30", "14:00-16:00"]),
+                "comment": comment,
+                "quantum_params_override": quantum_params_override
+            }
+
+        # Sezioni statiche e parametri avanzati
+        # Sezioni avanzate ottimizzate dinamicamente
+        # Calcolo valori medi e dinamici dai simboli ottimizzati
+        symbol_params = list(config.get('symbols', {}).values())
+        avg_spin_window = int(np.mean([60 + i*5 for i in range(len(symbol_params))])) if symbol_params else 80
+        avg_min_spin_samples = int(np.mean([20 + i*2 for i in range(len(symbol_params))])) if symbol_params else 30
+        avg_spin_threshold = round(0.28 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 500), 3)
+        avg_signal_cooldown = int(np.mean([600 for _ in symbol_params])) if symbol_params else 600
+        avg_buy_entropy = round(np.mean([s.get('signal_buy_threshold', 0.6) for s in symbol_params]), 3) if symbol_params else 0.58
+        avg_sell_entropy = round(np.mean([s.get('signal_sell_threshold', 0.4) for s in symbol_params]), 3) if symbol_params else 0.42
+        avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
+        # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
+        avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
+        buffer_size = int(400 + len(symbol_params)*30 + avg_score*2)
+
+        quantum_params = {
+            "buffer_size": buffer_size,
+            "spin_window": avg_spin_window,
+            "min_spin_samples": avg_min_spin_samples,
+            "spin_threshold": avg_spin_threshold,
+            "signal_cooldown": avg_signal_cooldown,
+            "entropy_thresholds": {
+                "buy_signal": avg_buy_entropy,
+                "sell_signal": avg_sell_entropy
+            },
+            "volatility_scale": avg_volatility_scale
+        }
+
+        risk_parameters = {
+            "magic_number": 147251,
+            "position_cooldown": 900,
+            "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 5),
+            "max_positions": 1,
+            "min_sl_distance_pips": {
+                "EURUSD": 30,
+                "GBPUSD": 35,
+                "USDJPY": 25,
+                "XAUUSD": 150,
+                "NAS100": 50,
+                "default": 40
+            },
+            "base_sl_pips": {
+                "EURUSD": 50,
+                "GBPUSD": 60,
+                "USDJPY": 40,
+                "XAUUSD": 220,
+                "NAS100": 100,
+                "default": 80
+            },
+            "profit_multiplier": 2.2,
+            "max_position_hours": 6,
+            "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.0015),
+            "trailing_stop": {
+                "enable": True,
+                "activation_pips": 100,
+                "step_pips": 50,
+                "lock_percentage": 0.5
+            },
+            "max_spread": {
+                "EURUSD": 12,
+                "GBPUSD": 15,
+                "USDJPY": 10,
+                "XAUUSD": 40,
+                "NAS100": 180,
+                "default": 20
+            }
+        }
+
+        the5ers_specific = {
+            "step1_target": 8,
+            "max_daily_loss_percent": 5,
+            "max_total_loss_percent": 10,
+            "drawdown_protection": {
+                "soft_limit": 0.02,
+                "hard_limit": 0.05
+            }
+        }
+
         production_config = {
             "logging": {
                 "log_file": f"logs/log_autonomous_high_stakes_{aggressiveness}_production_ready.log",
@@ -506,12 +654,12 @@ class AutonomousHighStakesOptimizer:
                 "port": 18889
             },
             "account_currency": "USD",
-            "magic_number": 177251,
-            "initial_balance": 100000,
-            "quantum_params": config.get("quantum_params", {}),
-            "risk_parameters": config.get("risk_parameters", {}),
-            "symbols": config.get("symbols", {}),
-            "THE5ERS_specific": {"drawdown_protection": {"soft_limit": 0.03, "hard_limit": 0.05}},
+            "magic_number": 237251,
+            "initial_balance": 5000,
+            "quantum_params": quantum_params,
+            "risk_parameters": risk_parameters,
+            "symbols": symbols,
+            "THE5ERS_specific": the5ers_specific,
             "conversion_metadata": {
                 "created_by": "AutonomousHighStakesOptimizer",
                 "creation_date": datetime.now().isoformat(),
@@ -527,60 +675,6 @@ class AutonomousHighStakesOptimizer:
         except Exception as e:
             logger.error(f"❌ Errore salvataggio {filepath}: {e}")
             raise
-    
-    def generate_all_configs(self) -> Dict[str, str]:
-        """
-        Genera tutte le configurazioni High Stakes ottimizzate da zero
-        
-        Returns:
-            Dict con mapping aggressiveness -> filepath
-        """
-        
-        print("🎯 AUTONOMOUS HIGH STAKES OPTIMIZER")
-        print("Generazione configurazioni ottimizzate DA ZERO")
-        print("="*60)
-        print(f"📊 Periodo ottimizzazione: {self.optimization_days} giorni")
-        print(f"📁 Directory output: {self.output_dir}")
-        print(f"🔍 Simboli disponibili: {len(self.available_symbols)}")
-        print()
-        
-        results = {}
-        levels = ['conservative', 'moderate', 'aggressive']
-        
-        for level in levels:
-            print(f"🔄 Generando {level.upper()}...")
-            
-            try:
-                # Genera configurazione ottimizzata
-                config = self.generate_optimized_config(level)
-                
-                # Salva configurazione
-                filepath = self.save_config(config, level)
-                results[level] = filepath
-                
-                # Report risultati
-                symbols_count = len(config['symbols'])
-                avg_score = config['optimization_results']['average_optimization_score']
-                risk_pct = config['risk_parameters']['risk_percent'] * 100
-                
-                print(f"   ✅ {level.upper()}: {symbols_count} simboli, {risk_pct:.1f}% risk, score {avg_score:.1f}")
-                
-            except Exception as e:
-                logger.error(f"❌ Errore generazione {level}: {e}")
-                print(f"   ❌ ERRORE: {e}")
-        
-        print()
-        print("🎉 OTTIMIZZAZIONE AUTONOMA COMPLETATA!")
-        print(f"📄 Generati {len(results)} file configurazione")
-        
-        # Report finale
-        if results:
-            print("\n📊 CONFIGURAZIONI GENERATE:")
-            for level, filepath in results.items():
-                filename = os.path.basename(filepath)
-                print(f"   {level.upper()}: {filename}")
-        
-        return results
     
     def run_validation_test(self, config_path: str, days: int = 7) -> Dict:
         """

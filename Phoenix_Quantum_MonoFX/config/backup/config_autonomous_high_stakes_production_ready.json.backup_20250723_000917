@@ -1,0 +1,111 @@
+{
+    "logging": {
+        "log_file": "logs/log_autonomous_high_stakes_conservative_production_ready.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "metatrader5": {
+        "login": 25437097,
+        "password": "wkchTWEO_.00",
+        "server": "FivePercentOnline-Real",
+        "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+        "port": 18889
+    },
+    "account_currency": "USD",
+    "magic_number": 177251,
+    "initial_balance": 100000,
+    "quantum_params": {
+        "buffer_size": 500,
+        "signal_cooldown": 600,
+        "adaptive_threshold": 4.305161392518491,
+        "volatility_filter": 3.170107595012327,
+        "trend_strength_min": 0.6,
+        "confluence_threshold": 3.614129114014793,
+        "quantum_boost": true,
+        "neural_enhancement": true
+    },
+    "risk_parameters": {
+        "risk_percent": 0.005,
+        "max_daily_trades": 4,
+        "max_concurrent_trades": 2,
+        "min_profit_target": 0.015,
+        "stop_loss_atr_multiplier": 1.5,
+        "take_profit_atr_multiplier": 2.5,
+        "daily_loss_limit": 0.05,
+        "max_drawdown": 0.08,
+        "risk_reward_ratio": 1.8
+    },
+    "symbols": {
+        "EURUSD": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.77,
+            "signal_sell_threshold": 0.33,
+            "max_spread": 2.0,
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "optimization_score": 837.1394466602478,
+            "aggressiveness_applied": "conservative"
+        },
+        "USDJPY": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 2.5,
+            "trading_hours": [
+                "08:00-09:30",
+                "13:00-15:00"
+            ],
+            "optimization_score": 770.9130168565218,
+            "aggressiveness_applied": "conservative"
+        },
+        "GBPJPY": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 4.5,
+            "trading_hours": [
+                "09:00-10:30",
+                "15:00-16:30"
+            ],
+            "optimization_score": 693.444056743923,
+            "aggressiveness_applied": "conservative"
+        },
+        "USDCAD": {
+            "enabled": true,
+            "lot_size": 0.07,
+            "stop_loss_pips": 12,
+            "take_profit_pips": 36,
+            "signal_buy_threshold": 0.825,
+            "signal_sell_threshold": 0.275,
+            "max_spread": 3.5,
+            "trading_hours": [
+                "14:00-16:00"
+            ],
+            "optimization_score": 662.6325937541,
+            "aggressiveness_applied": "conservative"
+        }
+    },
+    "THE5ERS_specific": {
+        "drawdown_protection": {
+            "soft_limit": 0.03,
+            "hard_limit": 0.05
+        }
+    },
+    "conversion_metadata": {
+        "created_by": "AutonomousHighStakesOptimizer",
+        "creation_date": "2025-07-21T20:14:34.368773",
+        "aggressiveness": "conservative"
+    }
+}
