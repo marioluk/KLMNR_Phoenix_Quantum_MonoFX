@@ -9,6 +9,7 @@
             "GBPUSD": 15,
             "USDJPY": 10,
             "XAUUSD": 40,
+            "SP500": 50,
             "NAS100": 180,
             "default": 20
         }
