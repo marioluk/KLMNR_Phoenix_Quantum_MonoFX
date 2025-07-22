@@ -4,6 +4,9 @@
 ---
 
 # AGGIUNGERE IN JSON
+
+Controllare se funziona il trailing stop
+
 "max_spread": {
             "EURUSD": 12,
             "GBPUSD": 15,
