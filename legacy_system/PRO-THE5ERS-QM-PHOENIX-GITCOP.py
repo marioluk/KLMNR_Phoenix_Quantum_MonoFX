@@ -1908,7 +1908,7 @@ class QuantumTradingSystem:
                 "sl": sl_price,
                 "tp": tp_price,
                 "deviation": 10,
-                "magic": self.config.config['risk_parameters']['magic_number'],
+                "magic": self.config.config['magic_number'],
                 "comment": "QTS-AUTO",
                 "type_time": mt5.ORDER_TIME_GTC,
                 "type_filling": mt5.ORDER_FILLING_FOK,  # Prova FOK prima, poi IOC se fallisce
@@ -2003,7 +2003,7 @@ class QuantumTradingSystem:
                 "position": position.ticket,
                 "price": symbol_info.ask if position.type == mt5.ORDER_TYPE_BUY else symbol_info.bid,
                 "deviation": 10,
-                "magic": self.config.config['risk_parameters']['magic_number'],
+                "magic": self.config.config['magic_number'],
                 "comment": "QTS-CLOSE",
                 "type_time": mt5.ORDER_TIME_GTC,
                 "type_filling": mt5.ORDER_FILLING_FOK,
