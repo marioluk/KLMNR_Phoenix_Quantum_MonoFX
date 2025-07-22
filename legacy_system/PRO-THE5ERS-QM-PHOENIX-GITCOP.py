@@ -678,32 +678,41 @@ class QuantumEngine:
     4. Controlli di Mercato e Connessione
     """
     
+
     def check_tick_activity(self):
-        """Monitoraggio stato mercato e qualità dati con heartbeat."""
+        """Monitoraggio stato mercato e qualità dati con heartbeat. Log dettagliato se i tick non arrivano."""
         current_time = time.time()
         issues = []
         warning_symbols = []
         heartbeat_data = []
-        
+
         if not mt5.terminal_info().connected:
             logger.warning("Connessione MT5 non disponibile")
             return False
 
-        for symbol in self._config_manager.symbols:  # Usa _config_manager invece di config_manager
+        # Recupera la lista dei simboli disponibili su MT5
+        available_symbols = [s.name for s in mt5.symbols_get() or []]
+
+        for symbol in self._config_manager.symbols:
             try:
                 tick = mt5.symbol_info_tick(symbol)
                 if not tick:
+                    # Log dettagliato: nome simbolo, simboli disponibili, visibilità
+                    symbol_info = mt5.symbol_info(symbol)
+                    is_visible = symbol_info.visible if symbol_info else False
+                    logger.warning(
+                        f"{symbol}: Nessun dato tick disponibile | "
+                        f"Simbolo visibile: {is_visible} | "
+                        f"Simboli disponibili: {available_symbols[:10]}..."
+                    )
                     issues.append(f"{symbol}: Nessun dato tick disponibile")
                     continue
-                    
-                symbol_info = mt5.symbol_info(symbol)
-                spread = (symbol_info.ask - symbol_info.bid) / self._get_pip_size(symbol) if symbol_info else 0
-                
-                # Usa la STESSA finestra temporale di get_signal
+
+                spread = (mt5.symbol_info(symbol).ask - mt5.symbol_info(symbol).bid) / self._get_pip_size(symbol) if mt5.symbol_info(symbol) else 0
+
                 ticks = list(self.tick_buffer.get(symbol, []))[-self.spin_window:]
-                
+
                 if len(ticks) >= self.min_spin_samples:
-                    # Calcoli IDENTICI a get_signal()
                     deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
                     entropy = self.calculate_entropy(deltas)
                     spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
@@ -712,7 +721,6 @@ class QuantumEngine:
                 else:
                     entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
 
-                # Preparazione dati heartbeat
                 state = {
                     'symbol': symbol,
                     'bid': tick.bid,
@@ -727,9 +735,8 @@ class QuantumEngine:
                 }
                 heartbeat_data.append(state)
 
-                # Verifiche aggiuntive
                 if is_trading_hours(symbol, self._config_manager.config):
-                    max_spread = self._config_manager._get_max_allowed_spread(symbol)  # Corretto qui
+                    max_spread = self._config_manager._get_max_allowed_spread(symbol)
                     if spread > max_spread:
                         issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread:.1f}p")
 
@@ -739,17 +746,14 @@ class QuantumEngine:
             except Exception as e:
                 logger.error(f"Errore monitoraggio {symbol}: {str(e)}", exc_info=True)
 
-        # Logging consolidato
         if heartbeat_data:
             hb_msg = "HEARTBEAT:\n" + "\n".join(
                 f"{d['symbol']}: Bid={d['bid']:.5f} | Ask={d['ask']:.5f} | "
                 f"Spread={d['spread']:.1f}p | Buffer={d['buffer_size']} | "
                 f"E={d['E']:.2f} | S={d['S']:.2f} | C={d['C']:.2f} | V={d['V']:.2f}"
-                for d in heartbeat_data[:5]  # Limita a 5 simboli per leggibilità
+                for d in heartbeat_data[:5]
             )
             logger.info(hb_msg)
-            
-            # Log sistema attivo
             positions_count = len(mt5.positions_get() or [])
             logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
 
