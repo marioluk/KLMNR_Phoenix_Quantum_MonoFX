@@ -3,6 +3,17 @@
 
 ---
 
+# AGGIUNGERE IN JSON
+"max_spread": {
+            "EURUSD": 12,
+            "GBPUSD": 15,
+            "USDJPY": 10,
+            "XAUUSD": 40,
+            "NAS100": 180,
+            "default": 20
+        }
+    },
+
 ## ✅ **COMPLETED - SISTEMA ENTERPRISE OPERATIVO**
 
 ### **✅ P1 - ENTERPRISE AUTOMATION IMPLEMENTATA E VERIFICATA**
