@@ -297,9 +297,13 @@ class AutonomousHighStakesOptimizer:
         
         return max(0, score)
     
-    def get_symbol_trading_hours(self, symbol: str) -> List[str]:
-        """Restituisce trading_hours ottimizzati per simbolo (dummy, da backtest)"""
-        trading_hours_mapping = {
+    def optimize_trading_hours(self, symbol: str, score: float) -> list:
+        """
+        Ottimizza dinamicamente le trading_hours per simbolo in base allo score.
+        Maggiore lo score, più ampie e numerose le finestre; score basso = finestre più strette.
+        """
+        # Finestra base per simbolo
+        base_windows = {
             'EURUSD': ["09:00-10:30", "14:00-16:00"],
             'USDJPY': ["08:00-09:30", "13:00-15:00"],
             'GBPUSD': ["10:00-12:00"],
@@ -318,7 +322,20 @@ class AutonomousHighStakesOptimizer:
             'FTSE100': ["09:00-17:30"],
             'JP225': ["02:00-08:00"]
         }
-        return trading_hours_mapping.get(symbol, ["14:00-16:00"])
+        windows = base_windows.get(symbol, ["14:00-16:00"])
+        # Più alto lo score, più finestre e più larghe
+        if score > 80:
+            # Aggiungi una finestra extra e allarga le esistenti
+            if symbol in ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD"]:
+                windows = ["08:00-12:00", "13:00-17:00", "18:00-20:00"]
+            elif symbol in ["SP500", "NAS100", "US30"]:
+                windows = ["15:00-22:00", "13:00-14:30"]
+            elif symbol in ["BTCUSD", "ETHUSD"]:
+                windows = ["00:00-23:59"]
+        elif score < 55:
+            # Restringi le finestre
+            windows = [w.split('-')[0] + '-' + (str(int(w.split('-')[0][:2])+1).zfill(2)+":00") for w in windows]
+        return windows
 
     def optimize_symbol_parameters(self, symbol: str, aggressiveness: str) -> Dict:
         """
@@ -345,6 +362,7 @@ class AutonomousHighStakesOptimizer:
         multipliers = aggressiveness_multipliers.get(aggressiveness, aggressiveness_multipliers['moderate'])
         
         # Parametri finali ottimizzati
+        score = base_params['score']
         optimized_params = {
             'enabled': True,
             'lot_size': round(base_params['risk_percent'] * 10, 3),  # Conversione risk -> lot
@@ -353,8 +371,8 @@ class AutonomousHighStakesOptimizer:
             'signal_buy_threshold': round(base_params['signal_threshold'] * multipliers['signal'], 3),
             'signal_sell_threshold': round((1 - base_params['signal_threshold']) * multipliers['signal'], 3),
             'max_spread': self.get_symbol_max_spread(symbol),
-            'trading_hours': self.get_symbol_trading_hours(symbol),
-            'optimization_score': base_params['score'],
+            'trading_hours': self.optimize_trading_hours(symbol, score),
+            'optimization_score': score,
             'aggressiveness_applied': aggressiveness
         }
         

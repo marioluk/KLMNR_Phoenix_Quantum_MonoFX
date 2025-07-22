@@ -1,0 +1,191 @@
+{
+    "logging": {
+        "log_file": "logs/log_autonomous_high_stakes_conservative_production_ready.log",
+        "max_size_mb": 50,
+        "backup_count": 7,
+        "log_level": "INFO"
+    },
+    "metatrader5": {
+        "login": 25437097,
+        "password": "wkchTWEO_.00",
+        "server": "FivePercentOnline-Real",
+        "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+        "port": 18889
+    },
+    "account_currency": "USD",
+    "magic_number": 237251,
+    "initial_balance": 5000,
+    "quantum_params": {
+        "buffer_size": 2016,
+        "spin_window": 67,
+        "min_spin_samples": 23,
+        "spin_threshold": 1.777,
+        "signal_cooldown": 600,
+        "entropy_thresholds": {
+            "buy_signal": 0.825,
+            "sell_signal": 0.275
+        },
+        "volatility_scale": 4.54
+    },
+    "risk_parameters": {
+        "magic_number": 147251,
+        "position_cooldown": 900,
+        "max_daily_trades": 4,
+        "max_positions": 1,
+        "min_sl_distance_pips": {
+            "EURUSD": 30,
+            "GBPUSD": 35,
+            "USDJPY": 25,
+            "XAUUSD": 150,
+            "NAS100": 50,
+            "default": 40
+        },
+        "base_sl_pips": {
+            "EURUSD": 50,
+            "GBPUSD": 60,
+            "USDJPY": 40,
+            "XAUUSD": 220,
+            "NAS100": 100,
+            "default": 80
+        },
+        "profit_multiplier": 2.2,
+        "max_position_hours": 6,
+        "risk_percent": 0.005,
+        "trailing_stop": {
+            "enable": true,
+            "activation_pips": 100,
+            "step_pips": 50,
+            "lock_percentage": 0.5
+        },
+        "max_spread": {
+            "EURUSD": 12,
+            "GBPUSD": 15,
+            "USDJPY": 10,
+            "XAUUSD": 40,
+            "NAS100": 180,
+            "default": 20
+        }
+    },
+    "symbols": {
+        "EURUSD": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.08,
+                "trailing_stop": {
+                    "activation_pips": 24,
+                    "step_pips": 12
+                }
+            },
+            "trading_hours": [
+                "09:00-10:30",
+                "14:00-16:00"
+            ],
+            "comment": "Override generato dinamicamente per EURUSD - score 866.91",
+            "quantum_params_override": {
+                "spin_window": 103,
+                "min_spin_samples": 41,
+                "signal_cooldown": 2333,
+                "entropy_thresholds": {
+                    "buy_signal": 2.559,
+                    "sell_signal": 1.513
+                }
+            }
+        },
+        "USDJPY": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.07,
+                "trailing_stop": {
+                    "activation_pips": 24,
+                    "step_pips": 12
+                }
+            },
+            "trading_hours": [
+                "08:00-09:30",
+                "13:00-15:00"
+            ],
+            "comment": "Override generato dinamicamente per USDJPY - score 764.74",
+            "quantum_params_override": {
+                "spin_window": 105,
+                "min_spin_samples": 41,
+                "signal_cooldown": 2139,
+                "entropy_thresholds": {
+                    "buy_signal": 2.354,
+                    "sell_signal": 1.367
+                }
+            }
+        },
+        "SP500": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.08,
+                "trailing_stop": {
+                    "activation_pips": 24,
+                    "step_pips": 12
+                }
+            },
+            "trading_hours": [
+                "15:30-22:00"
+            ],
+            "comment": "Override generato dinamicamente per SP500 - score 682.23",
+            "quantum_params_override": {
+                "spin_window": 108,
+                "min_spin_samples": 41,
+                "signal_cooldown": 1984,
+                "entropy_thresholds": {
+                    "buy_signal": 2.189,
+                    "sell_signal": 1.25
+                }
+            }
+        },
+        "USDCHF": {
+            "risk_management": {
+                "contract_size": 0.01,
+                "min_sl_distance_pips": 12,
+                "base_sl_pips": 12,
+                "profit_multiplier": 2.2,
+                "risk_percent": 0.08,
+                "trailing_stop": {
+                    "activation_pips": 24,
+                    "step_pips": 12
+                }
+            },
+            "trading_hours": [
+                "09:00-11:00"
+            ],
+            "comment": "Override generato dinamicamente per USDCHF - score 679.46",
+            "quantum_params_override": {
+                "spin_window": 114,
+                "min_spin_samples": 42,
+                "signal_cooldown": 1988,
+                "entropy_thresholds": {
+                    "buy_signal": 2.184,
+                    "sell_signal": 1.246
+                }
+            }
+        }
+    },
+    "THE5ERS_specific": {
+        "step1_target": 8,
+        "max_daily_loss_percent": 5,
+        "max_total_loss_percent": 10,
+        "drawdown_protection": {
+            "soft_limit": 0.02,
+            "hard_limit": 0.05
+        }
+    },
+    "conversion_metadata": {
+        "created_by": "AutonomousHighStakesOptimizer",
+        "creation_date": "2025-07-23T00:18:39.753310",
+        "aggressiveness": "conservative"
+    }
+}
