@@ -1,8 +1,0 @@
-{
-    "account_balance": 5000,
-    "target_daily_profit": 25,
-    "validation_days": 3,
-    "daily_loss_limit": 250,
-    "leverage": 100,
-    "max_daily_loss_percent": 0.05
-}

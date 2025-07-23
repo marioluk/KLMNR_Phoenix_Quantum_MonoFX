@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ====================================================================================
-# THE5ERS SYMBOL PERFORMANCE ANALYZER
+# HIGH_STAKES SYMBOL PERFORMANCE ANALYZER
 # Analizza performance simboli specifici per step ottimali
 # ====================================================================================
 
@@ -16,7 +16,7 @@ import random
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-class The5ersSymbolAnalyzer:
+class HighStakesSymbolAnalyzer:
     def __init__(self):
         """Inizializza analizzatore simboli"""
         self.symbol_data = {}
@@ -38,7 +38,7 @@ class The5ersSymbolAnalyzer:
                 'spread_avg': 1.5,
                 'volatility': 'LOW',
                 'best_sessions': ['LONDON', 'OVERLAP'],
-                'the5ers_rating': 95,
+                'high_stakes_rating': 95,
                 'step1_suitability': 10,
                 'step2_suitability': 9,
                 'step3_suitability': 8
@@ -48,7 +48,7 @@ class The5ersSymbolAnalyzer:
                 'spread_avg': 2.0,
                 'volatility': 'MEDIUM',
                 'best_sessions': ['ASIAN', 'LONDON'],
-                'the5ers_rating': 88,
+                'high_stakes_rating': 88,
                 'step1_suitability': 9,
                 'step2_suitability': 10,
                 'step3_suitability': 9
@@ -58,7 +58,7 @@ class The5ersSymbolAnalyzer:
                 'spread_avg': 3.5,
                 'volatility': 'HIGH',
                 'best_sessions': ['LONDON', 'OVERLAP'],
-                'the5ers_rating': 75,
+                'high_stakes_rating': 75,
                 'step1_suitability': 6,
                 'step2_suitability': 8,
                 'step3_suitability': 7
@@ -68,7 +68,7 @@ class The5ersSymbolAnalyzer:
                 'spread_avg': 5.5,
                 'volatility': 'VERY_HIGH',
                 'best_sessions': ['OVERLAP', 'NY'],
-                'the5ers_rating': 65,
+                'high_stakes_rating': 65,
                 'step1_suitability': 3,
                 'step2_suitability': 5,
                 'step3_suitability': 7
@@ -78,14 +78,14 @@ class The5ersSymbolAnalyzer:
                 'spread_avg': 12.0,
                 'volatility': 'EXTREME',
                 'best_sessions': ['NY'],
-                'the5ers_rating': 45,
+                'high_stakes_rating': 45,
                 'step1_suitability': 1,
                 'step2_suitability': 2,
                 'step3_suitability': 4
             }
         }
         
-        logger.info("🔍 The5ers Symbol Analyzer inizializzato")
+        logger.info("🔍 High Stakes Symbol Analyzer inizializzato")
     
     def get_session_for_hour(self, hour):
         """Determina sessione trading per ora"""
@@ -249,7 +249,7 @@ class The5ersSymbolAnalyzer:
             'overall_score': overall_score,
             'step_suitability': step_suitability,
             'tier': symbol_info.get('tier', 4),
-            'the5ers_rating': symbol_info.get('the5ers_rating', 50)
+            'high_stakes_rating': symbol_info.get('high_stakes_rating', 50)
         }
     
     def analyze_all_symbols_all_steps(self, days=30):
@@ -284,7 +284,7 @@ class The5ersSymbolAnalyzer:
         """Genera report completo analisi simboli"""
         
         print("\n" + "="*100)
-        print("🔍 THE5ERS SYMBOL PERFORMANCE ANALYSIS - COMPLETE REPORT")
+        print("🔍 HIGH STAKES SYMBOL PERFORMANCE ANALYSIS - COMPLETE REPORT")
         print("="*100)
         
         steps = [1, 2, 3]
@@ -384,7 +384,7 @@ def main():
     print("📊 Analisi strategica simboli per ogni step della challenge")
     
     # Inizializza analyzer
-    analyzer = The5ersSymbolAnalyzer()
+    analyzer = HighStakesSymbolAnalyzer()
     
     # Esegui analisi completa
     print("\n🚀 Avvio analisi completa...")

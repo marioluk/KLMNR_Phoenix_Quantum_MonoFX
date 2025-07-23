@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
     """
-    Ottimizzatore autonomo che genera configurazioni High Stakes da zero
+    Ottimizzatore autonomo che genera configurazioni avanzate da zero
     senza bisogno di file JSON sorgente, basandosi solo su:
-    - Algoritmo di trading phoenix_quantum_monofx_program.py
+    - Algoritmo di trading quantum
     - Dati storici MT5
     - Ottimizzazione parametrica
-    - Regole High Stakes Challenge
+    - Regole di challenge generiche
     """
     
     def __init__(self, optimization_days=60, output_dir=None):
@@ -43,7 +43,7 @@ class AutonomousHighStakesOptimizer:
         self.output_dir = output_dir or self.base_dir
         self.optimization_days = optimization_days
         
-        # Parametri Challenge (fissi)
+        # Parametri challenge generici (fissi)
         self.challenge_params = {
             'account_balance': 5000,
             'target_daily_profit': 25,  # €25 = 0.5%
@@ -125,18 +125,15 @@ class AutonomousHighStakesOptimizer:
                 "version": "2.0",
                 "created_by": "AutonomousOptimizer",
                 "creation_date": datetime.now().isoformat(),
-                "description": "Configurazione generata autonomamente per Challenge",
+                "description": "Configurazione generata autonomamente per challenge generica",
                 "optimization_period_days": self.optimization_days
             },
-            
             "challenge": self.challenge_params,
-            
             "trading_algorithm": {
-                "name": "PRO-THE5ERS-QM-PHOENIX-GITCOP",
+                "name": "PRO-QUANTUM-TRADING-SYSTEM",
                 "version": "2.0",
-                "description": "Algoritmo quantum ottimizzato per The5ers"
+                "description": "Algoritmo quantum ottimizzato per challenge generica"
             },
-            
             "quantum_params": {
                 "buffer_size": 500,
                 "signal_cooldown": 600,
@@ -180,7 +177,16 @@ class AutonomousHighStakesOptimizer:
         
         return base_config
     
-    # ...existing code...
+# ...existing code...
+
+def main():
+    """
+    Funzione principale per eseguire l'ottimizzatore autonomo.
+    """
+    optimizer = AutonomousHighStakesOptimizer()
+    results = optimizer.generate_all_configs()
+    for level, filepath in results.items():
+        logger.info(f"Configurazione '{level}' salvata in: {filepath}")
 
 if __name__ == "__main__":
     main()
