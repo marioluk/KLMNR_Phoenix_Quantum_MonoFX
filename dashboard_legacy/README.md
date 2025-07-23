@@ -163,7 +163,7 @@ pip install flask plotly pandas MetaTrader5
 ## 🔗 INTEGRAZIONE SISTEMA
 
 Questa dashboard fa parte del **sistema legacy** e si integra con:
-- `../PRO-THE5ERS-QM-PHOENIX-GITCOP.py` (Main system)
+- `../phoenix_quantum_monofx_program.py` (Main system)
 - `../config/` (Configurazioni)
 - `../../logs/` (File di log)
 

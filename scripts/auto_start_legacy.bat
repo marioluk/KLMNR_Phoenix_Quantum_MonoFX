@@ -11,7 +11,7 @@ REM Cambia alla directory corretta
 cd /d "C:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system"
 
 REM Verifica che siamo nella directory corretta
-if not exist "PRO-THE5ERS-QM-PHOENIX-GITCOP.py" (
+if not exist "phoenix_quantum_monofx_program.py" (
     echo [ERROR] File principale non trovato in: %CD%
     echo [ERROR] Controlla il percorso del progetto
     exit /b 1

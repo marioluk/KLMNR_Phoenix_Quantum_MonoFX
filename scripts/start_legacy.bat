@@ -1,13 +1,17 @@
+
 @echo off
 echo.
 echo 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY LAUNCHER
 echo ================================================================
 echo.
 
+REM Spostati nella directory root del progetto (una cartella sopra "scripts")
+cd /d "%~dp0.."
+
 REM Controllo che siamo nella cartella corretta
-if not exist "PRO-THE5ERS-QM-PHOENIX-GITCOP.py" (
+if not exist "phoenix_quantum_monofx_program.py" (
     echo ❌ ERRORE: File principale non trovato!
-    echo    Assicurati di essere nella cartella legacy_system/
+    echo    Assicurati di essere nella root del progetto!
     pause
     exit /b 1
 )
@@ -43,7 +47,7 @@ echo ================================================================
 echo.
 
 REM Avvia il sistema
-python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
+python phoenix_quantum_monofx_program.py
 
 echo.
 echo ✅ Sistema legacy terminato

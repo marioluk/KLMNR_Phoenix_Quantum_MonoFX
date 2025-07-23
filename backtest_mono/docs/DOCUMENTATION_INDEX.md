@@ -20,7 +20,7 @@
 | File | Descrizione | Configurabile |
 |------|-------------|---------------|
 | **`high_stakes_optimizer.py`** | **Optimizer configurabile** | ✅ **SÌ** |
-| `PRO-THE5ERS-QM-PHOENIX-GITCOP.py` | Engine backtest principale | ❌ No |
+| `phoenix_quantum_monofx_program.py` | Engine backtest principale | ❌ No |
 | `high_stakes_challenge_backtest.py` | High Stakes specifico | ❌ No |
 | `comparative_backtest.py` | Backtest comparativo | ❌ No |
 

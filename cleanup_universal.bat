@@ -43,7 +43,7 @@ echo.
 echo ✅ PULIZIA UNIVERSALE COMPLETATA!
 echo.
 echo 📊 File mantenuti per produzione:
-echo   ✅ PRO-THE5ERS-QM-PHOENIX-GITCOP.py (Sistema principale)
+echo   ✅ phoenix_quantum_monofx_program.py (Sistema principale)
 echo   ✅ config\*.json (Configurazioni attive)
 echo   ✅ config\backups (Ultimi 5 backup)
 echo   ✅ daily_config_updater.py (Automazione)

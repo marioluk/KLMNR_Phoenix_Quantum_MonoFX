@@ -8,7 +8,7 @@ legacy_system/
 │
 ├── config/                # Solo file di configurazione attivi e centralizzati
 ├── dashboard_legacy/      # Dashboard e tool di visualizzazione
-├── backtest_legacy/       # Script e tool di backtest
+├── backtest_mono/       # Script e tool di backtest
 │   ├── legacy/            # Script legacy non più usati, da archiviare o eliminare
 │   ├── docs/              # Documentazione tecnica e guide
 │   └── configs/           # Config di test/backtest (se necessario, altrimenti centralizza in config/)
@@ -105,7 +105,7 @@ pip install MetaTrader5 numpy
 ### **Avvio Sistema Legacy (Produzione):**
 ```bash
 cd c:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system
-python PRO-THE5ERS-QM-PHOENIX-GITCOP.py
+python phoenix_quantum_monofx_program.py
 ```
 
 ### **File di Configurazione Attivi:**
@@ -343,7 +343,7 @@ python -c "import json; print('OK' if json.load(open('PRO-THE5ERS-QM-PHOENIX-GIT
 
 Il sistema legacy ha i suoi strumenti di backtesting dedicati in:
 ```bash
-cd backtest_legacy/
+cd backtest_mono/
 ```
 
 **Caratteristiche Backtest Legacy:**
@@ -354,7 +354,7 @@ cd backtest_legacy/
 - ✅ Configurazioni pre-validate
 
 **Differenza dal Sistema Moderno:**
-- Legacy: `backtest_legacy/` (questo sistema)
+- Legacy: `backtest_mono/` (questo sistema)
 - Moderno: `../backtest/` (sistema modulare)
 
 ---

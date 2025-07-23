@@ -227,7 +227,7 @@ Controllare se funziona il trailing stop
 ## 💾 **BACKUP STRATEGY**
 
 ### **File da Backuppare**
-- [ ] **Sistema Principale**: `PRO-THE5ERS-QM-PHOENIX-GITCOP.py`
+- [ ] **Sistema Principale**: `phoenix_quantum_monofx_program.py`
 - [ ] **Configurazione**: `PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json`
 - [ ] **Log Critici**: Ultimi 7 giorni di log
 - [ ] **Metriche**: Export dati performance

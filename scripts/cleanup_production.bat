@@ -9,40 +9,40 @@ echo 🧹 PULIZIA LEGACY SYSTEM - RIMOZIONE FILE NON NECESSARI
 echo ========================================================
 
 echo.
-echo 📁 Pulizia backtest_legacy - rimozione file di test...
+echo 📁 Pulizia backtest_mono - rimozione file di test...
 
 REM Rimuovi file di test specifici
-if exist "backtest_legacy\test_*.py" (
+if exist "backtest_mono\test_*.py" (
     echo   - Rimozione file di test...
-    del /Q "backtest_legacy\test_*.py"
+    del /Q "backtest_mono\test_*.py"
 )
 
 REM Rimuovi file temporanei e debug
-if exist "backtest_legacy\quick_test_fix.py" (
+if exist "backtest_mono\quick_test_fix.py" (
     echo   - Rimozione quick test fix...
-    del /Q "backtest_legacy\quick_test_fix.py"
+    del /Q "backtest_mono\quick_test_fix.py"
 )
 
-if exist "backtest_legacy\cleanup_workspace.bat" (
+if exist "backtest_mono\cleanup_workspace.bat" (
     echo   - Rimozione cleanup obsoleto...
-    del /Q "backtest_legacy\cleanup_workspace.bat"
+    del /Q "backtest_mono\cleanup_workspace.bat"
 )
 
 REM Rimuovi cartella __pycache__
-if exist "backtest_legacy\__pycache__" (
+if exist "backtest_mono\__pycache__" (
     echo   - Rimozione cache Python...
-    rmdir /S /Q "backtest_legacy\__pycache__"
+    rmdir /S /Q "backtest_mono\__pycache__"
 )
 
 REM Rimuovi TODO files obsoleti
-if exist "backtest_legacy\TODO-NEW.txt" (
+if exist "backtest_mono\TODO-NEW.txt" (
     echo   - Rimozione TODO obsoleti...
-    del /Q "backtest_legacy\TODO-NEW.txt"
+    del /Q "backtest_mono\TODO-NEW.txt"
 )
 
-if exist "backtest_legacy\TODO.ipynb" (
+if exist "backtest_mono\TODO.ipynb" (
     echo   - Rimozione TODO notebook...
-    del /Q "backtest_legacy\TODO.ipynb"
+    del /Q "backtest_mono\TODO.ipynb"
 )
 
 echo.
@@ -69,7 +69,7 @@ echo.
 echo ✅ PULIZIA COMPLETATA!
 echo.
 echo 📊 File mantenuti per produzione:
-echo   ✅ PRO-THE5ERS-QM-PHOENIX-GITCOP.py (Sistema principale)
+echo   ✅ phoenix_quantum_monofx_program.py (Sistema principale)
 echo   ✅ config\*.json (Configurazioni attive)
 echo   ✅ config\backups (Ultimi 5 backup)
 echo   ✅ daily_config_updater.py (Automazione)

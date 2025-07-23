@@ -41,7 +41,7 @@ python the5ers_integrated_launcher.py
 | File | Descrizione | Configurabile |
 |------|-------------|---------------|
 | **`high_stakes_optimizer.py`** | **Optimizer configurabile** | ✅ **SÌ** |
-| `PRO-THE5ERS-QM-PHOENIX-GITCOP.py` | Engine backtest principale | ❌ No |
+| `phoenix_quantum_monofx_program.py` | Engine backtest principale | ❌ No |
 | `high_stakes_challenge_backtest.py` | High Stakes specifico | ❌ No |
 | `comparative_backtest.py` | Backtest comparativo | ❌ No |
 
@@ -386,7 +386,7 @@ python the5ers_integrated_launcher.py
 ```
 📅 Data inizio (YYYY-MM-DD) o giorni indietro (es: 30): 14
 
-🚀 Eseguendo: python PRO-THE5ERS-QM-PHOENIX-GITCOP.py --config config_high_stakes_moderate.json --days 7 --start-date 2025-07-04 --end-date 2025-07-18 --high-stakes
+🚀 Eseguendo: python phoenix_quantum_monofx_program.py --config config_high_stakes_moderate.json --days 7 --start-date 2025-07-04 --end-date 2025-07-18 --high-stakes
 ```
 
 #### **Passo 3b: Periodo con Date Specifiche**
@@ -394,7 +394,7 @@ python the5ers_integrated_launcher.py
 📅 Data inizio (YYYY-MM-DD) o giorni indietro (es: 30): 2025-07-01
 📅 Data fine (YYYY-MM-DD, ENTER per oggi): 2025-07-15
 
-🚀 Eseguendo: python PRO-THE5ERS-QM-PHOENIX-GITCOP.py --config config_high_stakes_moderate.json --days 7 --start-date 2025-07-01 --end-date 2025-07-15 --high-stakes
+🚀 Eseguendo: python phoenix_quantum_monofx_program.py --config config_high_stakes_moderate.json --days 7 --start-date 2025-07-01 --end-date 2025-07-15 --high-stakes
 ```
 
 ### **📈 10. BACKTEST PERIODO PERSONALIZZATO**

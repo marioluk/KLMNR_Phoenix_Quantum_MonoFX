@@ -1081,7 +1081,7 @@ class The5ersIntegratedLauncher:
         core_files = [
             ('autonomous_high_stakes_optimizer.py', self.base_dir, 'Optimizer Autonomo'),
             ('high_stakes_optimizer.py', self.base_dir, 'Optimizer Legacy'),
-            ('PRO-THE5ERS-QM-PHOENIX-GITCOP.py', os.path.dirname(self.base_dir), 'Script Principale')
+            ('phoenix_quantum_monofx_program.py', os.path.dirname(self.base_dir), 'Script Principale')
         ]
         
         print("\n📋 FILE CORE:")

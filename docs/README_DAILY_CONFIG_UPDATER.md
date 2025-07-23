@@ -209,7 +209,7 @@ schtasks /query /tn "KLMNR_Daily_Config_Updater" /v
 ### Problema: Errori Python
 **Soluzione**: Testa ambiente manualmente
 ```powershell
-cd backtest_legacy
+cd backtest_mono
 python daily_config_updater.py --days 30
 ```
 

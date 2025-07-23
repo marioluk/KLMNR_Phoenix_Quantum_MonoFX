@@ -27,7 +27,7 @@
 ## ✅ **FILE MANTENUTI (NECESSARI PER PRODUZIONE)**
 
 ### **🏆 Sistema Core:**
-- ✅ `PRO-THE5ERS-QM-PHOENIX-GITCOP.py` - **SISTEMA PRINCIPALE PRODUZIONE**
+- ✅ `phoenix_quantum_monofx_program.py` - **SISTEMA PRINCIPALE PRODUZIONE**
 - ✅ `start_legacy.bat` - Script avvio Windows
 - ✅ `start_legacy.py` - Script avvio Python
 
@@ -56,7 +56,7 @@
 
 ### **🔧 Utility:**
 - ✅ `cleanup_production.bat` - **SCRIPT PULIZIA [NUOVO]**
-- ✅ `backtest_legacy/` - Toolkit completo backtest e analisi
+- ✅ `backtest_mono/` - Toolkit completo backtest e analisi
 
 ---
 
@@ -79,7 +79,7 @@
 
 ```
 legacy_system/
-├── 🏆 PRO-THE5ERS-QM-PHOENIX-GITCOP.py      # SISTEMA PRINCIPALE
+├── 🏆 phoenix_quantum_monofx_program.py      # SISTEMA PRINCIPALE
 ├── ⚙️ config/
 │   ├── config_autonomous_high_stakes_***.json # CONFIG PRODUZIONE
 │   ├── PRO-THE5ERS-QM-PHOENIX-*.json         # CONFIG LEGACY
@@ -89,7 +89,7 @@ legacy_system/
 ├── 🚀 start_legacy.*                         # SCRIPT AVVIO
 ├── 📊 logs/                                  # LOG SISTEMA
 ├── 🧹 cleanup_production.bat                 # MANUTENZIONE
-└── 🔧 backtest_legacy/                       # TOOLKIT ANALISI
+└── 🔧 backtest_mono/                       # TOOLKIT ANALISI
 ```
 
 ---

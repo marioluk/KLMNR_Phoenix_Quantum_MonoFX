@@ -40,8 +40,8 @@ I tools di backtest legacy salvavano le configurazioni generate nella directory 
 legacy_system/
 ├── config/                    # ✅ NUOVO: Tutte le configurazioni qui
 │   └── PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json
-├── backtest_legacy/           # Tools di generazione
-└── PRO-THE5ERS-QM-PHOENIX-GITCOP.py  # Sistema principale
+├── backtest_mono/           # Tools di generazione
+└── phoenix_quantum_monofx_program.py  # Sistema principale
 ```
 
 #### **2. File Modificati**
@@ -88,7 +88,7 @@ legacy_system/
 
 #### **🧪 Testing**
 - ✅ Launcher legacy trova configurazioni correttamente
-- ✅ Path relativi funzionano dal backtest_legacy
+- ✅ Path relativi funzionano dal backtest_mono
 - ✅ Creazione automatica cartelle funzionante
 - ✅ Salvataggio file configurazioni nel path corretto
 
@@ -96,14 +96,14 @@ legacy_system/
 
 #### **Prima (Problema)**
 ```bash
-cd legacy_system/backtest_legacy
+cd legacy_system/backtest_mono
 python the5ers_integrated_launcher_complete.py
-# ❌ Config salvate in backtest_legacy/ (sbagliato)
+# ❌ Config salvate in backtest_mono/ (sbagliato)
 ```
 
 #### **Dopo (Risolto)**
 ```bash
-cd legacy_system/backtest_legacy  
+cd legacy_system/backtest_mono  
 python the5ers_integrated_launcher_complete.py
 # ✅ Config salvate in ../config/ (corretto)
 ```

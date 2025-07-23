@@ -96,7 +96,7 @@ python daily_config_updater.py --days 30
 
 ### Aggiornamento Manuale (se necessario):
 ```bash
-cd backtest_legacy
+cd backtest_mono
 python daily_config_updater.py --days 30
 ```
 

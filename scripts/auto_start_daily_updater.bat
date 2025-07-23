@@ -8,7 +8,7 @@ setlocal enabledelayedexpansion
 
 REM Configurazione
 set SCRIPT_DIR=%~dp0
-set BACKTEST_DIR=%SCRIPT_DIR%backtest_legacy
+set BACKTEST_DIR=%SCRIPT_DIR%backtest_mono
 set LOGS_DIR=%SCRIPT_DIR%logs
 set POWERSHELL_SCRIPT=%SCRIPT_DIR%AutoStartDailyUpdater.ps1
 

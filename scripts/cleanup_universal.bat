@@ -7,7 +7,7 @@ REM ============================================================================
 setlocal enabledelayedexpansion
 
 REM Funzione di pulizia per una directory
-set CLEAN_DIRS=backtest_legacy backtest_legacy\legacy backtest_legacy\docs backtest_legacy\configs dashboard_legacy logs config\backups archive
+set CLEAN_DIRS=backtest_mono backtest_mono\legacy backtest_mono\docs backtest_mono\configs dashboard_legacy logs config\backups archive
 for %%D in (%CLEAN_DIRS%) do (
     if /I not "%%D"=="archive" (
         if exist "%%D" (
@@ -45,7 +45,7 @@ echo.
 echo ✅ PULIZIA UNIVERSALE COMPLETATA!
 echo.
 echo 📊 File mantenuti per produzione:
-echo   ✅ PRO-THE5ERS-QM-PHOENIX-GITCOP.py (Sistema principale)
+echo   ✅ phoenix_quantum_monofx_program.py (Sistema principale)
 echo   ✅ config\*.json (Configurazioni attive)
 echo   ✅ config\backups (Ultimi 5 backup)
 echo   ✅ daily_config_updater.py (Automazione)

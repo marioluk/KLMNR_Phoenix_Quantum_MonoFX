@@ -1,7 +1,7 @@
 # 🚀 BACKTEST LEGACY - Quick Start Guide
 
 ## 📋 Panoramica
-Strumenti di backtesting ottimizzati per il **sistema legacy monolitico** (`PRO-THE5ERS-QM-PHOENIX-GITCOP.py`).
+Strumenti di backtesting ottimizzati per il **sistema legacy monolitico** (`phoenix_quantum_monofx_program.py`).
 
 ## 🎯 Script Principali
 
@@ -40,7 +40,7 @@ python master_analyzer.py
 
 ## 🔗 Integrazione
 Compatible con:
-- Sistema legacy: `../PRO-THE5ERS-QM-PHOENIX-GITCOP.py`
+- Sistema legacy: `../phoenix_quantum_monofx_program.py`
 - Configurazione: `../PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json`
 
 ## 📋 TODO

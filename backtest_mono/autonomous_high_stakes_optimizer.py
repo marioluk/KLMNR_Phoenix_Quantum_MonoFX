@@ -23,7 +23,7 @@ class AutonomousHighStakesOptimizer:
     """
     Ottimizzatore autonomo che genera configurazioni High Stakes da zero
     senza bisogno di file JSON sorgente, basandosi solo su:
-    - Algoritmo di trading PRO-THE5ERS-QM-PHOENIX-GITCOP.py
+    - Algoritmo di trading phoenix_quantum_monofx_program.py
     - Dati storici MT5
     - Ottimizzazione parametrica
     - Regole High Stakes Challenge

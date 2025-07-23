@@ -12,34 +12,34 @@ legacy_system/
 │   ├── config_high_stakes_moderate.json
 │   ├── config_high_stakes_aggressive.json
 │   └── *_production_ready.json                          # Convertiti per produzione
-├── backtest_legacy/                             # 📁 TOOLS GENERAZIONE CONFIG
+├── backtest_mono/                             # 📁 TOOLS GENERAZIONE CONFIG
 │   ├── autonomous_high_stakes_optimizer.py     # Genera config da zero
 │   ├── high_stakes_optimizer.py                # Ottimizza config esistenti
 │   ├── config_converter.py                     # Converte per produzione
 │   ├── production_converter.py                 # Batch converter
 │   └── the5ers_integrated_launcher_complete.py # Launcher unificato
-└── PRO-THE5ERS-QM-PHOENIX-GITCOP.py           # Sistema principale
+└── phoenix_quantum_monofx_program.py           # Sistema principale
 ```
 
 ## 🚀 Uso Corretto
 
 ### **Generazione Configurazioni Nuove:**
 ```bash
-cd legacy_system/backtest_legacy
+cd legacy_system/backtest_mono
 python the5ers_integrated_launcher_complete.py
 # ✅ Le configurazioni saranno salvate in ../config/
 ```
 
 ### **Ottimizzazione Configurazioni Esistenti:**
 ```bash
-cd legacy_system/backtest_legacy
+cd legacy_system/backtest_mono
 python high_stakes_optimizer.py
 # ✅ Le configurazioni ottimizzate saranno salvate in ../config/
 ```
 
 ### **Conversione per Produzione:**
 ```bash
-cd legacy_system/backtest_legacy
+cd legacy_system/backtest_mono
 python production_converter.py
 # ✅ Le configurazioni pronte per produzione saranno salvate in ../config/
 ```

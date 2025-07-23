@@ -38,7 +38,7 @@ legacy_system/
 
 ### **📊 Directory Backtest:**
 ```
-backtest_legacy/
+backtest_mono/
 ├── 📖 README.md                     # Documentazione backtest
 ├── ⚡ QUICK_START_BACKTEST.md        # Avvio rapido backtest
 ├── 🔄 README_DAILY_UPDATER.md       # Daily config updater
@@ -65,9 +65,9 @@ backtest_legacy/
 3. **logs/** - File di log per debug
 
 ### **📊 ANALISI E BACKTEST:**
-1. **[backtest_legacy/README.md](backtest_legacy/README.md)** - Sistema backtest
-2. **[backtest_legacy/QUICK_START_BACKTEST.md](backtest_legacy/QUICK_START_BACKTEST.md)** - Avvio tools
-3. **[backtest_legacy/README_DAILY_UPDATER.md](backtest_legacy/README_DAILY_UPDATER.md)** - Automazione
+1. **[backtest_mono/README.md](backtest_mono/README.md)** - Sistema backtest
+2. **[backtest_mono/QUICK_START_BACKTEST.md](backtest_mono/QUICK_START_BACKTEST.md)** - Avvio tools
+3. **[backtest_mono/README_DAILY_UPDATER.md](backtest_mono/README_DAILY_UPDATER.md)** - Automazione
 
 ---
 

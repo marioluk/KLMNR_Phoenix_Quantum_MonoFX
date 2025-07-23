@@ -28,7 +28,7 @@
 - **`autonomous_high_stakes_optimizer.py`** - 🔄 **AGGIORNATO**: Menu continuo, UX migliorata
 - **`production_converter.py`** - 🔄 **AGGIORNATO**: Smart file discovery, percorsi assoluti
 - **`the5ers_integrated_launcher_complete.py`** - Launcher principale (AUTONOMOUS)
-- **`PRO-THE5ERS-QM-PHOENIX-GITCOP.py`** - 🔄 **AGGIORNATO**: MT5 connection fix
+- **`phoenix_quantum_monofx_program.py`** - 🔄 **AGGIORNATO**: MT5 connection fix
 
 ### 🎯 **Caratteristiche Sistema Enhanced**
 - **Modalità**: 100% AUTONOMA + smart file management
