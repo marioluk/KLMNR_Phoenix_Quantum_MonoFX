@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from PRO-THE5ERS-QM-PHOENIX-GITCOP import QuantumTradingSystem, ConfigManager, logger
+from phoenix_quantum_monofx_program import QuantumTradingSystem, ConfigManager, logger
     import MetaTrader5 as mt5
 except ImportError as e:
     print(f"Errore importazione: {e}")
@@ -25,7 +25,7 @@ def test_system_initialization():
     
     try:
         # Test 1: Caricamento configurazione
-        config_file = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        config_file = "phoenix_quantum_monofx_config-STEP1.json"
         if not os.path.exists(config_file):
             print(f"❌ File configurazione non trovato: {config_file}")
             return False
@@ -64,7 +64,7 @@ def test_signal_generation():
     print("\n=== Test Generazione Segnali ===")
     
     try:
-        config_file = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        config_file = "phoenix_quantum_monofx_config-STEP1.json"
         system = QuantumTradingSystem(config_file)
         
         # Simula alcuni tick per riempire il buffer
@@ -115,7 +115,7 @@ def test_debug_status():
     print("\n=== Test Debug Status ===")
     
     try:
-        config_file = "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json"
+        config_file = "phoenix_quantum_monofx_config-STEP1.json"
         system = QuantumTradingSystem(config_file)
         
         # Debug status per ogni simbolo

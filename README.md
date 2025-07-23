@@ -1,4 +1,4 @@
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
+# 🎯 BROKER QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
 ## Sistema Monolitico Completo e Funzionante
 
 ---
@@ -9,14 +9,14 @@
 
 ### 🔧 **Fix Implementati Oggi:**
 1. **Git Repository**: Pulito e ottimizzato dopo rimozione estensione Gait
-2. **MT5 Connection**: Configurazione The5ers FivePercentOnline-Real funzionante
+2. **MT5 Connection**: Configurazione Broker FivePercentOnline-Real funzionante
 3. **File Path Management**: Sistema robusto per ricerca config automatica
 4. **Production Converter**: Funziona da qualsiasi directory con ricerca intelligente
 5. **Autonomous Optimizer**: Menu continuo per workflow fluido
 
 ### 🎯 **Sistema Pronto Per Produzione:**
 - ✅ Repository Git pulito e funzionante
-- ✅ MT5 connesso correttamente a The5ers
+- ✅ MT5 connesso correttamente a Broker
 - ✅ File management intelligente implementato
 - ✅ Tools di conversione ottimizzati
 - ✅ Workflow development-to-production streamlined
@@ -25,12 +25,12 @@
 
 ## 🚨 **IMPORTANTE - SISTEMA LEGACY**
 
-⚠️ **Questo README documenta il SISTEMA LEGACY MONOLITICO** contenuto nel file `PRO-THE5ERS-QM-PHOENIX-GITCOP.py`
+⚠️ **Questo README documenta il SISTEMA MONOLITICO** contenuto nel file `phoenix_quantum_monofx_program.py`
 
 🔄 **Per panoramica completa del progetto** → vedi `README_PROJECT_OVERVIEW.md`  
 🏗️ **Per sistema modulare refactorizzato** → vedi cartella `quantum_trading_system/`  
 📚 **Per documentazione legacy dedicata** → vedi `legacy_system/README_LEGACY.md`  
-🎯 **Per sistema backtest integrato** → vedi `legacy_system/backtest_legacy/README.md`
+🎯 **Per sistema backtest integrato** → vedi `legacy_system/backtest_mono/README.md`
 
 ## 📁 **ORGANIZZAZIONE PROJECT AGGIORNATA**
 
@@ -38,9 +38,9 @@
 ```
 KLMNR_Phoenix_Quantum/
 ├── legacy_system/              # 🏛️ Sistema Legacy Completo e FUNZIONANTE
-│   ├── PRO-THE5ERS-QM-PHOENIX-GITCOP.py  # Main legacy (MT5 FIXED)
+│   ├── phoenix_quantum_monofx_program.py  # Main MonoFX (MT5 FIXED)
 │   ├── config/                 # Configurazioni centralizzate
-│   ├── backtest_legacy/        # Tools di backtest (AGGIORNATI)
+│   ├── backtest_mono/        # Tools di backtest (AGGIORNATI)
 │   │   ├── autonomous_high_stakes_optimizer.py  # 🚀 Menu continuo
 │   │   ├── production_converter.py              # 🔄 Smart file discovery
 │   │   └── README.md                             # Documentazione aggiornata
@@ -67,7 +67,7 @@ Il sistema è implementato attraverso **6 classi principali** che operano in sin
 ### **�️ ARCHITETTURA DELLE CLASSI:**
 1. **`ConfigManager`** - Gestione configurazione e validazione parametri
 2. **`QuantumEngine`** - Motore di analisi quantistica e generazione segnali  
-3. **`DailyDrawdownTracker`** - Monitoraggio protezioni The5ers
+3. **`DailyDrawdownTracker`** - Monitoraggio protezioni Broker
 4. **`QuantumRiskManager`** - Gestione rischio e position sizing
 5. **`TradingMetrics`** - Raccolta e analisi delle metriche di performance
 6. **`QuantumTradingSystem`** - Coordinatore principale e entry point
@@ -168,9 +168,9 @@ volatility = 1 + |spin| * entropy
 
 ---
 
-### **3. DailyDrawdownTracker** - Protezione The5ers
+### **3. DailyDrawdownTracker** - Protezione Broker
 
-**Responsabilità:** Monitoraggio continuo del drawdown per compliance The5ers.
+**Responsabilità:** Monitoraggio continuo del drawdown per compliance Broker.
 
 #### **Parametri Critici:**
 ```python
@@ -456,7 +456,7 @@ def update_trailing_stop(position):
 1. **Stop Loss Hit**: Perdita massima raggiunta
 2. **Take Profit Hit**: Obiettivo di profitto raggiunto  
 3. **Trailing Stop**: Protezione profitti dinamica
-4. **Daily Drawdown**: Protezione The5ers (-2% soft, -5% hard)
+4. **Daily Drawdown**: Protezione Broker (-2% soft, -5% hard)
 5. **End of Session**: Chiusura forzata fuori orari
 6. **Emergency Stop**: Disconnessione MT5 o errori critici
 
@@ -587,7 +587,7 @@ Daily_High = max(Equity, Balance) del giorno corrente
 Current_Equity = equity in tempo reale
 ```
 
-**Soglie The5ers:**
+**Soglie Broker:**
 ```
 Soft_Limit = -2%   # Warning e riduzione aggressività
 Hard_Limit = -5%   # Stop immediato del trading
@@ -661,12 +661,12 @@ Gross_Loss = ∑(tutti i trade perdenti)
 ## 🏆 **STATUS PROGETTO**
 
 ✅ **Sistema Completo e Testato**  
-✅ **The5ers Compliance Verificata**  
+✅ **Broker Compliance Verificata**  
 ✅ **Configurazione Produzione Identificata**  
 ✅ **Risk Management Ultra-Conservativo**  
 ✅ **Analisi Matematica Documentata**  
 
-**🚀 CORE ENGINE PRONTO PER DEPLOYMENT SU THE5ERS HIGH STAKES CHALLENGE**
+**🚀 CORE ENGINE PRONTO PER DEPLOYMENT SU BROKER HIGH STAKES CHALLENGE**
 
 ---
 

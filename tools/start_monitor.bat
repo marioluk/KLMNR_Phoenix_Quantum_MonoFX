@@ -1,15 +1,16 @@
 @echo off
-REM THE5ERS LIVE MONITORING BATCH SCRIPT
-REM Avvia il monitor live per trading The5ers
+REM BROKER LIVE MONITORING BATCH SCRIPT
+REM Avvia il monitor live per trading broker
 
 echo ========================================
 echo THE5ERS LIVE MONITOR
+echo BROKER LIVE MONITOR
 echo ========================================
 
 REM Controlla se esiste il file di config
-if not exist "PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json" (
+if not exist "phoenix_quantum_monofx_config-140725-STEP1.json" (
     echo ERROR: Config file not found!
-    echo Please ensure PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json exists
+    echo Please ensure phoenix_quantum_monofx_config-140725-STEP1.json exists
     pause
     exit /b 1
 )
@@ -20,12 +21,12 @@ if not exist "logs" (
     mkdir logs
 )
 
-echo Starting THE5ERS Live Monitor...
+echo Starting BROKER Live Monitor...
 echo Press Ctrl+C to stop and generate report
 echo ========================================
 
 REM Avvia il monitor
-python monitor_the5ers_live.py PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json
+python monitor_broker_live.py phoenix_quantum_monofx_config-140725-STEP1.json
 
 echo ========================================
 echo Monitor stopped

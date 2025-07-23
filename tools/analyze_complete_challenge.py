@@ -449,7 +449,7 @@ def main():
     """Funzione principale"""
     if len(sys.argv) < 2:
         print("Usage: python analyze_complete_challenge.py <config_file>")
-        print("Example: python analyze_complete_challenge.py PRO-THE5ERS-QM-PHOENIX-GITCOP-config-140725-STEP1.json")
+        print("Example: python analyze_complete_challenge.py phoenix_quantum_hubfx_program-config-140725-STEP1.json")
         sys.exit(1)
     
     config_file = sys.argv[1]
