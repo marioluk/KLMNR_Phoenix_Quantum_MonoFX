@@ -594,9 +594,11 @@ class AutonomousHighStakesOptimizer:
         avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
         # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
         avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
-        buffer_size = int(400 + len(symbol_params)*30 + avg_score*2)
-        # Limita buffer_size per strategie intraday (M5-M30): tra 500 e 1500
-        buffer_size = max(500, min(buffer_size, 1500))
+        # Esegui una ricerca esplicita SOLO nel range 500-1500
+        buffer_candidates = [int(x) for x in np.linspace(500, 1500, num=21)]  # step di 50
+        # Scegli il buffer_size che massimizza una funzione di score (qui esempio: più vicino al valore calcolato)
+        buffer_formula = 400 + len(symbol_params)*30 + avg_score*2
+        buffer_size = min(buffer_candidates, key=lambda x: abs(x - buffer_formula))
 
         quantum_params = {
             "buffer_size": buffer_size,
