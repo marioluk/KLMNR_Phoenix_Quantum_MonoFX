@@ -558,16 +558,13 @@ class AutonomousHighStakesOptimizer:
             spin_window = int(60 + idx * 7 + score / 20)
             min_spin_samples = int(20 + idx * 2 + score / 40)
             signal_cooldown = int(600 + (score * 2) + idx * 10)
-            buy_entropy = round(params.get("signal_buy_threshold", 0.6) + score / 500, 3)
-            sell_entropy = round(params.get("signal_sell_threshold", 0.4) + score / 700, 3)
+            # Calcolo entropy e clamp nei range corretti
+            buy_entropy = min(1.0, max(0.50, round(params.get("signal_buy_threshold", 0.6) + score / 500, 3)))
+            sell_entropy = min(0.50, max(0.0, round(params.get("signal_sell_threshold", 0.4) + score / 700, 3)))
             quantum_params_override = {
                 "spin_window": spin_window,
                 "min_spin_samples": min_spin_samples,
-                "signal_cooldown": signal_cooldown,
-                "entropy_thresholds": {
-                    "buy_signal": buy_entropy,
-                    "sell_signal": sell_entropy
-                }
+                
             }
 
             # Comment personalizzato
@@ -589,8 +586,8 @@ class AutonomousHighStakesOptimizer:
         avg_min_spin_samples = int(np.mean([20 + i*2 for i in range(len(symbol_params))])) if symbol_params else 30
         avg_spin_threshold = round(0.28 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 500), 3)
         avg_signal_cooldown = int(np.mean([600 for _ in symbol_params])) if symbol_params else 600
-        avg_buy_entropy = round(np.mean([s.get('signal_buy_threshold', 0.6) for s in symbol_params]), 3) if symbol_params else 0.58
-        avg_sell_entropy = round(np.mean([s.get('signal_sell_threshold', 0.4) for s in symbol_params]), 3) if symbol_params else 0.42
+        avg_buy_entropy = round(np.mean([min(1.0, max(0.50, s.get('signal_buy_threshold', 0.6))) for s in symbol_params]), 3) if symbol_params else 0.58
+        avg_sell_entropy = round(np.mean([min(0.50, max(0.0, s.get('signal_sell_threshold', 0.4))) for s in symbol_params]), 3) if symbol_params else 0.42
         avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
         # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
         avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
@@ -607,14 +604,14 @@ class AutonomousHighStakesOptimizer:
             "spin_threshold": avg_spin_threshold,
             "signal_cooldown": avg_signal_cooldown,
             "entropy_thresholds": {
-                "buy_signal": avg_buy_entropy,
-                "sell_signal": avg_sell_entropy
+                "buy_signal": 0.54,
+                "sell_signal": 0.46
             },
             "volatility_scale": avg_volatility_scale
         }
 
         risk_parameters = {
-            "magic_number": 147251,
+            "magic_number": 247251,
             "position_cooldown": 900,
             "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 5),
             "max_positions": 1,
@@ -682,7 +679,7 @@ class AutonomousHighStakesOptimizer:
                 "port": 18889
             },
             "account_currency": "USD",
-            "magic_number": 237251,
+            "magic_number": 247251,
             "initial_balance": 5000,
             "quantum_params": quantum_params,
             "risk_parameters": risk_parameters,
