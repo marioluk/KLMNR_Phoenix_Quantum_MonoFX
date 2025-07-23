@@ -37,7 +37,7 @@ Sistema modulare per trading quantistico, progettato per scalabilità, automazio
 - **config**: Gestione configurazioni, mapping simboli
 - **trading**: Coordinamento multi-broker, orchestrazione ordini
 - **brokers**: Integrazione API broker
-- **utils**: Utility, logging, mapping
+- **utils**: Utility, log_utils, mapping
 
 ## Diagramma Architetturale
 ```mermaid
@@ -57,7 +57,7 @@ graph TD
 2. **Generazione segnali**: Engine elabora dati e produce segnali
 3. **Gestione rischio**: Modulo risk valuta operatività
 4. **Esecuzione ordini**: Trading coordina invio ordini ai broker
-5. **Monitoraggio**: Metrics raccoglie dati, logging continuo
+5. **Monitoraggio**: Metrics raccoglie dati, log_utils per logging continuo
 
 ## Esempio di codice (Python)
 ```python

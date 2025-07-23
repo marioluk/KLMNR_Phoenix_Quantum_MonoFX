@@ -7,7 +7,7 @@ Il modulo Trading coordina il ciclo operativo, gestisce l’invio ordini e l’i
 ### Ciclo operativo
 1. Ricezione segnali validati
 2. Invio ordini ai broker
-3. Monitoraggio esecuzione e logging
+3. Monitoraggio esecuzione e logging (log_utils)
 
 ### Principali classi
 - `TradingCoordinator`: orchestrazione ordini e broker
@@ -21,7 +21,7 @@ trader.execute(signals)
 
 ### Best practice
 - Gestire errori e retry automatici
-- Logging dettagliato di ogni operazione
+- Logging dettagliato di ogni operazione (log_utils)
 
 ---
 Vedi anche: [Refactoring Guide](../REFERENCE/refactoring_guide.md)

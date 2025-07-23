@@ -8,7 +8,7 @@ import logging
 from typing import Dict, List, Optional
 from pathlib import Path
 
-from .connection import BrokerConfig
+from brokers.connection import BrokerConfig
 
 logger = logging.getLogger('QuantumTradingSystem')
 

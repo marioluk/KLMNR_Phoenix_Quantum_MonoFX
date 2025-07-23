@@ -9,15 +9,27 @@ from collections import defaultdict
 from threading import Lock
 from typing import Dict, List, Optional, Any
 
-from ..config import ConfigManager
-from ..engine import QuantumEngine
-from ..risk import QuantumRiskManager
-from ..metrics import TradingMetrics
-from ..utils import is_trading_hours
-from ..logging import setup_logger, clean_old_logs
-from ..brokers import BrokerManager, MultiBrokerConfigLoader, BrokerConfig
+from config import ConfigManager
+from engine import QuantumEngine
+from risk import QuantumRiskManager
+from metrics import TradingMetrics
+from utils import is_trading_hours
+from log_utils.setup import setup_logger, clean_old_logs
+from brokers import BrokerManager, MultiBrokerConfigLoader, BrokerConfig
 
-logger = logging.getLogger('QuantumTradingSystem')
+def get_safe_logger():
+    l = logging.getLogger('QuantumTradingSystem')
+    if l is None or not l.handlers:
+        # Fallback: logger console warning
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.WARNING)
+        ch.setFormatter(formatter)
+        l.setLevel(logging.WARNING)
+        l.addHandler(ch)
+    return l
+
+logger = get_safe_logger()
 
 
 class MultiQuantumTradingSystem:

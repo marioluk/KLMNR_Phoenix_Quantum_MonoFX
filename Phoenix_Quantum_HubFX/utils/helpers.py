@@ -1,3 +1,4 @@
+from log_utils.setup import setup_logger
 """
 Funzioni utility per il Quantum Trading System
 """

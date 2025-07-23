@@ -1,0 +1,80 @@
+{
+  "account_currency": "USD",
+  "logging": {
+    "log_file": "logs/default.log",
+    "max_size_mb": 10,
+    "backup_count": 5,
+    "log_level": "INFO"
+  },
+  "THE5ERS_specific": {
+    "drawdown_protection": {
+      "soft_limit": 0.03,
+      "hard_limit": 0.05
+    }
+  },
+  "risk_parameters": {
+    "position_cooldown": 1800,
+    "max_spread": {
+      "default": 20,
+      "SP500": 10,
+      "NAS100": 15,
+      "XAUUSD": 30,
+      "BTCUSD": 50,
+      "ETHUSD": 40
+    },
+    "max_positions": 1,
+    "risk_percent": 0.02,
+    "base_sl_pips": 150,
+    "min_sl_distance_pips": 100,
+    "profit_multiplier": 2.0,
+    "trailing_stop": {
+      "enable": true,
+      "trailing_stop_activation": 0.5,
+      "trailing_step": 0.3
+    }
+  },
+  "quantum_params": {
+    "buffer_size": 100,
+    "spin_window": 20,
+    "min_spin_samples": 10,
+    "spin_threshold": 0.25,
+    "signal_cooldown": 900,
+    "entropy_thresholds": {
+      "buy_signal": 0.55,
+      "sell_signal": 0.45
+    }
+  },
+  "symbols": {
+    "XAUUSD": {
+      "trading_hours": ["00:00-24:00"],
+      "risk_management": {
+        "risk_percent": 0.015,
+        "base_sl_pips": 150,
+        "min_sl_distance_pips": 80,
+        "profit_multiplier": 2.0,
+        "contract_size": 100,
+        "trailing_stop": {
+          "enable": true,
+          "trailing_stop_activation": 0.5,
+          "trailing_step": 0.3
+        }
+      }
+    },
+    "SP500": {
+      "trading_hours": ["00:00-24:00"],
+      "risk_management": {
+        "risk_percent": 0.01,
+        "base_sl_pips": 30,
+        "min_sl_distance_pips": 10,
+        "profit_multiplier": 2.0,
+        "contract_size": 1,
+        "trailing_stop": {
+          "enable": true,
+          "trailing_stop_activation": 0.5,
+          "trailing_step": 0.3
+        }
+      }
+    }
+
+  }
+}

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 
-from .connection import BrokerConnection, BrokerConfig, BrokerStatus
+from brokers.connection import BrokerConnection, BrokerConfig, BrokerStatus
 
 logger = logging.getLogger('QuantumTradingSystem')
 

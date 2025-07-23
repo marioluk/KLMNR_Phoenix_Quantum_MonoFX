@@ -16,15 +16,15 @@ Architettura modulare:
 __version__ = "6.0.0"
 __author__ = "Quantum Trading Team"
 
-from .trading.main_system import QuantumTradingSystem
-from .trading.multi_system import MultiQuantumTradingSystem
-from .config.manager import ConfigManager
-from .engine.quantum_engine import QuantumEngine
-from .risk.manager import QuantumRiskManager
-from .logging.setup import setup_logger
-from .brokers.manager import BrokerManager
-from .brokers.connection import BrokerConnection
-from .brokers.config_loader import MultiBrokerConfigLoader
+from trading.main_system import QuantumTradingSystem
+from trading.multi_system import MultiQuantumTradingSystem
+from config.manager import ConfigManager
+from engine.quantum_engine import QuantumEngine
+from risk.manager import QuantumRiskManager
+from log_utils.setup import setup_logger
+from brokers.manager import BrokerManager
+from brokers.connection import BrokerConnection
+from brokers.config_loader import MultiBrokerConfigLoader
 
 __all__ = [
     'QuantumTradingSystem',

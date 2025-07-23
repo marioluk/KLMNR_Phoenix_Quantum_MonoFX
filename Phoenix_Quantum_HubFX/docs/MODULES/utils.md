@@ -2,11 +2,11 @@
 # Modulo Utils
 
 ## Descrizione
-Il modulo Utils contiene funzioni di supporto, mapping simboli, logging e conversioni dati.
+Il modulo Utils contiene funzioni di supporto, mapping simboli, log_utils (logging custom) e conversioni dati.
 
 ### Principali utility
 - `map_symbol(symbol)`: mapping tra simboli broker
-- `log_event(event)`: logging custom
+- `log_event(event)`: logging custom (tramite log_utils)
 
 ### Esempio di utilizzo
 ```python
@@ -17,7 +17,7 @@ log_event('Order sent')
 
 ### Best practice
 - Centralizzare le utility per evitare duplicazioni
-- Logging strutturato e timestamp
+- Logging strutturato e timestamp (log_utils)
 
 ---
 Vedi anche: [Refactoring Guide](../REFERENCE/refactoring_guide.md)

@@ -6,7 +6,7 @@ import MetaTrader5 as mt5
 import numpy as np
 import logging
 from typing import Dict, Tuple, Any, Optional
-from .drawdown_tracker import DailyDrawdownTracker
+from risk.drawdown_tracker import DailyDrawdownTracker
 
 logger = logging.getLogger('QuantumTradingSystem')
 
