@@ -3,13 +3,13 @@
 Verifica delle correzioni nomenclatura The5ers
 """
 
-from autonomous_high_stakes_optimizer import AutonomousHighStakesOptimizer
+from autonomous_optimizer import AutonomousOptimizer
 
 def verify_corrections():
     print("🔧 VERIFICA CORREZIONI NOMENCLATURA THE5ERS")
     print("="*50)
     
-    opt = AutonomousHighStakesOptimizer()
+    opt = AutonomousOptimizer()
     
     print(f"✅ Simboli totali: {len(opt.available_symbols)}")
     print("\n📋 LISTA SIMBOLI CORRETTA:")

@@ -43,8 +43,8 @@ class AutonomousHighStakesOptimizer:
         self.output_dir = output_dir or self.base_dir
         self.optimization_days = optimization_days
         
-        # Parametri High Stakes Challenge (fissi)
-        self.high_stakes_params = {
+        # Parametri Challenge (fissi)
+        self.challenge_params = {
             'account_balance': 5000,
             'target_daily_profit': 25,  # €25 = 0.5%
             'validation_days': 3,
@@ -123,13 +123,13 @@ class AutonomousHighStakesOptimizer:
         base_config = {
             "metadata": {
                 "version": "2.0",
-                "created_by": "AutonomousHighStakesOptimizer",
+                "created_by": "AutonomousOptimizer",
                 "creation_date": datetime.now().isoformat(),
-                "description": "Configurazione generata autonomamente per High Stakes Challenge",
+                "description": "Configurazione generata autonomamente per Challenge",
                 "optimization_period_days": self.optimization_days
             },
             
-            "high_stakes_challenge": self.high_stakes_params,
+            "challenge": self.challenge_params,
             
             "trading_algorithm": {
                 "name": "PRO-THE5ERS-QM-PHOENIX-GITCOP",
@@ -528,7 +528,7 @@ class AutonomousHighStakesOptimizer:
         config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
         os.makedirs(config_dir, exist_ok=True)
         
-        filename = f"config_autonomous_high_stakes_{aggressiveness}_production_ready.json"
+        filename = f"config_autonomous_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
 
         # =============================================================
@@ -669,7 +669,7 @@ class AutonomousHighStakesOptimizer:
 
         production_config = {
             "logging": {
-                "log_file": f"logs/log_autonomous_high_stakes_{aggressiveness}_production_ready.log",
+                "log_file": f"logs/log_autonomous_{aggressiveness}_production_ready.log",
                 "max_size_mb": 50,
                 "backup_count": 7,
                 "log_level": "INFO"
@@ -776,7 +776,7 @@ class AutonomousHighStakesOptimizer:
             'total_pnl': round(total_pnl, 2),
             'daily_avg_pnl': round(daily_pnl, 2),
             'profitable_days': profitable_days,
-            'high_stakes_validation': validation_success,
+            'challenge_validation': validation_success,
             'symbols_tested': symbols,
             'risk_percent_used': risk_pct,
             'aggressiveness_level': aggressiveness,
@@ -897,9 +897,9 @@ class AutonomousHighStakesOptimizer:
         total_losses = sum(d['losses'] for d in daily_results)
         overall_win_rate = (total_wins / (total_wins + total_losses)) * 100 if (total_wins + total_losses) > 0 else 0
         
-        # Validazione High Stakes
-        target_daily = self.high_stakes_params['target_daily_profit']
-        daily_loss_limit = self.high_stakes_params['daily_loss_limit']
+        # Validazione Challenge
+        target_daily = self.challenge_params['target_daily_profit']
+        daily_loss_limit = self.challenge_params['daily_loss_limit']
         # Calcola valori drawdown protection (default o semplici calcoli)
         # Soft limit: 3% - Hard limit: 5% (valori tipici The5ers)
         drawdown_protection = {
@@ -917,15 +917,15 @@ class AutonomousHighStakesOptimizer:
         max_daily_loss = min(d['pnl'] for d in daily_results)
         daily_target_hit = sum(1 for d in daily_results if d['pnl'] >= target_daily)
         
-        high_stakes_validation = (
+        challenge_validation = (
             daily_avg_pnl >= target_daily and
             max_daily_loss > -daily_loss_limit and
             daily_target_hit >= (actual_days * 0.6)  # 60% dei giorni target raggiunto
         )
         
         results = {
-            'success': high_stakes_validation,
-            'high_stakes_validation': high_stakes_validation,
+            'success': challenge_validation,
+            'challenge_validation': challenge_validation,
             'daily_avg_pnl': daily_avg_pnl,
             'total_pnl': total_profit,
             'win_rate': overall_win_rate,

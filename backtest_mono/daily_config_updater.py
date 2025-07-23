@@ -37,7 +37,7 @@ logger.addHandler(console_handler)
 
 # Import dei moduli necessari
 try:
-    from autonomous_high_stakes_optimizer import AutonomousHighStakesOptimizer
+    from autonomous_optimizer import AutonomousOptimizer
     from config_converter import ConfigConverter
     from production_converter import find_autonomous_configs
 except ImportError as e:
@@ -65,7 +65,7 @@ class DailyConfigUpdater:
         self.backup_dir = os.path.join(self.config_dir, "backups")
         
         # Inizializza componenti
-        self.optimizer = AutonomousHighStakesOptimizer(optimization_days)
+        self.optimizer = AutonomousOptimizer(optimization_days)
         self.converter = None  # Sarà inizializzato quando necessario
         
         logger.info(f"[INIT] Daily Config Updater inizializzato")
