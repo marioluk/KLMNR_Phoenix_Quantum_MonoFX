@@ -5,7 +5,7 @@ import os
 import sys
 
 # Aggiungi il percorso per import
-sys.path.append('legacy_system/backtest_legacy')
+sys.path.append('legacy_system/backtest_mono')
 
 from production_converter import find_autonomous_configs
 

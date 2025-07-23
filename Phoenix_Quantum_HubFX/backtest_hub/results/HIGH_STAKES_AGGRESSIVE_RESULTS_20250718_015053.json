@@ -1,0 +1,153 @@
+{
+  "timestamp": "20250718_015053",
+  "aggressiveness_level": "aggressive",
+  "config_used": "C:\\GitRepos\\The5ers\\backtest_clean\\config_high_stakes_aggressive.json",
+  "parameters": {
+    "starting_balance": 5000,
+    "target_daily_profit": 25,
+    "min_profitable_days": 3,
+    "days_tested": 10,
+    "validation_mode": true
+  },
+  "results": {
+    "final_balance": 50390.99219066578,
+    "total_pnl": 45390.99219066578,
+    "profitable_days_achieved": 10,
+    "validation_completed": true,
+    "challenge_status": "VALIDATION_COMPLETED",
+    "daily_results": [
+      {
+        "day": 1,
+        "starting_balance": 5000,
+        "ending_balance": 6777.862036669647,
+        "daily_pnl": 1777.862036669647,
+        "daily_pnl_percent": 35.557240733392945,
+        "trades_count": 8,
+        "winners": 5,
+        "win_rate": 62.5,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "1/3"
+      },
+      {
+        "day": 2,
+        "starting_balance": 6777.862036669647,
+        "ending_balance": 11693.713199399794,
+        "daily_pnl": 4915.851162730148,
+        "daily_pnl_percent": 72.5280499386734,
+        "trades_count": 8,
+        "winners": 5,
+        "win_rate": 62.5,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "2/3"
+      },
+      {
+        "day": 3,
+        "starting_balance": 11693.713199399794,
+        "ending_balance": 23378.254128871748,
+        "daily_pnl": 11684.540929471954,
+        "daily_pnl_percent": 99.92156238338127,
+        "trades_count": 8,
+        "winners": 7,
+        "win_rate": 87.5,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 4,
+        "starting_balance": 23378.254128871748,
+        "ending_balance": 29443.08476564897,
+        "daily_pnl": 6064.830636777225,
+        "daily_pnl_percent": 25.942187998064668,
+        "trades_count": 4,
+        "winners": 4,
+        "win_rate": 100.0,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 5,
+        "starting_balance": 29443.08476564897,
+        "ending_balance": 32007.499024135486,
+        "daily_pnl": 2564.414258486516,
+        "daily_pnl_percent": 8.709733639996848,
+        "trades_count": 5,
+        "winners": 5,
+        "win_rate": 100.0,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 6,
+        "starting_balance": 32007.499024135486,
+        "ending_balance": 36592.309316873056,
+        "daily_pnl": 4584.810292737566,
+        "daily_pnl_percent": 14.324175373028542,
+        "trades_count": 6,
+        "winners": 5,
+        "win_rate": 83.33333333333334,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 7,
+        "starting_balance": 36592.309316873056,
+        "ending_balance": 42088.36386649394,
+        "daily_pnl": 5496.054549620889,
+        "daily_pnl_percent": 15.019698543832014,
+        "trades_count": 7,
+        "winners": 4,
+        "win_rate": 57.14285714285714,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 8,
+        "starting_balance": 42088.36386649394,
+        "ending_balance": 44441.433442947746,
+        "daily_pnl": 2353.069576453805,
+        "daily_pnl_percent": 5.590784150977787,
+        "trades_count": 2,
+        "winners": 2,
+        "win_rate": 100.0,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 9,
+        "starting_balance": 44441.433442947746,
+        "ending_balance": 47150.78258831508,
+        "daily_pnl": 2709.3491453673378,
+        "daily_pnl_percent": 6.096448596433099,
+        "trades_count": 3,
+        "winners": 3,
+        "win_rate": 100.0,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      },
+      {
+        "day": 10,
+        "starting_balance": 47150.78258831508,
+        "ending_balance": 50390.99219066578,
+        "daily_pnl": 3240.2096023506974,
+        "daily_pnl_percent": 6.8720165912022155,
+        "trades_count": 3,
+        "winners": 2,
+        "win_rate": 66.66666666666666,
+        "is_profitable_day": true,
+        "target_met": true,
+        "validation_status": "COMPLETED"
+      }
+    ],
+    "total_trades": 54,
+    "aggressiveness_used": "aggressive"
+  }
+}

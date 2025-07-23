@@ -424,6 +424,6 @@ class BrokerManager:
                 logger.error(f"Errore disconnessione {name}: {str(e)}")
                 
         # Shutdown executor
-        self.executor.shutdown(wait=True, timeout=30)
+        self.executor.shutdown(wait=True)
         
         logger.info("✅ BrokerManager shutdown completato")
