@@ -595,6 +595,8 @@ class AutonomousHighStakesOptimizer:
         # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
         avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
         buffer_size = int(400 + len(symbol_params)*30 + avg_score*2)
+        # Limita buffer_size per strategie intraday (M5-M30): tra 500 e 1500
+        buffer_size = max(500, min(buffer_size, 1500))
 
         quantum_params = {
             "buffer_size": buffer_size,
