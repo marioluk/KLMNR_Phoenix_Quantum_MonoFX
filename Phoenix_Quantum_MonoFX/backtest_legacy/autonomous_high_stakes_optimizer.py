@@ -597,7 +597,7 @@ class AutonomousHighStakesOptimizer:
         # Esegui una ricerca esplicita SOLO nel range 500-1500
         buffer_candidates = [int(x) for x in np.linspace(500, 1500, num=21)]  # step di 50
         # Scegli il buffer_size che massimizza una funzione di score (qui esempio: più vicino al valore calcolato)
-        buffer_formula = 400 + len(symbol_params)*30 + avg_score*2
+        buffer_formula = 400 + len(symbol_params)*30 + avg_score*1.2
         buffer_size = min(buffer_candidates, key=lambda x: abs(x - buffer_formula))
 
         quantum_params = {
