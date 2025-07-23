@@ -40,4 +40,18 @@
 
 ---
 
+---
+
+## Log attività luglio 2025 (commit, ripristino, neutralizzazione)
+
+- **Ripristino directory Phoenix_Quantum_MonoFX/backtest_mono** da versione di produzione (GitHub) dopo errore di patch.
+- **Commit dettagliati**:
+  - Commit separato per nuove funzionalità e tool in Phoenix_Quantum_HubFX (backtest, analisi, configurazione, validazione, launcher integrato, risultati, broker).
+  - Commit separato per aggiornamento documentazione e script in tools/ e docs/.
+- **Verifica stato git** prima di ogni commit per garantire tracciabilità e pulizia della cronologia.
+- **Preparazione neutralizzazione riferimenti legacy** (The5ers, high_stakes) in Phoenix_Quantum_HubFX, con preferenza per nomi broker generici (BrokerA, BrokerB) nelle prossime attività.
+- **Conferma allineamento** tra ambiente locale e produzione dopo ripristino e commit.
+
+---
+
 *Ultimo aggiornamento: 23 luglio 2025*
