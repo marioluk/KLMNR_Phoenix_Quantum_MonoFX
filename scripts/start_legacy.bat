@@ -1,7 +1,7 @@
 
 @echo off
 echo.
-echo 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY LAUNCHER
+echo 🎯 QUANTUM TRADING SYSTEM - LEGACY LAUNCHER
 echo ================================================================
 echo.
 
@@ -42,7 +42,7 @@ echo.
 echo 🚀 Avvio sistema legacy...
 echo 💡 Usa Ctrl+C per fermare il sistema
 echo 📊 Monitor log: logs/log_autonomous_high_stakes_conservative_production_ready.log
-echo 🔗 Connessione: The5ers FivePercentOnline-Real
+echo 🔗 Connessione: Challenge-Account
 echo ================================================================
 echo.
 

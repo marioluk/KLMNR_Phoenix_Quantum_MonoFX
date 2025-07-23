@@ -42,7 +42,7 @@ Utilizza lo script `scripts/cleanup_universal.bat` per:
 - Mantieni la dashboard, i backtest e i log separati
 - Usa la cartella `scripts/` per tutti gli script di automazione e manutenzione
 - Aggiorna questa documentazione se modifichi la struttura
-# 🎯 THE5ERS QUANTUM TRADING SYSTEM - LEGACY ENTERPRISE VERSION
+# 🎯 QUANTUM TRADING SYSTEM - LEGACY ENTERPRISE VERSION
 ## Sistema Enterprise con Automazione Completa - STATO: PRODUZIONE 24/7 ✅
 
 ---
@@ -127,7 +127,7 @@ signal, price = engine.get_signal("EURUSD")
 ```
 
 ### **3. DailyDrawdownTracker**
-Monitoraggio protezioni The5ers (soft -2%, hard -5%)
+Monitoraggio protezioni challenge (soft -2%, hard -5%)
 ```python
 tracker = DailyDrawdownTracker(initial_equity, config)
 soft_hit, hard_hit = tracker.check_limits(current_equity)
@@ -224,10 +224,10 @@ def calculate_quantum_volatility(self, symbol: str, window: int = 50) -> float:
 }
 ```
 
-### **Protezioni The5ers:**
+### **Protezioni challenge:**
 ```json
 {
-  "THE5ERS_specific": {
+  "challenge_specific": {
     "step1_target": 8,            // 8% target profitto
     "max_daily_loss_percent": 5,  // 5% perdita massima giornaliera
     "max_total_loss_percent": 10, // 10% perdita massima totale
@@ -315,14 +315,14 @@ Sistema attivo - Posizioni: 0/1
 **4. Errori di Configurazione:**
 ```bash
 # Valida la sintassi del config JSON
-python -c "import json; print('OK' if json.load(open('PRO-THE5ERS-QM-PHOENIX-GITCOP-config-STEP1.json')) else 'ERROR')"
+python -c "import json; print('OK' if json.load(open('PRO-CHALLENGE-QM-PHOENIX-GITCOP-config-STEP1.json')) else 'ERROR')"
 ```
 
 ---
 
 ## 📈 **PERFORMANCE ATTESE**
 
-### **Obiettivi The5ers Step 1:**
+### **Obiettivi Challenge Step 1:**
 - **Target**: +8% in 30 giorni
 - **Max Daily Loss**: -5%
 - **Max Total Loss**: -10%
@@ -350,7 +350,7 @@ cd backtest_mono/
 - ✅ Compatibile con sistema monolitico
 - ✅ Scripts di analisi performance
 - ✅ Tools di ottimizzazione parametri
-- ✅ Report storici The5ers
+- ✅ Report storici challenge
 - ✅ Configurazioni pre-validate
 
 **Differenza dal Sistema Moderno:**
@@ -376,12 +376,12 @@ cd backtest_mono/
 
 ✅ **Sistema Completo e Funzionante**  
 ✅ **Sintassi Python Validata**  
-✅ **Configurazione The5ers Pronta**  
+✅ **Configurazione challenge Pronta**  
 ✅ **Risk Management Ultra-Conservativo**  
 ✅ **Logging e Monitoraggio Completi**  
 ✅ **Protezioni Multi-Layer Attive**
 
-**🚀 PRONTO PER DEPLOYMENT IMMEDIATO SU THE5ERS HIGH STAKES CHALLENGE**
+**🚀 PRONTO PER DEPLOYMENT IMMEDIATO SU CHALLENGE**
 
 ---
 

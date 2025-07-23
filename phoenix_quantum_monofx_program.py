@@ -19,7 +19,7 @@ from functools import lru_cache
 
 
 # Configurazioni globali
-CONFIG_FILE = "config/config_autonomous_high_stakes_production_ready.json"
+CONFIG_FILE = "config/config_autonomous_challenge_production_ready.json"
 
 # Carica la configurazione JSON all'avvio
 def auto_correct_symbols(config):
@@ -844,11 +844,12 @@ class QuantumEngine:
     
         
 """
-3- DailyDrawdownTracker - Monitora il drawdown giornaliero con protezione THE5ERS. 
+3- DailyDrawdownTracker - Monitora il drawdown giornaliero con protezione challenge. 
 Può essere inizializzato indipendentemente ma viene utilizzato dal sistema principale.
 """
+
 class DailyDrawdownTracker:
-    """Monitoraggio del drawdown giornaliero con protezione THE5ERS"""
+    """Monitoraggio del drawdown giornaliero con protezione challenge"""
     
     def __init__(self, initial_equity: float, config: Dict):
         """Inizializzazione con accesso sicuro alla configurazione"""
@@ -862,10 +863,10 @@ class DailyDrawdownTracker:
         self.currency = actual_config.get('account_currency', 'USD')
         
         try:
-            dd_config = actual_config['THE5ERS_specific']['drawdown_protection']
-            self.soft_limit = float(dd_config['soft_limit'])
-            self.hard_limit = float(dd_config['hard_limit'])
-        except KeyError as e:
+            dd_config = actual_config.get('challenge_specific', {}).get('drawdown_protection', {})
+            self.soft_limit = float(dd_config.get('soft_limit', 0.05))
+            self.hard_limit = float(dd_config.get('hard_limit', 0.10))
+        except Exception as e:
             raise ValueError(f"Configurazione drawdown mancante: {str(e)}") from e
         
         self.protection_active = False
@@ -1599,7 +1600,7 @@ class QuantumTradingSystem:
             
 
     def _initialize_mt5(self) -> bool:
-        """Connessione a MetaTrader 5 con configurazione specifica The5ers"""
+        """Connessione a MetaTrader 5 con configurazione specifica challenge"""
         try:
             # Chiudi eventuali connessioni precedenti
             mt5.shutdown()
@@ -1607,7 +1608,7 @@ class QuantumTradingSystem:
             # Ottieni configurazione MT5 specifica
             mt5_config = self.config.config.get('metatrader5', {})
             
-            # Inizializza con parametri specifici The5ers
+            # Inizializza con parametri specifici challenge
             if not mt5.initialize(
                 path=mt5_config.get('path', 'C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe'),
                 login=int(mt5_config.get('login', 0)),
@@ -1616,7 +1617,7 @@ class QuantumTradingSystem:
                 timeout=60000,
                 port=int(mt5_config.get('port', 18889))
             ):
-                logger.error(f"Inizializzazione MT5 The5ers fallita: {mt5.last_error()}")
+                logger.error(f"Inizializzazione MT5 challenge fallita: {mt5.last_error()}")
                 return False
             
             terminal_info = mt5.terminal_info()
@@ -1624,12 +1625,12 @@ class QuantumTradingSystem:
                 logger.error("Impossibile ottenere info terminal MT5")
                 return False
                 
-            logger.info(f"MT5 The5ers inizializzato: {terminal_info.company} - {terminal_info.name}")
+            logger.info(f"MT5 challenge inizializzato: {terminal_info.company} - {terminal_info.name}")
             logger.info(f"Server: {mt5_config.get('server')} | Porta: {mt5_config.get('port')} | Login: {mt5_config.get('login')}")
             return True
             
         except Exception as e:
-            logger.error(f"Errore inizializzazione MT5 The5ers: {str(e)}")
+            logger.error(f"Errore inizializzazione MT5 challenge: {str(e)}")
             return False
 
     """
@@ -1640,7 +1641,7 @@ class QuantumTradingSystem:
         """Verifica/connessione MT5 - Verifica la connessione MT5 con ripristino automatico"""
         try:
             if not mt5.terminal_info() or not mt5.terminal_info().connected:
-                logger.warning("Connessione MT5 The5ers persa, tentativo di riconnessione...")
+                logger.warning("Connessione MT5 challenge persa, tentativo di riconnessione...")
                 mt5.shutdown()
                 time.sleep(2)
                 
@@ -1656,7 +1657,7 @@ class QuantumTradingSystem:
                 )
             return True
         except Exception as e:
-            logger.error(f"Errore verifica connessione The5ers: {str(e)}")
+            logger.error(f"Errore verifica connessione challenge: {str(e)}")
             return False
 
     """
@@ -2396,8 +2397,8 @@ class QuantumTradingSystem:
         except Exception as e:
             logger.error(f"Errore debug_trade_status per {symbol}: {str(e)}")
     
-    def check_the5ers_limits(self):
-        """Controlla i limiti imposti dal broker The5ers"""
+    def check_challenge_limits(self):
+        """Controlla i limiti imposti dal broker challenge"""
         account_info = mt5.account_info()
         if not account_info:
             logger.error("Impossibile ottenere info account MT5")
@@ -2407,9 +2408,9 @@ class QuantumTradingSystem:
         equity = account_info.equity
         balance = account_info.balance
         initial_balance = self.config.config.get('initial_balance', balance)
-        max_daily_loss = initial_balance * self.config.config['THE5ERS_specific']['max_daily_loss_percent'] / 100
-        max_total_loss = initial_balance * self.config.config['THE5ERS_specific']['max_total_loss_percent'] / 100
-        profit_target = initial_balance * self.config.config['THE5ERS_specific']['step1_target'] / 100
+        max_daily_loss = initial_balance * self.config.config.get('challenge_specific', {}).get('max_daily_loss_percent', 0) / 100
+        max_total_loss = initial_balance * self.config.config.get('challenge_specific', {}).get('max_total_loss_percent', 0) / 100
+        profit_target = initial_balance * self.config.config.get('challenge_specific', {}).get('step1_target', 0) / 100
 
         # Daily loss check
         today = datetime.now().date()
