@@ -594,10 +594,10 @@ class AutonomousHighStakesOptimizer:
         avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
         # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
         avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
-        # Esegui una ricerca esplicita SOLO nel range 500-1500
         buffer_candidates = [int(x) for x in np.linspace(400, 1200, num=21)]  # step di 40
-        # Scegli il buffer_size che massimizza una funzione di score (qui esempio: più vicino al valore calcolato)
-        buffer_formula = 400 + len(symbol_params)*30 + avg_score*1.2
+        # Normalizza avg_score tra 500 e 900 (tipico range), mappando su [0,1]
+        score_norm = min(max((avg_score - 500) / 400, 0), 1)
+        buffer_formula = 400 + score_norm * 800  # 400-1200
         buffer_size = min(buffer_candidates, key=lambda x: abs(x - buffer_formula))
 
         quantum_params = {
