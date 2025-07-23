@@ -34,4 +34,11 @@
 
 ---
 **Sessione conclusa il 23/07/2025.**
+
+#### Log finale ottimizzazione buffer_size e commit (23/07/2025)
+- Implementata nuova formula normalizzata per `buffer_size` (range 400-1200) con distribuzione dinamica in base allo score medio, per garantire valori adatti all’intraday e differenziati tra i vari config.
+- Rigenerati i file di configurazione: ora i valori di buffer_size sono effettivamente diversi e centrali per ogni profilo (aggressive, production, conservative).
+- Eseguito commit e push delle modifiche con messaggio professionale e validazione dei risultati.
+- Validazione finale: la logica produce ora configurazioni robuste, ottimizzate e pronte per produzione.
+
 Tutti gli obiettivi di questa chat sono stati raggiunti (ottimizzazione buffer_size, refactoring config, workflow git, documentazione). Si passa ora a un nuovo argomento in una nuova chat.
