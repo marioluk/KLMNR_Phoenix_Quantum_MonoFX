@@ -134,7 +134,7 @@ class AutonomousHighStakesOptimizer:
             "trading_algorithm": {
                 "name": "phoenix_quantum_monofx_program",
                 "version": "2.0",
-                "description": "Algoritmo quantum ottimizzato per The5ers"
+                "description": "Algoritmo quantum ottimizzato per il broker"
             },
             
             "quantum_params": {
@@ -657,7 +657,7 @@ class AutonomousHighStakesOptimizer:
             }
         }
 
-        the5ers_specific = {
+        challenge_specific = {
             "step1_target": 8,
             "max_daily_loss_percent": 5,
             "max_total_loss_percent": 10,
@@ -687,7 +687,7 @@ class AutonomousHighStakesOptimizer:
             "quantum_params": quantum_params,
             "risk_parameters": risk_parameters,
             "symbols": symbols,
-            "THE5ERS_specific": the5ers_specific,
+            "challenge_specific": challenge_specific,
             "conversion_metadata": {
                 "created_by": "AutonomousHighStakesOptimizer",
                 "creation_date": datetime.now().isoformat(),
@@ -901,16 +901,16 @@ class AutonomousHighStakesOptimizer:
         target_daily = self.high_stakes_params['target_daily_profit']
         daily_loss_limit = self.high_stakes_params['daily_loss_limit']
         # Calcola valori drawdown protection (default o semplici calcoli)
-        # Soft limit: 3% - Hard limit: 5% (valori tipici The5ers)
+        # Soft limit: 3% - Hard limit: 5% (valori tipici del broker)
         drawdown_protection = {
             "soft_limit": 0.03,
             "hard_limit": 0.05
         }
         # Puoi aggiungere logica per calcolo dinamico qui se vuoi
 
-        # Sezione THE5ERS_specific sempre presente
-        the5ers_specific = config_data.get("THE5ERS_specific", {})
-        the5ers_specific["drawdown_protection"] = drawdown_protection
+        # Sezione challenge_specific sempre presente
+        challenge_specific = config_data.get("challenge_specific", {})
+        challenge_specific["drawdown_protection"] = drawdown_protection
 
         
         # Controllo compliance
@@ -933,7 +933,7 @@ class AutonomousHighStakesOptimizer:
             'total_wins': total_wins,
             'total_losses': total_losses,
             'test_days': actual_days,
-            "THE5ERS_specific": the5ers_specific,
+            "challenge_specific": challenge_specific,
             'aggressiveness_level': aggressiveness,
             'symbols_count': len(symbols),
             'daily_target_hit': daily_target_hit,
