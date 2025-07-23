@@ -38,6 +38,12 @@ logs/daily_config_updater_*.log
 
 # Auto-start system logs
 **/auto_start_*.log
+
+# Escludi tutti i file di backup universali
+*.backup*
+*backup*/
+*/*.backup*
+*/*backup*/
 **/auto_start_daily_updater_*.log
 
 # Backup files
