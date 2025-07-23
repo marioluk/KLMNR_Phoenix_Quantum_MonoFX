@@ -137,7 +137,7 @@ Esempi di utilizzo:
     
     parser.add_argument(
         "--broker",
-        choices=["THE5ERS", "FTMO", "MYFOREXFUNDS", "ALL"],
+        choices=["THE5ERS", "FTMO", "MYFOREXFUNDS", "OANDA", "ALL"],
         default="ALL",
         help="Avvia solo broker specifico (default: ALL)"
     )
