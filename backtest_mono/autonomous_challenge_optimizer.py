@@ -610,7 +610,16 @@ class AutonomousHighStakesOptimizer:
         symbol_params = list(config.get('symbols', {}).values())
         avg_spin_window = int(np.mean([60 + i*5 for i in range(len(symbol_params))])) if symbol_params else 80
         avg_min_spin_samples = int(np.mean([20 + i*2 for i in range(len(symbol_params))])) if symbol_params else 30
-        avg_spin_threshold = round(0.28 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 500), 3)
+        # Calcolo spin_threshold normalizzato in [0,1] (es: media dei migliori spin normalizzati oppure valore fisso sensato)
+        # Qui usiamo un valore tipico robusto, oppure la media dei migliori simboli se disponibile
+        spin_thresholds = [
+            abs(s.get('quantum_params_override', {}).get('spin_threshold', 0.25))
+            for s in symbol_params if s.get('quantum_params_override', {}).get('spin_threshold') is not None
+        ]
+        if spin_thresholds:
+            avg_spin_threshold = round(np.clip(np.mean(spin_thresholds), 0.15, 0.5), 3)
+        else:
+            avg_spin_threshold = 0.25  # default robusto
         avg_signal_cooldown = int(np.mean([600 for _ in symbol_params])) if symbol_params else 600
         avg_buy_entropy = round(np.mean([min(1.0, max(0.50, s.get('signal_buy_threshold', 0.6))) for s in symbol_params]), 3) if symbol_params else 0.58
         avg_sell_entropy = round(np.mean([min(0.50, max(0.0, s.get('signal_sell_threshold', 0.4))) for s in symbol_params]), 3) if symbol_params else 0.42
@@ -636,7 +645,7 @@ class AutonomousHighStakesOptimizer:
             "buffer_size": buffer_size,
             "spin_window": avg_spin_window,
             "min_spin_samples": avg_min_spin_samples,
-            "spin_threshold": avg_spin_threshold,
+            "spin_threshold": avg_spin_threshold,  # sempre normalizzato [0,1]
             "signal_cooldown": avg_signal_cooldown,
             "entropy_thresholds": {
                 "buy_signal": 0.54,
