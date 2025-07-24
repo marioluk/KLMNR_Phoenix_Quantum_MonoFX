@@ -1779,7 +1779,9 @@ class QuantumTradingSystem:
                 
             for symbol in self.config_manager.symbols:
                 tick = mt5.symbol_info_tick(symbol)
+                logger.debug(f"[DEBUG TICK] {symbol}: tick={tick}")
                 if tick:
+                    logger.debug(f"[DEBUG TICK] {symbol}: tick.bid={getattr(tick, 'bid', None)}")
                     self.engine.process_tick(symbol, tick.bid)
                     buffer_size = len(self.engine.tick_buffer.get(symbol, []))
                     logger.debug(f"{symbol} buffer: {buffer_size}")
