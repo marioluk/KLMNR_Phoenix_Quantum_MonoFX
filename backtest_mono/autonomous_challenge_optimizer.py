@@ -751,8 +751,9 @@ class AutonomousHighStakesOptimizer:
             "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.0015),
             "trailing_stop": {
                 "enable": True,
-                "activation_mode": "fixed",  # "fixed" oppure "percent_tp"
-                "activation_pips": 250,
+                "activation_mode": "percent_tp",  # "fixed" oppure "percent_tp"
+                "tp_percentage": 0.5,              # Usato solo se activation_mode = "percent_tp"
+                "activation_pips": 150,            # Usato solo se activation_mode = "fixed"
                 "step_pips": 50,
                 "lock_percentage": 0.5
             },

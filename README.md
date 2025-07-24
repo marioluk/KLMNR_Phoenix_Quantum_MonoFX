@@ -7,24 +7,40 @@ Da luglio 2025 è possibile scegliere la modalità di attivazione del trailing s
     "enable": true,
     "activation_mode": "fixed",      // "fixed" (default) oppure "percent_tp"
     "activation_pips": 150,           // usato solo se activation_mode = "fixed"
+    "tp_percentage": 0.5,             // usato solo se activation_mode = "percent_tp"
     "step_pips": 50,
     "lock_percentage": 0.5
 }
 ```
 
+
 - Se `activation_mode` è `fixed`, il trailing stop si attiva al raggiungimento di `activation_pips` pips di profitto.
-- Se `activation_mode` è `percent_tp`, il trailing stop si attiva automaticamente quando il profitto raggiunge il 50% del take profit calcolato per la posizione (dinamico per ogni trade/simbolo).
+- Se `activation_mode` è `percent_tp`, il trailing stop si attiva automaticamente quando il profitto raggiunge la percentuale di take profit specificata da `tp_percentage` (es: 0.5 = 50%) calcolata per la posizione (dinamico per ogni trade/simbolo).
 
 Questa logica è implementata sia nell'optimizer che nel trading engine. Non è più necessario modificare il codice per cambiare la modalità: basta aggiornare la configurazione.
 
 **Esempio:**
+
 
 Per attivare il trailing stop al 50% del TP:
 ```json
 "trailing_stop": {
     "enable": true,
     "activation_mode": "percent_tp",
-    "activation_pips": 150,  // ignorato
+    "tp_percentage": 0.5,         // attiva trailing al 50% del TP
+    "activation_pips": 150,       // ignorato in questa modalità
+    "step_pips": 50,
+    "lock_percentage": 0.5
+}
+```
+
+Per attivare il trailing stop al 70% del TP:
+```json
+"trailing_stop": {
+    "enable": true,
+    "activation_mode": "percent_tp",
+    "tp_percentage": 0.7,         // attiva trailing al 70% del TP
+    "activation_pips": 150,       // ignorato
     "step_pips": 50,
     "lock_percentage": 0.5
 }

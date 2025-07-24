@@ -1144,7 +1144,8 @@ class QuantumRiskManager:
             activation_mode = trailing_stop.get('activation_mode', 'fixed')
             activation_pips = trailing_stop.get('activation_pips', 150)
             if activation_mode == 'percent_tp':
-                activation_pips = int(round(tp_pips * 0.5))
+                tp_percentage = trailing_stop.get('tp_percentage', 0.5)
+                activation_pips = int(round(tp_pips * tp_percentage))
             # Ora activation_pips è coerente con la modalità scelta
             self._last_trailing_activation_pips = activation_pips  # per debug o uso esterno
 
