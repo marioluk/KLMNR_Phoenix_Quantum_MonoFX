@@ -1181,16 +1181,31 @@ class QuantumRiskManager:
         
         
     def _get_config(self, symbol: str, key: str, default: Any = None) -> Any:
-        """Helper per ottenere valori dalla configurazione"""
-        # Accesso sicuro alla configurazione
+        """Helper per ottenere valori dalla configurazione, gestendo anche dict per simbolo"""
         config = self.config.config if hasattr(self.config, 'config') else self.config
-        
-        # Cerca prima nelle impostazioni specifiche del simbolo, poi nei parametri generali di rischio
+
+        # Prima cerca override specifico del simbolo
         symbol_config = config.get('symbols', {}).get(symbol, {})
         if key in symbol_config.get('risk_management', {}):
             return symbol_config['risk_management'][key]
-        
-        return config.get('risk_parameters', {}).get(key, default)
+
+        # Poi cerca nei parametri globali di rischio
+        value = config.get('risk_parameters', {}).get(key, default)
+        # Se il valore è un dict (mappa per simbolo), estrai quello giusto
+        if isinstance(value, dict):
+            # Cerca chiave esatta, poi 'default', poi primo valore numerico
+            if symbol in value:
+                return value[symbol]
+            elif 'default' in value:
+                return value['default']
+            else:
+                # fallback: primo valore numerico trovato
+                for v in value.values():
+                    if isinstance(v, (int, float)):
+                        return v
+            # Se non trovato, ritorna il dict stesso (comportamento legacy)
+            return default
+        return value
         
 
     
