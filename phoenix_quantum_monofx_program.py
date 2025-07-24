@@ -981,59 +981,64 @@ class QuantumRiskManager:
     2. Calcolo Dimensioni Posizione
     """
     def calculate_position_size(self, symbol: str, price: float, signal: str) -> float:
-        """Calcola dimensione posizione con gestione robusta degli errori"""
+        """Calcola dimensione posizione con gestione robusta degli errori e log dettagliato"""
         try:
             # 1. Verifica parametri iniziali
             if not self._load_symbol_data(symbol):
                 logger.error(f"Impossibile caricare dati simbolo {symbol}")
                 return 0.0
-                
+
             # 2. Ottieni parametri di rischio NORMALIZZATI
             risk_config = self.get_risk_config(symbol)
             account = mt5.account_info()
-            
+
             if not account:
                 logger.error("Impossibile ottenere info account")
                 return 0.0
-            
+
             # 3. Calcola rischio assoluto in valuta base
             risk_percent = risk_config.get('risk_percent', 0.02)  # 2% default
             risk_amount = account.equity * risk_percent
-            
+
             # 4. Calcola SL in pips con volatilità
             sl_pips = self._calculate_sl_pips(symbol)
-            
+
             # 5. Usa pip value dai dati caricati
             symbol_data = self.symbol_data[symbol]
             pip_value = symbol_data['pip_value']
-            
+            contract_size = symbol_data.get('contract_size', 1.0)
+
             # 6. Calcola size base
             if sl_pips <= 0 or pip_value <= 0:
                 logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
                 return 0.0
-                
+
             size = risk_amount / (sl_pips * pip_value)
-            
+
             # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
             max_size_limit = 0.1  # Massimo 0.1 lotti per posizioni conservative
             if size > max_size_limit:
-                logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} "
-                              f"(Safety limit applicato)")
+                logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
-            
+
             # 7. Applica limiti
             size = self._apply_size_limits(symbol, size)
-            
+
+            # Determina tipo strumento per log
+            if symbol in ['XAUUSD', 'XAGUSD']:
+                symbol_type = 'Metallo'
+            elif symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']:
+                symbol_type = 'Indice'
+            else:
+                symbol_type = 'Forex'
+
             logger.info(
-                f"Size calc {symbol}: "
-                f"Risk=${risk_amount:.2f}({risk_percent*100:.1f}%) | "
-                f"SL={sl_pips:.1f}pips | "
-                f"PipValue=${pip_value:.4f} | "
-                f"Size={size:.2f}"
+                f"[SIZE-DEBUG] {symbol} ({symbol_type}) | RiskAmount=${risk_amount:.2f} ({risk_percent*100:.2f}%) | "
+                f"SL={sl_pips:.2f} pips | PipValue=${pip_value:.4f} | ContractSize={contract_size} | Size={size:.4f}"
             )
-            
+
             return size
-            
+
         except Exception as e:
             logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
             return 0.0
