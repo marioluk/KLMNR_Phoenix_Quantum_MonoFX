@@ -752,7 +752,7 @@ class AutonomousHighStakesOptimizer:
             "trailing_stop": {
                 "enable": True,
                 "activation_mode": "fixed",  # "fixed" oppure "percent_tp"
-                "activation_pips": 100,
+                "activation_pips": 250,
                 "step_pips": 50,
                 "lock_percentage": 0.5
             },
