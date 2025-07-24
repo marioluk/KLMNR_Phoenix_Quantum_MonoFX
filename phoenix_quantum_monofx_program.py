@@ -600,7 +600,7 @@ class QuantumEngine:
         
         # 3. Filtri conservativi (tua logica originale)
         if confidence < 0.8:
-            logger.debug(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8)")
+            logger.info(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8)")
             return "HOLD", 0.0
             
         # 4. Verifica cooldown segnali (900s)
@@ -1846,7 +1846,7 @@ class QuantumTradingSystem:
             # 5. Ottieni segnale (senza attivare cooldown)
             signal, price = self.engine.get_signal(symbol, for_trading=False)
             
-            logger.debug(f"🔍 Segnale per {symbol}: {signal} (Price: {price})")
+            logger.info(f"🔍 Segnale per {symbol}: {signal} (Price: {price})")
             
             if signal in ["BUY", "SELL"]:
                 logger.info(f"🎯 SEGNALE ATTIVO {signal} per {symbol} - Controllo condizioni trading")
@@ -1882,7 +1882,7 @@ class QuantumTradingSystem:
                 else:
                     logger.warning(f"🚫 {symbol}: Segnale non confermato per trading effettivo")
             else:
-                logger.debug(f"💤 {symbol}: HOLD - nessuna azione")
+                logger.info(f"💤 {symbol}: HOLD - nessuna azione")
                     
         except Exception as e:
             logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)
