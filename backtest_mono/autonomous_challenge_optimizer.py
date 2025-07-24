@@ -363,14 +363,21 @@ class AutonomousHighStakesOptimizer:
         
         # Parametri finali ottimizzati
         score = base_params['score']
+        signal_buy_threshold = round(base_params['signal_threshold'] * multipliers['signal'], 3)
+        signal_sell_threshold = round((1 - base_params['signal_threshold']) * multipliers['signal'], 3)
+
+        # Calcolo confidence_threshold per simbolo: media tra buy e 1-sell (o altro criterio)
+        confidence_threshold = round((signal_buy_threshold + (1 - signal_sell_threshold)) / 2, 3)
+
         optimized_params = {
             'enabled': True,
             'risk_percent': base_params['risk_percent'],
             'lot_size': round(base_params['risk_percent'] * 10, 3),  # Conversione risk -> lot
             'stop_loss_pips': int(base_params['stop_loss_pips'] * multipliers['sl']),
             'take_profit_pips': int(base_params['take_profit_pips'] * multipliers['tp']),
-            'signal_buy_threshold': round(base_params['signal_threshold'] * multipliers['signal'], 3),
-            'signal_sell_threshold': round((1 - base_params['signal_threshold']) * multipliers['signal'], 3),
+            'signal_buy_threshold': signal_buy_threshold,
+            'signal_sell_threshold': signal_sell_threshold,
+            'confidence_threshold': confidence_threshold,
             'max_spread': self.get_symbol_max_spread(symbol),
             'trading_hours': self.optimize_trading_hours(symbol, score),
             'optimization_score': score,
@@ -541,7 +548,6 @@ class AutonomousHighStakesOptimizer:
         symbols = {}
         for symbol, params in config.get('symbols', {}).items():
             # Solo i parametri ottimizzati per simbolo
-            # Rischio: stop_loss_pips, take_profit_pips
             risk_management = {
                 "stop_loss_pips": params.get("stop_loss_pips", 40),
                 "take_profit_pips": params.get("take_profit_pips", 40),
@@ -555,12 +561,13 @@ class AutonomousHighStakesOptimizer:
                 "spin_threshold": params.get("spin_threshold"),
                 "volatility_filter": params.get("volatility_filter"),
                 "signal_buy_threshold": params.get("signal_buy_threshold"),
-                "signal_sell_threshold": params.get("signal_sell_threshold")
+                "signal_sell_threshold": params.get("signal_sell_threshold"),
+                # Inserisci confidence_threshold per simbolo se presente
+                "confidence_threshold": params.get("confidence_threshold")
             }
             # Rimuovi chiavi None
             quantum_params_override = {k: v for k, v in quantum_params_override.items() if v is not None}
 
-            # Commento e trading_hours
             comment = f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}"
             trading_hours = params.get("trading_hours", ["09:00-10:30", "14:00-16:00"])
 
@@ -590,6 +597,15 @@ class AutonomousHighStakesOptimizer:
         buffer_formula = 400 + score_norm * 800  # 400-1200
         buffer_size = min(buffer_candidates, key=lambda x: abs(x - buffer_formula))
 
+        # Calcolo confidence_threshold globale (media dei threshold buy/sell dei simboli, oppure default 0.8)
+        if symbol_params:
+            avg_confidence_threshold = round(np.mean([
+                s.get('confidence_threshold', 0.8) if s.get('confidence_threshold') is not None else 0.8
+                for s in symbol_params
+            ]), 3)
+        else:
+            avg_confidence_threshold = 0.8
+
         quantum_params = {
             "buffer_size": buffer_size,
             "spin_window": avg_spin_window,
@@ -601,6 +617,7 @@ class AutonomousHighStakesOptimizer:
                 "sell_signal": 0.46
             },
             #"volatility_scale": avg_volatility_scale
+            "confidence_threshold": avg_confidence_threshold
         }
 
         risk_parameters = {
