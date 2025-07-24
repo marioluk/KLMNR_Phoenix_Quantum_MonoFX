@@ -23,7 +23,10 @@ class AutonomousHighStakesOptimizer:
     @staticmethod
     def calculate_sl_tp_with_volatility(symbol: str, base_sl: float, min_sl: float, profit_multiplier: float, volatility: float) -> (float, float):
         """
-        Calcola SL e TP in pips usando la stessa logica del trading engine.
+        Calcola SL e TP robusti:
+        - Usa il valore ottimizzato (base_sl), ma non scende mai sotto min_sl per asset
+        - Se il valore ottimizzato è vicino al minimo, applica un buffer_factor (es. 1.15)
+        - Limita l'amplificazione della volatilità
         """
         # Limita l'amplificazione della volatilità per evitare SL eccessivi
         if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
@@ -31,9 +34,14 @@ class AutonomousHighStakesOptimizer:
         else:  # Forex
             volatility_factor = min(volatility, 1.2)  # Max +20%
 
+        buffer_factor = 1.15  # Applica solo se sl ottimizzato è vicino al minimo
         adjusted_sl = base_sl * volatility_factor
-        sl_pips = max(adjusted_sl, min_sl)
-        tp_pips = sl_pips * profit_multiplier
+        # Se il valore ottimizzato è <= min_sl * 1.05, applica buffer_factor
+        if adjusted_sl <= min_sl * 1.05:
+            sl_pips = int(round(min_sl * buffer_factor))
+        else:
+            sl_pips = int(round(max(adjusted_sl, min_sl)))
+        tp_pips = int(round(sl_pips * profit_multiplier))
         return sl_pips, tp_pips
     @staticmethod
     def calculate_normalized_spin(ticks: list) -> float:

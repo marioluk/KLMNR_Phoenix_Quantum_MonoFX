@@ -1090,11 +1090,9 @@ class QuantumRiskManager:
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
         try:
             symbol_config = self.get_risk_config(symbol)
-
             min_sl = symbol_config.get('min_sl_distance_pips', 100)
             base_sl = symbol_config.get('base_sl_pips', 150)
             tp_multiplier = symbol_config.get('profit_multiplier', 2.0)
-
             # Se min_sl o base_sl sono dict (mappa per simbolo), estrai valore corretto
             if isinstance(min_sl, dict):
                 if symbol in min_sl:
@@ -1110,36 +1108,39 @@ class QuantumRiskManager:
                     base_sl = base_sl['default']
                 else:
                     base_sl = next((v for v in base_sl.values() if isinstance(v, (int, float))), 150)
-
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
                 logger.error(f"Simbolo {symbol} non trovato")
                 return 0.0, 0.0
-
             pip_size = self.engine._get_pip_size(symbol)
             digits = symbol_info.digits
-
-            volatility = self.engine.calculate_quantum_volatility(symbol)
-
-            sl_pips = max(
-                min_sl,
-                min(
-                    base_sl * 2.0,
-                    base_sl * (1.0 + 0.5 * volatility)
-                )
-            )
-            tp_pips = sl_pips * tp_multiplier
-
+            # Volatilità (se disponibile)
+            volatility = 1.0
+            try:
+                volatility = float(self.engine.calculate_quantum_volatility(symbol))
+            except Exception:
+                pass
+            # Limita l'amplificazione della volatilità
+            if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
+                volatility_factor = min(volatility, 1.5)
+            else:
+                volatility_factor = min(volatility, 1.2)
+            buffer_factor = 1.15
+            adjusted_sl = base_sl * volatility_factor
+            # Se il valore ottimizzato è <= min_sl * 1.05, applica buffer_factor
+            if adjusted_sl <= min_sl * 1.05:
+                sl_pips = int(round(min_sl * buffer_factor))
+            else:
+                sl_pips = int(round(max(adjusted_sl, min_sl)))
+            tp_pips = int(round(sl_pips * tp_multiplier))
             if position_type == mt5.ORDER_TYPE_BUY:
                 sl_price = entry_price - (sl_pips * pip_size)
                 tp_price = entry_price + (tp_pips * pip_size)
             else:
                 sl_price = entry_price + (sl_pips * pip_size)
                 tp_price = entry_price - (tp_pips * pip_size)
-
             sl_price = round(sl_price, digits)
             tp_price = round(tp_price, digits)
-
             logger.info(
                 f"Livelli calcolati per {symbol}: SL={sl_pips:.1f}pips TP={tp_pips:.1f}pips "
                 f"(Volatility={volatility:.2f}, Config: min_sl={min_sl}, base_sl={base_sl}, multiplier={tp_multiplier})"
