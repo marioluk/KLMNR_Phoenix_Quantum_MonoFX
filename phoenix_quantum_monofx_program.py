@@ -534,23 +534,18 @@ class QuantumEngine:
     """
 
     def process_tick(self, symbol: str, price: float):
-
         """
         Aggiunge un nuovo tick al buffer circolare e calcola delta/direzione rispetto al tick precedente.
-        Processa un nuovo tick di prezzo
+        Logga ogni tick per debug approfondito.
         """
         if symbol not in self.tick_buffer:
-            with self.buffer_lock:  # Usa il lock solo qui
+            with self.buffer_lock:
                 self.tick_buffer[symbol] = deque(maxlen=self.buffer_size)
             logger.info(f"Inizializzato buffer per {symbol}")
-        
+
         if price <= 0:
             return
-        
-        # Logga il primo tick ricevuto
-        if len(self.tick_buffer[symbol]) == 0:
-            logger.info(f"Primo tick ricevuto per {symbol}: {price}")
-        
+
         # Calcola delta e direzione
         if len(self.tick_buffer[symbol]) > 0:
             last_price = self.tick_buffer[symbol][-1]['price']
@@ -558,14 +553,17 @@ class QuantumEngine:
             direction = 1 if delta > 0 else (-1 if delta < 0 else 0)
         else:
             delta = 0
-            direction = 0  # Neutro invece di bias up
-        
+            direction = 0
+
         self.tick_buffer[symbol].append({
             'price': price,
             'delta': delta,
             'direction': direction,
             'time': time.time()
         })
+
+        # Log dettagliato per ogni tick
+        logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.tick_buffer[symbol])}")
 
     def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
         """
