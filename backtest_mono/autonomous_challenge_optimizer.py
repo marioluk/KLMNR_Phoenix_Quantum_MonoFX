@@ -425,8 +425,20 @@ class AutonomousHighStakesOptimizer:
         char = symbol_characteristics.get(symbol, {'volatility': 1.0})
         volatility = char['volatility']
 
+
         base_sl = base_params['stop_loss_pips'] * multipliers['sl']
-        min_sl = 10 * multipliers['sl']
+        # min_sl differenziato per asset
+        if symbol in ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD']:
+            min_sl = 25 * multipliers['sl']  # Forex
+        elif symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']:
+            min_sl = 40 * multipliers['sl']  # Indici
+        elif symbol in ['XAUUSD', 'XAGUSD']:
+            min_sl = 80 * multipliers['sl']  # Oro/Argento
+        elif symbol in ['BTCUSD', 'ETHUSD']:
+            min_sl = 120 * multipliers['sl']  # Crypto
+        else:
+            min_sl = 30 * multipliers['sl']  # Default fallback
+
         profit_multiplier = 2.2 * multipliers['tp']
         sl_pips, tp_pips = self.calculate_sl_tp_with_volatility(symbol, base_sl, min_sl, profit_multiplier, volatility)
 
