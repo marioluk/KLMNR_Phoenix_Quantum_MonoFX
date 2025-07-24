@@ -432,12 +432,8 @@ def __init__(self, config_path: str):
     self._activate_symbols()
     
     # 4. Inizializzazione componenti core
-    self.engine = QuantumEngine(self.config)
-    self.risk_manager = QuantumRiskManager(self.config, self.engine, self)
     
     # 5. Setup metriche e drawdown tracker
-    self.metrics = TradingMetrics()
-    self.drawdown_tracker = DailyDrawdownTracker(initial_equity, config)
 ```
 
 #### **Ciclo Principale di Trading:**
@@ -452,9 +448,7 @@ def start(self):
         # 2. Aggiornamento account info
         self._update_account_info()
         
-        # 3. Controllo drawdown giornaliero
         if self._check_daily_limits():
-            break  # Stop per protezione
             
         # 4. Processamento simboli configurati
         for symbol in self.config.symbols:
@@ -470,14 +464,9 @@ def start(self):
 ---
 
 ## ⚙️ **LOGICA DI TRADING E PUNTI DI INGRESSO/USCITA**
-
-### **Algoritmo di Generazione Segnali:**
-
-#### **Condizioni di Ingresso:**
 1. **Verifica Prerequisiti:**
    ```python
    # Orari di trading validi
-   if not is_trading_hours(symbol, config): return
    # Spread accettabile  
    if current_spread > max_allowed_spread: return
    # Cooldown rispettato
@@ -501,9 +490,6 @@ def start(self):
    # Generazione segnale finale
    signal_strength = abs(spin) * confidence * entropy
    
-   # Soglie configurabili
-   buy_threshold = quantum_params['entropy_thresholds']['buy_signal']   # 0.58
-   sell_threshold = quantum_params['entropy_thresholds']['sell_signal'] # 0.42
    
    if entropy > buy_threshold and spin > 0:
        return "BUY", signal_strength
@@ -527,10 +513,6 @@ def execute_trade(symbol, signal, signal_strength):
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
         "volume": position_size,
-        "type": mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL,
-        "price": mt5.symbol_info_tick(symbol).ask if signal == "BUY" else bid,
-        "sl": sl_price,
-        "tp": tp_price,
         "deviation": 20,
         "magic": MAGIC_NUMBER,
         "comment": f"QTS_{signal}_{signal_strength:.2f}",
@@ -544,10 +526,6 @@ def execute_trade(symbol, signal, signal_strength):
 ```
 
 ### **Gestione Posizioni Aperte:**
-
-#### **Trailing Stop Logic:**
-```python
-def update_trailing_stop(position):
     symbol = position.symbol
     config = get_symbol_config(symbol)
     
@@ -669,7 +647,6 @@ Safe_Size = Position_Size × min(1, Max_Margin / Required_Margin)
 
 dove:
 Max_Margin = Account_Free_Margin × 0.8  (80% del margine libero)
-Required_Margin = MT5.order_calc_margin(symbol, size, price)
 ```
 
 ### **5. Stop Loss Dinamico**
@@ -681,7 +658,6 @@ SL_dynamic = max(Min_SL_pips, Base_SL_pips × Volatility_Factor)
 dove:
 Volatility_Factor = 1 + α × V_quantum
 α = coefficiente di sensibilità (default: 0.5)
-```
 
 **Take Profit Correlato:**
 ```

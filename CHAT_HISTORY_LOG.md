@@ -1,3 +1,10 @@
+# ---
+### Troubleshooting risk management e log size (luglio 2025)
+- Abilitato log dettagliato ([SIZE-DEBUG]) per il calcolo della size e del rischio su tutti i simboli (forex, indici, metalli):
+  - Modificato il file di configurazione per impostare `"log_level": "DEBUG"`.
+  - Ora nei log vengono mostrati: risk_amount, sl_pips, pip_value, contract_size, size calcolata e tipo strumento.
+  - Utile per diagnosticare differenze di esposizione tra asset diversi.
+- Commit documentato e test in attesa di nuovi trade per validazione.
 # CHAT_HISTORY_LOG.md
 
 ## Cronologia e decisioni principali (luglio 2025)
