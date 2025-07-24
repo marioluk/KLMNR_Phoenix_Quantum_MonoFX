@@ -21,6 +21,21 @@ logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
     @staticmethod
+    def calculate_sl_tp_with_volatility(symbol: str, base_sl: float, min_sl: float, profit_multiplier: float, volatility: float) -> (float, float):
+        """
+        Calcola SL e TP in pips usando la stessa logica del trading engine.
+        """
+        # Limita l'amplificazione della volatilità per evitare SL eccessivi
+        if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
+            volatility_factor = min(volatility, 1.5)  # Max +50%
+        else:  # Forex
+            volatility_factor = min(volatility, 1.2)  # Max +20%
+
+        adjusted_sl = base_sl * volatility_factor
+        sl_pips = max(adjusted_sl, min_sl)
+        tp_pips = sl_pips * profit_multiplier
+        return sl_pips, tp_pips
+    @staticmethod
     def calculate_normalized_spin(ticks: list) -> float:
         """
         Calcola lo spin normalizzato tra -1 e +1, come in phoenix_quantum_monofx_program.py.
@@ -387,20 +402,45 @@ class AutonomousHighStakesOptimizer:
         
         multipliers = aggressiveness_multipliers.get(aggressiveness, aggressiveness_multipliers['moderate'])
         
-        # Parametri finali ottimizzati
+        # Caratteristiche simbolo per volatilità
+        symbol_characteristics = {
+            'EURUSD': {'volatility': 0.7},
+            'USDJPY': {'volatility': 0.6},
+            'GBPUSD': {'volatility': 0.8},
+            'USDCHF': {'volatility': 0.6},
+            'AUDUSD': {'volatility': 0.7},
+            'USDCAD': {'volatility': 0.7},
+            'NZDUSD': {'volatility': 0.9},
+            'BTCUSD': {'volatility': 3.5},
+            'ETHUSD': {'volatility': 2.8},
+            'XAUUSD': {'volatility': 1.5},
+            'XAGUSD': {'volatility': 2.0},
+            'SP500': {'volatility': 1.2},
+            'NAS100': {'volatility': 1.8},
+            'US30': {'volatility': 1.5},
+            'DAX40': {'volatility': 1.4},
+            'FTSE100': {'volatility': 1.1},
+            'JP225': {'volatility': 1.3}
+        }
+        char = symbol_characteristics.get(symbol, {'volatility': 1.0})
+        volatility = char['volatility']
+
+        base_sl = base_params['stop_loss_pips'] * multipliers['sl']
+        min_sl = 10 * multipliers['sl']
+        profit_multiplier = 2.2 * multipliers['tp']
+        sl_pips, tp_pips = self.calculate_sl_tp_with_volatility(symbol, base_sl, min_sl, profit_multiplier, volatility)
+
         score = base_params['score']
         signal_buy_threshold = round(base_params['signal_threshold'] * multipliers['signal'], 3)
         signal_sell_threshold = round((1 - base_params['signal_threshold']) * multipliers['signal'], 3)
-
-        # Calcolo confidence_threshold per simbolo: media tra buy e 1-sell (o altro criterio)
         confidence_threshold = round((signal_buy_threshold + (1 - signal_sell_threshold)) / 2, 3)
 
         optimized_params = {
             'enabled': True,
             'risk_percent': base_params['risk_percent'],
-            'lot_size': round(base_params['risk_percent'] * 10, 3),  # Conversione risk -> lot
-            'stop_loss_pips': int(base_params['stop_loss_pips'] * multipliers['sl']),
-            'take_profit_pips': int(base_params['take_profit_pips'] * multipliers['tp']),
+            'lot_size': round(base_params['risk_percent'] * 10, 3),
+            'stop_loss_pips': int(sl_pips),
+            'take_profit_pips': int(tp_pips),
             'signal_buy_threshold': signal_buy_threshold,
             'signal_sell_threshold': signal_sell_threshold,
             'confidence_threshold': confidence_threshold,
@@ -409,7 +449,7 @@ class AutonomousHighStakesOptimizer:
             'optimization_score': score,
             'aggressiveness_applied': aggressiveness
         }
-        
+
         return optimized_params
     
     def get_symbol_max_spread(self, symbol: str) -> float:
