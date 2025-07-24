@@ -625,6 +625,11 @@ class AutonomousHighStakesOptimizer:
         # Genera timestamp compatto: giorno mese anno ora minuti
         now = datetime.now()
         timestamp_str = now.strftime("%d%m%Y%H%M")
+        # Magic number: giorno mese senza zeri, anno due cifre, 1 finale (es: 24/7/25 -> 247251)
+        day = str(now.day)
+        month = str(now.month)
+        year = str(now.year)[-2:]
+        magic_number = int(f"{day}{month}{year}1")
         filename = f"config_autonomous_challenge_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
 
@@ -719,7 +724,7 @@ class AutonomousHighStakesOptimizer:
         }
 
         risk_parameters = {
-            "magic_number": 247251,
+            "magic_number": magic_number,
             "position_cooldown": 900,
             "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 5),
             "max_positions": 1,
@@ -800,7 +805,6 @@ class AutonomousHighStakesOptimizer:
                 "port": 18889
             },
             "account_currency": "USD",
-            "magic_number": 247251,
             "initial_balance": 5000,
             "quantum_params": quantum_params,
             "risk_parameters": risk_parameters,
