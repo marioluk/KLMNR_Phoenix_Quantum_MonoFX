@@ -7,7 +7,20 @@
 
 ✅ **SISTEMA COMPLETAMENTE RISOLTO E OPERATIVO**
 
-### 🔧 **Fix Implementati Oggi:**
+### � MODIFICA CRITICA - NORMALIZZAZIONE SPIN_THRESHOLD (24 luglio 2025)
+
+**Da questa versione, il parametro `spin_threshold` nella configurazione è SEMPRE normalizzato nell'intervallo [0,1]** e calcolato in modo robusto dall'ottimizzatore, perfettamente coerente con la logica del trading engine (`phoenix_quantum_monofx_program.py`).
+
+- Tutti i segnali BUY/SELL ora usano soglie di spin consistenti e confrontabili.
+- La generazione del file di configurazione produce `spin_threshold` normalizzato (es: 0.25, 0.3, ecc.), mai valori >1.
+- Questo elimina ogni ambiguità tra ottimizzatore, config e motore di trading.
+- Per aumentare la frequenza dei segnali, abbassare leggermente `spin_threshold` (es: 0.15-0.20).
+
+**IMPORTANTE:** Se usi vecchi file config, assicurati che `spin_threshold` sia nel range [0,1]!
+
+---
+
+### �🔧 **Fix Implementati Oggi:**
 1. **Git Repository**: Pulito e ottimizzato dopo rimozione estensione Gait
 2. **MT5 Connection**: Configurazione Broker FivePercentOnline-Real funzionante
 3. **File Path Management**: Sistema robusto per ricerca config automatica
