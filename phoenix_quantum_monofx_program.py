@@ -380,7 +380,7 @@ class QuantumEngine:
         signal_cooldown = self.config.get('quantum_params', {}).get('signal_cooldown', 900)
         last_signal = self.last_signal_time.get(symbol, 0)
         if time.time() - last_signal < signal_cooldown:
-            logger.info(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
+            logger.debug(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
             return True
             
         return False
