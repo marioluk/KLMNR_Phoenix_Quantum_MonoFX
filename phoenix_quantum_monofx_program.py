@@ -1139,6 +1139,15 @@ class QuantumRiskManager:
                 sl_pips = int(round(max(adjusted_sl, float(min_sl))))
             tp_pips = int(round(sl_pips * profit_multiplier))
 
+            # --- Trailing stop activation mode support ---
+            trailing_stop = self._get_config(symbol, 'trailing_stop', {})
+            activation_mode = trailing_stop.get('activation_mode', 'fixed')
+            activation_pips = trailing_stop.get('activation_pips', 150)
+            if activation_mode == 'percent_tp':
+                activation_pips = int(round(tp_pips * 0.5))
+            # Ora activation_pips è coerente con la modalità scelta
+            self._last_trailing_activation_pips = activation_pips  # per debug o uso esterno
+
             if position_type == mt5.ORDER_TYPE_BUY:
                 sl_price = entry_price - (sl_pips * pip_size)
                 tp_price = entry_price + (tp_pips * pip_size)
@@ -1149,7 +1158,8 @@ class QuantumRiskManager:
             tp_price = round(tp_price, digits)
             logger.info(
                 f"Livelli calcolati per {symbol}: SL={sl_pips:.1f}pips TP={tp_pips:.1f}pips "
-                f"(Volatility={volatility:.2f}, min_sl={min_sl}, base_sl={base_sl}, multiplier={profit_multiplier})"
+                f"(Volatility={volatility:.2f}, min_sl={min_sl}, base_sl={base_sl}, multiplier={profit_multiplier}, "
+                f"trailing_activation_mode={activation_mode}, trailing_activation_pips={activation_pips})"
             )
             return sl_price, tp_price
         except Exception as e:
