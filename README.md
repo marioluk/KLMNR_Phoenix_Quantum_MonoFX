@@ -1,4 +1,39 @@
-# Novità: Opzione Trailing Stop Dinamico
+# Novità: Opzione Trailing Stop Dinamico e Limite Trade Giornaliero Globale/Per-Simbolo
+## 🚨 AGGIORNAMENTO - 24 LUGLIO 2025: Limite trade giornaliero globale/per-simbolo
+
+Da questa versione è possibile scegliere se il limite massimo di trade giornalieri (`max_daily_trades`) venga applicato globalmente su tutti i simboli oppure separatamente per ogni simbolo. Questa opzione è configurabile tramite il nuovo parametro:
+
+```json
+"risk_parameters": {
+    ...
+    "max_daily_trades": 6,
+    "daily_trade_limit_mode": "global" // "global" (default) oppure "per_symbol"
+}
+```
+
+- Se `daily_trade_limit_mode` è `global`, il limite massimo di trade giornalieri viene applicato all'intero sistema (tutti i simboli sommati).
+- Se `daily_trade_limit_mode` è `per_symbol`, il limite viene applicato separatamente per ogni simbolo.
+
+**Dove viene applicata questa logica:**
+- Trading engine (`phoenix_quantum_monofx_program.py`): la logica di conteggio e blocco trade è aggiornata per supportare entrambe le modalità.
+- Ottimizzatore/autogeneratore (`autonomous_challenge_optimizer.py`): i template e le configurazioni generate includono il nuovo parametro, con default `global`.
+
+**Nota:** Puoi cambiare la modalità in qualsiasi momento aggiornando la configurazione, senza modificare il codice.
+
+**Esempio di sezione risk_parameters:**
+```json
+"risk_parameters": {
+    "risk_percent": 0.007,
+    "max_daily_trades": 6,
+    "max_concurrent_trades": 3,
+    "daily_trade_limit_mode": "per_symbol"
+}
+```
+
+**Compatibilità:**
+- Le vecchie configurazioni senza il parametro useranno la modalità globale (default).
+
+---
 
 Da luglio 2025 è possibile scegliere la modalità di attivazione del trailing stop direttamente da file di configurazione tramite il parametro:
 
@@ -63,11 +98,18 @@ Per attivare il trailing stop a 150 pips fissi:
 
 ---
 
-## 🚨 **AGGIORNAMENTO - 20 LUGLIO 2025**
+
+## 🚨 **AGGIORNAMENTI RECENTI**
+
+### 24 LUGLIO 2025
+**Nuova opzione `daily_trade_limit_mode` (globale/per-simbolo) per il limite massimo di trade giornalieri.**
+Configurabile da file di configurazione, supportata sia dal motore di trading che dall'ottimizzatore. Default: globale.
+
+### 20 LUGLIO 2025
 
 ✅ **SISTEMA COMPLETAMENTE RISOLTO E OPERATIVO**
 
-### � MODIFICA CRITICA - NORMALIZZAZIONE SPIN_THRESHOLD (24 luglio 2025)
+### 🔥 MODIFICA CRITICA - NORMALIZZAZIONE SPIN_THRESHOLD (24 luglio 2025)
 
 **Da questa versione, il parametro `spin_threshold` nella configurazione è SEMPRE normalizzato nell'intervallo [0,1]** e calcolato in modo robusto dall'ottimizzatore, perfettamente coerente con la logica del trading engine (`phoenix_quantum_monofx_program.py`).
 
