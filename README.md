@@ -1,3 +1,47 @@
+# Novità: Opzione Trailing Stop Dinamico
+
+Da luglio 2025 è possibile scegliere la modalità di attivazione del trailing stop direttamente da file di configurazione tramite il parametro:
+
+```json
+"trailing_stop": {
+    "enable": true,
+    "activation_mode": "fixed",      // "fixed" (default) oppure "percent_tp"
+    "activation_pips": 150,           // usato solo se activation_mode = "fixed"
+    "step_pips": 50,
+    "lock_percentage": 0.5
+}
+```
+
+- Se `activation_mode` è `fixed`, il trailing stop si attiva al raggiungimento di `activation_pips` pips di profitto.
+- Se `activation_mode` è `percent_tp`, il trailing stop si attiva automaticamente quando il profitto raggiunge il 50% del take profit calcolato per la posizione (dinamico per ogni trade/simbolo).
+
+Questa logica è implementata sia nell'optimizer che nel trading engine. Non è più necessario modificare il codice per cambiare la modalità: basta aggiornare la configurazione.
+
+**Esempio:**
+
+Per attivare il trailing stop al 50% del TP:
+```json
+"trailing_stop": {
+    "enable": true,
+    "activation_mode": "percent_tp",
+    "activation_pips": 150,  // ignorato
+    "step_pips": 50,
+    "lock_percentage": 0.5
+}
+```
+
+Per attivare il trailing stop a 150 pips fissi:
+```json
+"trailing_stop": {
+    "enable": true,
+    "activation_mode": "fixed",
+    "activation_pips": 150,
+    "step_pips": 50,
+    "lock_percentage": 0.5
+}
+```
+
+**Nota:** La modalità può essere cambiata in qualsiasi momento aggiornando la config, senza riavviare il sistema.
 # 🎯 BROKER QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
 ## Sistema Monolitico Completo e Funzionante
 
