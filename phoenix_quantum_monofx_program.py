@@ -155,24 +155,27 @@ def is_trading_hours(symbol: str, config: Dict) -> bool:
         symbol_config = config.get('symbols', {}).get(symbol, {})
         trading_hours = symbol_config.get('trading_hours', ["00:00-24:00"])
         now = datetime.now().time()
-        
+        debug_ranges = []
         for time_range in trading_hours:
             if isinstance(time_range, str):  # Formato legacy "HH:MM-HH:MM"
                 start, end = parse_time(time_range)
+                debug_ranges.append(f"{start.strftime('%H:%M')}-{end.strftime('%H:%M')}")
                 if start <= end:
                     if start <= now <= end:
+                        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} -> OK")
                         return True
                 else:  # Overnight (es. 22:00-02:00)
                     if now >= start or now <= end:
+                        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} (overnight) -> OK")
                         return True
-                        
             elif isinstance(time_range, list):  # Nuovo formato ["HH:MM", "HH:MM"]
                 start, end = parse_time("-".join(time_range))
+                debug_ranges.append(f"{start.strftime('%H:%M')}-{end.strftime('%H:%M')}")
                 if start <= now <= end:
+                    logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} (list) -> OK")
                     return True
-                    
+        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} - FUORI ORARIO. Intervalli validi: {debug_ranges}")
         return False
-        
     except Exception as e:
         logger.error(f"Errore controllo orari {symbol}: {str(e)}")
         return True  # Fallback: assume sempre trading
