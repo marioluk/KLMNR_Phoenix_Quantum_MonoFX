@@ -1901,46 +1901,62 @@ class QuantumTradingSystem:
             # 1. Verifica se possiamo fare trading
             if not self.engine.can_trade(symbol):
                 return
-                
+
+            # 1.1. Controllo limite trade giornalieri (opzionale: globale o per simbolo)
+            risk_params = self.config_manager.config['risk_parameters']
+            daily_limit = risk_params.get('max_daily_trades', 5)
+            # Nuovo parametro opzionale: 'daily_trade_limit_mode' ('global' o 'per_symbol')
+            limit_mode = risk_params.get('daily_trade_limit_mode', 'global')
+            if limit_mode == 'global':
+                total_trades_today = sum(self.trade_count.values())
+                if total_trades_today >= daily_limit:
+                    logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {total_trades_today}/{daily_limit}. Nessun nuovo trade verrà aperto oggi.")
+                    return
+            else:  # per_symbol
+                trades_for_symbol = self.trade_count.get(symbol, 0)
+                if trades_for_symbol >= daily_limit:
+                    logger.info(f"🚫 Limite trade giornalieri per {symbol} raggiunto: {trades_for_symbol}/{daily_limit}. Nessun nuovo trade su questo simbolo oggi.")
+                    return
+
             # 2. Verifica orari di trading
             if not is_trading_hours(symbol, self.config_manager.config):
                 return
-                
+
             # 3. Verifica posizioni esistenti
             existing_positions = mt5.positions_get(symbol=symbol)
             if existing_positions and len(existing_positions) > 0:
                 return
-                
+
             # 4. Verifica limite posizioni totali
             if current_positions >= self.max_positions:
                 return
-                
+
             # 5. Ottieni segnale (senza attivare cooldown)
             signal, price = self.engine.get_signal(symbol, for_trading=False)
-            
+
             logger.debug(f"🔍 Segnale per {symbol}: {signal} (Price: {price})")
-            
+
             if signal in ["BUY", "SELL"]:
                 logger.info(f"🎯 SEGNALE ATTIVO {signal} per {symbol} - Controllo condizioni trading")
-                
+
                 # 5.1 Verifica cooldown segnale PRIMA di procedere
                 if hasattr(self.engine, 'last_signal_time') and symbol in self.engine.last_signal_time:
                     time_since_last = time.time() - self.engine.last_signal_time[symbol]
                     if time_since_last < self.engine.signal_cooldown:
                         logger.info(f"⏰ {symbol}: In cooldown, salto trade (tempo rimanente: {self.engine.signal_cooldown - time_since_last:.1f}s)")
                         return
-                
+
                 # 5.2 Se tutto ok, ottieni segnale per trading (questo attiva il cooldown)
                 trading_signal, trading_price = self.engine.get_signal(symbol, for_trading=True)
-                
+
                 if trading_signal in ["BUY", "SELL"]:
                     logger.info(f"✅ Segnale confermato per trading: {trading_signal}")
-                    
+
                     # 6. Calcola dimensione posizione
                     size = self.risk_manager.calculate_position_size(symbol, trading_price, trading_signal)
-                    
+
                     logger.info(f"💰 Size calcolata per {symbol}: {size} lots")
-                    
+
                     if size > 0:
                         logger.info(f"✅ Esecuzione trade autorizzata per {symbol} - Size: {size}")
                         # 7. Esegui il trade
@@ -1955,7 +1971,7 @@ class QuantumTradingSystem:
                     logger.warning(f"🚫 {symbol}: Segnale non confermato per trading effettivo")
             else:
                 logger.debug(f"💤 {symbol}: HOLD - nessuna azione")
-                    
+
         except Exception as e:
             logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)
 
