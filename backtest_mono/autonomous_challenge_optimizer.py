@@ -170,15 +170,12 @@ class AutonomousHighStakesOptimizer:
                 "description": "Configurazione generata autonomamente per High Stakes Challenge",
                 "optimization_period_days": self.optimization_days
             },
-            
             "high_stakes_challenge": self.high_stakes_params,
-            
             "trading_algorithm": {
                 "name": "phoenix_quantum_monofx_program",
                 "version": "2.0",
                 "description": "Algoritmo quantum ottimizzato per il broker"
             },
-            
             "quantum_params": {
                 "buffer_size": 500,
                 "signal_cooldown": 600,
@@ -189,7 +186,6 @@ class AutonomousHighStakesOptimizer:
                 "quantum_boost": True,
                 "neural_enhancement": True
             },
-            
             "risk_parameters": {
                 "risk_percent": 0.007,  # Sarà ottimizzato
                 "max_daily_trades": 6,  # Sarà ottimizzato
@@ -199,18 +195,16 @@ class AutonomousHighStakesOptimizer:
                 "take_profit_atr_multiplier": 2.5,
                 "daily_loss_limit": 0.05,
                 "max_drawdown": 0.08,
-                "risk_reward_ratio": 1.8
+                "risk_reward_ratio": 1.8,
+                "daily_trade_limit_mode": "per_symbol"  # <--- AGGIUNTO: default global / per_symbol
             },
-            
             "symbols": {},  # Sarà ottimizzato
-            
             "trading_sessions": {
                 "london": {"start": "08:00", "end": "17:00", "enabled": True},
                 "newyork": {"start": "13:00", "end": "22:00", "enabled": True},
                 "tokyo": {"start": "00:00", "end": "09:00", "enabled": False},
                 "sydney": {"start": "22:00", "end": "07:00", "enabled": False}
             },
-            
             "filters": {
                 "news_filter": True,
                 "spread_filter": True,
@@ -219,7 +213,6 @@ class AutonomousHighStakesOptimizer:
                 "time_filter": True
             }
         }
-        
         return base_config
     
     def run_parameter_optimization(self, symbol: str, days: int = 30) -> Dict:
@@ -727,6 +720,7 @@ class AutonomousHighStakesOptimizer:
             "magic_number": magic_number,
             "position_cooldown": 900,
             "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 5),
+            "daily_trade_limit_mode": config.get("risk_parameters", {}).get("daily_trade_limit_mode", "global"),
             "max_positions": 1,
             "min_sl_distance_pips": {
                 "EURUSD": 30,
