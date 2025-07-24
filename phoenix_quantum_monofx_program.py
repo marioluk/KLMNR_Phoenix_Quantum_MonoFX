@@ -1485,29 +1485,29 @@ class QuantumTradingSystem:
         self.config_manager = ConfigManager(config_path)
         self._config = self.config_manager.config
         
-        # Attiva automaticamente i simboli in MT5
+        # Inizializzazione MT5
+        if not self._initialize_mt5():
+            raise RuntimeError("Inizializzazione MT5 fallita")
+
+        # Attiva automaticamente i simboli in MT5 (dopo l'inizializzazione!)
         print("📡 Attivazione simboli in MT5...")
         self._activate_symbols()
         print("✅ Simboli attivati")
-        
+
         print("🧠 Inizializzazione Quantum Engine...")
         self.engine = QuantumEngine(self.config_manager)
         print("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self.config_manager, self.engine, self)  # Passa self come terzo parametro
-        
+
         self.max_positions = self.config_manager.get_risk_params().get('max_positions', 4)
         self.current_positions = 0
         self.trade_count = defaultdict(int)
-        
-        # Inizializzazione MT5
-        if not self._initialize_mt5():
-            raise RuntimeError("Inizializzazione MT5 fallita")
-        
+
         # Metriche e tracking
         self.metrics_lock = Lock()
         self.position_lock = Lock()
         self.metrics = TradingMetrics()
-        
+
         # Info account e valuta
         self.account_info = mt5.account_info()
         self.currency = (
@@ -1517,7 +1517,7 @@ class QuantumTradingSystem:
         )
         if not self.account_info:
             logger.warning(f"Usando valuta di fallback: {self.currency}")
-        
+
         # Inizializzazione metriche trading
         self.trade_metrics = {
             'total_trades': 0,
@@ -1526,23 +1526,23 @@ class QuantumTradingSystem:
             'total_profit': 0.0,
             'symbol_stats': defaultdict(dict)
         }
-        
+
         # Drawdown tracker
         initial_equity = self.account_info.equity if self.account_info else 10000
         self.drawdown_tracker = DailyDrawdownTracker(
             initial_equity=initial_equity,
             config=self.config.config
         )
-        
+
         # Stato sistema
         self.last_position_check = 0
         self.last_connection_check = 0
         self.last_account_update = 0
         self.last_tick_check = 0
         self.last_buffer_check = 0
-        
+
         logger.info("Sistema inizializzato correttamente")
-        
+
         logger.info(f"Simboli configurati: {self.config_manager.symbols}")
         logger.info(f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}")
     
