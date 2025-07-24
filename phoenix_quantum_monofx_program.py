@@ -1089,50 +1089,56 @@ class QuantumRiskManager:
     
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
         try:
-            symbol_config = self.get_risk_config(symbol)
-            min_sl = symbol_config.get('min_sl_distance_pips', 100)
-            base_sl = symbol_config.get('base_sl_pips', 150)
-            tp_multiplier = symbol_config.get('profit_multiplier', 2.0)
-            # Se min_sl o base_sl sono dict (mappa per simbolo), estrai valore corretto
-            if isinstance(min_sl, dict):
-                if symbol in min_sl:
-                    min_sl = min_sl[symbol]
-                elif 'default' in min_sl:
-                    min_sl = min_sl['default']
+            # min_sl: 1) override simbolo, 2) risk_parameters, 3) fallback
+            min_sl = self._get_config(symbol, 'stop_loss_pips', None)
+            if min_sl is None:
+                min_sl = self._get_config(symbol, 'min_sl_distance_pips', None)
+            if min_sl is None:
+                forex = ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD']
+                indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
+                oro = ['XAUUSD', 'XAGUSD']
+                crypto = ['BTCUSD', 'ETHUSD']
+                if symbol in forex:
+                    min_sl = 250
+                elif symbol in indici:
+                    min_sl = 400
+                elif symbol in oro:
+                    min_sl = 800
+                elif symbol in crypto:
+                    min_sl = 1200
                 else:
-                    min_sl = next((v for v in min_sl.values() if isinstance(v, (int, float))), 100)
-            if isinstance(base_sl, dict):
-                if symbol in base_sl:
-                    base_sl = base_sl[symbol]
-                elif 'default' in base_sl:
-                    base_sl = base_sl['default']
-                else:
-                    base_sl = next((v for v in base_sl.values() if isinstance(v, (int, float))), 150)
+                    min_sl = 300
+
+            base_sl = self._get_config(symbol, 'base_sl_pips', 30)
+            profit_multiplier = self._get_config(symbol, 'profit_multiplier', 2.2)
+
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
                 logger.error(f"Simbolo {symbol} non trovato")
                 return 0.0, 0.0
             pip_size = self.engine._get_pip_size(symbol)
             digits = symbol_info.digits
-            # Volatilità (se disponibile)
-            volatility = 1.0
+
             try:
                 volatility = float(self.engine.calculate_quantum_volatility(symbol))
             except Exception:
-                pass
-            # Limita l'amplificazione della volatilità
-            if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
+                volatility = 1.0
+
+            oro = ['XAUUSD', 'XAGUSD']
+            indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
+            if symbol in oro + indici:
                 volatility_factor = min(volatility, 1.5)
             else:
                 volatility_factor = min(volatility, 1.2)
+
             buffer_factor = 1.15
             adjusted_sl = base_sl * volatility_factor
-            # Se il valore ottimizzato è <= min_sl * 1.05, applica buffer_factor
-            if adjusted_sl <= min_sl * 1.05:
-                sl_pips = int(round(min_sl * buffer_factor))
+            if adjusted_sl <= float(min_sl) * 1.05:
+                sl_pips = int(round(float(min_sl) * buffer_factor))
             else:
-                sl_pips = int(round(max(adjusted_sl, min_sl)))
-            tp_pips = int(round(sl_pips * tp_multiplier))
+                sl_pips = int(round(max(adjusted_sl, float(min_sl))))
+            tp_pips = int(round(sl_pips * profit_multiplier))
+
             if position_type == mt5.ORDER_TYPE_BUY:
                 sl_price = entry_price - (sl_pips * pip_size)
                 tp_price = entry_price + (tp_pips * pip_size)
@@ -1143,10 +1149,9 @@ class QuantumRiskManager:
             tp_price = round(tp_price, digits)
             logger.info(
                 f"Livelli calcolati per {symbol}: SL={sl_pips:.1f}pips TP={tp_pips:.1f}pips "
-                f"(Volatility={volatility:.2f}, Config: min_sl={min_sl}, base_sl={base_sl}, multiplier={tp_multiplier})"
+                f"(Volatility={volatility:.2f}, min_sl={min_sl}, base_sl={base_sl}, multiplier={profit_multiplier})"
             )
             return sl_price, tp_price
-
         except Exception as e:
             logger.error(f"Errore calcolo livelli per {symbol}: {str(e)}")
             return 0.0, 0.0
@@ -1163,30 +1168,49 @@ class QuantumRiskManager:
         
         
     def _calculate_sl_pips(self, symbol: str) -> float:
-        """Calcola gli SL pips con volatilità adattiva limitata"""
-        min_sl = self._get_config(symbol, 'min_sl_distance_pips', 
-                  {'default': 15, 'XAUUSD': 80, 'BTCUSD': 150}.get(symbol, 15))
-        
-        base_sl = self._get_config(symbol, 'base_sl_pips', 
-                  {'default': 30, 'XAUUSD': 150, 'BTCUSD': 400}.get(symbol, 30))
-        
-        # Ottieni la volatilità quantistica corrente con limitazioni
-        volatility = self.engine.calculate_quantum_volatility(symbol)
-        
-        # Limita l'amplificazione della volatilità per evitare SL eccessivi
-        # Massimo +20% di amplificazione per forex, +50% per oro/indici
-        if symbol in ['XAUUSD', 'XAGUSD', 'SP500', 'NAS100', 'US30']:
-            volatility_factor = min(volatility, 1.5)  # Max +50%
-        else:  # Forex
-            volatility_factor = min(volatility, 1.2)  # Max +20%
-        
+        """Calcola SL pips robusto come nell'optimizer"""
+        # min_sl: 1) override simbolo, 2) risk_parameters, 3) fallback
+        min_sl = self._get_config(symbol, 'stop_loss_pips', None)
+        if min_sl is None:
+            min_sl = self._get_config(symbol, 'min_sl_distance_pips', None)
+        if min_sl is None:
+            forex = ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD']
+            indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
+            oro = ['XAUUSD', 'XAGUSD']
+            crypto = ['BTCUSD', 'ETHUSD']
+            if symbol in forex:
+                min_sl = 250
+            elif symbol in indici:
+                min_sl = 400
+            elif symbol in oro:
+                min_sl = 800
+            elif symbol in crypto:
+                min_sl = 1200
+            else:
+                min_sl = 300
+
+        base_sl = self._get_config(symbol, 'base_sl_pips', 30)
+        try:
+            volatility = float(self.engine.calculate_quantum_volatility(symbol))
+        except Exception:
+            volatility = 1.0
+        oro = ['XAUUSD', 'XAGUSD']
+        indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
+        if symbol in oro + indici:
+            volatility_factor = min(volatility, 1.5)
+        else:
+            volatility_factor = min(volatility, 1.2)
+
+        buffer_factor = 1.15
         adjusted_sl = base_sl * volatility_factor
-        final_sl = max(adjusted_sl, min_sl)
-        
+        if adjusted_sl <= float(min_sl) * 1.05:
+            final_sl = int(round(float(min_sl) * buffer_factor))
+        else:
+            final_sl = int(round(max(adjusted_sl, float(min_sl))))
+
         logger.debug(f"SL calculation for {symbol}: base={base_sl}, volatility={volatility:.2f}, "
-                    f"factor={volatility_factor:.2f}, final={final_sl:.1f} pips")
-        
-        return final_sl  
+                    f"factor={volatility_factor:.2f}, min_sl={min_sl}, final={final_sl} pips")
+        return final_sl
 
     
     def _round_to_step(self, size: float, symbol: str) -> float:
