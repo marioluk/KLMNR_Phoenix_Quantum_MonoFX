@@ -396,7 +396,7 @@ class QuantumEngine:
         try:
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
-                logger.debug(f"Impossibile ottenere info simbolo {symbol}")
+                logger.info(f"Impossibile ottenere info simbolo {symbol}")
                 return False
                 
             current_spread = (symbol_info.ask - symbol_info.bid) / self._get_pip_size(symbol)
@@ -2338,7 +2338,7 @@ class QuantumTradingSystem:
         # 3. Verifica tick corrente
         tick = mt5.symbol_info_tick(symbol)
         if not tick:
-            logger.debug(f"Nessun tick disponibile per {symbol}")
+            logger.info(f"Nessun tick disponibile per {symbol}")
             return False
         
         if tick.time_msc < (time.time() - 60)*1000:  # Se il tick è più vecchio di 60s
