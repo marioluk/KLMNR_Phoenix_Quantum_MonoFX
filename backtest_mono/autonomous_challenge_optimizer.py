@@ -622,6 +622,9 @@ class AutonomousHighStakesOptimizer:
         config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
         os.makedirs(config_dir, exist_ok=True)
         
+        # Genera timestamp compatto: giorno mese anno ora minuti
+        now = datetime.now()
+        timestamp_str = now.strftime("%d%m%Y%H%M")
         filename = f"config_autonomous_challenge_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
 
@@ -784,7 +787,7 @@ class AutonomousHighStakesOptimizer:
 
         production_config = {
             "logging": {
-                "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready.log",
+                "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready_{timestamp_str}.log",
                 "max_size_mb": 50,
                 "backup_count": 7,
                 "log_level": "INFO"
