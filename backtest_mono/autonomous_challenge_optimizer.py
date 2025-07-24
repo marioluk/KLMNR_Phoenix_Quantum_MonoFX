@@ -20,6 +20,25 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
+    @staticmethod
+    def calculate_normalized_spin(ticks: list) -> float:
+        """
+        Calcola lo spin normalizzato tra -1 e +1, come in phoenix_quantum_monofx_program.py.
+        Args:
+            ticks: lista di dict con chiave 'direction' (1, -1, 0)
+        Returns:
+            float: spin normalizzato [-1, +1]
+        """
+        if not ticks or len(ticks) < 3:
+            return 0.0
+        valid_ticks = [t for t in ticks if t.get('direction', 0) != 0]
+        if len(valid_ticks) < 3:
+            return 0.0
+        positive = sum(1 for t in valid_ticks if t.get('direction', 0) > 0)
+        negative = sum(1 for t in valid_ticks if t.get('direction', 0) < 0)
+        total = len(valid_ticks)
+        raw_spin = (positive - negative) / total
+        return raw_spin
     """
     Ottimizzatore autonomo che genera configurazioni High Stakes da zero
     senza bisogno di file JSON sorgente, basandosi solo su:
@@ -249,8 +268,6 @@ class AutonomousHighStakesOptimizer:
         """
         import random
         # Simulazione realistica basata su caratteristiche simbolo
-        
-        # Parametri base per simbolo
         symbol_characteristics = {
             'EURUSD': {'volatility': 0.7, 'trend': 0.8, 'spread': 1.2},
             'USDJPY': {'volatility': 0.6, 'trend': 0.7, 'spread': 1.5},
@@ -270,31 +287,40 @@ class AutonomousHighStakesOptimizer:
             'FTSE100': {'volatility': 1.1, 'trend': 0.6, 'spread': 2.0},
             'JP225': {'volatility': 1.3, 'trend': 0.6, 'spread': 3.0}
         }
-        
         char = symbol_characteristics.get(symbol, {'volatility': 1.0, 'trend': 0.6, 'spread': 2.5})
-        
+
+        # Simula una sequenza di tick fittizi per calcolare spin normalizzato
+        # (direzioni random, coerenti con win_rate atteso)
+        n_ticks = 20
+        directions = [random.choice([1, -1]) for _ in range(n_ticks)]
+        ticks = [{'direction': d} for d in directions]
+        spin = self.calculate_normalized_spin(ticks)
+
         # Calcola win rate basato su parametri
         rr_ratio = tp_pips / sl_pips if sl_pips > 0 else 2.0
         optimal_risk = 0.007  # Risk ottimale per High Stakes
         risk_penalty = abs(risk - optimal_risk) * 10
-        
+
         base_win_rate = 0.65 + (signal_th - 0.6) * 0.3 - risk_penalty
         win_rate = max(0.4, min(0.85, base_win_rate + random.uniform(-0.1, 0.1)))
-        
+
         # Calcola profit factor
         avg_win = tp_pips * char['trend']
         avg_loss = sl_pips
         profit_factor = (win_rate * avg_win) / ((1 - win_rate) * avg_loss) if avg_loss > 0 else 1.0
-        
+
         # Penalità per troppe trades (High Stakes prefer qualità)
         trade_penalty = max(0, (trades - 6) * 0.1)
-        
+
         # Penalty per spread
         spread_penalty = char['spread'] * 0.02
-        
+
         # Score combinato
         score = (profit_factor * win_rate * (1 - trade_penalty - spread_penalty)) * 100
-        
+
+        # Puoi usare spin normalizzato per logging, analisi o metriche future
+        # logger.debug(f"Simulazione spin normalizzato {symbol}: {spin:.3f}")
+
         return max(0, score)
     
     def optimize_trading_hours(self, symbol: str, score: float) -> list:
