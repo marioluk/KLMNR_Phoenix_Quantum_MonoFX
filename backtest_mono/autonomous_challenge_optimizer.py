@@ -666,7 +666,7 @@ class AutonomousHighStakesOptimizer:
 
         production_config = {
             "logging": {
-                "log_file": f"logs/log_autonomous_high_stakes_{aggressiveness}_production_ready.log",
+                "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready.log",
                 "max_size_mb": 50,
                 "backup_count": 7,
                 "log_level": "INFO"
