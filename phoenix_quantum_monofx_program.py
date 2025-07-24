@@ -1090,9 +1090,26 @@ class QuantumRiskManager:
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
         try:
             symbol_config = self.get_risk_config(symbol)
+
             min_sl = symbol_config.get('min_sl_distance_pips', 100)
             base_sl = symbol_config.get('base_sl_pips', 150)
             tp_multiplier = symbol_config.get('profit_multiplier', 2.0)
+
+            # Se min_sl o base_sl sono dict (mappa per simbolo), estrai valore corretto
+            if isinstance(min_sl, dict):
+                if symbol in min_sl:
+                    min_sl = min_sl[symbol]
+                elif 'default' in min_sl:
+                    min_sl = min_sl['default']
+                else:
+                    min_sl = next((v for v in min_sl.values() if isinstance(v, (int, float))), 100)
+            if isinstance(base_sl, dict):
+                if symbol in base_sl:
+                    base_sl = base_sl[symbol]
+                elif 'default' in base_sl:
+                    base_sl = base_sl['default']
+                else:
+                    base_sl = next((v for v in base_sl.values() if isinstance(v, (int, float))), 150)
 
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
