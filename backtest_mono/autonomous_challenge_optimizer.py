@@ -365,6 +365,7 @@ class AutonomousHighStakesOptimizer:
         score = base_params['score']
         optimized_params = {
             'enabled': True,
+            'risk_percent': base_params['risk_percent'],
             'lot_size': round(base_params['risk_percent'] * 10, 3),  # Conversione risk -> lot
             'stop_loss_pips': int(base_params['stop_loss_pips'] * multipliers['sl']),
             'take_profit_pips': int(base_params['take_profit_pips'] * multipliers['tp']),
@@ -539,41 +540,33 @@ class AutonomousHighStakesOptimizer:
         # Override dinamico per simbolo: genera la struttura usando i parametri ottimizzati
         symbols = {}
         for symbol, params in config.get('symbols', {}).items():
-            # Override risk_management
+            # Solo i parametri ottimizzati per simbolo
+            # Rischio: stop_loss_pips, take_profit_pips
             risk_management = {
-                "contract_size": 0.01,
-                "min_sl_distance_pips": params.get("stop_loss_pips", 40),
-                "base_sl_pips": params.get("stop_loss_pips", 40),
-                "profit_multiplier": 2.2,
-                "risk_percent": params.get("lot_size", 0.0015),
-                "trailing_stop": {
-                    "activation_pips": int(params.get("stop_loss_pips", 40) * 2),
-                    "step_pips": int(params.get("stop_loss_pips", 40) * 1)
-                }
+                "stop_loss_pips": params.get("stop_loss_pips", 40),
+                "take_profit_pips": params.get("take_profit_pips", 40),
+                "risk_percent": params.get("risk_percent", 0.007)
             }
 
-            # Override quantum_params_override - ora dinamico per simbolo, senza buffer_size
-            score = params.get("optimization_score", 50)
-            idx = list(config.get('symbols', {}).keys()).index(symbol)
-            spin_window = int(60 + idx * 7 + score / 20)
-            min_spin_samples = int(20 + idx * 2 + score / 40)
-            signal_cooldown = int(600 + (score * 2) + idx * 10)
-            # Calcolo entropy e clamp nei range corretti
-            buy_entropy = min(1.0, max(0.50, round(params.get("signal_buy_threshold", 0.6) + score / 500, 3)))
-            sell_entropy = min(0.50, max(0.0, round(params.get("signal_sell_threshold", 0.4) + score / 700, 3)))
+            # Parametri quantistici ottimizzati per simbolo
             quantum_params_override = {
-                "spin_window": spin_window,
-                "min_spin_samples": min_spin_samples,
-                
+                "spin_window": params.get("spin_window"),
+                "min_spin_samples": params.get("min_spin_samples"),
+                "spin_threshold": params.get("spin_threshold"),
+                "volatility_filter": params.get("volatility_filter"),
+                "signal_buy_threshold": params.get("signal_buy_threshold"),
+                "signal_sell_threshold": params.get("signal_sell_threshold")
             }
+            # Rimuovi chiavi None
+            quantum_params_override = {k: v for k, v in quantum_params_override.items() if v is not None}
 
-            # Comment personalizzato
+            # Commento e trading_hours
             comment = f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}"
+            trading_hours = params.get("trading_hours", ["09:00-10:30", "14:00-16:00"])
 
-            # Struttura finale per simbolo
             symbols[symbol] = {
                 "risk_management": risk_management,
-                "trading_hours": params.get("trading_hours", ["09:00-10:30", "14:00-16:00"]),
+                "trading_hours": trading_hours,
                 "comment": comment,
                 "quantum_params_override": quantum_params_override
             }
@@ -588,7 +581,7 @@ class AutonomousHighStakesOptimizer:
         avg_signal_cooldown = int(np.mean([600 for _ in symbol_params])) if symbol_params else 600
         avg_buy_entropy = round(np.mean([min(1.0, max(0.50, s.get('signal_buy_threshold', 0.6))) for s in symbol_params]), 3) if symbol_params else 0.58
         avg_sell_entropy = round(np.mean([min(0.50, max(0.0, s.get('signal_sell_threshold', 0.4))) for s in symbol_params]), 3) if symbol_params else 0.42
-        avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
+        #avg_volatility_scale = round(0.8 + (config.get('optimization_results', {}).get('average_optimization_score', 50) / 200), 2)
         # Ottimizzazione dinamica buffer_size: funzione del numero di simboli e score medio
         avg_score = config.get('optimization_results', {}).get('average_optimization_score', 50)
         buffer_candidates = [int(x) for x in np.linspace(400, 1200, num=21)]  # step di 40
@@ -607,7 +600,7 @@ class AutonomousHighStakesOptimizer:
                 "buy_signal": 0.54,
                 "sell_signal": 0.46
             },
-            "volatility_scale": avg_volatility_scale
+            #"volatility_scale": avg_volatility_scale
         }
 
         risk_parameters = {
