@@ -587,7 +587,6 @@ class QuantumEngine:
             Tuple: (Segnale, Prezzo) - "BUY"/"SELL"/"HOLD"
         """
         ticks = list(self.tick_buffer.get(symbol, []))
-        
         # 1. Verifica preliminare buffer
         if len(ticks) < self.min_spin_samples:
             logger.debug(f"{symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks)")
@@ -597,44 +596,48 @@ class QuantumEngine:
         spin_window = min(self.spin_window, len(ticks))
         recent_ticks = ticks[-spin_window:]
         spin, confidence = self.calculate_spin(recent_ticks)
-        
+
+        # Log dettagliato del buffer e dei prezzi
+        last_tick_price = recent_ticks[-1]['price'] if recent_ticks else 0.0
+        logger.debug(f"{symbol}: Ultimo prezzo buffer={last_tick_price}, Confidenza calcolata={confidence:.3f}, Spin={spin:.3f}, Buffer size={len(ticks)}")
+
         # 3. Filtri conservativi (tua logica originale)
         if confidence < 0.8:
-            logger.info(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8)")
-            return "HOLD", 0.0
-            
+            logger.info(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8) -> HOLD. Prezzo={last_tick_price}")
+            return "HOLD", last_tick_price
+
         # 4. Verifica cooldown segnali (900s)
         last_signal_time = self.last_signal_time.get(symbol, 0)
         if time.time() - last_signal_time < self.signal_cooldown:
             remaining = int(self.signal_cooldown - (time.time() - last_signal_time))
-            logger.debug(f"{symbol}: In cooldown segnali ({remaining}s rimanenti)")
-            return "HOLD", 0.0
+            logger.debug(f"{symbol}: In cooldown segnali ({remaining}s rimanenti) -> HOLD. Prezzo={last_tick_price}")
+            return "HOLD", last_tick_price
 
         # 5. Calcolo metriche (tua logica originale invariata)
         deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
         entropy = self.calculate_entropy(deltas)
         volatility = 1 + abs(spin) * entropy
-        
+
         thresholds = self.config.get('quantum_params', {}).get('entropy_thresholds', {})
         base_buy_thresh = thresholds.get('buy_signal', 0.55)
         base_sell_thresh = thresholds.get('sell_signal', 0.45)
-        
+
         # Applica la volatilità in modo simmetrico
         buy_thresh = base_buy_thresh * (1 + (volatility - 1) * 0.5)
         sell_thresh = base_sell_thresh * (1 - (volatility - 1) * 0.5)
 
         # 6. Generazione segnale con logging simmetrico
         signal = "HOLD"
-        
+
         # Log delle condizioni per debug
         buy_condition = entropy > buy_thresh and spin > self.spin_threshold * confidence
         sell_condition = entropy < sell_thresh and spin < -self.spin_threshold * confidence
-        
+
         logger.debug(f"{symbol} Signal Analysis: "
                     f"E={entropy:.3f} S={spin:.3f} C={confidence:.3f} | "
                     f"BUY: E>{buy_thresh:.3f}? {entropy > buy_thresh} & S>{self.spin_threshold * confidence:.3f}? {spin > self.spin_threshold * confidence} = {buy_condition} | "
-                    f"SELL: E<{sell_thresh:.3f}? {entropy < sell_thresh} & S<{-self.spin_threshold * confidence:.3f}? {spin < -self.spin_threshold * confidence} = {sell_condition}")
-        
+                    f"SELL: E<{sell_thresh:.3f}? {entropy < sell_thresh} & S<{-self.spin_threshold * confidence:.3f}? {spin < -self.spin_threshold * confidence} = {sell_condition} | Prezzo={last_tick_price}")
+
         if buy_condition:
             signal = "BUY"
         elif sell_condition:
@@ -645,36 +648,37 @@ class QuantumEngine:
             # Solo imposta il cooldown se stiamo effettivamente facendo trading
             if for_trading:
                 self.last_signal_time[symbol] = time.time()
-            
+
             # Monitora bias direzionale
             if not hasattr(self, 'signal_stats'):
                 self.signal_stats = {'BUY': 0, 'SELL': 0}
             self.signal_stats[signal] += 1
-            
+
             buy_ratio = self.signal_stats['BUY'] / (self.signal_stats['BUY'] + self.signal_stats['SELL'])
-            
+
             logger.info(
                 f"Segnale {signal} per {symbol}: "
                 f"E={entropy:.2f} S={spin:.2f} V={volatility:.2f} C={confidence:.2f} | "
                 f"Soglie: B={buy_thresh:.2f} S={sell_thresh:.2f} | "
                 f"Bias Check: BUY={self.signal_stats['BUY']} SELL={self.signal_stats['SELL']} Ratio={buy_ratio:.2f} | "
-                f"Cooldown segnale attivato (900s)"
+                f"Cooldown segnale attivato (900s) | Prezzo={last_tick_price}"
             )
-            
+
             # Avviso se bias eccessivo
             if (self.signal_stats['BUY'] + self.signal_stats['SELL']) > 10:
                 if buy_ratio > 0.8:
                     logger.warning(f"⚠️ BIAS LONG DETECTED: {buy_ratio:.1%} buy signals!")
                 elif buy_ratio < 0.2:
                     logger.warning(f"⚠️ BIAS SHORT DETECTED: {buy_ratio:.1%} buy signals!")
-            
+
             # Aggiungi logging esplicito per i segnali SELL
             if signal == "SELL":
                 logger.debug(f"SELL signal conditions met for {symbol}: "
                             f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
-                            f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f}")
-        
-        return signal, recent_ticks[-1]['price'] if recent_ticks else 0.0
+                            f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
+
+        # Restituisci sempre il prezzo reale dell'ultimo tick del buffer
+        return signal, last_tick_price
         
         
     """
