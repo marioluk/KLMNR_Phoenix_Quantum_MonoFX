@@ -766,11 +766,20 @@ class QuantumEngine:
                 logger.error(f"Errore monitoraggio {symbol}: {str(e)}", exc_info=True)
 
         if heartbeat_data:
-            hb_msg = "HEARTBEAT:\n" + "\n".join(
-                f"{d['symbol']}: Bid={d['bid']:.5f} | Ask={d['ask']:.5f} | "
-                f"Spread={d['spread']:.1f}p | Buffer={d['buffer_size']} | "
-                f"E={d['E']:.2f} | S={d['S']:.2f} | C={d['C']:.2f} | V={d['V']:.2f}"
-                for d in heartbeat_data[:5]
+            hb_msg = ("\n==================== [HEARTBEAT] ====================\n" +
+                "\n".join(
+                    f"Symbol: {d['symbol']}\n"
+                    f"  Bid: {d['bid']:.5f}\n"
+                    f"  Ask: {d['ask']:.5f}\n"
+                    f"  Spread: {d['spread']:.1f} pips\n"
+                    f"  Buffer Size: {d['buffer_size']}\n"
+                    f"  Entropy (E): {d['E']:.2f}\n"
+                    f"  Spin (S): {d['S']:.2f}\n"
+                    f"  Confidence (C): {d['C']:.2f}\n"
+                    f"  Volatility (V): {d['V']:.2f}\n"
+                    "------------------------------------------------------"
+                for d in heartbeat_data[:5]) +
+                "\n======================================================\n"
             )
             logger.info(hb_msg)
             positions_count = len(mt5.positions_get() or [])
