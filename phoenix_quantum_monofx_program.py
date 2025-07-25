@@ -1856,7 +1856,13 @@ class QuantumTradingSystem:
             del self.last_tick_check
         
         mt5.shutdown()
-        logger.info("Sistema arrestato correttamente")
+        logger.info(
+            "\n==================== [ARRESTO SISTEMA] ====================\n"
+            "Arresto richiesto dall'utente\n"
+            "------------------------------------------------------\n"
+            "Sistema arrestato correttamente\n"
+            "======================================================\n"
+        )
 
     def _main_loop(self):
         """
