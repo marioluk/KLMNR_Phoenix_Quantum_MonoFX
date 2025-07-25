@@ -459,8 +459,26 @@
                             plot_bgcolor: '#181c20',
                             paper_bgcolor: '#23272f',
                             font: { color: '#e0e0e0', family: 'Montserrat, Segoe UI, Tahoma, Geneva, Verdana, sans-serif' },
-                            xaxis: Object.assign({}, data.layout.xaxis, { color: '#e0e0e0', gridcolor: '#23272f', zerolinecolor: '#23272f', linecolor: '#e0e0e0', tickfont: { color: '#e0e0e0' }, title: Object.assign({}, (data.layout.xaxis||{}).title, { font: { color: '#e0e0e0' } }) }),
-                            yaxis: Object.assign({}, data.layout.yaxis, { color: '#e0e0e0', gridcolor: '#23272f', zerolinecolor: '#23272f', linecolor: '#e0e0e0', tickfont: { color: '#e0e0e0' }, title: Object.assign({}, (data.layout.yaxis||{}).title, { font: { color: '#e0e0e0' } }) })
+                            xaxis: Object.assign({}, data.layout.xaxis, {
+                                color: '#e0e0e0',
+                                gridcolor: '#23272f',
+                                zeroline: true,
+                                zerolinecolor: '#00ffe7',
+                                zerolinewidth: 2,
+                                linecolor: '#e0e0e0',
+                                tickfont: { color: '#e0e0e0' },
+                                title: Object.assign({}, (data.layout.xaxis||{}).title, { font: { color: '#e0e0e0' } })
+                            }),
+                            yaxis: Object.assign({}, data.layout.yaxis, {
+                                color: '#e0e0e0',
+                                gridcolor: '#23272f',
+                                zeroline: true,
+                                zerolinecolor: '#00ffe7',
+                                zerolinewidth: 2,
+                                linecolor: '#e0e0e0',
+                                tickfont: { color: '#e0e0e0' },
+                                title: Object.assign({}, (data.layout.yaxis||{}).title, { font: { color: '#e0e0e0' } })
+                            })
                         });
                         Plotly.newPlot(elementId, data.data, darkLayout, {
                             responsive: true,
