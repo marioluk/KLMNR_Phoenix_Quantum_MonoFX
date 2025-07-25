@@ -7,18 +7,18 @@ echo THE5ERS GRAPHICAL DASHBOARD - LEGACY
 echo ==========================================
 
 REM Controlla se esiste il file di config nella cartella parent
-if not exist "../config/config_autonomous_high_stakes_production_ready.json" (
-    echo ERROR: Config file not found!
-    echo Please ensure ../config/config_autonomous_high_stakes_production_ready.json exists
-    pause
-    exit /b 1
-)
+    if not exist "..\..\config\config_autonomous_challenge_production_ready.json" (
+        echo ERROR: Config file not found!
+        echo Please ensure ..\..\config\config_autonomous_challenge_production_ready.json exists
+        pause
+        exit /b 1
+    )
 
 REM Controlla se esiste la directory logs
-if not exist "../../logs" (
-    echo Creating logs directory...
-    mkdir "../../logs"
-)
+    if not exist "..\..\logs" (
+        echo Creating logs directory...
+        mkdir "..\..\logs"
+    )
 
 REM Controlla se esiste la directory templates
 if not exist "templates" (
@@ -41,8 +41,8 @@ echo - Click "Refresh MT5" button to update with latest data
 echo ==========================================
 
 REM Avvia la dashboard e apri il browser
-start http://127.0.0.1:5000
-python dashboard_the5ers.py
+    start http://127.0.0.1:5000
+    python dashboard_broker.py
 
 echo ==========================================
 echo Dashboard stopped

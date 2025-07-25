@@ -18,27 +18,20 @@ print(f"📁 Working Directory: {os.getcwd()}")
 # Test auto-detect config file
 config_file = None
 
-# Auto-detect config file (come nel codice dashboard)
 if config_file is None:
-    # Cerca prima nella cartella config del sistema legacy
-    legacy_config = "../config/config_autonomous_challenge_production_ready.json"
-    if os.path.exists(legacy_config):
-        config_file = legacy_config
+    # Path reale usato dalla dashboard (config nella root progetto)
+    config_path = os.path.normpath(os.path.join(os.getcwd(), '..', '..', 'config', 'config_autonomous_challenge_production_ready.json'))
+    if os.path.exists(config_path):
+        config_file = config_path
         print(f"✅ Config trovato: {config_file}")
     else:
-        # Fallback alla directory corrente
-        config_file = "config_autonomous_high_stakes_production_ready.json"
-        print(f"⚠️  Fallback config: {config_file}")
+        print(f"❌ Config non trovata: {config_path}")
+        config_file = None
 
-# Test esistenza file
-print(f"📄 Config file: {config_file}")
-print(f"🔍 File exists: {os.path.exists(config_file)}")
 
-if os.path.exists(config_file):
+if config_file and os.path.exists(config_file):
     abs_path = os.path.abspath(config_file)
     print(f"📍 Absolute path: {abs_path}")
-    
-    # Test caricamento JSON
     try:
         import json
         with open(config_file, 'r') as f:
@@ -48,6 +41,8 @@ if os.path.exists(config_file):
         print(f"📊 The5ers config: {config.get('THE5ERS_specific', {}).get('step1_target', 'N/A')}%")
     except Exception as e:
         print(f"❌ Errore caricamento JSON: {e}")
+else:
+    print(f"❌ Config file non trovato o non accessibile.")
 
 print("=" * 60)
 print("✅ Test completato!")

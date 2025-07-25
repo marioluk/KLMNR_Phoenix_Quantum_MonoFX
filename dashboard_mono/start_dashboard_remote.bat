@@ -18,7 +18,7 @@ for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /R "IPv4"') do (
 )
 echo.
 
-echo 🔄 Avvio dashboard legacy con accesso remoto...
-python dashboard_the5ers.py
-
+echo 🔄 Avvio dashboard con accesso remoto... 
+python dashboard_broker.py 
+pause 
 pause
