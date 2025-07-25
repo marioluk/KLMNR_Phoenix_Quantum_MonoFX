@@ -7,7 +7,7 @@ REM ============================================================================
 setlocal enabledelayedexpansion
 
 REM Funzione di pulizia per una directory
-set CLEAN_DIRS=backtest_legacy dashboard_legacy logs config\backups
+set CLEAN_DIRS=backtest_legacy dashboard_mono logs config\backups
 for %%D in (%CLEAN_DIRS%) do (
     if exist "%%D" (
         echo.

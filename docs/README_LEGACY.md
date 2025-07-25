@@ -7,7 +7,7 @@
 legacy_system/
 │
 ├── config/                # Solo file di configurazione attivi e centralizzati
-├── dashboard_legacy/      # Dashboard e tool di visualizzazione
+├── dashboard_mono/      # Dashboard e tool di visualizzazione
 ├── backtest_mono/       # Script e tool di backtest
 │   ├── legacy/            # Script legacy non più usati, da archiviare o eliminare
 │   ├── docs/              # Documentazione tecnica e guide

@@ -159,7 +159,7 @@ KLMNR_Phoenix_Quantum/
 │   │   ├── autonomous_high_stakes_optimizer.py  # 🚀 Menu continuo
 │   │   ├── production_converter.py              # 🔄 Smart file discovery
 │   │   └── README.md                             # Documentazione aggiornata
-│   ├── dashboard_legacy/       # Dashboard web legacy
+│   ├── dashboard_mono/       # Dashboard web mono
 │   └── logs/                   # Log files
 ├── quantum_trading_system/     # 🚀 Sistema Moderno (In sviluppo)
 ├── dashboard/                  # 🎨 Dashboard Moderna (Futura)
@@ -170,7 +170,7 @@ KLMNR_Phoenix_Quantum/
 
 ### Quick Start
 - **Sistema Legacy**: `cd legacy_system && start_legacy.bat`
-- **Dashboard Legacy**: `cd legacy_system/dashboard_legacy && start_dashboard.bat`
+- **Dashboard Mono**: `cd legacy_system/dashboard_mono && start_dashboard.bat`
 - **Backtest Tools**: `cd backtest_clean`
 
 ---

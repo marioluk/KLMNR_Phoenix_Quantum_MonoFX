@@ -7,7 +7,7 @@ REM ============================================================================
 setlocal enabledelayedexpansion
 
 REM Funzione di pulizia per una directory
-set CLEAN_DIRS=backtest_mono backtest_mono\legacy backtest_mono\docs backtest_mono\configs dashboard_legacy logs config\backups archive
+set CLEAN_DIRS=backtest_mono backtest_mono\legacy backtest_mono\docs backtest_mono\configs dashboard_mono logs config\backups archive
 for %%D in (%CLEAN_DIRS%) do (
     if /I not "%%D"=="archive" (
         if exist "%%D" (
