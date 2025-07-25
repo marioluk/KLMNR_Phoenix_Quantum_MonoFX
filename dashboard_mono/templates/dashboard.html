@@ -454,7 +454,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.data && data.data.length > 0) {
-                        Plotly.newPlot(elementId, data.data, data.layout, {
+                        // Applica tema scuro ai grafici
+                        const darkLayout = Object.assign({}, data.layout, {
+                            plot_bgcolor: '#181c20',
+                            paper_bgcolor: '#23272f',
+                            font: { color: '#e0e0e0', family: 'Montserrat, Segoe UI, Tahoma, Geneva, Verdana, sans-serif' },
+                            xaxis: Object.assign({}, data.layout.xaxis, { color: '#e0e0e0', gridcolor: '#23272f', zerolinecolor: '#23272f', linecolor: '#e0e0e0', tickfont: { color: '#e0e0e0' }, title: Object.assign({}, (data.layout.xaxis||{}).title, { font: { color: '#e0e0e0' } }) }),
+                            yaxis: Object.assign({}, data.layout.yaxis, { color: '#e0e0e0', gridcolor: '#23272f', zerolinecolor: '#23272f', linecolor: '#e0e0e0', tickfont: { color: '#e0e0e0' }, title: Object.assign({}, (data.layout.yaxis||{}).title, { font: { color: '#e0e0e0' } }) })
+                        });
+                        Plotly.newPlot(elementId, data.data, darkLayout, {
                             responsive: true,
                             displayModeBar: false
                         });
