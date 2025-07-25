@@ -1845,22 +1845,27 @@ class QuantumTradingSystem:
     def stop(self):
         """Ferma il sistema"""
         self.running = False
-        
-        if hasattr(self, 'last_position_check'):
-            del self.last_position_check
-        if hasattr(self, 'last_connection_check'):
-            del self.last_connection_check
-        if hasattr(self, 'last_account_update'):
-            del self.last_account_update
-        if hasattr(self, 'last_tick_check'):
-            del self.last_tick_check
-        
+        # Pulizia variabili di stato
+        for attr in [
+            'last_position_check',
+            'last_connection_check',
+            'last_account_update',
+            'last_tick_check'
+        ]:
+            if hasattr(self, attr):
+                delattr(self, attr)
+
+        # Arresto MetaTrader 5
         mt5.shutdown()
+
+        # Log raggruppato e leggibile per shutdown
         logger.info(
             "\n==================== [ARRESTO SISTEMA] ====================\n"
-            "Arresto richiesto dall'utente\n"
+            "🛑 Arresto richiesto dall'utente o per errore critico\n"
             "------------------------------------------------------\n"
-            "Sistema arrestato correttamente\n"
+            "🧹 Pulizia variabili di stato e chiusura connessione MT5\n"
+            "------------------------------------------------------\n"
+            "✅ Sistema arrestato correttamente\n"
             "======================================================\n"
         )
 

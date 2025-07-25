@@ -20,8 +20,101 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
+    # =============================
+    # Tipologie di Trading per Timeframe
+    # =============================
+    # Tipo di Trading | Durata Operazioni | Timeframe Tipico | Caratteristiche principali
+    # Scalping        | Pochi secondi/min | 1m – 5m          | Altissima velocità, molti trade al giorno, spread ridotto
+    # Intraday        | Entro la giornata | 5m – 1h           | Nessuna posizione overnight, sfrutta volatilità giornaliera
+    # Swing Trading   | Giorni o settimane| 1h – 1d           | Coglie oscillazioni di prezzo più ampie
+    # Position Trading| Settimane o mesi  | 1d – 1M           | Approccio tranquillo, segue trend di lungo periodo
+
+    def get_trading_mode_params(self, mode: str) -> dict:
+        """
+        Restituisce i parametri chiave per la tipologia di trading scelta.
+        mode: 'scalping', 'intraday', 'swing', 'position'
+        """
+        presets = {
+            'scalping': {
+                # Scalping: operazioni rapidissime, molti trade, SL/TP stretti
+                'max_position_hours': 0.1,  # 6 minuti
+                'max_daily_trades': 40,
+                'position_cooldown': 60,    # 1 minuto
+                'stop_loss_pips': 6,
+                'take_profit_pips': 10,
+                'buffer_size': 60,
+                'spin_window': 8,
+                'min_spin_samples': 2,
+                'signal_cooldown': 60,
+                'comment': 'Scalping: altissima velocità, molti trade al giorno, spread ridotto'
+            },
+            'intraday': {
+                # Intraday: operazioni entro la giornata, volatilità giornaliera
+                'max_position_hours': 6,
+                'max_daily_trades': 12,
+                'position_cooldown': 600,
+                'stop_loss_pips': 18,
+                'take_profit_pips': 30,
+                'buffer_size': 200,
+                'spin_window': 20,
+                'min_spin_samples': 5,
+                'signal_cooldown': 300,
+                'comment': 'Intraday: nessuna posizione overnight, sfrutta volatilità giornaliera'
+            },
+            'swing': {
+                # Swing Trading: operazioni di giorni/settimane, oscillazioni ampie
+                'max_position_hours': 72,
+                'max_daily_trades': 4,
+                'position_cooldown': 3600,
+                'stop_loss_pips': 60,
+                'take_profit_pips': 120,
+                'buffer_size': 500,
+                'spin_window': 40,
+                'min_spin_samples': 10,
+                'signal_cooldown': 1800,
+                'comment': 'Swing Trading: coglie oscillazioni di prezzo più ampie'
+            },
+            'position': {
+                # Position Trading: operazioni di settimane/mesi, trend lunghi
+                'max_position_hours': 720,
+                'max_daily_trades': 1,
+                'position_cooldown': 86400,
+                'stop_loss_pips': 200,
+                'take_profit_pips': 400,
+                'buffer_size': 1200,
+                'spin_window': 80,
+                'min_spin_samples': 20,
+                'signal_cooldown': 43200,
+                'comment': 'Position Trading: segue trend di lungo periodo, operatività tranquilla'
+            }
+        }
+        return presets.get(mode, presets['intraday'])
+
+    def generate_mode_config(self, mode: str) -> dict:
+        """
+        Genera una configurazione ottimizzata per la tipologia di trading scelta.
+        mode: 'scalping', 'intraday', 'swing', 'position'
+        """
+        params = self.get_trading_mode_params(mode)
+        config = self.create_base_config_template()
+        # Aggiorna parametri globali
+        config['metadata']['trading_mode'] = mode
+        config['metadata']['comment'] = params['comment']
+        config['risk_parameters']['max_position_hours'] = params['max_position_hours']
+        config['risk_parameters']['max_daily_trades'] = params['max_daily_trades']
+        config['risk_parameters']['position_cooldown'] = params['position_cooldown']
+        config['risk_parameters']['stop_loss_pips'] = params['stop_loss_pips']
+        config['risk_parameters']['take_profit_pips'] = params['take_profit_pips']
+        config['quantum_params']['buffer_size'] = params['buffer_size']
+        config['quantum_params']['spin_window'] = params['spin_window']
+        config['quantum_params']['min_spin_samples'] = params['min_spin_samples']
+        config['quantum_params']['signal_cooldown'] = params['signal_cooldown']
+        # Simboli: attiva solo i principali per esempio
+        config['symbols'] = {s: {'enabled': True, 'comment': params['comment']} for s in self.available_symbols[:5]}
+        return config
+
     @staticmethod
-    def calculate_sl_tp_with_volatility(symbol: str, base_sl: float, min_sl: float, profit_multiplier: float, volatility: float) -> (float, float):
+    def calculate_sl_tp_with_volatility(symbol: str, base_sl: float, min_sl: float, profit_multiplier: float, volatility: float) -> Tuple[float, float]:
         """
         Calcola SL e TP robusti:
         - Usa il valore ottimizzato (base_sl), ma non scende mai sotto min_sl per asset
@@ -1118,21 +1211,41 @@ def main():
                 print("2. 🟡 Moderate")
                 print("3. 🔴 Aggressive")
                 level_choice = input("👉 Scegli (1-3): ").strip()
-                
                 aggressiveness = {
                     "1": "conservative",
                     "2": "moderate",
                     "3": "aggressive"
                 }.get(level_choice, "moderate")
-                
                 # Genera configurazione ottimizzata
                 optimizer = AutonomousHighStakesOptimizer()
                 config = optimizer.generate_optimized_config(aggressiveness)
-                
                 # Salva configurazione
                 filepath = optimizer.save_config(config, aggressiveness)
-                
                 print(f"✅ Configurazione {aggressiveness} generata e salvata: {os.path.basename(filepath)}")
+            elif choice == "7":
+                print("\n⚡ Tipologie disponibili:")
+                print("1. Scalping")
+                print("2. Intraday (Day Trading)")
+                print("3. Swing Trading")
+                print("4. Position Trading")
+                mode_choice = input("👉 Scegli tipologia (1-4): ").strip()
+                mode_map = {
+                    "1": "scalping",
+                    "2": "intraday",
+                    "3": "swing",
+                    "4": "position"
+                }
+                mode = mode_map.get(mode_choice, "intraday")
+                optimizer = AutonomousHighStakesOptimizer()
+                config = optimizer.generate_mode_config(mode)
+                # Salva configurazione
+                filename = f"config_{mode}_production_ready.json"
+                config_dir = os.path.join(os.path.dirname(optimizer.output_dir), "config")
+                os.makedirs(config_dir, exist_ok=True)
+                filepath = os.path.join(config_dir, filename)
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, indent=4, ensure_ascii=False)
+                print(f"✅ Configurazione {mode} generata e salvata: {os.path.basename(filepath)}")
             elif choice == "3":
                 # Auto-Best
                 print("\n🏆 Esecuzione Auto-Best (tutte le configurazioni, solo migliore mantenuta)...")
