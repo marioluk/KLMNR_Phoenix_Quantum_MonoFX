@@ -1032,9 +1032,25 @@ class QuantumRiskManager:
             else:
                 symbol_type = 'Forex'
 
-            logger.info(
-                f"[SIZE-DEBUG] {symbol} ({symbol_type}) | RiskAmount=${risk_amount:.2f} ({risk_percent*100:.2f}%) | "
-                f"SL={sl_pips:.2f} pips | PipValue=${pip_value:.4f} | ContractSize={contract_size} | Size={size:.4f}"
+            logger.debug("\n" +
+                "-------------------- [SIZE-DEBUG] --------------------\n" +
+                f"Symbol: {symbol} ({symbol_type})\n" +
+                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n" +
+                f"SL: {sl_pips:.2f} pips\n" +
+                f"Pip Value: ${pip_value:.4f}\n" +
+                f"Contract Size: {contract_size}\n" +
+                f"Size: {size:.4f}\n" +
+                "------------------------------------------------------\n"
+            )
+            logger.info("\n" +
+                "==================== [SIZE-DEBUG] ====================\n" +
+                f"Symbol: {symbol} ({symbol_type})\n" +
+                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n" +
+                f"SL: {sl_pips:.2f} pips\n" +
+                f"Pip Value: ${pip_value:.4f}\n" +
+                f"Contract Size: {contract_size}\n" +
+                f"Size: {size:.4f}\n" +
+                "======================================================\n"
             )
 
             return size
@@ -1083,7 +1099,12 @@ class QuantumRiskManager:
                              f"(Margine richiesto: ${margin_required:.2f}, disponibile: ${max_margin:.2f})")
                 size = safe_size
         
-        logger.info(f"Size finale per {symbol}: {size:.2f}")
+        logger.info(
+            "\n==================== [SIZE-FINALE] ====================\n"
+            f"Symbol: {symbol}\n"
+            f"Size finale: {size:.2f}\n"
+            "======================================================\n"
+        )
         
         return size
     
@@ -1163,9 +1184,18 @@ class QuantumRiskManager:
             sl_price = round(sl_price, digits)
             tp_price = round(tp_price, digits)
             logger.info(
-                f"Livelli calcolati per {symbol}: SL={sl_pips:.1f}pips TP={tp_pips:.1f}pips "
-                f"(Volatility={volatility:.2f}, min_sl={min_sl}, base_sl={base_sl}, multiplier={profit_multiplier}, "
-                f"trailing_activation_mode={activation_mode}, trailing_activation_pips={activation_pips})"
+                "\n==================== [LEVELS-DEBUG] ====================\n"
+                f"Symbol: {symbol}\n"
+                f"SL: {sl_pips:.1f} pips\n"
+                f"TP: {tp_pips:.1f} pips\n"
+                f"Entry Price: {entry_price}\n"
+                f"Volatility: {volatility:.2f}\n"
+                f"Min SL: {min_sl}\n"
+                f"Base SL: {base_sl}\n"
+                f"Multiplier: {profit_multiplier}\n"
+                f"Trailing Activation Mode: {activation_mode}\n"
+                f"Trailing Activation Pips: {activation_pips}\n"
+                "======================================================\n"
             )
             return sl_price, tp_price
         except Exception as e:
@@ -1224,8 +1254,16 @@ class QuantumRiskManager:
         else:
             final_sl = int(round(max(adjusted_sl, float(min_sl))))
 
-        logger.debug(f"SL calculation for {symbol}: base={base_sl}, volatility={volatility:.2f}, "
-                    f"factor={volatility_factor:.2f}, min_sl={min_sl}, final={final_sl} pips")
+        logger.debug(
+            "\n-------------------- [SL-CALC-DEBUG] ------------------\n"
+            f"Symbol: {symbol}\n"
+            f"Base SL: {base_sl}\n"
+            f"Volatility: {volatility:.2f}\n"
+            f"Factor: {volatility_factor:.2f}\n"
+            f"Min SL: {min_sl}\n"
+            f"Final SL: {final_sl} pips\n"
+            "------------------------------------------------------\n"
+        )
         return final_sl
 
     
