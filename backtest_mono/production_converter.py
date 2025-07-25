@@ -21,7 +21,7 @@ def deploy_ready_config():
     # Mostra i file disponibili
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_dir = os.path.abspath(os.path.join(script_dir, "..", "config"))
-    files = [f for f in os.listdir(config_dir) if f.startswith("config_autonomous_challenge_") and f.endswith("_production_ready.json")]
+    files = [f for f in os.listdir(config_dir) if f.endswith("_production_ready.json")]
     if not files:
         print("❌ Nessun file di configurazione disponibile per il deploy.")
         return False
