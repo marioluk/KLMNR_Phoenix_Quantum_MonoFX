@@ -16,7 +16,7 @@ Il Daily Config Updater:
 
 ### 1️⃣ Test del Sistema (OPZIONALE)
 ```powershell
-cd c:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system
+cd c:\KLMNR_Projects\KLMNR_Phoenix_Quantum_MonoFX
 .\auto_start_daily_updater.bat
 ```
 

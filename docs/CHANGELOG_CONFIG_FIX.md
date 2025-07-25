@@ -6,7 +6,7 @@
 
 #### **🏛️ Legacy Dashboard**
 ```
-legacy_system/dashboard_mono/
+dashboard_mono/
 ├── dashboard_the5ers.py       # Main dashboard app (updated)
 ├── start_dashboard.bat        # Windows launcher  
 ├── start_dashboard_debug.py   # Debug launcher

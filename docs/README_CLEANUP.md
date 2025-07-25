@@ -15,7 +15,7 @@ Questo documento descrive lo script `cleanup_production.bat` per la pulizia del 
 
 ## Esecuzione
 
-Apri un prompt dei comandi nella cartella `legacy_system` ed esegui:
+Apri un prompt dei comandi nella cartella `KLMNR_Phoenix_Quantum_MonoFX` ed esegui:
 ```
 cleanup_production.bat
 ```

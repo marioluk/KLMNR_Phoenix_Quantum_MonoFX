@@ -34,7 +34,7 @@ logs\daily_config_updater_20250720.log
 tools\mt5_manual_mode_manager.bat  # -> Gestione completa
 
 # Restart daily updater:
-legacy_system\auto_start_daily_updater.bat
+scripts\auto_start_daily_updater.bat
 ```
 
 ## ⚙️ Configurazione Enterprise Operativa

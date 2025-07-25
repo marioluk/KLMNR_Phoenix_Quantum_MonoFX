@@ -113,7 +113,7 @@ echo.
 echo Il Daily Config Updater è ora configurato per eseguire:
 echo - OGNI GIORNO alle 06:00
 echo - Con restart automatico su errore (max 3 tentativi)
-echo - Con log dettagliati in legacy_system\logs\
+echo - Con log dettagliati in logs\
 echo.
 echo OPZIONI DISPONIBILI:
 echo.

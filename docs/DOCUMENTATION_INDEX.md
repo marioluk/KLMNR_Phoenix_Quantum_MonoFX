@@ -25,7 +25,7 @@
 
 ### **📚 Directory Root Legacy:**
 ```
-legacy_system/
+KLMNR_Phoenix_Quantum_MonoFX/
 ├── 📖 README_LEGACY.md              # Doc principale sistema
 ├── ⚡ QUICK_START.md                 # Avvio rapido
 ├── 📊 PRODUCTION_STATUS.md           # Status produzione

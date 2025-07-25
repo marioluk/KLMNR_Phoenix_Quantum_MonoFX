@@ -8,7 +8,7 @@ echo [%date% %time%] AVVIO AUTOMATICO SISTEMA LEGACY
 echo =================================================================
 
 REM Cambia alla directory corretta
-cd /d "C:\KLMNR_Projects\KLMNR_Phoenix_Quantum\legacy_system"
+cd /d "C:\KLMNR_Projects\KLMNR_Phoenix_Quantum_MonoFX"
 
 REM Verifica che siamo nella directory corretta
 if not exist "phoenix_quantum_monofx_program.py" (
