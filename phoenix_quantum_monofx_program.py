@@ -12,9 +12,11 @@ from datetime import datetime, time as dt_time, timedelta  # <-- AGGIUNTO timede
 from typing import Dict, Tuple, List, Any, Optional
 from collections import deque, defaultdict
 from threading import Lock
+
 from logging.handlers import RotatingFileHandler
 import os
 import sys
+import json
 from functools import lru_cache
 
 
@@ -28,6 +30,11 @@ def auto_correct_symbols(config):
     """
     return config
 def load_config(config_path=CONFIG_FILE):
+    # Se il path è relativo, convertilo in assoluto rispetto alla root del progetto
+    if not os.path.isabs(config_path):
+        # Trova la root del progetto (dove si trova questo file)
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
     with open(config_path) as f:
         return json.load(f)
 
@@ -63,16 +70,21 @@ LOG_FILE = config["logging"]["log_file"]
 def setup_logger(config_path=CONFIG_FILE):
     """Configura il sistema di logging"""
     logger = logging.getLogger('QuantumTradingSystem')
-    
+
     if logger.handlers:
         return logger
+
+    # Risolvi il path assoluto del file di configurazione
+    if not os.path.isabs(config_path):
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
 
     # Carica la configurazione
     with open(config_path) as f:
         config = json.load(f)
-    
+
     log_config = config.get('logging', {})
-    
+
     # Crea la directory dei log se non esiste
     log_dir = os.path.dirname(log_config.get('log_file', 'logs/default.log'))
     os.makedirs(log_dir, exist_ok=True)
@@ -1587,6 +1599,203 @@ class QuantumTradingSystem:
     """
     Sistema completo di trading algoritmico quantistico
     """
+
+    def get_live_status(self):
+        """Restituisce lo stato live del sistema per la dashboard (tick, equity, bilancio, P&L, drawdown, posizioni)"""
+        try:
+            # Info account
+            account = mt5.account_info()
+            equity = account.equity if account else None
+            balance = account.balance if account else None
+            currency = account.currency if account else 'USD'
+            # Drawdown
+            drawdown = None
+            if hasattr(self, 'drawdown_tracker'):
+                drawdown = self.drawdown_tracker.get_drawdown() if hasattr(self.drawdown_tracker, 'get_drawdown') else None
+            # P&L
+            total_profit = self.trade_metrics.get('total_profit', 0.0)
+            # Posizioni aperte
+            open_positions = []
+            positions = mt5.positions_get()
+            if positions:
+                for pos in positions:
+                    open_positions.append({
+                        'ticket': pos.ticket,
+                        'symbol': pos.symbol,
+                        'type': 'BUY' if pos.type == mt5.ORDER_TYPE_BUY else 'SELL',
+                        'volume': pos.volume,
+                        'price_open': pos.price_open,
+                        'price_current': pos.price_current,
+                        'profit': pos.profit,
+                        'sl': pos.sl,
+                        'tp': pos.tp,
+                        'time': pos.time
+                    })
+            # Tick e dati di mercato per ogni simbolo
+            symbols_data = {}
+            for symbol in self.config_manager.symbols:
+                tick = mt5.symbol_info_tick(symbol)
+                symbols_data[symbol] = {
+                    'bid': getattr(tick, 'bid', None),
+                    'ask': getattr(tick, 'ask', None),
+                    'last': getattr(tick, 'last', None),
+                    'spread': getattr(tick, 'ask', 0) - getattr(tick, 'bid', 0) if tick else None,
+                    'time': getattr(tick, 'time', None)
+                }
+            return {
+                'equity': equity,
+                'balance': balance,
+                'currency': currency,
+                'drawdown': drawdown,
+                'total_profit': total_profit,
+                'open_positions': open_positions,
+                'symbols_data': symbols_data
+            }
+        except Exception as e:
+            logger.error(f"Errore get_live_status: {str(e)}")
+            return {}
+
+    def get_trade_history(self):
+        """Restituisce lo storico operazioni reali da MT5 (ultimi 30 giorni)"""
+        from datetime import datetime, timedelta
+        try:
+            date_to = datetime.now()
+            date_from = date_to - timedelta(days=30)
+            deals = mt5.history_deals_get(date_from, date_to)
+            history = []
+            if deals:
+                for d in deals:
+                    history.append({
+                        'ticket': d.ticket,
+                        'symbol': d.symbol,
+                        'type': 'BUY' if d.type == mt5.ORDER_TYPE_BUY else 'SELL',
+                        'volume': d.volume,
+                        'price': d.price,
+                        'profit': d.profit,
+                        'time': d.time,
+                        'comment': d.comment
+                    })
+            return history
+        except Exception as e:
+            logger.error(f"Errore get_trade_history: {str(e)}")
+            return []
+
+    def send_manual_order(self, symbol, type_, size, sl=None, tp=None):
+        """
+        Invia un ordine manuale buy/sell su MT5
+        Args:
+            symbol: str
+            type_: 'BUY' o 'SELL'
+            size: float
+            sl: float (prezzo stop loss)
+            tp: float (prezzo take profit)
+        Returns:
+            dict: risultato operazione
+        """
+        try:
+            if type_ == 'BUY':
+                order_type = mt5.ORDER_TYPE_BUY
+            elif type_ == 'SELL':
+                order_type = mt5.ORDER_TYPE_SELL
+            else:
+                return {'success': False, 'error': 'Tipo ordine non valido'}
+
+            symbol_info = mt5.symbol_info(symbol)
+            if not symbol_info:
+                return {'success': False, 'error': f'Simbolo {symbol} non trovato'}
+
+            price = symbol_info.ask if order_type == mt5.ORDER_TYPE_BUY else symbol_info.bid
+            request = {
+                'action': mt5.TRADE_ACTION_DEAL,
+                'symbol': symbol,
+                'volume': float(size),
+                'type': order_type,
+                'price': price,
+                'sl': sl if sl else 0.0,
+                'tp': tp if tp else 0.0,
+                'deviation': 10,
+                'magic': 123456,
+                'comment': 'Manual order from dashboard',
+                'type_time': mt5.ORDER_TIME_GTC,
+                'type_filling': mt5.ORDER_FILLING_IOC
+            }
+            result = mt5.order_send(request)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                return {'success': True, 'ticket': result.order, 'result': str(result)}
+            else:
+                return {'success': False, 'error': str(result)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def modify_order(self, ticket, sl=None, tp=None):
+        """
+        Modifica SL/TP di una posizione aperta
+        Args:
+            ticket: int
+            sl: float
+            tp: float
+        Returns:
+            dict: risultato operazione
+        """
+        try:
+            position = mt5.positions_get(ticket=ticket)
+            if not position:
+                return {'success': False, 'error': f'Posizione {ticket} non trovata'}
+            pos = position[0]
+            request = {
+                'action': mt5.TRADE_ACTION_SLTP,
+                'position': ticket,
+                'sl': sl if sl else pos.sl,
+                'tp': tp if tp else pos.tp,
+                'symbol': pos.symbol,
+                'magic': pos.magic,
+                'comment': 'Modify SL/TP from dashboard'
+            }
+            result = mt5.order_send(request)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                return {'success': True, 'result': str(result)}
+            else:
+                return {'success': False, 'error': str(result)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def close_order(self, ticket):
+        """
+        Chiude manualmente una posizione aperta
+        Args:
+            ticket: int
+        Returns:
+            dict: risultato operazione
+        """
+        try:
+            position = mt5.positions_get(ticket=ticket)
+            if not position:
+                return {'success': False, 'error': f'Posizione {ticket} non trovata'}
+            pos = position[0]
+            symbol = pos.symbol
+            volume = pos.volume
+            order_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+            price = mt5.symbol_info(symbol).bid if order_type == mt5.ORDER_TYPE_SELL else mt5.symbol_info(symbol).ask
+            request = {
+                'action': mt5.TRADE_ACTION_DEAL,
+                'symbol': symbol,
+                'volume': volume,
+                'type': order_type,
+                'position': ticket,
+                'price': price,
+                'deviation': 10,
+                'magic': pos.magic,
+                'comment': 'Manual close from dashboard',
+                'type_time': mt5.ORDER_TIME_GTC,
+                'type_filling': mt5.ORDER_FILLING_IOC
+            }
+            result = mt5.order_send(request)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                return {'success': True, 'result': str(result)}
+            else:
+                return {'success': False, 'error': str(result)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
     
     """
     1. Inizializzazione e Configurazione
