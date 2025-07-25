@@ -387,6 +387,20 @@ class QuantumEngine:
     
 
     def can_trade(self, symbol: str) -> bool:
+        # 0. Controllo limiti di posizione per simbolo
+        position_limits = getattr(self, 'position_limits', {})
+        max_positions_per_symbol = getattr(self, 'max_positions_per_symbol', None)
+        if max_positions_per_symbol is not None:
+            current_limit = position_limits.get(symbol, 0)
+            if current_limit >= max_positions_per_symbol:
+                logger.info(
+                    "\n-------------------- [POSITION LIMIT] ------------------\n"
+                    f"Symbol: {symbol}\n"
+                    f"Current: {current_limit}\n"
+                    f"Max Allowed: {max_positions_per_symbol}\n"
+                    "------------------------------------------------------\n"
+                )
+                return False
         """Verifica se è possibile aprire una nuova posizione con controlli completi"""
         # 1. Controlla cooldown
         if self.is_in_cooldown_period(symbol):
@@ -1892,12 +1906,27 @@ class QuantumTradingSystem:
                 
             for symbol in self.config_manager.symbols:
                 tick = mt5.symbol_info_tick(symbol)
-                logger.debug(f"[DEBUG TICK] {symbol}: tick={tick}")
+                logger.debug(
+                    "\n-------------------- [DEBUG TICK] ----------------------\n"
+                    f"Symbol: {symbol}\n"
+                    f"Tick: {tick}\n"
+                    "------------------------------------------------------\n"
+                )
                 if tick:
-                    logger.debug(f"[DEBUG TICK] {symbol}: tick.bid={getattr(tick, 'bid', None)}")
+                    logger.debug(
+                        "\n-------------------- [DEBUG TICK] ----------------------\n"
+                        f"Symbol: {symbol}\n"
+                        f"Tick.bid: {getattr(tick, 'bid', None)}\n"
+                        "------------------------------------------------------\n"
+                    )
                     self.engine.process_tick(symbol, tick.bid)
                     buffer_size = len(self.engine.tick_buffer.get(symbol, []))
-                    logger.debug(f"{symbol} buffer: {buffer_size}")
+                    logger.debug(
+                        "\n-------------------- [BUFFER-DEBUG] --------------------\n"
+                        f"Symbol: {symbol}\n"
+                        f"Buffer Size: {buffer_size}\n"
+                        "------------------------------------------------------\n"
+                    )
                 
             try:
                 # Timeout per process_symbols
