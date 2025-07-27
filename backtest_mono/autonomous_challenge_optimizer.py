@@ -505,7 +505,11 @@ class AutonomousHighStakesOptimizer:
         }
         return config
 
-    def save_config(self, config: Dict, aggressiveness: str) -> str:
+    def save_config(self, config: Dict, aggressiveness: str, base_config_path: str = None) -> str:
+        """
+        Salva la configurazione generata, centralizzando tutti i parametri numerici e di orario dal file di configurazione se fornito.
+        """
+        import json
         config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
         os.makedirs(config_dir, exist_ok=True)
         now = datetime.now()
@@ -517,83 +521,51 @@ class AutonomousHighStakesOptimizer:
         filename = f"config_autonomous_challenge_{aggressiveness}_production_ready.json"
         filepath = os.path.join(config_dir, filename)
 
-        # Sezioni statiche e parametri avanzati
+        # Carica parametri di base dal file di configurazione se fornito
+        base_conf = {}
+        if base_config_path and os.path.exists(base_config_path):
+            with open(base_config_path, 'r', encoding='utf-8') as f:
+                base_conf = json.load(f)
+
+        def get_param(section, key, default):
+            return base_conf.get(section, {}).get(key, default)
+
+        def get_section(section, default):
+            return base_conf.get(section, default)
+
         production_config = {
             "logging": {
                 "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready_{timestamp_str}.log",
-                "max_size_mb": 50,
-                "backup_count": 7,
-                "log_level": "INFO"
+                "max_size_mb": get_param("logging", "max_size_mb", 50),
+                "backup_count": get_param("logging", "backup_count", 7),
+                "log_level": get_param("logging", "log_level", "INFO")
             },
-            "metatrader5": {
+            "metatrader5": get_section("metatrader5", {
                 "login": 25437097,
                 "password": "wkchTWEO_.00",
                 "server": "FivePercentOnline-Real",
                 "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
                 "port": 18889
-            },
-            "account_currency": "USD",
-            "initial_balance": 5000,
+            }),
+            "account_currency": base_conf.get("account_currency", "USD"),
+            "initial_balance": base_conf.get("initial_balance", 5000),
             "quantum_params": config.get("quantum_params", {}),
             "risk_parameters": {
                 "magic_number": magic_number,
-                "position_cooldown": 900,
+                "position_cooldown": get_param("risk_parameters", "position_cooldown", 900),
                 "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 4),
                 "daily_trade_limit_mode": config.get("risk_parameters", {}).get("daily_trade_limit_mode", "per_symbol"),
-                "max_positions": 1,
-                "min_sl_distance_pips": {
-                    "EURUSD": 30,
-                    "GBPUSD": 35,
-                    "USDJPY": 25,
-                    "XAUUSD": 150,
-                    "NAS100": 50,
-                    "SP500": 15,
-                    "US30": 30,
-                    "BTCUSD": 200,
-                    "ETHUSD": 100,
-                    "USDCHF": 30,
-                    "default": 40
-                },
-                "base_sl_pips": {
-                    "EURUSD": 50,
-                    "GBPUSD": 60,
-                    "USDJPY": 40,
-                    "XAUUSD": 220,
-                    "NAS100": 100,
-                    "SP500": 30,
-                    "US30": 60,
-                    "BTCUSD": 400,
-                    "ETHUSD": 200,
-                    "USDCHF": 50,
-                    "default": 80
-                },
-                "profit_multiplier": 2.2,
-                "max_position_hours": 6,
+                "max_positions": get_param("risk_parameters", "max_positions", 1),
+                "min_sl_distance_pips": get_param("risk_parameters", "min_sl_distance_pips", {}),
+                "base_sl_pips": get_param("risk_parameters", "base_sl_pips", {}),
+                "profit_multiplier": get_param("risk_parameters", "profit_multiplier", 2.2),
+                "max_position_hours": get_param("risk_parameters", "max_position_hours", 6),
                 "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.005),
-                "trailing_stop": {
-                    "enable": True,
-                    "activation_mode": "percent_tp",
-                    "tp_percentage": 0.5,
-                    "activation_pips": 150,
-                    "step_pips": 50,
-                    "lock_percentage": 0.5
-                },
-                "max_spread": {
-                    "EURUSD": 12,
-                    "USDJPY": 10,
-                    "GBPUSD": 15,
-                    "USDCHF": 15,
-                    "SP500": 60,
-                    "NAS100": 180,
-                    "US30": 60,
-                    "BTCUSD": 250,
-                    "ETHUSD": 150,
-                    "XAUUSD": 40,
-                    "default": 80
-                }
+                "trailing_stop": get_param("risk_parameters", "trailing_stop", {}),
+                "max_spread": get_param("risk_parameters", "max_spread", {})
             },
             "symbols": {},
-            "challenge_specific": {
+            "challenge_specific": get_section("challenge_specific", {
                 "step1_target": 8,
                 "max_daily_loss_percent": 5,
                 "max_total_loss_percent": 10,
@@ -601,7 +573,7 @@ class AutonomousHighStakesOptimizer:
                     "soft_limit": 0.02,
                     "hard_limit": 0.05
                 }
-            },
+            }),
             "conversion_metadata": {
                 "created_by": "AutonomousHighStakesOptimizer",
                 "creation_date": datetime.now().isoformat(),
