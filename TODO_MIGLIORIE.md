@@ -17,8 +17,8 @@
 - [x] Documentare meglio i parametri e i return nei docstring
 
 ## Logging e Debug
-- [ ] Uniformare i livelli di log e i messaggi (info, warning, error, critical, debug)
-- [ ] Migliorare i messaggi di log per i casi di edge-case o fallback
+- [x] Uniformare i livelli di log e i messaggi (info, warning, error, critical, debug)
+- [x] Migliorare i messaggi di log per i casi di edge-case o fallback
 
 ## Edge Case e Funzionalità
 - [ ] Implementare la funzione `get_daily_loss` (attualmente stub)

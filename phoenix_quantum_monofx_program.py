@@ -129,13 +129,13 @@ def validate_config(config):
     log_conf = config["logging"]
     if "log_file" not in log_conf:
         log_conf["log_file"] = "logs/default.log"
-        logger.info("[Config] log_file non trovato, uso default logs/default.log")
+        logger.warning("[Config] log_file non trovato, uso default logs/default.log")
     if "max_size_mb" not in log_conf or log_conf.get("max_size_mb", 0) <= 0:
         log_conf["max_size_mb"] = 10
-        logger.info("[Config] max_size_mb non trovato o non valido, uso default 10")
+        logger.warning("[Config] max_size_mb non trovato o non valido, uso default 10")
     if "backup_count" not in log_conf or log_conf.get("backup_count", 0) < 1:
         log_conf["backup_count"] = 5
-        logger.info("[Config] backup_count non trovato o troppo basso, uso default 5")
+        logger.warning("[Config] backup_count non trovato o troppo basso, uso default 5")
 
 
     # Fallback e default per metatrader5
@@ -150,7 +150,7 @@ def validate_config(config):
     for k, v in mt5_defaults.items():
         if k not in mt5_conf:
             mt5_conf[k] = v
-            logger.info(f"[Config] {k} non trovato in metatrader5, uso default {v}")
+            logger.warning(f"[Config] {k} non trovato in metatrader5, uso default {v}")
 
 
 ## --- Tutte le funzioni e classi rimangono qui ---
@@ -662,7 +662,7 @@ class QuantumEngine:
         try:
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
-                logger.info(f"Impossibile ottenere info simbolo {symbol}")
+                logger.error(f"Impossibile ottenere info simbolo {symbol}")
                 return False
             current_spread = (symbol_info.ask - symbol_info.bid) / self._get_pip_size(symbol)
             symbol_config = self._get_symbol_config(symbol)
@@ -672,7 +672,7 @@ class QuantumEngine:
             else:
                 max_allowed = max_spread
             if current_spread > max_allowed:
-                logger.debug(f"Spread {symbol} troppo alto: {current_spread:.1f}p > {max_allowed}p")
+                logger.warning(f"Spread {symbol} troppo alto: {current_spread:.1f}p > {max_allowed}p")
                 return False
         except Exception as e:
             logger.error(f"Errore verifica spread {symbol}: {e}")
@@ -681,7 +681,7 @@ class QuantumEngine:
         # 3. Controlla numero massimo posizioni aperte
         positions = mt5.positions_get()
         if positions and len(positions) >= self.config.get('risk_parameters', {}).get('max_positions', 1):
-            logger.debug(f"Massimo numero posizioni raggiunto: {len(positions)}")
+            logger.warning(f"Massimo numero posizioni raggiunto: {len(positions)}")
             return False
             
         # 4. Controlla trades giornalieri - RIMOSSO controllo qui per evitare duplicazione
@@ -693,7 +693,7 @@ class QuantumEngine:
         """Registra la chiusura solo se effettivamente avvenuta"""
         if mt5.positions_get(symbol=symbol) is None or len(mt5.positions_get(symbol=symbol)) == 0:
             self.set_position_cooldown(symbol, time.time())
-            logger.debug(f"Cooldown registrato per {symbol} (1800s)")
+            logger.info(f"Cooldown registrato per {symbol} (1800s)")
 
         
 
@@ -854,7 +854,7 @@ class QuantumEngine:
         try:
             ticks = list(self.get_tick_buffer(symbol))
             if len(ticks) < self.min_spin_samples:
-                logger.debug(f"{symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks)")
+                logger.warning(f"[EdgeCase] {symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks) - segnale non affidabile 🚩")
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
             recent_ticks = ticks[-spin_window:]
