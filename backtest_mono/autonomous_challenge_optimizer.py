@@ -507,7 +507,7 @@ class AutonomousHighStakesOptimizer:
 
     def save_config(self, config: Dict, aggressiveness: str, base_config_path: str = None) -> str:
         """
-        Salva la configurazione generata, centralizzando tutti i parametri numerici e di orario dal file di configurazione se fornito.
+        Salva la configurazione generata, includendo tutti i parametri richiesti dal file di produzione e mantenendo i parametri ottimizzati.
         """
         import json
         config_dir = os.path.join(os.path.dirname(self.output_dir), "config")
@@ -533,6 +533,63 @@ class AutonomousHighStakesOptimizer:
         def get_section(section, default):
             return base_conf.get(section, default)
 
+        # --- QUANTUM PARAMS ---
+        quantum_params = config.get("quantum_params", {}).copy()
+        # Aggiungi parametri extra se presenti nel config ottimizzato
+        for k in ["spin_window", "min_spin_samples", "spin_threshold", "entropy_thresholds", "volatility_scale"]:
+            if k in config.get("quantum_params", {}):
+                quantum_params[k] = config["quantum_params"][k]
+
+        # --- RISK PARAMETERS ---
+        risk_parameters = config.get("risk_parameters", {}).copy()
+        # Aggiungi parametri extra se presenti nel config ottimizzato
+        for k in ["magic_number", "position_cooldown", "max_daily_trades", "max_positions", "min_sl_distance_pips", "base_sl_pips", "profit_multiplier", "max_position_hours", "risk_percent", "trailing_stop", "max_spread"]:
+            if k in config.get("risk_parameters", {}):
+                risk_parameters[k] = config["risk_parameters"][k]
+
+        # --- SYMBOLS ---
+        symbols = {}
+        for symbol, params in config.get('symbols', {}).items():
+            # Ricostruisci la sezione risk_management per ogni simbolo
+            risk_management = {
+                "contract_size": params.get("contract_size", 0.01),
+                "min_sl_distance_pips": params.get("min_sl_distance_pips", 12),
+                "base_sl_pips": params.get("base_sl_pips", 12),
+                "profit_multiplier": params.get("profit_multiplier", 2.2),
+                "risk_percent": params.get("risk_percent", 0.08),
+                "trailing_stop": params.get("trailing_stop", {"activation_pips": 24, "step_pips": 12})
+            }
+            # Permetti override dei parametri ottimizzati
+            for k in ["contract_size", "min_sl_distance_pips", "base_sl_pips", "profit_multiplier", "risk_percent", "trailing_stop"]:
+                if k in params:
+                    risk_management[k] = params[k]
+            # Quantum override
+            quantum_override = params.get("quantum_params_override", {})
+            for k in ["spin_window", "min_spin_samples", "signal_cooldown", "entropy_thresholds"]:
+                if k in params:
+                    quantum_override[k] = params[k]
+            symbols[symbol] = {
+                "risk_management": risk_management,
+                "timezone": params.get("timezone", "Europe/Rome"),
+                "trading_hours": params.get("trading_hours", ["09:00-10:30", "14:00-16:00"]),
+                "comment": params.get("comment", f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}"),
+                "quantum_params_override": quantum_override
+            }
+
+        # --- MAX SPREAD ---
+        max_spread = get_param("risk_parameters", "max_spread", {})
+        if not max_spread:
+            # Ricava max_spread per simbolo se non presente
+            max_spread = {s: params.get("max_spread", 20) for s, params in config.get('symbols', {}).items()}
+        risk_parameters["max_spread"] = max_spread
+
+        # --- TRAILING STOP ---
+        trailing_stop = get_param("risk_parameters", "trailing_stop", {})
+        if not trailing_stop:
+            trailing_stop = {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}
+        risk_parameters["trailing_stop"] = trailing_stop
+
+        # --- PRODUZIONE CONFIG ---
         production_config = {
             "logging": {
                 "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready_{timestamp_str}.log",
@@ -548,23 +605,11 @@ class AutonomousHighStakesOptimizer:
                 "port": 18889
             }),
             "account_currency": base_conf.get("account_currency", "USD"),
+            "magic_number": magic_number,
             "initial_balance": base_conf.get("initial_balance", 5000),
-            "quantum_params": config.get("quantum_params", {}),
-            "risk_parameters": {
-                "magic_number": magic_number,
-                "position_cooldown": get_param("risk_parameters", "position_cooldown", 900),
-                "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 4),
-                "daily_trade_limit_mode": config.get("risk_parameters", {}).get("daily_trade_limit_mode", "per_symbol"),
-                "max_positions": get_param("risk_parameters", "max_positions", 1),
-                "min_sl_distance_pips": get_param("risk_parameters", "min_sl_distance_pips", {}),
-                "base_sl_pips": get_param("risk_parameters", "base_sl_pips", {}),
-                "profit_multiplier": get_param("risk_parameters", "profit_multiplier", 2.2),
-                "max_position_hours": get_param("risk_parameters", "max_position_hours", 6),
-                "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.005),
-                "trailing_stop": get_param("risk_parameters", "trailing_stop", {}),
-                "max_spread": get_param("risk_parameters", "max_spread", {})
-            },
-            "symbols": {},
+            "quantum_params": quantum_params,
+            "risk_parameters": risk_parameters,
+            "symbols": symbols,
             "challenge_specific": get_section("challenge_specific", {
                 "step1_target": 8,
                 "max_daily_loss_percent": 5,
@@ -581,27 +626,8 @@ class AutonomousHighStakesOptimizer:
             }
         }
 
-        # Override dinamico per simbolo
-        for symbol, params in config.get('symbols', {}).items():
-            production_config['symbols'][symbol] = {
-                "risk_management": {
-                    "stop_loss_pips": params.get("stop_loss_pips", 40),
-                    "take_profit_pips": params.get("take_profit_pips", 40),
-                    "risk_percent": params.get("risk_percent", 0.007)
-                },
-                "timezone": params.get("timezone", "Europe/Rome"),
-                "trading_hours": params.get("trading_hours", ["09:00-10:30", "14:00-16:00"]),
-                "comment": f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}",
-                "quantum_params_override": {
-                    "signal_buy_threshold": params.get("signal_buy_threshold"),
-                    "signal_sell_threshold": params.get("signal_sell_threshold"),
-                    "confidence_threshold": params.get("confidence_threshold")
-                }
-            }
-
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
-                #json.dump(production_config, f, indent=4, ensure_ascii=False)
                 json.dump({"config": production_config}, f, indent=4)
             return filepath
         except Exception as e:
