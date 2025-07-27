@@ -93,7 +93,7 @@ Per attivare il trailing stop a 150 pips fissi:
 ```
 
 **Nota:** La modalità può essere cambiata in qualsiasi momento aggiornando la config, senza riavviare il sistema.
-# 🎯 BROKER QUANTUM TRADING SYSTEM - LEGACY MONOLITHIC VERSION
+# 🎯 BROKER QUANTUM TRADING SYSTEM MONOLITHIC VERSION
 ## Sistema Monolitico Completo e Funzionante
 
 ---
@@ -138,21 +138,18 @@ Configurabile da file di configurazione, supportata sia dal motore di trading ch
 
 ---
 
-## 🚨 **IMPORTANTE - SISTEMA LEGACY**
+## 🚨 **IMPORTANTE - SISTEMA MONOLITICO**
 
 ⚠️ **Questo README documenta il SISTEMA MONOLITICO** contenuto nel file `phoenix_quantum_monofx_program.py`
 
 🔄 **Per panoramica completa del progetto** → vedi `README_PROJECT_OVERVIEW.md`  
-🏗️ **Per sistema modulare refactorizzato** → vedi cartella `quantum_trading_system/`  
-📚 **Per documentazione legacy dedicata** → vedi `legacy_system/README_LEGACY.md`  
-🎯 **Per sistema backtest integrato** → vedi `legacy_system/backtest_mono/README.md`
+🎯 **Per sistema backtest integrato** → vedi `/backtest_mono/README.md`
 
 ## 📁 **ORGANIZZAZIONE PROJECT AGGIORNATA**
 
 ### Sistema Reorganizzato e Ottimizzato (Luglio 2025)
 ```
-KLMNR_Phoenix_Quantum/
-├── legacy_system/              # 🏛️ Sistema Legacy Completo e FUNZIONANTE
+KLMNR_Phoenix_Quantum_MonoFX/
 │   ├── phoenix_quantum_monofx_program.py  # Main MonoFX (MT5 FIXED)
 │   ├── config/                 # Configurazioni centralizzate
 │   ├── backtest_mono/        # Tools di backtest (AGGIORNATI)
@@ -162,22 +159,22 @@ KLMNR_Phoenix_Quantum/
 │   ├── dashboard_mono/       # Dashboard web mono
 │   └── logs/                   # Log files
 ├── quantum_trading_system/     # 🚀 Sistema Moderno (In sviluppo)
-├── dashboard/                  # 🎨 Dashboard Moderna (Futura)
+├── dashboard_mono/                  # 🎨 Dashboard Moderna (Futura)
 ├── backtest/                  # 🧪 Tools di testing e analisi
 ├── docs/                      # 📚 Documentazione
 └── .gitignore                 # 🔧 Git ottimizzato (FIXED)
 ```
 
 ### Quick Start
-- **Sistema Legacy**: `cd legacy_system && start_legacy.bat`
+
 - **Dashboard Mono**: `cd legacy_system/dashboard_mono && start_dashboard.bat`
 - **Backtest Tools**: `cd backtest_clean`
 
 ---
 
-## 📋 **OVERVIEW ARCHITETTURALE - SISTEMA LEGACY**
+## 📋 **OVERVIEW ARCHITETTURALE - SISTEMA MONOLITICO**
 
-Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo basato su su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
+Il sistema è implementato attraverso **6 classi principali** che operano in sinergia per fornire un trading system completo basato su principi quantistici e analisi dell'entropia. Il core engine applica algoritmi matematici avanzati per l'analisi dei tick di mercato e la generazione di segnali di alta qualità.
 
 ### **�️ ARCHITETTURA DELLE CLASSI:**
 1. **`ConfigManager`** - Gestione configurazione e validazione parametri
