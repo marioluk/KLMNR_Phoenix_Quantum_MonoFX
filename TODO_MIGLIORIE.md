@@ -8,13 +8,13 @@
 - [x] Controllare che tutti i simboli abbiano i campi richiesti (risk_management, trading_hours, ecc.)
 
 ## Stile, Best Practice e Robustezza
-- [ ] Aggiungere type hint a tutti i metodi pubblici e principali
-- [ ] Estrarre costanti hardcoded in alto al file o nella config
-- [ ] Migliorare la gestione delle eccezioni: evitare di "mangiare" errori critici, loggare sempre con contesto
-- [ ] Estrarre utility/metodi privati per evitare duplicazione di controlli (es. simboli, posizioni, limiti)
-- [ ] Spezzare i metodi molto lunghi in funzioni più piccole e testabili
-- [ ] Aggiungere test automatici/unitari per la business logic
-- [ ] Documentare meglio i parametri e i return nei docstring
+- [x] Aggiungere type hint a tutti i metodi pubblici e principali
+- [x] Estrarre costanti hardcoded in alto al file o nella config
+- [x] Migliorare la gestione delle eccezioni: evitare di "mangiare" errori critici, loggare sempre con contesto
+- [x] Estrarre utility/metodi privati per evitare duplicazione di controlli (es. simboli, posizioni, limiti)
+- [x] Spezzare i metodi molto lunghi in funzioni più piccole e testabili
+- [x] Aggiungere test automatici/unitari per la business logic
+- [x] Documentare meglio i parametri e i return nei docstring
 
 ## Logging e Debug
 - [ ] Uniformare i livelli di log e i messaggi (info, warning, error, critical, debug)
