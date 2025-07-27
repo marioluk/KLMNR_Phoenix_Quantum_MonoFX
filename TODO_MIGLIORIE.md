@@ -21,9 +21,9 @@
 - [x] Migliorare i messaggi di log per i casi di edge-case o fallback
 
 ## Edge Case e Funzionalità
-- [ ] Implementare la funzione `get_daily_loss` (attualmente stub)
-- [ ] Verificare che la funzione `is_trading_hours` gestisca bene fusi orari e giorni festivi
-- [ ] Verificare che tutte le variabili condivise siano protette da lock/thread-safe
+- [x] Implementare la funzione `get_daily_loss` (attualmente stub)
+- [x] Verificare che la funzione `is_trading_hours` gestisca bene fusi orari e giorni festivi
+- [x] Verificare che tutte le variabili condivise siano protette da lock/thread-safe
 
 ## Extra
 - [ ] Centralizzare la documentazione delle configurazioni e dei parametri accettati

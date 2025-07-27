@@ -589,6 +589,7 @@ class AutonomousHighStakesOptimizer:
                     "take_profit_pips": params.get("take_profit_pips", 40),
                     "risk_percent": params.get("risk_percent", 0.007)
                 },
+                "timezone": params.get("timezone", "Europe/Rome"),
                 "trading_hours": params.get("trading_hours", ["09:00-10:30", "14:00-16:00"]),
                 "comment": f"Override generato dinamicamente per {symbol} - score {params.get('optimization_score', 0):.2f}",
                 "quantum_params_override": {
@@ -600,7 +601,8 @@ class AutonomousHighStakesOptimizer:
 
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(production_config, f, indent=4, ensure_ascii=False)
+                #json.dump(production_config, f, indent=4, ensure_ascii=False)
+                json.dump({"config": production_config}, f, indent=4)
             return filepath
         except Exception as e:
             logger.error(f"❌ Errore salvataggio {filepath}: {e}")
