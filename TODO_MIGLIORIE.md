@@ -31,7 +31,12 @@
 
 
 NUOVE IMPLEMENTAZIONI
-Possibilità di testare w confrontare tutti i tipi di trading 
+
+Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono
+
+togliere tutti i riferimenti a legacy sostituire con mono
+
+
 
 ---
 
