@@ -29,6 +29,10 @@
 - [x] Centralizzare la documentazione delle configurazioni e dei parametri accettati
 - [x] Aggiornare la documentazione tecnica e README con le nuove best practice
 
+
+NUOVE IMPLEMENTAZIONI
+Possibilità di testare w confrontare tutti i tipi di trading 
+
 ---
 
 > Aggiornare questa lista man mano che si implementano le migliorie o si identificano nuove aree di intervento.
