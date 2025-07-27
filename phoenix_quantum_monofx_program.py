@@ -1931,7 +1931,7 @@ class QuantumTradingSystem:
             self._process_symbols()
             self.check_buffers()
             # Heartbeat/logging operativo
-            logger.info("[Heartbeat] Ciclo trading completato.")
+            logger.debug("[Heartbeat] Ciclo trading completato.")
         except Exception as e:
             logger.error(f"Errore nel main loop: {e}", exc_info=True)
     """
