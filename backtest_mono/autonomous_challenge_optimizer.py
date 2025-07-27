@@ -556,6 +556,11 @@ class AutonomousHighStakesOptimizer:
                 "USDJPY": 25,
                 "XAUUSD": 150,
                 "NAS100": 50,
+                "SP500": 15,
+                "US30": 30,
+                "BTCUSD": 200,
+                "ETHUSD": 100,
+                "USDCHF": 30,
                 "default": 40
             },
             "base_sl_pips": {
@@ -564,6 +569,11 @@ class AutonomousHighStakesOptimizer:
                 "USDJPY": 40,
                 "XAUUSD": 220,
                 "NAS100": 100,
+                "SP500": 30,
+                "US30": 60,
+                "BTCUSD": 400,
+                "ETHUSD": 200,
+                "USDCHF": 50,
                 "default": 80
             },
             "profit_multiplier": config.get("risk_parameters", {}).get("profit_multiplier", 2.2),
@@ -575,12 +585,13 @@ class AutonomousHighStakesOptimizer:
                 "USDJPY": 10,
                 "GBPUSD": 15,
                 "USDCHF": 15,
-                "SP500": 50,
+                "SP500": 60,
                 "NAS100": 180,
                 "US30": 60,
                 "BTCUSD": 250,
                 "ETHUSD": 150,
-                "XAUUSD": 40
+                "XAUUSD": 40,
+                "default": 80
             }
         }
 
