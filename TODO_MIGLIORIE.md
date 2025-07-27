@@ -26,8 +26,8 @@
 - [x] Verificare che tutte le variabili condivise siano protette da lock/thread-safe
 
 ## Extra
-- [ ] Centralizzare la documentazione delle configurazioni e dei parametri accettati
-- [ ] Aggiornare la documentazione tecnica e README con le nuove best practice
+- [x] Centralizzare la documentazione delle configurazioni e dei parametri accettati
+- [x] Aggiornare la documentazione tecnica e README con le nuove best practice
 
 ---
 

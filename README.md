@@ -762,3 +762,24 @@ Gross_Loss = ∑(tutti i trade perdenti)
 ---
 
 *Sistema progettato per maximizzare le probabilità di successo attraverso algoritmi quantistici avanzati, matematica finanziaria rigorosa e risk management disciplinato.*
+
+---
+
+# 🚀 Best Practice 2025 - Phoenix Quantum MonoFX
+
+- Tutte le configurazioni sono centralizzate in `config/` e documentate in `config/README.md` (tabella parametri accettati)
+- Validazione automatica della configurazione all’avvio: warning/errore per parametri mancanti o incoerenti
+- Fallback e default robusti per tutti i parametri opzionali
+- Magic number, spread, orari, pips e limiti sono gestiti solo tramite file di configurazione
+- Logging uniforme (info, warning, error, critical, debug) e messaggi dettagliati per edge-case
+- Tutte le variabili condivise sono protette da lock/thread-safe
+- Test automatici/unitari per la business logic e validazione config
+- Docstring dettagliati per ogni funzione pubblica e parametri
+- Un solo README principale per chiarezza, con rimando a `config/README.md` e `docs/CONFIG_ORGANIZATION_GUIDE.md`
+
+---
+
+Per la descrizione completa di tutti i parametri accettati, consulta la tabella in `config/README.md`.
+Per la struttura delle cartelle e la generazione/gestione delle configurazioni, vedi anche `docs/CONFIG_ORGANIZATION_GUIDE.md`.
+
+---

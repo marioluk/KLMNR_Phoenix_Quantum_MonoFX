@@ -15,3 +15,58 @@ Vedrai nei log tutte le informazioni utili per il debug delle differenze tra for
 ### Note aggiuntive
 - Ricordati di riportare il log_level a "INFO" in produzione per evitare file di log troppo grandi.
 - Per troubleshooting avanzato, consulta anche la documentazione tecnica nella cartella `docs/`.
+
+---
+
+## 📑 Parametri di configurazione accettati
+
+| Chiave principale | Sottochiave / Parametro         | Tipo      | Default / Esempio | Descrizione breve |
+|-------------------|----------------------------------|-----------|-------------------|-------------------|
+| logging           | log_file                         | string    | logs/log_...log   | Path file di log  |
+| logging           | max_size_mb                      | int       | 50                | Max size log (MB) |
+| logging           | backup_count                     | int       | 7                 | Rotazione log     |
+| logging           | log_level                        | string    | INFO              | Livello log       |
+| metatrader5       | login                            | int       | ...               | Login MT5         |
+| metatrader5       | password                         | string    | ...               | Password MT5      |
+| metatrader5       | server                           | string    | ...               | Server MT5        |
+| metatrader5       | path                             | string    | ...               | Path terminal     |
+| metatrader5       | port                             | int       | 18889             | Porta terminal    |
+| account_currency  |                                  | string    | USD               | Valuta account    |
+| initial_balance   |                                  | float     | 5000              | Balance iniziale  |
+| quantum_params    | buffer_size                      | int       | 200               | Buffer segnali    |
+| quantum_params    | signal_cooldown                  | int       | 300               | Cooldown segnali  |
+| quantum_params    | adaptive_threshold               | float     | ...               | Soglia adattiva   |
+| quantum_params    | volatility_filter                | float     | ...               | Filtro volatilità |
+| quantum_params    | trend_strength_min               | float     | 0.6               | Min trend         |
+| quantum_params    | confluence_threshold             | float     | ...               | Soglia confluenza |
+| quantum_params    | quantum_boost                    | bool      | true              | Boost quantum     |
+| quantum_params    | neural_enhancement               | bool      | true              | Potenziamento NN  |
+| quantum_params    | spin_window                      | int       | 20                | Finestra spin     |
+| quantum_params    | min_spin_samples                 | int       | 5                 | Min campioni spin |
+| risk_parameters   | magic_number                     | int       | ...               | Magic number      |
+| risk_parameters   | position_cooldown                | int       | 900               | Cooldown posizioni|
+| risk_parameters   | max_daily_trades                 | int       | 4                 | Max trade/giorno  |
+| risk_parameters   | daily_trade_limit_mode           | string    | per_symbol        | Limite trade/giorno|
+| risk_parameters   | max_positions                    | int       | 1                 | Max posizioni     |
+| risk_parameters   | profit_multiplier                | float     | 2.2               | Moltiplicatore TP |
+| risk_parameters   | max_position_hours               | int       | 6                 | Max ore posizione |
+| risk_parameters   | risk_percent                     | float     | 0.005             | % rischio trade   |
+| symbols           | <SYMBOL>                         | oggetto   | ...               | Config per simbolo|
+| symbols.<SYMBOL>  | risk_management                  | oggetto   | ...               | SL/TP/risk per sym|
+| symbols.<SYMBOL>  | timezone                         | string    | Europe/Rome       | Fuso orario       |
+| symbols.<SYMBOL>  | trading_hours                    | lista     | ...               | Orari trading     |
+| symbols.<SYMBOL>  | quantum_params_override           | oggetto   | ...               | Override quantum  |
+| challenge_specific| step1_target                     | float     | 8                 | Target profit %   |
+| challenge_specific| max_daily_loss_percent           | float     | 5                 | Max perdita/giorno|
+| challenge_specific| max_total_loss_percent           | float     | 10                | Max perdita totale|
+| challenge_specific| drawdown_protection.soft_limit   | float     | 0.02              | Soft DD limit     |
+| challenge_specific| drawdown_protection.hard_limit   | float     | 0.05              | Hard DD limit     |
+| conversion_metadata| created_by                       | string    | ...               | Tool generazione  |
+| conversion_metadata| creation_date                    | string    | ...               | Data creazione    |
+| conversion_metadata| aggressiveness                   | string    | ...               | Profilo rischio   |
+
+> Per ogni simbolo (es. EURUSD, SP500, USDJPY, ecc.) vanno definiti almeno: `risk_management`, `timezone`, `trading_hours`. Gli override sono opzionali.
+
+---
+
+Questa tabella riassume tutti i parametri accettati nei file di configurazione. Per dettagli avanzati, consultare anche la documentazione tecnica in `docs/`.
