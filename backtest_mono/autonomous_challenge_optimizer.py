@@ -534,18 +534,55 @@ class AutonomousHighStakesOptimizer:
             return base_conf.get(section, default)
 
         # --- QUANTUM PARAMS ---
-        quantum_params = config.get("quantum_params", {}).copy()
-        # Aggiungi parametri extra se presenti nel config ottimizzato
-        for k in ["spin_window", "min_spin_samples", "spin_threshold", "entropy_thresholds", "volatility_scale"]:
-            if k in config.get("quantum_params", {}):
-                quantum_params[k] = config["quantum_params"][k]
+        quantum_params = {
+            "buffer_size": config.get("quantum_params", {}).get("buffer_size", 880),
+            "spin_window": config.get("quantum_params", {}).get("spin_window", 67),
+            "min_spin_samples": config.get("quantum_params", {}).get("min_spin_samples", 23),
+            "spin_threshold": config.get("quantum_params", {}).get("spin_threshold", 1.777),
+            "signal_cooldown": config.get("quantum_params", {}).get("signal_cooldown", 600),
+            "entropy_thresholds": config.get("quantum_params", {}).get("entropy_thresholds", {"buy_signal": 0.825, "sell_signal": 0.275}),
+            "volatility_scale": config.get("quantum_params", {}).get("volatility_scale", 4.54)
+        }
 
         # --- RISK PARAMETERS ---
-        risk_parameters = config.get("risk_parameters", {}).copy()
-        # Aggiungi parametri extra se presenti nel config ottimizzato
-        for k in ["magic_number", "position_cooldown", "max_daily_trades", "max_positions", "min_sl_distance_pips", "base_sl_pips", "profit_multiplier", "max_position_hours", "risk_percent", "trailing_stop", "max_spread"]:
-            if k in config.get("risk_parameters", {}):
-                risk_parameters[k] = config["risk_parameters"][k]
+        risk_parameters = {
+            "magic_number": config.get("risk_parameters", {}).get("magic_number", 147251),
+            "position_cooldown": config.get("risk_parameters", {}).get("position_cooldown", 900),
+            "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 4),
+            "max_positions": config.get("risk_parameters", {}).get("max_positions", 1),
+            "min_sl_distance_pips": {
+                "EURUSD": 30,
+                "GBPUSD": 35,
+                "USDJPY": 25,
+                "XAUUSD": 150,
+                "NAS100": 50,
+                "default": 40
+            },
+            "base_sl_pips": {
+                "EURUSD": 50,
+                "GBPUSD": 60,
+                "USDJPY": 40,
+                "XAUUSD": 220,
+                "NAS100": 100,
+                "default": 80
+            },
+            "profit_multiplier": config.get("risk_parameters", {}).get("profit_multiplier", 2.2),
+            "max_position_hours": config.get("risk_parameters", {}).get("max_position_hours", 6),
+            "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.005),
+            "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}),
+            "max_spread": {
+                "EURUSD": 12,
+                "USDJPY": 10,
+                "GBPUSD": 15,
+                "USDCHF": 15,
+                "SP500": 50,
+                "NAS100": 180,
+                "US30": 60,
+                "BTCUSD": 250,
+                "ETHUSD": 150,
+                "XAUUSD": 40
+            }
+        }
 
         # --- SYMBOLS ---
         symbols = {}
