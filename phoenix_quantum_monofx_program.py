@@ -21,7 +21,17 @@ from functools import lru_cache
 
 
 # Configurazioni globali
+
 CONFIG_FILE = "config/config_autonomous_challenge_production_ready.json"
+
+# Lock globale per la variabile config
+import threading
+# Lock globale per la variabile config
+_config_lock = threading.Lock()
+# Lock per logger
+_logger_lock = threading.Lock()
+# Lock per LOG_FILE
+_logfile_lock = threading.Lock()
 
 # Carica la configurazione JSON all'avvio
 def auto_correct_symbols(config):
@@ -29,28 +39,41 @@ def auto_correct_symbols(config):
     Versione semplificata: non effettua correzioni automatiche, restituisce la configurazione invariata.
     """
     return config
+
 def load_config(config_path=CONFIG_FILE):
     # Se il path è relativo, convertilo in assoluto rispetto alla root del progetto
     if not os.path.isabs(config_path):
-        # Trova la root del progetto (dove si trova questo file)
         project_root = os.path.dirname(os.path.abspath(__file__))
         config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
     with open(config_path) as f:
-        return json.load(f)
+        loaded = json.load(f)
+    return loaded
 
-config = load_config()
 
-# Correggi i simboli in base a quelli disponibili su MT5
-config = auto_correct_symbols(config)
+# Variabile config protetta da lock
+config = None
+
+def set_config(new_config):
+    global config
+    with _config_lock:
+        config = new_config
+
+def get_config():
+    with _config_lock:
+        return config
+
+# Caricamento iniziale thread-safe
+set_config(auto_correct_symbols(load_config()))
 
 # Reload automatico della configurazione ogni 15 minuti
 import threading
+
 def periodic_reload_config(interval=900):
-    global config
     while True:
         time.sleep(interval)
         try:
-            config = load_config()
+            new_config = load_config()
+            set_config(auto_correct_symbols(new_config))
             print(f"[{datetime.now()}] Configurazione ricaricata.")
         except Exception as e:
             print(f"Errore reload config: {e}")
@@ -59,67 +82,97 @@ def periodic_reload_config(interval=900):
 reload_thread = threading.Thread(target=periodic_reload_config, daemon=True)
 reload_thread.start()
 
-# Ora puoi ottenere il percorso del log dal JSON
-LOG_FILE = config["logging"]["log_file"]
+
+# Helper thread-safe per ottenere il percorso del log
+_LOG_FILE = None
+def set_log_file(new_log_file):
+    global _LOG_FILE
+    with _logfile_lock:
+        _LOG_FILE = new_log_file
+
+def get_log_file():
+    with _logfile_lock:
+        if _LOG_FILE is not None:
+            return _LOG_FILE
+        cfg = get_config()
+        return cfg["logging"]["log_file"] if cfg else "logs/default.log"
+
+set_log_file(get_log_file())
 
 
 # -----------------------------------------------------------
 # SEZIONE LOGGING
 # -----------------------------------------------------------
 
+
+_LOGGER = None
+def set_logger(new_logger):
+    global _LOGGER
+    with _logger_lock:
+        _LOGGER = new_logger
+
+def get_logger():
+    with _logger_lock:
+        return _LOGGER
+
 def setup_logger(config_path=CONFIG_FILE):
     """Configura il sistema di logging"""
-    logger = logging.getLogger('QuantumTradingSystem')
+    with _logger_lock:
+        logger = logging.getLogger('QuantumTradingSystem')
 
-    if logger.handlers:
+        if logger.handlers:
+            return logger
+
+        # Risolvi il path assoluto del file di configurazione
+        if not os.path.isabs(config_path):
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
+
+        # Carica la configurazione
+        with open(config_path) as f:
+            config = json.load(f)
+
+        log_config = config.get('logging', {})
+
+        # Crea la directory dei log se non esiste
+        log_dir = os.path.dirname(log_config.get('log_file', 'logs/default.log'))
+        os.makedirs(log_dir, exist_ok=True)
+
+        # Formattazione
+        formatter = logging.Formatter(
+            '%(asctime)s | %(levelname)-8s | %(filename)s:%(lineno)d | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+
+        # File handler con rotazione
+        file_handler = RotatingFileHandler(
+            log_config.get('log_file', get_log_file()),
+            maxBytes=log_config.get('max_size_mb', 10)*1024*1024,
+            backupCount=log_config.get('backup_count', 5),
+            encoding='utf-8'
+        )
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
+
+        # Console Handler (mostra tutto da INFO in su)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
+        console_handler.setFormatter(formatter)
+
+        # Configurazione finale
+        logger.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+        logger.propagate = False
+
+        set_logger(logger)
         return logger
 
-    # Risolvi il path assoluto del file di configurazione
-    if not os.path.isabs(config_path):
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
 
-    # Carica la configurazione
-    with open(config_path) as f:
-        config = json.load(f)
-
-    log_config = config.get('logging', {})
-
-    # Crea la directory dei log se non esiste
-    log_dir = os.path.dirname(log_config.get('log_file', 'logs/default.log'))
-    os.makedirs(log_dir, exist_ok=True)
-
-    # Formattazione
-    formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(filename)s:%(lineno)d | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-
-    # File handler con rotazione
-    file_handler = RotatingFileHandler(
-        log_config.get('log_file', LOG_FILE),
-        maxBytes=log_config.get('max_size_mb', 10)*1024*1024,
-        backupCount=log_config.get('backup_count', 5),
-        encoding='utf-8'
-    )
-    file_handler.setFormatter(formatter)
-    file_handler.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
-
-    # Console Handler (mostra tutto da INFO in su)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
-    console_handler.setFormatter(formatter)
-
-    # Configurazione finale
-    logger.setLevel(getattr(logging, log_config.get('log_level', 'INFO')))
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-    logger.propagate = False
-
-    return logger
-
-def clean_old_logs(log_file=LOG_FILE, max_backups=5):
+def clean_old_logs(log_file=None, max_backups=5):
     """Pulizia dei vecchi file di log"""
+    if log_file is None:
+        log_file = get_log_file()
     try:
         for i in range(max_backups + 1, 10):
             fname = f"{log_file}.{i}"
@@ -128,8 +181,11 @@ def clean_old_logs(log_file=LOG_FILE, max_backups=5):
     except Exception as e:
         print(f"Pulizia log fallita: {str(e)}")
 
-logger = setup_logger()
+
+
+set_logger(setup_logger())
 clean_old_logs()
+logger = get_logger()
 
 # -----------------------------------------------------------
 # UTILITY FUNCTIONS
@@ -201,61 +257,106 @@ def is_trading_hours(symbol: str, config: Dict) -> bool:
 """
 class ConfigManager:
     def __init__(self, config_path: str):
-        if isinstance(config_path, dict):
-            self._config = config_path
-        else:
-            self._config = self._load_config(config_path)
-        
-        # Aggiungi la validazione durante l'inizializzazione
-        self._validate_config()
-        
-        self.symbols = list(self._config.get('symbols', {}).keys())
+        """Costruttore principale thread-safe"""
+        from threading import Lock
+        logger.info(
+            "\n==================== [AVVIO QUANTUM TRADING SYSTEM] ====================\n"
+            f"File configurazione: {config_path}\n"
+            "------------------------------------------------------\n"
+        )
+        self._setup_logger(config_path)
+        logger.info("✅ Logger configurato")
+        self._config_path = config_path
+        self.running = False
+        logger.info("📋 Caricamento configurazione...")
+        self._load_configuration(config_path)  # Questo inizializza self.config
+        logger.info("✅ Configurazione caricata")
+        if not hasattr(self.config, 'config') or 'symbols' not in self.config.config:
+            pass
+        logger.info(
+            "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
+            f"Simboli trovati: {list(self.config.config['symbols'].keys())}\n"
+            "------------------------------------------------------\n"
+        )
+        self._config = self.config
+        logger.info("🔄 Inizializzazione componenti core...")
+        if not self._initialize_mt5():
+            pass
+        logger.info("📡 Attivazione simboli in MT5...")
+        self._activate_symbols()
+        logger.info("✅ Simboli attivati")
+        logger.info("🧠 Inizializzazione Quantum Engine...")
+        self.engine = QuantumEngine(self)
+        logger.info("✅ Quantum Engine pronto")
+        self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
+        self.max_positions = self.get_risk_params().get('max_positions', 4)
+        # Locks per variabili runtime
+        self._trade_count_lock = Lock()
+        self._current_positions_lock = Lock()
+        self._metrics_lock = Lock()
+        self._trade_metrics_lock = Lock()
+        # Variabili protette
+        self._current_positions = 0
+        self._trade_count = defaultdict(int)
+        self._metrics = TradingMetrics()
+        self.account_info = mt5.account_info()
+        self.currency = (
+            self.account_info.currency 
+            if self.account_info 
+            else self.config.config.get('account_currency', 'USD')
+        )
+        if not self.account_info:
+            pass
+        self._trade_metrics = {
+            'total_trades': 0,
+            'successful_trades': 0,
+            'failed_trades': 0,
+            'total_profit': 0.0,
+            'symbol_stats': defaultdict(dict)
+        }
+        initial_equity = self.account_info.equity if self.account_info else 10000
 
-    def _validate_config(self):
-        """Valida la struttura base del file di configurazione"""
-        required_sections = ['symbols', 'risk_parameters']
-        for section in required_sections:
-            if section not in self._config:
-                raise ValueError(f"Sezione {section} mancante nella configurazione")
-        
-        # Validazione aggiuntiva per i simboli
-        symbols_section = self._config.get('symbols', {})
-        if not isinstance(symbols_section, dict) or len(symbols_section) == 0:
-            raise ValueError("Sezione symbols deve contenere almeno un simbolo configurato")
-        
-        # Validazione parametri di rischio
-        risk_params = self._config.get('risk_parameters', {})
-        if not isinstance(risk_params, dict):
-            raise ValueError("Sezione risk_parameters deve essere un dizionario")
-    
-        
-    def _load_config(self, path: str) -> Dict:
-        try:
-            with open(path, 'r') as f:
-                config = json.load(f)
-                # Normalizza la struttura della configurazione
-                return self._normalize_config(config)
-        except Exception as e:
-            logger.error(f"Errore nel caricamento del config: {str(e)}", exc_info=True)
-            raise
-    
-    def _normalize_config(self, config: Dict) -> Dict:
-        """Normalizza la struttura della configurazione per gestire le duplicazioni"""
-        # Unisci risk_parameters e risk_management
-        if 'risk_management' in config and 'risk_parameters' in config:
-            config['risk_parameters'].update(config['risk_management'])
-            del config['risk_management']
-        
-        # Sposta le impostazioni di trailing stop da features a risk_parameters
-        if 'features' in config and 'trailing_stop' in config['features']:
-            if 'trailing_stop' not in config['risk_parameters']:
-                config['risk_parameters']['trailing_stop'] = {}
-            config['risk_parameters']['trailing_stop'].update(
-                config['features']['trailing_stop'])
-        
-        return config
-        
-    @property
+    # Getter/setter thread-safe per current_positions
+    def get_current_positions(self):
+        with self._current_positions_lock:
+            return self._current_positions
+    def set_current_positions(self, value):
+        with self._current_positions_lock:
+            self._current_positions = value
+
+    # Getter/setter thread-safe per trade_count
+    def get_trade_count(self, symbol=None):
+        with self._trade_count_lock:
+            if symbol is not None:
+                return self._trade_count.get(symbol, 0)
+            return dict(self._trade_count)
+    def inc_trade_count(self, symbol):
+        with self._trade_count_lock:
+            self._trade_count[symbol] += 1
+    def set_trade_count(self, symbol, value):
+        with self._trade_count_lock:
+            self._trade_count[symbol] = value
+
+    # Getter/setter thread-safe per metrics (TradingMetrics)
+    def get_metrics(self):
+        with self._metrics_lock:
+            return self._metrics
+    def set_metrics(self, metrics):
+        with self._metrics_lock:
+            self._metrics = metrics
+
+    # Getter/setter thread-safe per trade_metrics (dict)
+    def get_trade_metrics(self, key=None):
+        with self._trade_metrics_lock:
+            if key is not None:
+                return self._trade_metrics.get(key, None)
+            return dict(self._trade_metrics)
+    def set_trade_metrics(self, key, value):
+        with self._trade_metrics_lock:
+            self._trade_metrics[key] = value
+    def inc_trade_metrics(self, key, amount=1):
+        with self._trade_metrics_lock:
+            self._trade_metrics[key] += amount
     def config(self):
         return self._config
         
@@ -341,38 +442,100 @@ class QuantumEngine:
             self._config_manager = None
             self._config = config
 
-        self.tick_buffer = defaultdict(deque)
-        self.position_cooldown = {}  # Traccia ultima chiusura per simbolo
-        self.buffer_lock = Lock()    # <-- AGGIUNTO lock per thread safety
+        # Lock per tutte le strutture dati runtime condivise
+        self._runtime_lock = Lock()
 
-        # MODIFICA QUI - Parametri buffer ridotti per debug
-        # Parametri configurabili
-        quantum_params = self._config.get('quantum_params', {})
-        self.buffer_size = quantum_params.get('buffer_size', 100)  # Era 250
-        self.spin_window = quantum_params.get('spin_window', 20)   # Era 50
-        self.min_spin_samples = quantum_params.get('min_spin_samples', 10)  # Era 20
-        self.spin_threshold = quantum_params.get('spin_threshold', 0.25)
-        self.signal_cooldown = quantum_params.get('signal_cooldown', 300)
-    
-        
-        # Inizializza buffer per simboli
-        for symbol in self._config.get('symbols', {}):
-            self.tick_buffer[symbol] = deque(maxlen=self.buffer_size)
-        
-        # Cache con timeout
-        self.last_signal_time = {}
+        # Strutture dati protette
+        self._tick_buffer = defaultdict(deque)
+        self._position_cooldown = {}
+        self._last_signal_time = {}
         self._volatility_cache = {}
         self._spin_cache = {}
+        self._signal_stats = {'BUY': 0, 'SELL': 0}
+        self._last_warning_time = {}
+
+        # Parametri buffer/config
+        quantum_params = self._config.get('quantum_params', {})
+        self.buffer_size = quantum_params.get('buffer_size', 100)
+        self.spin_window = quantum_params.get('spin_window', 20)
+        self.min_spin_samples = quantum_params.get('min_spin_samples', 10)
+        self.spin_threshold = quantum_params.get('spin_threshold', 0.25)
+        self.signal_cooldown = quantum_params.get('signal_cooldown', 300)
+
+        # Inizializza buffer per simboli
+        for symbol in self._config.get('symbols', {}):
+            self._tick_buffer[symbol] = deque(maxlen=self.buffer_size)
+
         self._cache_timeout = 60  # secondi
-        
-        self.last_warning_time = {}
         self.warning_cooldown = 300  # 5 minuti tra warning simili
-        
-        # Inizializza signal_stats per evitare errori
-        self.signal_stats = {'BUY': 0, 'SELL': 0}
-        
-       
-        
+
+    # --- Getter/setter thread-safe per strutture dati runtime ---
+    def get_tick_buffer(self, symbol=None):
+        with self._runtime_lock:
+            if symbol is not None:
+                return self._tick_buffer[symbol]
+            return self._tick_buffer
+
+    def append_tick(self, symbol, tick):
+        with self._runtime_lock:
+            self._tick_buffer[symbol].append(tick)
+
+    def get_position_cooldown(self, symbol=None):
+        with self._runtime_lock:
+            if symbol is not None:
+                return self._position_cooldown.get(symbol, 0)
+            return dict(self._position_cooldown)
+
+    def set_position_cooldown(self, symbol, value):
+        with self._runtime_lock:
+            self._position_cooldown[symbol] = value
+
+    def get_last_signal_time(self, symbol=None):
+        with self._runtime_lock:
+            if symbol is not None:
+                return self._last_signal_time.get(symbol, 0)
+            return dict(self._last_signal_time)
+
+    def set_last_signal_time(self, symbol, value):
+        with self._runtime_lock:
+            self._last_signal_time[symbol] = value
+
+    def get_signal_stats(self):
+        with self._runtime_lock:
+            return dict(self._signal_stats)
+
+    def inc_signal_stats(self, signal):
+        with self._runtime_lock:
+            if signal in self._signal_stats:
+                self._signal_stats[signal] += 1
+            else:
+                self._signal_stats[signal] = 1
+
+    def get_volatility_cache(self):
+        with self._runtime_lock:
+            return dict(self._volatility_cache)
+
+    def set_volatility_cache(self, key, value):
+        with self._runtime_lock:
+            self._volatility_cache[key] = value
+
+    def get_spin_cache(self):
+        with self._runtime_lock:
+            return dict(self._spin_cache)
+
+    def set_spin_cache(self, key, value):
+        with self._runtime_lock:
+            self._spin_cache[key] = value
+
+    def get_last_warning_time(self, symbol=None):
+        with self._runtime_lock:
+            if symbol is not None:
+                return self._last_warning_time.get(symbol, 0)
+            return dict(self._last_warning_time)
+
+    def set_last_warning_time(self, symbol, value):
+        with self._runtime_lock:
+            self._last_warning_time[symbol] = value
         
     @property
     def config(self):
@@ -381,20 +544,16 @@ class QuantumEngine:
     
     def is_in_cooldown_period(self, symbol: str) -> bool:
         """Verifica se il simbolo è in un periodo di cooldown"""
-        # 1. Controlla cooldown normale posizioni (1800s)
-        last_close = self.position_cooldown.get(symbol, 0)
+        last_close = self.get_position_cooldown(symbol)
         position_cooldown = self.config.get('risk_parameters', {}).get('position_cooldown', 1800)
         if time.time() - last_close < position_cooldown:
             logger.info(f"Cooldown normale attivo per {symbol} - {position_cooldown - (time.time() - last_close):.0f}s rimanenti")
             return True
-            
-        # 2. Controlla cooldown segnali (900s)
         signal_cooldown = self.config.get('quantum_params', {}).get('signal_cooldown', 900)
-        last_signal = self.last_signal_time.get(symbol, 0)
+        last_signal = self.get_last_signal_time(symbol)
         if time.time() - last_signal < signal_cooldown:
             logger.debug(f"Cooldown segnale attivo per {symbol} - {signal_cooldown - (time.time() - last_signal):.0f}s rimanenti")
             return True
-            
         return False
     
 
@@ -454,9 +613,8 @@ class QuantumEngine:
         
     def record_trade_close(self, symbol: str):
         """Registra la chiusura solo se effettivamente avvenuta"""
-        # Modificato per registrare solo chiusure reali
         if mt5.positions_get(symbol=symbol) is None or len(mt5.positions_get(symbol=symbol)) == 0:
-            self.position_cooldown[symbol] = time.time()
+            self.set_position_cooldown(symbol, time.time())
             logger.debug(f"Cooldown registrato per {symbol} (1800s)")
 
         
@@ -564,32 +722,23 @@ class QuantumEngine:
         Aggiunge un nuovo tick al buffer circolare e calcola delta/direzione rispetto al tick precedente.
         Logga ogni tick per debug approfondito.
         """
-        if symbol not in self.tick_buffer:
-            with self.buffer_lock:
-                self.tick_buffer[symbol] = deque(maxlen=self.buffer_size)
-            logger.info(f"Inizializzato buffer per {symbol}")
-
+        buf = self.get_tick_buffer(symbol)
         if price <= 0:
             return
-
-        # Calcola delta e direzione
-        if len(self.tick_buffer[symbol]) > 0:
-            last_price = self.tick_buffer[symbol][-1]['price']
+        if len(buf) > 0:
+            last_price = buf[-1]['price']
             delta = price - last_price
             direction = 1 if delta > 0 else (-1 if delta < 0 else 0)
         else:
             delta = 0
             direction = 0
-
-        self.tick_buffer[symbol].append({
+        self.append_tick(symbol, {
             'price': price,
             'delta': delta,
             'direction': direction,
             'time': time.time()
         })
-
-        # Log dettagliato per ogni tick
-        logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.tick_buffer[symbol])}")
+        logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.get_tick_buffer(symbol))}")
 
     def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
         """
@@ -597,111 +746,65 @@ class QuantumEngine:
         - Entropia dei tick recenti
         - Spin e confidenza
         - Soglie adattive (entropy_thresholds dalla configurazione)
-        
-        Versione ottimizzata che:
-        1. Mantiene tutti i tuoi parametri originali
-        2. Gestisce correttamente il cooldown di 900s
-        3. Aggiunge logging dettagliato
-        4. Non modifica la logica del segnale
-        
-        Args:
-            symbol: Simbolo da analizzare
-            
-        Returns:
-            Tuple: (Segnale, Prezzo) - "BUY"/"SELL"/"HOLD"
         """
-        ticks = list(self.tick_buffer.get(symbol, []))
-        # 1. Verifica preliminare buffer
+        ticks = list(self.get_tick_buffer(symbol))
         if len(ticks) < self.min_spin_samples:
             logger.debug(f"{symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks)")
             return "HOLD", 0.0
-
-        # 2. Calcolo spin e confidenza
         spin_window = min(self.spin_window, len(ticks))
         recent_ticks = ticks[-spin_window:]
         spin, confidence = self.calculate_spin(recent_ticks)
-
-        # Log dettagliato del buffer e dei prezzi
         last_tick_price = recent_ticks[-1]['price'] if recent_ticks else 0.0
         logger.debug(f"{symbol}: Ultimo prezzo buffer={last_tick_price}, Confidenza calcolata={confidence:.3f}, Spin={spin:.3f}, Buffer size={len(ticks)}")
-
-        # 3. Filtri conservativi (tua logica originale)
         if confidence < 0.8:
             logger.debug(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8) -> HOLD. Prezzo={last_tick_price}")
             return "HOLD", last_tick_price
-
-        # 4. Verifica cooldown segnali (900s)
-        last_signal_time = self.last_signal_time.get(symbol, 0)
+        last_signal_time = self.get_last_signal_time(symbol)
         if time.time() - last_signal_time < self.signal_cooldown:
             remaining = int(self.signal_cooldown - (time.time() - last_signal_time))
             logger.debug(f"{symbol}: In cooldown segnali ({remaining}s rimanenti) -> HOLD. Prezzo={last_tick_price}")
             return "HOLD", last_tick_price
-
-        # 5. Calcolo metriche (tua logica originale invariata)
         deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
         entropy = self.calculate_entropy(deltas)
         volatility = 1 + abs(spin) * entropy
-
         thresholds = self.config.get('quantum_params', {}).get('entropy_thresholds', {})
         base_buy_thresh = thresholds.get('buy_signal', 0.55)
         base_sell_thresh = thresholds.get('sell_signal', 0.45)
-
-        # Applica la volatilità in modo simmetrico
         buy_thresh = base_buy_thresh * (1 + (volatility - 1) * 0.5)
         sell_thresh = base_sell_thresh * (1 - (volatility - 1) * 0.5)
-
-        # 6. Generazione segnale con logging simmetrico
         signal = "HOLD"
-
-        # Log delle condizioni per debug
         buy_condition = entropy > buy_thresh and spin > self.spin_threshold * confidence
         sell_condition = entropy < sell_thresh and spin < -self.spin_threshold * confidence
-
         logger.debug(f"{symbol} Signal Analysis: "
                     f"E={entropy:.3f} S={spin:.3f} C={confidence:.3f} | "
                     f"BUY: E>{buy_thresh:.3f}? {entropy > buy_thresh} & S>{self.spin_threshold * confidence:.3f}? {spin > self.spin_threshold * confidence} = {buy_condition} | "
                     f"SELL: E<{sell_thresh:.3f}? {entropy < sell_thresh} & S<{-self.spin_threshold * confidence:.3f}? {spin < -self.spin_threshold * confidence} = {sell_condition} | Prezzo={last_tick_price}")
-
         if buy_condition:
             signal = "BUY"
         elif sell_condition:
             signal = "SELL"
-
-        # 7. Registrazione segnale (senza influenzare cooldown posizioni)
         if signal != "HOLD":
-            # Solo imposta il cooldown se stiamo effettivamente facendo trading
             if for_trading:
-                self.last_signal_time[symbol] = time.time()
-
-            # Monitora bias direzionale
-            if not hasattr(self, 'signal_stats'):
-                self.signal_stats = {'BUY': 0, 'SELL': 0}
-            self.signal_stats[signal] += 1
-
-            buy_ratio = self.signal_stats['BUY'] / (self.signal_stats['BUY'] + self.signal_stats['SELL'])
-
+                self.set_last_signal_time(symbol, time.time())
+            self.inc_signal_stats(signal)
+            stats = self.get_signal_stats()
+            buy_ratio = stats['BUY'] / (stats['BUY'] + stats['SELL']) if (stats['BUY'] + stats['SELL']) > 0 else 0
             logger.info(
                 f"Segnale {signal} per {symbol}: "
                 f"E={entropy:.2f} S={spin:.2f} V={volatility:.2f} C={confidence:.2f} | "
                 f"Soglie: B={buy_thresh:.2f} S={sell_thresh:.2f} | "
-                f"Bias Check: BUY={self.signal_stats['BUY']} SELL={self.signal_stats['SELL']} Ratio={buy_ratio:.2f} | "
+                f"Bias Check: BUY={stats['BUY']} SELL={stats['SELL']} Ratio={buy_ratio:.2f} | "
                 f"Cooldown segnale attivato (900s) | Prezzo={last_tick_price}"
             )
-
-            # Avviso se bias eccessivo
-            if (self.signal_stats['BUY'] + self.signal_stats['SELL']) > 10:
+            if (stats['BUY'] + stats['SELL']) > 10:
                 if buy_ratio > 0.8:
                     logger.warning(f"⚠️ BIAS LONG DETECTED: {buy_ratio:.1%} buy signals!")
                 elif buy_ratio < 0.2:
                     logger.warning(f"⚠️ BIAS SHORT DETECTED: {buy_ratio:.1%} buy signals!")
-
-            # Aggiungi logging esplicito per i segnali SELL
             if signal == "SELL":
                 logger.debug(f"SELL signal conditions met for {symbol}: "
                             f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
                             f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
-
-        # Restituisci sempre il prezzo reale dell'ultimo tick del buffer
         return signal, last_tick_price
         
         
@@ -716,19 +819,14 @@ class QuantumEngine:
         issues = []
         warning_symbols = []
         heartbeat_data = []
-
         if not mt5.terminal_info().connected:
             logger.warning("Connessione MT5 non disponibile")
             return False
-
-        # Recupera la lista dei simboli disponibili su MT5
         available_symbols = [s.name for s in mt5.symbols_get() or []]
-
         for symbol in self._config_manager.symbols:
             try:
                 tick = mt5.symbol_info_tick(symbol)
                 if not tick:
-                    # Log dettagliato: nome simbolo, simboli disponibili, visibilità
                     symbol_info = mt5.symbol_info(symbol)
                     is_visible = symbol_info.visible if symbol_info else False
                     logger.warning(
@@ -738,11 +836,8 @@ class QuantumEngine:
                     )
                     issues.append(f"{symbol}: Nessun dato tick disponibile")
                     continue
-
                 spread = (mt5.symbol_info(symbol).ask - mt5.symbol_info(symbol).bid) / self._get_pip_size(symbol) if mt5.symbol_info(symbol) else 0
-
-                ticks = list(self.tick_buffer.get(symbol, []))[-self.spin_window:]
-
+                ticks = list(self.get_tick_buffer(symbol))[-self.spin_window:]
                 if len(ticks) >= self.min_spin_samples:
                     deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
                     entropy = self.calculate_entropy(deltas)
@@ -751,13 +846,12 @@ class QuantumEngine:
                     volatility = 1 + abs(spin) * entropy
                 else:
                     entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
-
                 state = {
                     'symbol': symbol,
                     'bid': tick.bid,
                     'ask': tick.ask,
                     'spread': spread,
-                    'buffer_size': len(self.tick_buffer.get(symbol, [])),
+                    'buffer_size': len(self.get_tick_buffer(symbol)),
                     'E': round(entropy, 2),
                     'S': round(spin, 2),
                     'C': round(confidence, 2),
@@ -765,18 +859,14 @@ class QuantumEngine:
                     'timestamp': current_time
                 }
                 heartbeat_data.append(state)
-
                 if is_trading_hours(symbol, self._config_manager.config):
                     max_spread = self._config_manager._get_max_allowed_spread(symbol)
                     if spread > max_spread:
                         issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread:.1f}p")
-
-                if len(self.tick_buffer.get(symbol, [])) < self.min_spin_samples:
+                if len(self.get_tick_buffer(symbol)) < self.min_spin_samples:
                     warning_symbols.append(symbol)
-
             except Exception as e:
                 logger.error(f"Errore monitoraggio {symbol}: {str(e)}", exc_info=True)
-
         if heartbeat_data:
             hb_msg = ("\n==================== [HEARTBEAT] ====================\n" +
                 "\n".join(
@@ -796,12 +886,10 @@ class QuantumEngine:
             logger.info(hb_msg)
             positions_count = len(mt5.positions_get() or [])
             logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
-
         if warning_symbols:
             logger.warning(f"Buffer insufficiente: {', '.join(warning_symbols[:3])}")
         if issues:
             logger.warning(f"Problemi: {' | '.join(issues[:3])}")
-
         return True
         
         
@@ -892,74 +980,111 @@ class DailyDrawdownTracker:
     """Monitoraggio del drawdown giornaliero con protezione challenge"""
     
     def __init__(self, initial_equity: float, config: Dict):
-        """Inizializzazione con accesso sicuro alla configurazione"""
-        # Se config è un ConfigManager, estrai il dizionario config
+        """Inizializzazione con accesso sicuro alla configurazione e protezione thread-safe"""
+        from threading import Lock
+        self._lock = Lock()
         actual_config = config.config if hasattr(config, 'config') else config
-        
-        self.daily_high = initial_equity
-        self.current_equity = initial_equity
-        self.current_balance = initial_equity
-        self.last_update_date = datetime.now().date()
+        self._daily_high = initial_equity
+        self._current_equity = initial_equity
+        self._current_balance = initial_equity
+        self._last_update_date = datetime.now().date()
         self.currency = actual_config.get('account_currency', 'USD')
-        
         try:
             dd_config = actual_config.get('challenge_specific', {}).get('drawdown_protection', {})
             self.soft_limit = float(dd_config.get('soft_limit', 0.05))
             self.hard_limit = float(dd_config.get('hard_limit', 0.10))
         except Exception as e:
             raise ValueError(f"Configurazione drawdown mancante: {str(e)}") from e
-        
-        self.protection_active = False
-        self.max_daily_drawdown = 0.0
-        self.last_check_time = time.time()
+        self._protection_active = False
+        self._max_daily_drawdown = 0.0
+        self._last_check_time = time.time()
+
+    # Getter/setter thread-safe
+    def get_daily_high(self):
+        with self._lock:
+            return self._daily_high
+    def set_daily_high(self, value):
+        with self._lock:
+            self._daily_high = value
+    def get_current_equity(self):
+        with self._lock:
+            return self._current_equity
+    def set_current_equity(self, value):
+        with self._lock:
+            self._current_equity = value
+    def get_current_balance(self):
+        with self._lock:
+            return self._current_balance
+    def set_current_balance(self, value):
+        with self._lock:
+            self._current_balance = value
+    def get_last_update_date(self):
+        with self._lock:
+            return self._last_update_date
+    def set_last_update_date(self, value):
+        with self._lock:
+            self._last_update_date = value
+    def get_protection_active(self):
+        with self._lock:
+            return self._protection_active
+    def set_protection_active(self, value):
+        with self._lock:
+            self._protection_active = value
+    def get_max_daily_drawdown(self):
+        with self._lock:
+            return self._max_daily_drawdown
+    def set_max_daily_drawdown(self, value):
+        with self._lock:
+            self._max_daily_drawdown = value
+    def get_last_check_time(self):
+        with self._lock:
+            return self._last_check_time
+    def set_last_check_time(self, value):
+        with self._lock:
+            self._last_check_time = value
 
     def update(self, current_equity: float, current_balance: float) -> None:
-        """Aggiorna i valori di equity e balance"""
+        """Aggiorna i valori di equity e balance (thread-safe)"""
         today = datetime.now().date()
-        
-        if today != self.last_update_date:
-            self.daily_high = max(current_equity, current_balance)
-            self.current_balance = current_balance
-            self.last_update_date = today
-            self.protection_active = False
-            self.max_daily_drawdown = 0.0
-            logger.info(f"Reset giornaliero drawdown. Nuovo high: {self.daily_high:.2f} {self.currency}")
-        else:
-            self.daily_high = max(self.daily_high, current_equity, current_balance)
-            self.current_equity = current_equity
-            self.current_balance = current_balance
+        with self._lock:
+            if today != self._last_update_date:
+                self._daily_high = max(current_equity, current_balance)
+                self._current_balance = current_balance
+                self._last_update_date = today
+                self._protection_active = False
+                self._max_daily_drawdown = 0.0
+                logger.info(f"Reset giornaliero drawdown. Nuovo high: {self._daily_high:.2f} {self.currency}")
+            else:
+                self._daily_high = max(self._daily_high, current_equity, current_balance)
+                self._current_equity = current_equity
+                self._current_balance = current_balance
 
     def check_limits(self, current_equity: float) -> Tuple[bool, bool]:
-        """Verifica se sono stati raggiunti i limiti di drawdown"""
-        if time.time() - self.last_check_time < 5:
-            return False, False
-            
-        self.last_check_time = time.time()
-        
-        try:
-            drawdown_pct = (current_equity - self.daily_high) / self.daily_high
-            self.max_daily_drawdown = min(self.max_daily_drawdown, drawdown_pct)
-            
-            soft_hit = drawdown_pct <= -self.soft_limit
-            hard_hit = drawdown_pct <= -self.hard_limit
-            
-            if hard_hit:
-                logger.critical(
-                    f"HARD LIMIT HIT! Drawdown: {drawdown_pct*100:.2f}% | "
-                    f"High: {self.daily_high:.2f} {self.currency} | "
-                    f"Current: {current_equity:.2f} {self.currency}"
-                )
-            elif soft_hit and not self.protection_active:
-                logger.warning(
-                    f"SOFT LIMIT HIT! Drawdown: {drawdown_pct*100:.2f}% | "
-                    f"Max Daily: {self.max_daily_drawdown*100:.2f}%"
-                )
-                
-            return soft_hit, hard_hit
-            
-        except ZeroDivisionError:
-            logger.error("Errore calcolo drawdown (daily_high zero)")
-            return False, False
+        """Verifica se sono stati raggiunti i limiti di drawdown (thread-safe)"""
+        with self._lock:
+            if time.time() - self._last_check_time < 5:
+                return False, False
+            self._last_check_time = time.time()
+            try:
+                drawdown_pct = (current_equity - self._daily_high) / self._daily_high
+                self._max_daily_drawdown = min(self._max_daily_drawdown, drawdown_pct)
+                soft_hit = drawdown_pct <= -self.soft_limit
+                hard_hit = drawdown_pct <= -self.hard_limit
+                if hard_hit:
+                    logger.critical(
+                        f"HARD LIMIT HIT! Drawdown: {drawdown_pct*100:.2f}% | "
+                        f"High: {self._daily_high:.2f} {self.currency} | "
+                        f"Current: {current_equity:.2f} {self.currency}"
+                    )
+                elif soft_hit and not self._protection_active:
+                    logger.warning(
+                        f"SOFT LIMIT HIT! Drawdown: {drawdown_pct*100:.2f}% | "
+                        f"Max Daily: {self._max_daily_drawdown*100:.2f}%"
+                    )
+                return soft_hit, hard_hit
+            except ZeroDivisionError:
+                logger.error("Errore calcolo drawdown (daily_high zero)")
+                return False, False
 
 
 
@@ -974,37 +1099,37 @@ class QuantumRiskManager:
     1. Inizializzazione
     """
     def __init__(self, config, engine, trading_system=None):
-        """Initialize with either ConfigManager or dict"""
-        if hasattr(config, 'get_risk_params'):  # It's a ConfigManager
+        """Initialize with either ConfigManager or dict, thread-safe runtime"""
+        from threading import Lock
+        self._lock = Lock()
+        if hasattr(config, 'get_risk_params'):
             self._config_manager = config
             self._config = config.config
-        else:  # It's a raw dict
+        else:
             self._config_manager = None
             self._config = config
-        
         self.engine = engine
-        self.trading_system = trading_system  # Inizializza correttamente qui
-        
-        # Inizializzazione semplificata
+        self.trading_system = trading_system
         account_info = mt5.account_info()
         self.drawdown_tracker = DailyDrawdownTracker(
             account_info.equity if account_info else 10000,
             self._config
         )
-        
-        self.symbol_data = {}
-        
-        # Inizializza il tracker di drawdown
-        account_info = mt5.account_info()
-        self.drawdown_tracker = DailyDrawdownTracker(
-            account_info.equity if account_info else 10000,
-            self.config
-        )
-        
+        self._symbol_data = {}
         # Parametri da config
         self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
         self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
         self.profit_multiplier = config.get('risk_management', {}).get('profit_multiplier', 1.5)
+
+    # Getter/setter thread-safe per symbol_data
+    def get_symbol_data(self, symbol=None):
+        with self._lock:
+            if symbol is not None:
+                return self._symbol_data.get(symbol, None)
+            return dict(self._symbol_data)
+    def set_symbol_data(self, symbol, value):
+        with self._lock:
+            self._symbol_data[symbol] = value
     
     @property
     def config(self):
@@ -1461,6 +1586,41 @@ class TradingMetrics:
     """Monitoraggio delle metriche di performance"""  
     
     """
+    def __init__(self):
+        from threading import Lock
+        self._lock = Lock()
+        # Esempio di metriche runtime
+        self._trades = []
+        self._performance = {}
+        self._stats = {}
+
+    # Getter/setter thread-safe per trades
+    def add_trade(self, trade):
+        with self._lock:
+            self._trades.append(trade)
+    def get_trades(self):
+        with self._lock:
+            return list(self._trades)
+
+    # Getter/setter thread-safe per performance
+    def set_performance(self, key, value):
+        with self._lock:
+            self._performance[key] = value
+    def get_performance(self, key=None):
+        with self._lock:
+            if key is not None:
+                return self._performance.get(key, None)
+            return dict(self._performance)
+
+    # Getter/setter thread-safe per stats
+    def set_stat(self, key, value):
+        with self._lock:
+            self._stats[key] = value
+    def get_stat(self, key=None):
+        with self._lock:
+            if key is not None:
+                return self._stats.get(key, None)
+            return dict(self._stats)
     1. Inizializzazione  
     """  
     def __init__(self):
@@ -1823,8 +1983,7 @@ class QuantumTradingSystem:
             f"Simboli trovati: {list(self.config.config['symbols'].keys())}\n"
             "------------------------------------------------------\n"
         )
-        self.config_manager = ConfigManager(config_path)
-        self._config = self.config_manager.config
+        self._config = self.config
         logger.info("🔄 Inizializzazione componenti core...")
         if not self._initialize_mt5():
             raise RuntimeError("Inizializzazione MT5 fallita")
@@ -1832,10 +1991,10 @@ class QuantumTradingSystem:
         self._activate_symbols()
         logger.info("✅ Simboli attivati")
         logger.info("🧠 Inizializzazione Quantum Engine...")
-        self.engine = QuantumEngine(self.config_manager)
+        self.engine = QuantumEngine(self)
         logger.info("✅ Quantum Engine pronto")
-        self.risk_manager = QuantumRiskManager(self.config_manager, self.engine, self)  # Passa self come terzo parametro
-        self.max_positions = self.config_manager.get_risk_params().get('max_positions', 4)
+        self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
+        self.max_positions = self.get_risk_params().get('max_positions', 4)
         self.current_positions = 0
         self.trade_count = defaultdict(int)
         self.metrics_lock = Lock()
@@ -1929,7 +2088,7 @@ class QuantumTradingSystem:
             logger.info(f"Caricamento configurazione da {config_path}")
             
             # Carica la configurazione usando ConfigManager
-            self.config = ConfigManager(config_path)
+            self._config = load_config(config_path)
             
             # Verifica di base
             if not hasattr(self.config, 'config'):
