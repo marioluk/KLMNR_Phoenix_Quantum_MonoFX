@@ -1,11 +1,11 @@
 # TODO - Migliorie e Refactoring Phoenix Quantum MonoFX
 
 ## Validazione e Gestione Configurazione
-- [ ] Implementare validazione automatica del file di configurazione all’avvio
-- [ ] Segnalare parametri mancanti, incoerenti o valori fuori range (log warning/error)
-- [ ] Centralizzare tutti i magic number (es. orari, spread, pips) usando solo valori dal file di configurazione
-- [ ] Aggiungere fallback o default per parametri opzionali
-- [ ] Controllare che tutti i simboli abbiano i campi richiesti (risk_management, trading_hours, ecc.)
+- [x] Implementare validazione automatica del file di configurazione all’avvio
+- [x] Segnalare parametri mancanti, incoerenti o valori fuori range (log warning/error)
+- [x] Centralizzare tutti i magic number (es. orari, spread, pips) usando solo valori dal file di configurazione
+- [x] Aggiungere fallback o default per parametri opzionali
+- [x] Controllare che tutti i simboli abbiano i campi richiesti (risk_management, trading_hours, ecc.)
 
 ## Stile, Best Practice e Robustezza
 - [ ] Aggiungere type hint a tutti i metodi pubblici e principali

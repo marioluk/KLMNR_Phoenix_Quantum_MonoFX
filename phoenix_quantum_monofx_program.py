@@ -20,17 +20,21 @@ import json
 from functools import lru_cache
 
 
-# Configurazioni globali
 
+# ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 CONFIG_FILE = "config/config_autonomous_challenge_production_ready.json"
+DEFAULT_CONFIG_RELOAD_INTERVAL = 900  # secondi (15 minuti)
+DEFAULT_LOG_FILE = "logs/default.log"
+DEFAULT_LOG_MAX_SIZE_MB = 10
+DEFAULT_LOG_BACKUP_COUNT = 5
+DEFAULT_LOG_MAX_BACKUPS = 10
+DEFAULT_TRADING_HOURS = "00:00-24:00"
+DEFAULT_TIME_RANGE = (0, 0, 23, 59)  # (h1, m1, h2, m2)
 
-# Lock globale per la variabile config
+# Lock globali
 import threading
-# Lock globale per la variabile config
 _config_lock = threading.Lock()
-# Lock per logger
 _logger_lock = threading.Lock()
-# Lock per LOG_FILE
 _logfile_lock = threading.Lock()
 
 # Carica la configurazione JSON all'avvio
@@ -40,6 +44,114 @@ def auto_correct_symbols(config):
     """
     return config
 
+
+def validate_config(config):
+    """
+    Valida la configurazione principale: controlla la presenza dei campi obbligatori e la coerenza dei valori.
+    Logga warning/error e solleva ValueError in caso di problemi bloccanti.
+    """
+    required_top = ["logging", "metatrader5", "quantum_params", "risk_parameters", "symbols"]
+    for key in required_top:
+        if key not in config:
+            logger.error(f"Parametro mancante nella configurazione: '{key}'")
+            raise ValueError(f"Parametro mancante nella configurazione: '{key}'")
+
+
+    # Fallback e default per logging
+    log_conf = config["logging"]
+    if "log_file" not in log_conf:
+        log_conf["log_file"] = "logs/default.log"
+        logger.info("[Config] log_file non trovato, uso default logs/default.log")
+    if "max_size_mb" not in log_conf or log_conf.get("max_size_mb", 0) <= 0:
+        log_conf["max_size_mb"] = 10
+        logger.info("[Config] max_size_mb non trovato o non valido, uso default 10")
+    if "backup_count" not in log_conf or log_conf.get("backup_count", 0) < 1:
+        log_conf["backup_count"] = 5
+        logger.info("[Config] backup_count non trovato o troppo basso, uso default 5")
+
+
+    # Fallback e default per metatrader5
+    mt5_conf = config["metatrader5"]
+    mt5_defaults = {
+        "login": 0,
+        "password": "",
+        "server": "",
+        "path": "",
+        "port": 0
+    }
+    for k, v in mt5_defaults.items():
+        if k not in mt5_conf:
+            mt5_conf[k] = v
+            logger.info(f"[Config] {k} non trovato in metatrader5, uso default {v}")
+    for k in ["login", "password", "server", "path"]:
+        if not mt5_conf.get(k):
+            logger.error(f"[Config] Campo '{k}' mancante in metatrader5")
+    if not str(mt5_conf.get("port", "")).isdigit():
+        logger.warning("[Config] Porta MT5 non valida")
+
+
+    # Fallback e default per risk_parameters
+    rp = config["risk_parameters"]
+    risk_defaults = {
+        "risk_percent": 0.005,
+        "max_positions": 1,
+        "profit_multiplier": 2.0,
+        "max_position_hours": 6
+    }
+    for k, v in risk_defaults.items():
+        if k not in rp:
+            rp[k] = v
+            logger.info(f"[Config] {k} non trovato in risk_parameters, uso default {v}")
+    if not (0 < rp.get("risk_percent", 0.01) < 0.1):
+        logger.warning(f"[Config] risk_percent fuori range: {rp.get('risk_percent')}")
+    if rp.get("max_positions", 0) < 1:
+        logger.error("[Config] max_positions deve essere >= 1")
+    if rp.get("profit_multiplier", 0) <= 0:
+        logger.warning("[Config] profit_multiplier non positivo")
+
+
+    # Fallback e validazione rigorosa per symbols
+    for symbol, symconf in config["symbols"].items():
+        # risk_management obbligatorio e completo
+        if "risk_management" not in symconf or not isinstance(symconf["risk_management"], dict):
+            symconf["risk_management"] = {"stop_loss_pips": 40, "take_profit_pips": 40, "risk_percent": 0.007}
+            logger.warning(f"[Config] risk_management mancante o non valido per {symbol}, uso default")
+        rm = symconf["risk_management"]
+        for field in ["stop_loss_pips", "take_profit_pips", "risk_percent"]:
+            if field not in rm:
+                rm[field] = 40 if "pips" in field else 0.007
+                logger.warning(f"[Config] {field} mancante in risk_management di {symbol}, uso default")
+        if not isinstance(rm["stop_loss_pips"], (int, float)) or rm["stop_loss_pips"] <= 0:
+            logger.error(f"[Config] stop_loss_pips non valido per {symbol}")
+        if not isinstance(rm["take_profit_pips"], (int, float)) or rm["take_profit_pips"] <= 0:
+            logger.error(f"[Config] take_profit_pips non valido per {symbol}")
+        if not (0 < rm.get("risk_percent", 0.01) < 0.1):
+            logger.warning(f"[Config] risk_percent fuori range per {symbol}: {rm.get('risk_percent')}")
+        # trading_hours obbligatorio e lista di stringhe
+        if "trading_hours" not in symconf or not isinstance(symconf["trading_hours"], list) or not all(isinstance(x, str) for x in symconf["trading_hours"]):
+            symconf["trading_hours"] = ["09:00-10:30", "14:00-16:00"]
+            logger.warning(f"[Config] trading_hours mancante o non valido per {symbol}, uso default")
+
+
+    # Fallback e default per quantum_params
+    qp = config["quantum_params"]
+    quantum_defaults = {
+        "buffer_size": 60,
+        "spin_window": 8,
+        "min_spin_samples": 2,
+        "signal_cooldown": 60
+    }
+    for k, v in quantum_defaults.items():
+        if k not in qp:
+            qp[k] = v
+            logger.info(f"[Config] {k} non trovato in quantum_params, uso default {v}")
+    if qp.get("buffer_size", 0) < 1:
+        logger.warning("[Config] buffer_size troppo basso")
+    if qp.get("spin_window", 0) < 1:
+        logger.warning("[Config] spin_window troppo basso")
+
+    logger.info("Validazione configurazione completata con successo.")
+
 def load_config(config_path=CONFIG_FILE):
     # Se il path è relativo, convertilo in assoluto rispetto alla root del progetto
     if not os.path.isabs(config_path):
@@ -47,6 +159,7 @@ def load_config(config_path=CONFIG_FILE):
         config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
     with open(config_path) as f:
         loaded = json.load(f)
+    validate_config(loaded)
     return loaded
 
 
@@ -68,7 +181,7 @@ set_config(auto_correct_symbols(load_config()))
 # Reload automatico della configurazione ogni 15 minuti
 import threading
 
-def periodic_reload_config(interval=900):
+def periodic_reload_config(interval=DEFAULT_CONFIG_RELOAD_INTERVAL):
     while True:
         time.sleep(interval)
         try:
@@ -95,7 +208,7 @@ def get_log_file():
         if _LOG_FILE is not None:
             return _LOG_FILE
         cfg = get_config()
-        return cfg["logging"]["log_file"] if cfg else "logs/default.log"
+        return cfg["logging"]["log_file"] if cfg else DEFAULT_LOG_FILE
 
 set_log_file(get_log_file())
 
@@ -135,7 +248,7 @@ def setup_logger(config_path=CONFIG_FILE):
         log_config = config.get('logging', {})
 
         # Crea la directory dei log se non esiste
-        log_dir = os.path.dirname(log_config.get('log_file', 'logs/default.log'))
+        log_dir = os.path.dirname(log_config.get('log_file', DEFAULT_LOG_FILE))
         os.makedirs(log_dir, exist_ok=True)
 
         # Formattazione
@@ -147,8 +260,8 @@ def setup_logger(config_path=CONFIG_FILE):
         # File handler con rotazione
         file_handler = RotatingFileHandler(
             log_config.get('log_file', get_log_file()),
-            maxBytes=log_config.get('max_size_mb', 10)*1024*1024,
-            backupCount=log_config.get('backup_count', 5),
+            maxBytes=log_config.get('max_size_mb', DEFAULT_LOG_MAX_SIZE_MB)*1024*1024,
+            backupCount=log_config.get('backup_count', DEFAULT_LOG_BACKUP_COUNT),
             encoding='utf-8'
         )
         file_handler.setFormatter(formatter)
@@ -174,7 +287,7 @@ def clean_old_logs(log_file=None, max_backups=5):
     if log_file is None:
         log_file = get_log_file()
     try:
-        for i in range(max_backups + 1, 10):
+        for i in range(max_backups + 1, DEFAULT_LOG_MAX_BACKUPS):
             fname = f"{log_file}.{i}"
             if os.path.exists(fname):
                 os.remove(fname)
@@ -215,13 +328,14 @@ def parse_time(time_str: str) -> Tuple[dt_time, dt_time]:
         
     except ValueError as e:
         logger.error(f"Formato orario non valido: {time_str} | Errore: {str(e)}")
-        return dt_time(0, 0), dt_time(23, 59)  # Default 24h
+        h1, m1, h2, m2 = DEFAULT_TIME_RANGE
+        return dt_time(h1, m1), dt_time(h2, m2)  # Default 24h
 
 def is_trading_hours(symbol: str, config: Dict) -> bool:
     """Versione compatibile con sessioni multiple"""
     try:
         symbol_config = config.get('symbols', {}).get(symbol, {})
-        trading_hours = symbol_config.get('trading_hours', ["00:00-24:00"])
+        trading_hours = symbol_config.get('trading_hours', [DEFAULT_TRADING_HOURS])
         now = datetime.now().time()
         debug_ranges = []
         for time_range in trading_hours:
@@ -270,7 +384,13 @@ class ConfigManager:
         self.running = False
         logger.info("📋 Caricamento configurazione...")
         self._load_configuration(config_path)  # Questo inizializza self.config
-        logger.info("✅ Configurazione caricata")
+        # Validazione automatica della configurazione
+        try:
+            validate_config(self.config.config)
+            logger.info("✅ Configurazione caricata e validata")
+        except Exception as e:
+            logger.critical(f"Errore di validazione configurazione: {e}")
+            raise
         if not hasattr(self.config, 'config') or 'symbols' not in self.config.config:
             pass
         logger.info(
