@@ -423,11 +423,11 @@ class AutonomousHighStakesOptimizer:
 
     def get_symbol_max_spread(self, symbol: str) -> float:
         spread_limits = {
-            'EURUSD': 2.0, 'USDJPY': 2.5, 'GBPUSD': 3.0, 'USDCHF': 3.0,
+            "EURUSD": 12, 'USDJPY': 10, 'GBPUSD': 15, 'USDCHF': 15,
             'AUDUSD': 3.5, 'USDCAD': 3.5, 'NZDUSD': 4.0,
-            'BTCUSD': 25.0, 'ETHUSD': 15.0,
-            'XAUUSD': 5.0, 'XAGUSD': 4.0,
-            'SP500': 1.5, 'NAS100': 8.0, 'US30': 6.0,
+            'BTCUSD': 250, 'ETHUSD': 150,
+            'XAUUSD': 40, 'XAGUSD': 4.0,
+            'SP500': 60, 'NAS100': 180, 'US30': 60,
             'DAX40': 2.5, 'FTSE100': 2.0, 'JP225': 3.0
         }
         return spread_limits.get(symbol, 4.0)
@@ -579,20 +579,8 @@ class AutonomousHighStakesOptimizer:
             "profit_multiplier": config.get("risk_parameters", {}).get("profit_multiplier", 2.2),
             "max_position_hours": config.get("risk_parameters", {}).get("max_position_hours", 6),
             "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.005),
-            "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}),
-            "max_spread": {
-                "EURUSD": 12,
-                "USDJPY": 10,
-                "GBPUSD": 15,
-                "USDCHF": 15,
-                "SP500": 60,
-                "NAS100": 180,
-                "US30": 60,
-                "BTCUSD": 250,
-                "ETHUSD": 150,
-                "XAUUSD": 40,
-                "default": 80
-            }
+            "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5})
+            
         }
 
         # --- SYMBOLS ---
