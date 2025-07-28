@@ -95,7 +95,36 @@ def setup_logger(config_path=None):
         formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    # Imposta il livello di log dinamicamente dal file di configurazione se presente
+    log_level = None
+    try:
+        import json
+        if config_path and isinstance(config_path, str):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if 'config' in data:
+                    log_level = data['config'].get('logging', {}).get('log_level', None)
+                else:
+                    log_level = data.get('logging', {}).get('log_level', None)
+        else:
+            config = globals().get('_GLOBAL_CONFIG', None)
+            if config is not None:
+                conf = getattr(config, 'config', config)
+                log_level = conf.get('logging', {}).get('log_level', None)
+    except Exception:
+        pass
+    level_map = {
+        'CRITICAL': logging.CRITICAL,
+        'ERROR': logging.ERROR,
+        'WARNING': logging.WARNING,
+        'INFO': logging.INFO,
+        'DEBUG': logging.DEBUG,
+        'NOTSET': logging.NOTSET
+    }
+    if log_level:
+        logger.setLevel(level_map.get(str(log_level).upper(), logging.INFO))
+    else:
+        logger.setLevel(logging.INFO)
     return logger
 
 def get_logger():
@@ -439,7 +468,7 @@ class ConfigManager:
         }
         
     def _get_max_allowed_spread(self, symbol: str) -> float:
-        """Restituisce lo spread massimo consentito per un simbolo"""
+        """Restituisce lo spread massimo consentito per un simbolo dalla config risk_parameters.max_spread, fallback solo se non presente"""
         try:
             DEFAULT_SPREADS = {
                 'SP500': 10.0,
@@ -449,30 +478,20 @@ class ConfigManager:
                 'ETHUSD': 40.0,
                 'default': 20.0
             }
-            
-            # Accedi direttamente a self.config che è già un dict
             risk_params = self.config.get('risk_parameters', {})
-            spread_config = risk_params.get('max_spread', {})
-            
+            spread_config = risk_params.get('max_spread', None)
+            if spread_config is None:
+                return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
             if isinstance(spread_config, dict):
-                symbol_spread = spread_config.get(symbol, spread_config.get('default', 'auto'))
+                symbol_spread = spread_config.get(symbol, spread_config.get('default', None))
+                if symbol_spread is None:
+                    return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
             else:
                 symbol_spread = spread_config
-                
-            if isinstance(symbol_spread, str):
-                symbol_spread = symbol_spread.lower()
-                if symbol_spread == 'adaptive':
-                    # Volatility calculation must be handled outside ConfigManager
-                    logger.error("Adaptive spread calculation requires volatility, which is not available in ConfigManager.")
-                    return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
-                elif symbol_spread == 'auto':
-                    return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
-            
             return float(symbol_spread)
-            
         except Exception as e:
-            logger.error(f"Errore determinazione spread per {symbol}: {str(e)}")
-            return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
+            logger.error(f"[ConfigManager] Errore determinazione max_spread per {symbol}: {str(e)}")
+            return 20.0
         
         
 """
@@ -669,12 +688,15 @@ class QuantumEngine:
         self._last_warning_time = {}
 
         # Parametri buffer/config
+
+        # Parametri sempre dalla config (quantum_params)
         quantum_params = self.config.get('quantum_params', {})
         self.buffer_size = quantum_params.get('buffer_size', 100)
         self.spin_window = quantum_params.get('spin_window', 20)
         self.min_spin_samples = quantum_params.get('min_spin_samples', 10)
         self.spin_threshold = quantum_params.get('spin_threshold', 0.25)
         self.signal_cooldown = quantum_params.get('signal_cooldown', 300)
+        self.entropy_thresholds = quantum_params.get('entropy_thresholds', {'buy_signal': 0.55, 'sell_signal': 0.45})
 
         # Inizializza buffer per simboli
         for symbol in self.config.get('symbols', {}):
@@ -1957,24 +1979,6 @@ class TradingMetrics:
         """Ricalcola le metriche aggregate:"""
         if not self._profit_history:
             return
-            
-        profits = np.array(self._profit_history)
-        self.metrics['win_rate'] = np.mean(profits >= 0) * 100
-        self.metrics['avg_profit'] = np.mean(profits)
-        self.metrics['max_drawdown'] = self._calculate_drawdown(profits)
-        self.metrics['sharpe_ratio'] = self._calculate_sharpe(profits)
-        self.metrics['profit_factor'] = self._calculate_profit_factor(profits)
-        
-        for symbol, stats in self.metrics['symbol_stats'].items():
-            if stats['trades'] > 0:
-                stats['win_rate'] = (stats['wins'] / stats['trades']) * 100
-                stats['avg_profit'] = stats['total_profit'] / stats['trades']
-
-
-    """
-    3. Calcoli Statistici (metodi interni)
-    """
-
     def _calculate_drawdown(self, profits: np.ndarray) -> float:
         """ Calcola il drawdown massimo dalla curva di equity."""
         equity_curve = np.cumsum(profits)
