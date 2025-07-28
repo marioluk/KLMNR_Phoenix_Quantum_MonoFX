@@ -107,6 +107,13 @@ class The5ersGraphicalDashboard:
         self.last_log_position = 0
         self.last_update = datetime.now()
 
+        # Se il drawdown è > 0 ma la drawdown_history è vuota, aggiungi un punto per il grafico
+        if self.current_metrics['current_drawdown'] > 0 and not self.drawdown_history:
+            self.drawdown_history.append({
+                'timestamp': datetime.now().isoformat(),
+                'drawdown': self.current_metrics['current_drawdown']
+            })
+
 
         print(f"[DEBUG] Config file utilizzato: {self.config_file}")
         raw_config = self.load_config()
