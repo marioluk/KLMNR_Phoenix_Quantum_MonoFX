@@ -78,8 +78,24 @@ def clean_old_logs():
 
 def setup_logger(config_path=None):
     """Crea e restituisce un logger base. Accetta config_path per compatibilità futura."""
+    import os
     logger = logging.getLogger("phoenix_quantum")
     if not logger.handlers:
+        # Determina il file di log dalla configurazione
+        log_file = get_log_file()
+        # Crea la cartella se non esiste
+        log_dir = os.path.dirname(log_file)
+        if log_dir and not os.path.exists(log_dir):
+            os.makedirs(log_dir, exist_ok=True)
+        # File handler
+        try:
+            file_handler = logging.FileHandler(log_file, encoding='utf-8')
+            file_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+            file_handler.setFormatter(file_formatter)
+            logger.addHandler(file_handler)
+        except Exception as e:
+            print(f"[setup_logger] Errore creazione file di log: {e}")
+        # Anche lo stream handler su console
         handler = logging.StreamHandler()
         formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
         handler.setFormatter(formatter)
