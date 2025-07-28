@@ -38,7 +38,18 @@ def set_log_file(log_file):
     _LOG_FILE = log_file
 
 def get_log_file():
-    """Stub: restituisce il file di log attuale."""
+    """Restituisce il file di log attuale dalla configurazione, con fallback."""
+    # Prova a recuperare dalla configurazione globale
+    config = globals().get('_GLOBAL_CONFIG', None)
+    if config is not None:
+        # Supporta sia SimpleNamespace che dict
+        conf = getattr(config, 'config', config)
+        log_file = None
+        if isinstance(conf, dict):
+            log_file = conf.get('logging', {}).get('log_file')
+        if log_file:
+            return log_file
+    # Fallback su variabile globale o default
     return globals().get('_LOG_FILE', DEFAULT_LOG_FILE)
 
 def set_logger(logger_obj):
