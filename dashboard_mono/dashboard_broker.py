@@ -28,20 +28,13 @@ except ImportError:
 class The5ersGraphicalDashboard:
     @staticmethod
     def get_default_config_path():
-        """Restituisce il path centralizzato del file di configurazione challenge."""
-        # 1. Cerca nella cartella 'config' della root del progetto
-        config_root = os.path.join(os.path.dirname(__file__), '..', 'config', 'config_autonomous_challenge_production_ready.json')
-        config_root = os.path.normpath(config_root)
-        if os.path.exists(config_root):
-            return config_root
-        # 2. Cerca nella cartella superiore (legacy)
-        challenge_config = os.path.join(os.path.dirname(__file__), '..', '..', 'config', 'config_autonomous_challenge_production_ready.json')
-        challenge_config = os.path.normpath(challenge_config)
-        if os.path.exists(challenge_config):
-            return challenge_config
-        # 3. Fallback: cerca nella directory corrente
-        fallback = os.path.join(os.getcwd(), 'config_autonomous_challenge_production_ready.json')
-        return fallback
+        """Restituisce sempre il path assoluto del file di configurazione come nello script principale."""
+        # Path assoluto dalla root del progetto
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        config_path = os.path.join(project_root, 'config', 'config_autonomous_challenge_production_ready.json')
+        config_path = os.path.normpath(config_path)
+        print(f"[DEBUG] get_default_config_path: {config_path}")
+        return config_path
 
     @staticmethod
     def get_default_log_path(config: dict = None):
@@ -78,7 +71,15 @@ class The5ersGraphicalDashboard:
             config_file = self.get_default_config_path()
         
         self.config_file = config_file
-        self.config = self.load_config()
+        print(f"[DEBUG] Config file utilizzato: {self.config_file}")
+        raw_config = self.load_config()
+        # Supporta sia struttura con chiave 'config' sia senza
+        if isinstance(raw_config, dict) and 'config' in raw_config and isinstance(raw_config['config'], dict):
+            self.config = raw_config['config']
+            print("[DEBUG] Configurazione: wrapper 'config' rilevato, uso raw_config['config']")
+        else:
+            self.config = raw_config
+            print("[DEBUG] Configurazione: uso raw_config diretto")
         self.use_mt5 = use_mt5 and MT5_AVAILABLE
         
         # Auto-detect log file se non specificato
@@ -229,15 +230,16 @@ class The5ersGraphicalDashboard:
             login = self.mt5_config.get('login')
             password = self.mt5_config.get('password')
             server = self.mt5_config.get('server')
-            
+            print(f"[DEBUG] Parametri MT5: login={login!r}, password={'***' if password else None}, server={server!r}")
+            if not all([login, password, server]):
+                print(f"❌ Parametri MT5 mancanti o non validi: login={login!r}, password={'***' if password else None}, server={server!r}")
+                return False
             if not mt5.login(login, password, server):
                 print(f"❌ Errore login MT5: {mt5.last_error()}")
                 return False
-            
             self.mt5_connected = True
             print(f"✅ Connesso a MT5 - Account: {login}")
             return True
-            
         except Exception as e:
             print(f"❌ Errore connessione MT5: {e}")
             return False

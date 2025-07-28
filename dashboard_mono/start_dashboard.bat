@@ -6,13 +6,13 @@ echo ==========================================
 echo THE5ERS GRAPHICAL DASHBOARD - LEGACY
 echo ==========================================
 
-REM Controlla se esiste il file di config nella cartella parent
-    if not exist "..\..\config\config_autonomous_challenge_production_ready.json" (
-        echo ERROR: Config file not found!
-        echo Please ensure ..\..\config\config_autonomous_challenge_production_ready.json exists
-        pause
-        exit /b 1
-    )
+REM Controlla se esiste il file di config nella cartella corretta (root progetto)
+if not exist "..\config\config_autonomous_challenge_production_ready.json" (
+    echo ERROR: Config file not found!
+    echo Please ensure ..\config\config_autonomous_challenge_production_ready.json exists
+    pause
+    exit /b 1
+)
 
 REM Controlla se esiste la directory logs
     if not exist "..\..\logs" (
