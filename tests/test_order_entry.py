@@ -1,14 +1,57 @@
+
+print("[DEBUG-TEST] Inizio esecuzione test_order_entry.py")
+
+
 import pytest
 import importlib.util
 import sys
 import os
 from types import SimpleNamespace
+import time
 
+# MOCK MT5 PRIMA DELL'IMPORT DEL MODULO PRINCIPALE
+import types
+class MT5Mock:
+    def symbol_info(self, symbol):
+        class Info:
+            bid = 1.1000
+            ask = 1.1002
+            point = 0.0001
+        return Info()
+    def positions_get(self, *args, **kwargs):
+        return []
+    def account_info(self):
+        class Account:
+            currency = 'USD'
+            equity = 10000
+        return Account()
+    def symbol_info_tick(self, symbol):
+        class Tick:
+            bid = 1.1000
+            ask = 1.1002
+        return Tick()
+    def terminal_info(self):
+        class Terminal:
+            connected = True
+        return Terminal()
+    def symbols_get(self):
+        class S:
+            name = 'EURUSD'
+        return [S()]
+
+sys.modules['mt5'] = MT5Mock()
+
+
+
+print("[DEBUG-TEST] Prima di importare phoenix_quantum_monofx_program")
+print("[TEST] Inizio import modulo principale...")
 FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "phoenix_quantum_monofx_program.py")
 spec = importlib.util.spec_from_file_location("phoenix_quantum_monofx_program", FILE)
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
+print("[DEBUG-TEST] Dopo import phoenix_quantum_monofx_program")
+print("[TEST] Modulo principale importato con successo.")
 QuantumEngine = mod.QuantumEngine
 
 class DummyConfig(dict):
@@ -28,7 +71,10 @@ class DummyConfig(dict):
     def get(self, key, default=None):
         return self.config.get(key, default)
 
+@pytest.mark.timeout(10)
 def test_order_entry_on_buy_signal():
+    print("[TEST] Inizio test_order_entry_on_buy_signal")
+    start = time.time()
     engine = QuantumEngine(DummyConfig())
     symbol = 'EURUSD'
     # Simula tick che generano un segnale BUY
@@ -41,14 +87,17 @@ def test_order_entry_on_buy_signal():
     ]
     for tick in ticks:
         engine.append_tick(symbol, tick)
-    # Forza la confidence a 1.0 e spin positivo
     engine.min_spin_samples = 2
+    print("[TEST] Chiamo get_signal...")
     signal, price = engine.get_signal(symbol, for_trading=False)
-    assert signal in ("BUY", "HOLD")  # BUY se la logica lo consente, HOLD se la soglia non è superata
-    # Se vuoi forzare BUY, puoi manipolare direttamente i parametri o tick
-    # assert signal == "BUY"
+    print(f"[TEST] Risultato get_signal: signal={signal}, price={price}")
+    assert signal in ("BUY", "HOLD")
+    print(f"[TEST] Fine test_order_entry_on_buy_signal in {time.time()-start:.2f}s")
 
+@pytest.mark.timeout(10)
 def test_order_entry_on_sell_signal():
+    print("[TEST] Inizio test_order_entry_on_sell_signal")
+    start = time.time()
     engine = QuantumEngine(DummyConfig())
     symbol = 'EURUSD'
     # Simula tick che generano un segnale SELL
@@ -62,5 +111,8 @@ def test_order_entry_on_sell_signal():
     for tick in ticks:
         engine.append_tick(symbol, tick)
     engine.min_spin_samples = 2
+    print("[TEST] Chiamo get_signal...")
     signal, price = engine.get_signal(symbol, for_trading=False)
+    print(f"[TEST] Risultato get_signal: signal={signal}, price={price}")
     assert signal in ("SELL", "HOLD")
+    print(f"[TEST] Fine test_order_entry_on_sell_signal in {time.time()-start:.2f}s")

@@ -1,21 +1,68 @@
-import os
-import json
-import logging
-import time
 
+print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
+
+print("[DEBUG-TRACE] Prima di import os")
+import os
+print("[DEBUG-TRACE] Dopo import os")
+print("[DEBUG-TRACE] Prima di import json")
+import json
+print("[DEBUG-TRACE] Dopo import json")
+print("[DEBUG-TRACE] Prima di import logging")
+import logging
+print("[DEBUG-TRACE] Dopo import logging")
+print("[DEBUG-TRACE] Prima di import time")
+import time
+print("[DEBUG-TRACE] Dopo import time")
+
+
+print("[DEBUG] Import base completati")
+
+print("[DEBUG-TRACE] Prima di import datetime")
 from datetime import datetime, time as dt_time, timedelta
+print("[DEBUG-TRACE] Dopo import datetime")
+print("[DEBUG-TRACE] Prima di import typing")
 from typing import Dict, Tuple, List, Any, Optional
+print("[DEBUG-TRACE] Dopo import typing")
+print("[DEBUG-TRACE] Prima di import collections")
 from collections import deque, defaultdict
-from logging.handlers import RotatingFileHandler
-from functools import lru_cache
-import threading
-import traceback
-import numpy as np
+print("[DEBUG-TRACE] Dopo import collections")
+print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
+try:
+    from logging.handlers import RotatingFileHandler
+    print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
+except Exception as e:
+    print(f"[IMPORT ERROR] logging.handlers: {e}")
+print("[DEBUG-TRACE] Prima di import lru_cache")
+try:
+    from functools import lru_cache
+    print("[DEBUG-TRACE] Dopo import lru_cache")
+except Exception as e:
+    print(f"[IMPORT ERROR] functools.lru_cache: {e}")
+print("[DEBUG-TRACE] Prima di import threading")
+try:
+    import threading
+    print("[DEBUG-TRACE] Dopo import threading")
+except Exception as e:
+    print(f"[IMPORT ERROR] threading: {e}")
+print("[DEBUG-TRACE] Prima di import traceback")
+try:
+    import traceback
+    print("[DEBUG-TRACE] Dopo import traceback")
+except Exception as e:
+    print(f"[IMPORT ERROR] traceback: {e}")
+print("[DEBUG-TRACE] Prima di import numpy as np")
+try:
+    import numpy as np
+    print("[DEBUG-TRACE] Dopo import numpy as np")
+except Exception as e:
+    print(f"[IMPORT ERROR] numpy: {e}")
 
 
 # Dipendenze esterne/metatrader5
+print("[DEBUG] Prima del blocco import MT5")
 try:
     import MetaTrader5 as mt5
+    print("[DEBUG] Import MT5 completato")
 except ImportError as e:
     print(f"[IMPORT ERROR] {e}. Alcune funzionalità potrebbero non funzionare correttamente.")
 
@@ -30,7 +77,9 @@ def validate_config(config):
 
 # ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 # Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
-CONFIG_FILE: str = "config/config_autonomous_challenge_production_ready.json"
+print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE: str = os.path.join(PROJECT_ROOT, "config", "config_autonomous_challenge_production_ready.json")
 DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
 DEFAULT_LOG_FILE: str = "logs/default.log"
 DEFAULT_LOG_MAX_SIZE_MB: int = 10
@@ -38,6 +87,7 @@ DEFAULT_LOG_BACKUP_COUNT: int = 5
 DEFAULT_LOG_MAX_BACKUPS: int = 10
 DEFAULT_TRADING_HOURS: str = "00:00-24:00"
 DEFAULT_TIME_RANGE: tuple = (0, 0, 23, 59)  # (h1, m1, h2, m2)
+print("[DEBUG] Costanti globali definite")
 
 # ===================== STUB FUNZIONI DI UTILITÀ MANCANTI =====================
 # Queste funzioni sono placeholder per evitare errori di import/esecuzione.
@@ -209,8 +259,12 @@ class ConfigManager:
 ## --- Tutte le funzioni e classi rimangono qui ---
 
 # --- Avvio sistema solo se eseguito come script principale ---
+
+# --- Avvio sistema solo se eseguito come script principale ---
 def main():
+    print("[DEBUG] Inizio main()")
     set_config(auto_correct_symbols(load_config()))
+    print("[DEBUG] Configurazione caricata e impostata")
 
     def periodic_reload_config(interval: int = DEFAULT_CONFIG_RELOAD_INTERVAL) -> None:
         while True:
@@ -224,12 +278,17 @@ def main():
 
     reload_thread = threading.Thread(target=periodic_reload_config, daemon=True)
     reload_thread.start()
+    print("[DEBUG] Thread di reload configurazione avviato")
 
     set_log_file(get_log_file())
+    print("[DEBUG] Log file impostato")
     set_logger(setup_logger())
+    print("[DEBUG] Logger impostato")
     clean_old_logs()
+    print("[DEBUG] Pulizia vecchi log eseguita")
     global logger
     logger = get_logger()
+    print("[DEBUG] Logger globale ottenuto")
 
     # --- TEST LOGGING CONFIGURAZIONE ---
     logger.debug("[TEST] Questo è un messaggio DEBUG (dovrebbe vedersi solo se log_level=DEBUG)")
@@ -240,6 +299,8 @@ def main():
     print("[LOG TEST] Livello logger:", logger.level)
     for h in logger.handlers:
         print("[LOG TEST] Handler:", h, "Level:", h.level)
+    print("[DEBUG] Fine main() - setup completato")
+
 
 
 # --- Esegui solo se eseguito come script principale ---
@@ -676,7 +737,7 @@ class QuantumEngine:
                 self._config = config
 
         # Lock per tutte le strutture dati runtime condivise
-        self._runtime_lock = threading.Lock()
+        self._runtime_lock = threading.RLock()
 
         # Strutture dati protette
         self._tick_buffer = defaultdict(deque)
@@ -906,45 +967,47 @@ class QuantumEngine:
         Returns:
             Tuple[float, float]: (spin, confidenza)
         """
+        # print debug rimosso
         if not ticks or len(ticks) < self.min_spin_samples:
+            print(f"[DEBUG-TEST] [calculate_spin] POCHI TICK: {len(ticks)} < {self.min_spin_samples}")
             return 0.0, 0.0
-        
-        # Chiave di cache corretta con parentesi chiuse
         cache_key = hash(tuple((t['price'], t['direction']) for t in ticks[-self.spin_window:]))
-        
-        return self._get_cached(
+        # print debug rimosso
+        result = self._get_cached(
             self._spin_cache,
             cache_key,
             self._calculate_spin_impl,
             ticks[-self.spin_window:]
         )
+        # print debug rimosso
+        return result
 
     def _calculate_spin_impl(self, ticks: List[Dict]) -> Tuple[float, float]:
         """
         (metodo interno)
         Implementazione base del calcolo dello spin (senza cache).
         """
-        if len(ticks) < 5:
+        try:
+            if len(ticks) < 5:
+                return 0.0, 0.0
+            # Filtra i tick con direction valida (non zero)
+            valid_ticks = [t for t in ticks if t.get('direction', 0) != 0]
+            if len(valid_ticks) < 3:
+                return 0.0, 0.0
+            positive = sum(1 for t in valid_ticks if t.get('direction', 0) > 0)
+            negative = sum(1 for t in valid_ticks if t.get('direction', 0) < 0)
+            total = len(valid_ticks)
+            # Calcolo spin bilanciato
+            raw_spin = (positive - negative) / total
+            # Confidence basata sulla deviazione dalla neutralità
+            balance_deviation = abs(positive - negative) / total
+            confidence = min(1.0, balance_deviation * np.sqrt(total))
+            return raw_spin, confidence
+        except Exception as e:
+            print(f"[DEBUG-TEST] [_calculate_spin_impl] EXCEPTION: {e}")
+            import logging
+            logging.getLogger("phoenix_quantum").error(f"[QuantumEngine._calculate_spin_impl] EXCEPTION: {e}")
             return 0.0, 0.0
-            
-        # Filtra i tick con direction valida (non zero)
-        valid_ticks = [t for t in ticks if t.get('direction', 0) != 0]
-        
-        if len(valid_ticks) < 3:
-            return 0.0, 0.0
-            
-        positive = sum(1 for t in valid_ticks if t.get('direction', 0) > 0)
-        negative = sum(1 for t in valid_ticks if t.get('direction', 0) < 0)
-        total = len(valid_ticks)
-        
-        # Calcolo spin bilanciato
-        raw_spin = (positive - negative) / total
-        
-        # Confidence basata sulla deviazione dalla neutralità
-        balance_deviation = abs(positive - negative) / total
-        confidence = min(1.0, balance_deviation * np.sqrt(total))
-        
-        return raw_spin, confidence
 
     
 
@@ -1017,6 +1080,7 @@ class QuantumEngine:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
 
     def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
+        # print debug rimosso
         global logger
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
@@ -1032,31 +1096,45 @@ class QuantumEngine:
             Tuple[str, float]: Segnale ("BUY"/"SELL"/"HOLD"), prezzo di riferimento.
         """
         try:
+            print(f"[DEBUG-TEST] [get_signal] Prima di get_tick_buffer({symbol})")
             ticks = list(self.get_tick_buffer(symbol))
+            print(f"[DEBUG-TEST] [get_signal] ticks: {ticks}")
             from phoenix_quantum_monofx_program import is_trading_hours  # Import assoluto per evitare errori
-            # Passa sempre un dict puro a is_trading_hours
             config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+            print(f"[DEBUG-TEST] [get_signal] config_dict: {config_dict}")
             if len(ticks) < self.min_spin_samples:
+                print(f"[DEBUG-TEST] [get_signal] Buffer insufficiente: {len(ticks)}/{self.min_spin_samples}")
                 if is_trading_hours(symbol, config_dict):
                     logger.warning(f"[EdgeCase] {symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks) - segnale non affidabile 🚩")
                 else:
-                    # Non loggare warning se il mercato è chiuso
                     logger.debug(f"[NO WARNING] {symbol}: Buffer insufficiente ma mercato chiuso (weekend/festivo/orario)")
+                print(f"[DEBUG-TEST] [get_signal] RETURN HOLD (buffer insufficiente)")
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
+            print(f"[DEBUG-TEST] [get_signal] spin_window: {spin_window}")
             recent_ticks = ticks[-spin_window:]
+            print(f"[DEBUG-TEST] [get_signal] recent_ticks: {recent_ticks}")
             spin, confidence = self.calculate_spin(recent_ticks)
+            print(f"[DEBUG-TEST] [get_signal] spin: {spin}, confidence: {confidence}")
             last_tick_price = recent_ticks[-1]['price'] if recent_ticks else 0.0
+            print(f"[DEBUG-TEST] [get_signal] last_tick_price: {last_tick_price}")
             logger.debug(f"{symbol}: Ultimo prezzo buffer={last_tick_price}, Confidenza calcolata={confidence:.3f}, Spin={spin:.3f}, Buffer size={len(ticks)}")
             if confidence < 0.8:
+                print(f"[DEBUG-TEST] [get_signal] Confidence troppo bassa: {confidence}")
                 logger.debug(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8) -> HOLD. Prezzo={last_tick_price}")
+                print(f"[DEBUG-TEST] [get_signal] RETURN HOLD (confidence)")
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
+            print(f"[DEBUG-TEST] [get_signal] last_signal_time: {last_signal_time}")
             if self._check_signal_cooldown(symbol, last_signal_time):
+                print(f"[DEBUG-TEST] [get_signal] In cooldown, RETURN HOLD")
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
+            print(f"[DEBUG-TEST] [get_signal] deltas: {deltas}")
             entropy = self.calculate_entropy(deltas)
+            print(f"[DEBUG-TEST] [get_signal] entropy: {entropy}")
             volatility = 1 + abs(spin) * entropy
+            print(f"[DEBUG-TEST] [get_signal] volatility: {volatility}")
             buy_thresh, sell_thresh = self._calculate_signal_thresholds(volatility)
             signal = "HOLD"
             buy_condition = entropy > buy_thresh and spin > self.spin_threshold * confidence
@@ -1213,11 +1291,19 @@ class QuantumEngine:
         (metodo interno)
         Gestisce una cache con timeout per ottimizzare calcoli ripetuti (es. volatilità).
         Helper per gestire cache con timeout
-        Tutto thread-safe.
+        Tutto thread-safe e a prova di deadlock.
         """
-        with self._runtime_lock:
+        # print debug rimosso
+        acquired = self._runtime_lock.acquire(timeout=2.0)
+        if not acquired:
+        # print debug rimosso
+            import logging
+            logging.getLogger("phoenix_quantum").error("[QuantumEngine._get_cached] DEADLOCK TIMEOUT su _runtime_lock! Restituisco fallback.")
+            # Fallback: restituisco valore neutro
+            return (0.0, 0.0)
+        try:
+            # print debug rimosso
             now = time.time()
-            # Usa sempre i getter/setter per accedere alle cache se disponibili
             if cache_dict is self._volatility_cache:
                 cache = self.get_volatility_cache()
             elif cache_dict is self._spin_cache:
@@ -1226,18 +1312,40 @@ class QuantumEngine:
                 cache = cache_dict
             if key in cache:
                 value, timestamp = cache[key]
+                print(f"[DEBUG-TEST] [_get_cached] CACHE HIT: value={value}, timestamp={timestamp}")
                 if now - timestamp < self._cache_timeout:
+                    print(f"[DEBUG-TEST] [_get_cached] CACHE VALID RETURN {value}")
                     return value
-            value = calculate_func(*args)
+            # print debug rimosso
+            # Timeout per la funzione di calcolo
+            import concurrent.futures
+            value = None
+            try:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(calculate_func, *args)
+                    value = future.result(timeout=2.0)
+            except concurrent.futures.TimeoutError:
+                print(f"[DEBUG-TEST] [_get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
+                import logging
+                logging.getLogger("phoenix_quantum").error("[QuantumEngine._get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
+                value = (0.0, 0.0)
+            except Exception as e:
+                print(f"[DEBUG-TEST] [_get_cached] EXCEPTION in calculate_func: {e}")
+                import logging
+                logging.getLogger("phoenix_quantum").error(f"[QuantumEngine._get_cached] EXCEPTION in calculate_func: {e}")
+                value = (0.0, 0.0)
+            # print debug rimosso
             cache[key] = (value, now)
-            # Aggiorna la cache tramite setter se disponibile
             if cache_dict is self._volatility_cache:
                 self.set_volatility_cache(key, (value, now))
             elif cache_dict is self._spin_cache:
                 self.set_spin_cache(key, (value, now))
             else:
                 cache_dict[key] = (value, now)
+            # print debug rimosso
             return value
+        finally:
+            self._runtime_lock.release()
         
     
         
@@ -1894,46 +2002,6 @@ Classe indipendente ma utilizzata dal sistema principale.
 """
 
 class TradingMetrics:
-    """Monitoraggio delle metriche di performance"""  
-    
-    """
-    def __init__(self):
-        from threading import Lock
-        self._lock = Lock()
-        # Esempio di metriche runtime
-        self._trades = []
-        self._performance = {}
-        self._stats = {}
-
-    # Getter/setter thread-safe per trades
-    def add_trade(self, trade):
-        with self._lock:
-            self._trades.append(trade)
-    def get_trades(self):
-        with self._lock:
-            return list(self._trades)
-
-    # Getter/setter thread-safe per performance
-    def set_performance(self, key, value):
-        with self._lock:
-            self._performance[key] = value
-    def get_performance(self, key=None):
-        with self._lock:
-            if key is not None:
-                return self._performance.get(key, None)
-            return dict(self._performance)
-
-    # Getter/setter thread-safe per stats
-    def set_stat(self, key, value):
-        with self._lock:
-            self._stats[key] = value
-    def get_stat(self, key=None):
-        with self._lock:
-            if key is not None:
-                return self._stats.get(key, None)
-            return dict(self._stats)
-    1. Inizializzazione  
-    """  
     def __init__(self):
         self.metrics = {
             'total_trades': 0,
@@ -1979,6 +2047,7 @@ class TradingMetrics:
         """Ricalcola le metriche aggregate:"""
         if not self._profit_history:
             return
+
     def _calculate_drawdown(self, profits: np.ndarray) -> float:
         """ Calcola il drawdown massimo dalla curva di equity."""
         equity_curve = np.cumsum(profits)
@@ -1988,25 +2057,18 @@ class TradingMetrics:
 
     def _calculate_sharpe(self, profits: np.ndarray) -> float:
         """ Calcola lo Sharpe Ratio annualizzato."""
+        # Esempio semplice: Sharpe annualizzato con risk-free rate 0
         if len(profits) < 2:
             return 0.0
-            
-        daily_returns = profits / np.mean(profits[:-1]) if np.mean(profits[:-1]) != 0 else profits
-        sharpe = np.mean(daily_returns) / (np.std(daily_returns) + 1e-10)
-        return sharpe * np.sqrt(252)
+        mean = np.mean(profits)
+        std = np.std(profits)
+        if std == 0:
+            return 0.0
+        sharpe = mean / std * np.sqrt(252)  # 252 giorni di trading
+        return sharpe
 
-    def _calculate_profit_factor(self, profits: np.ndarray) -> float:
-        """Calcola il rapporto tra profitti e perdite."""
-        gross_profit = profits[profits > 0].sum()
-        gross_loss = -profits[profits < 0].sum()
-        return gross_profit / (gross_loss + 1e-10)
-        
-    """
-    4. Report e Output
-    """
-    
-    def get_metrics_summary(self) -> dict:
-        """Restituisce un riassunto delle metriche di performance"""
+    def get_metrics_summary(self):
+        """Restituisce un riassunto delle metriche principali."""
         return {
             'total_trades': self.metrics['total_trades'],
             'win_rate': round(self.metrics['win_rate'], 2),
@@ -2015,13 +2077,13 @@ class TradingMetrics:
             'sharpe_ratio': round(self.metrics['sharpe_ratio'], 2),
             'profit_factor': round(self.metrics['profit_factor'], 2)
         }
-    
+
     def get_symbol_stats(self, symbol: str) -> dict:
         """Restituisce le statistiche per un simbolo specifico"""
         if symbol not in self.metrics['symbol_stats']:
             return {}
         return self.metrics['symbol_stats'][symbol]
-    
+
     def log_performance_report(self):
         """Stampa un report delle performance nei log"""
         summary = self.get_metrics_summary()
@@ -2034,19 +2096,6 @@ class TradingMetrics:
         logger.info(f"   Profit Factor: {summary['profit_factor']:.2f}")
 
 
-"""
-6- QuantumTradingSystem - La classe principale che coordina tutto:
-
-    -Utilizza ConfigManager per caricare la configurazione
-
-    -Istanzia QuantumEngine per l'elaborazione dei segnali
-
-    -Utilizza QuantumRiskManager per la gestione del rischio
-
-    -Monitora le posizioni con DailyDrawdownTracker
-
-    -Tiene traccia delle performance con TradingMetrics
-"""        
 
 class QuantumTradingSystem:
     def _safe_sleep(self, seconds):

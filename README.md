@@ -1,3 +1,45 @@
+# Debug e Diagnostica (Segnali e Strategie)
+
+## Segnali di Debug Utilizzati
+
+Durante la fase di troubleshooting e test sono stati utilizzati i seguenti segnali di debug (print temporanei, ora rimossi):
+
+- `[DEBUG-TEST] [get_signal] INIZIO: symbol=...`
+- `[DEBUG-TEST] [calculate_spin] INIZIO: ticks=...`
+- `[DEBUG-TEST] [calculate_spin] cache_key: ...`
+- `[DEBUG-TEST] [calculate_spin] RISULTATO: ...`
+- `[DEBUG-TEST] [_get_cached] INIZIO: key=..., cache_dict=...`
+- `[DEBUG-TEST] [_get_cached] PRESO LOCK`
+- `[DEBUG-TEST] [_get_cached] DEADLOCK TIMEOUT su _runtime_lock! Restituisco fallback.`
+- `[DEBUG-TEST] [_get_cached] CACHE MISS, calcolo valore...`
+- `[DEBUG-TEST] [_get_cached] VALORE CALCOLATO: ...`
+- `[DEBUG-TEST] [_get_cached] VALORE SALVATO IN CACHE`
+
+Questi segnali sono stati fondamentali per:
+- Tracciare il flusso di esecuzione durante i test
+- Individuare deadlock o blocchi su threading/lock
+- Verificare la corretta propagazione dei dati tra funzioni
+- Validare la presenza di output anche in ambiente pytest
+
+## Strategie di Troubleshooting adottate
+
+- Mock di moduli esterni (es. `mt5`) nei test
+- Import dinamico del modulo principale nei test
+- Print di debug in ogni funzione critica (inizio, fine, errori)
+- Timeout e fallback nei lock per evitare deadlock
+- Uso di `threading.RLock` per la sicurezza thread-safe
+- Timeout sulle funzioni di calcolo intensive
+
+## Come riutilizzare
+
+Se in futuro dovessi riscontrare blocchi, deadlock o assenza di output nei test:
+1. Inserisci print simili a quelli sopra nelle funzioni sospette
+2. Verifica la presenza di output sia in esecuzione diretta che in pytest (`-s`)
+3. Applica timeout e fallback nei lock
+4. Mocka le dipendenze esterne nei test
+5. Consulta questa sezione per esempi di segnali e strategie
+
+---
 # Changelog (Modifiche recenti a phoenix_quantum_monofx_program.py)
 
 ## 28-07-2025
