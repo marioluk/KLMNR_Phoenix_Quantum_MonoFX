@@ -43,7 +43,7 @@ class The5ersGraphicalDashboard:
         # Determina la root del progetto (un livello sopra la cartella corrente)
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         logs_dir = os.path.join(project_root, 'logs')
-        pattern = os.path.join(logs_dir, 'log_autonomous_challenge_*.log')
+        pattern = os.path.join(logs_dir, 'log_autonomous_*.log')
         log_files = glob.glob(pattern)
         if log_files:
             # Seleziona il file più recente
