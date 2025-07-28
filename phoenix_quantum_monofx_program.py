@@ -2459,12 +2459,29 @@ class QuantumTradingSystem:
                 tick = mt5.symbol_info_tick(symbol)
                 if not tick:
                     continue
-                    
+
                 if not self._validate_tick(tick):
                     continue
-                    
+
+                # Inserisci il tick nel buffer della QuantumEngine
+                if hasattr(self, 'engine') and hasattr(self.engine, 'process_tick'):
+                    # Usa il prezzo medio tra bid e ask se disponibile, altrimenti bid
+                    price = None
+                    if hasattr(tick, 'last') and tick.last and tick.last > 0:
+                        price = tick.last
+                    elif hasattr(tick, 'bid') and hasattr(tick, 'ask') and tick.bid > 0 and tick.ask > 0:
+                        price = (tick.bid + tick.ask) / 2
+                    elif hasattr(tick, 'bid') and tick.bid > 0:
+                        price = tick.bid
+                    if price:
+                        self.engine.process_tick(symbol, price)
+                        # Logga i primi tick inseriti per ogni simbolo
+                        buffer_len = len(self.engine.get_tick_buffer(symbol))
+                        if buffer_len <= 5:
+                            logger.debug(f"[DEBUG TICK BUFFER] {symbol}: Inserito tick n.{buffer_len} - prezzo={price}")
+
                 self._process_single_symbol(symbol, tick, current_positions)
-                
+
             except Exception as e:
                 logger.error(f"Errore processamento {symbol}: {str(e)}", exc_info=True)
                 
