@@ -26,6 +26,12 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+        # Se drawdown > 0 e drawdown_history è vuoto, aggiungi un punto iniziale
+        if self.current_metrics['current_drawdown'] > 0 and not self.drawdown_history:
+            self.drawdown_history.append({
+                'timestamp': datetime.now().isoformat(),
+                'drawdown': self.current_metrics['current_drawdown']
+            })
     @staticmethod
     def get_default_config_path():
         """Restituisce sempre il path assoluto del file di configurazione come nello script principale."""
