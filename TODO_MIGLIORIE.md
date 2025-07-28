@@ -30,11 +30,10 @@
 - [x] Aggiornare la documentazione tecnica e README con le nuove best practice
 
 
-NUOVE IMPLEMENTAZIONI
+## NUOVE IMPLEMENTAZIONI
 
-Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono
-
-togliere tutti i riferimenti a legacy sostituire con mono
+- [ ] Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono, dopo  Generazione configurazioni per tipologia 'intraday'... segnalare quale è la migliore configurazione
+- [ ] Togliere tutti i riferimenti a legacy sostituire con mono
 
 
 

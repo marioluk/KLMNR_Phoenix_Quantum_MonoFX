@@ -79,28 +79,50 @@ def clean_old_logs():
 def setup_logger(config_path=None):
     """Crea e restituisce un logger base. Accetta config_path per compatibilità futura."""
     import os
+    import logging
+    # Recupera la configurazione globale
+    config = globals().get('_GLOBAL_CONFIG', None)
+    conf = getattr(config, 'config', config) if config is not None else {}
+    log_conf = conf.get('logging', {}) if isinstance(conf, dict) else {}
+
+    # Parametri di default
+    log_file = log_conf.get('log_file', DEFAULT_LOG_FILE)
+    log_level_str = log_conf.get('log_level', 'INFO')
+    max_size_mb = log_conf.get('max_size_mb', DEFAULT_LOG_MAX_SIZE_MB)
+    backup_count = log_conf.get('backup_count', DEFAULT_LOG_BACKUP_COUNT)
+
+    # Conversione livello log
+    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+
     logger = logging.getLogger("phoenix_quantum")
-    if not logger.handlers:
-        # Determina il file di log dalla configurazione
-        log_file = get_log_file()
-        # Crea la cartella se non esiste
-        log_dir = os.path.dirname(log_file)
-        if log_dir and not os.path.exists(log_dir):
-            os.makedirs(log_dir, exist_ok=True)
-        # File handler
-        try:
-            file_handler = logging.FileHandler(log_file, encoding='utf-8')
-            file_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
-            file_handler.setFormatter(file_formatter)
-            logger.addHandler(file_handler)
-        except Exception as e:
-            print(f"[setup_logger] Errore creazione file di log: {e}")
-        # Anche lo stream handler su console
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    # Rimuovi tutti gli handler esistenti per evitare duplicati
+    for h in list(logger.handlers):
+        logger.removeHandler(h)
+
+    # Crea la cartella se non esiste
+    log_dir = os.path.dirname(log_file)
+    if log_dir and not os.path.exists(log_dir):
+        os.makedirs(log_dir, exist_ok=True)
+
+    # File handler con rotazione
+    try:
+        from logging.handlers import RotatingFileHandler
+        file_handler = RotatingFileHandler(log_file, maxBytes=max_size_mb*1024*1024, backupCount=backup_count, encoding='utf-8')
+        file_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(log_level)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        print(f"[setup_logger] Errore creazione file di log: {e}")
+
+    # Anche lo stream handler su console
+    stream_handler = logging.StreamHandler()
+    stream_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+    stream_handler.setFormatter(stream_formatter)
+    stream_handler.setLevel(log_level)
+    logger.addHandler(stream_handler)
+
+    logger.setLevel(log_level)
     return logger
 import os
 import sys
@@ -218,6 +240,16 @@ def main():
     clean_old_logs()
     global logger
     logger = get_logger()
+
+    # --- TEST LOGGING CONFIGURAZIONE ---
+    logger.debug("[TEST] Questo è un messaggio DEBUG (dovrebbe vedersi solo se log_level=DEBUG)")
+    logger.info("[TEST] Questo è un messaggio INFO (dovrebbe vedersi se log_level=INFO o inferiore)")
+    logger.warning("[TEST] Questo è un messaggio WARNING (dovrebbe vedersi sempre)")
+    logger.error("[TEST] Questo è un messaggio ERROR (dovrebbe vedersi sempre)")
+    logger.critical("[TEST] Questo è un messaggio CRITICAL (dovrebbe vedersi sempre)")
+    print("[LOG TEST] Livello logger:", logger.level)
+    for h in logger.handlers:
+        print("[LOG TEST] Handler:", h, "Level:", h.level)
 
 
 # --- Esegui solo se eseguito come script principale ---
