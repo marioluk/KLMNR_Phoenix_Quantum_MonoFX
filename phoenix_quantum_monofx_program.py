@@ -2370,18 +2370,18 @@ class QuantumTradingSystem:
         """Avvia il sistema"""
         print("🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀")
         try:
-            # Controllo robusto presenza simboli
+            # Controllo robusto presenza simboli su self._config
             symbols = None
-            if hasattr(self, 'config'):
+            if hasattr(self, '_config'):
                 # Caso attributo symbols
-                if hasattr(self.config, 'symbols') and self.config.symbols:
-                    symbols = self.config.symbols
-                # Caso config.config['symbols']
-                elif hasattr(self.config, 'config') and isinstance(self.config.config, dict) and 'symbols' in self.config.config:
-                    symbols = self.config.config['symbols']
+                if hasattr(self._config, 'symbols') and self._config.symbols:
+                    symbols = self._config.symbols
+                # Caso _config.config['symbols']
+                elif hasattr(self._config, 'config') and isinstance(self._config.config, dict) and 'symbols' in self._config.config:
+                    symbols = self._config.config['symbols']
                 # Caso dict puro
-                elif isinstance(self.config, dict) and 'symbols' in self.config:
-                    symbols = self.config['symbols']
+                elif isinstance(self._config, dict) and 'symbols' in self._config:
+                    symbols = self._config['symbols']
             if not symbols or not isinstance(symbols, (dict, list)) or len(symbols) == 0:
                 raise RuntimeError("Configurazione non valida - simboli mancanti")
 
