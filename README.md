@@ -1,5 +1,114 @@
 # Debug e Diagnostica (Segnali e Strategie)
 
+---
+# 🔄 LOGICA SPIN QUANTISTICO: CALCOLO, NORMALIZZAZIONE E USO NEI SEGNALI BUY/SELL
+
+---
+# 🔄 LOGICA ENTROPIA: CALCOLO, NORMALIZZAZIONE E USO NEI SEGNALI BUY/SELL
+
+## Calcolo dell'Entropia
+
+L'**entropia** misura la "disordine" o imprevedibilità delle variazioni di prezzo (delta) in una finestra di tick.
+
+- **Formula:**
+  ```
+  E = -Σ (pᵢ * log(pᵢ)) / log(N)
+  ```
+  dove:
+    - pᵢ = |deltaᵢ| / somma(|delta|) (probabilità normalizzata di ogni variazione)
+    - N = numero di delta validi nella finestra
+    - La somma è su tutti i delta ≠ 0
+
+- **Range:** l'entropia è sempre normalizzata tra 0 (massimo ordine, tutti i delta uguali) e 1 (massimo disordine, delta distribuiti uniformemente).
+- **Normalizzazione:** la divisione per `log(N)` garantisce che il massimo valore sia 1 indipendentemente dalla finestra.
+
+## Logica BUY/SELL
+
+- L'entropia viene usata insieme allo spin per generare i segnali:
+  - **BUY:** `entropia > soglia_buy` **e** `spin > spin_threshold * confidence`
+  - **SELL:** `entropia < soglia_sell` **e** `spin < -spin_threshold * confidence`
+  - **HOLD:** nessuna delle due condizioni
+
+- Le soglie di entropia (`soglia_buy`, `soglia_sell`) sono configurabili e possono essere adattate dinamicamente in base alla volatilità.
+- L'entropia non viene mai "invertita" o modificata prima della decisione: il confronto è sempre diretto con la soglia.
+
+## Esempio pratico
+
+Supponiamo:
+  - entropia = 0.62, soglia_buy = 0.55, spin = 0.30, confidence = 0.9, spin_threshold = 0.25
+  - Condizione BUY: 0.62 > 0.55 (TRUE) **e** 0.30 > 0.25 * 0.9 → 0.30 > 0.225 (TRUE) ⇒ BUY
+
+Se invece:
+  - entropia = 0.40, soglia_sell = 0.45, spin = -0.35, confidence = 0.8, spin_threshold = 0.25
+  - Condizione SELL: 0.40 < 0.45 (TRUE) **e** -0.35 < -0.25 * 0.8 → -0.35 < -0.20 (TRUE) ⇒ SELL
+
+## Riepilogo
+
+- L'entropia è sempre normalizzata tra 0 e 1.
+- Le soglie sono configurabili e possono essere adattive.
+- La logica implementata corrisponde esattamente a quella descritta nei commenti e nella documentazione del codice.
+- Se vuoi cambiare la sensibilità dei segnali, agisci su `entropy_thresholds` nella config.
+
+---
+
+## Calcolo dello Spin
+
+Lo **spin** è una misura del momentum direzionale dei tick di mercato:
+
+- **Formula:**
+  ```
+  S = (N⁺ - N⁻) / N_total
+  ```
+  dove:
+    - N⁺ = numero tick con direzione positiva (prezzo in salita)
+    - N⁻ = numero tick con direzione negativa (prezzo in discesa)
+    - N_total = N⁺ + N⁻
+
+- **Range:** lo spin è sempre compreso tra -1 (tutti short) e +1 (tutti long), 0 se bilanciato.
+- **Non viene mai normalizzato tra 0 e 1** e non viene applicato il modulo prima della decisione buy/sell.
+
+## Calcolo della Confidenza
+
+- **Formula:**
+  ```
+  C = |N⁺ - N⁻| / N_total × √N_total
+  ```
+  - C è una misura di quanto è sbilanciato il momentum, pesata per il numero di tick.
+  - Range: [0, 1] (viene troncata a 1.0 se superiore)
+
+## Logica BUY/SELL
+
+- La decisione di acquisto/vendita si basa su:
+  - **BUY:** `spin > spin_threshold * confidence` e entropia > soglia buy
+  - **SELL:** `spin < -spin_threshold * confidence` e entropia < soglia sell
+  - **HOLD:** nessuna delle due condizioni
+
+- **Nota:**
+  - Lo spin positivo genera solo segnali BUY, quello negativo solo SELL.
+  - Il modulo (`abs(spin)`) viene usato solo per la volatilità, mai per la logica buy/sell.
+  - La soglia `spin_threshold` è normalizzata tra 0 e 1 e va impostata in config in questo range.
+
+## Esempio pratico
+
+Supponiamo:
+  - spin = 0.35, confidence = 0.8, spin_threshold = 0.25
+  - Condizione BUY: 0.35 > 0.25 * 0.8 → 0.35 > 0.20 → TRUE
+  - Condizione SELL: non valutata perché spin > 0
+
+Se invece:
+  - spin = -0.40, confidence = 0.7, spin_threshold = 0.25
+  - Condizione SELL: -0.40 < -0.25 * 0.7 → -0.40 < -0.175 → TRUE
+  - Condizione BUY: non valutata perché spin < 0
+
+## Riepilogo
+
+- Lo spin è simmetrico, negativo per sell, positivo per buy.
+- Non viene mai reso positivo tramite modulo prima della decisione buy/sell.
+- La logica implementata corrisponde esattamente a quella descritta nei commenti e nella documentazione del codice.
+- Se vuoi cambiare la sensibilità dei segnali, agisci su `spin_threshold` nella config.
+
+---
+
 ## Segnali di Debug Utilizzati
 
 Durante la fase di troubleshooting e test sono stati utilizzati i seguenti segnali di debug (print temporanei, ora rimossi):
