@@ -2370,22 +2370,34 @@ class QuantumTradingSystem:
         """Avvia il sistema"""
         print("🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀")
         try:
-            if not hasattr(self, 'config') or not hasattr(self.config, 'symbols'):
+            # Controllo robusto presenza simboli
+            symbols = None
+            if hasattr(self, 'config'):
+                # Caso attributo symbols
+                if hasattr(self.config, 'symbols') and self.config.symbols:
+                    symbols = self.config.symbols
+                # Caso config.config['symbols']
+                elif hasattr(self.config, 'config') and isinstance(self.config.config, dict) and 'symbols' in self.config.config:
+                    symbols = self.config.config['symbols']
+                # Caso dict puro
+                elif isinstance(self.config, dict) and 'symbols' in self.config:
+                    symbols = self.config['symbols']
+            if not symbols or not isinstance(symbols, (dict, list)) or len(symbols) == 0:
                 raise RuntimeError("Configurazione non valida - simboli mancanti")
-                
-            print(f"📋 Sistema con {len(self.config.symbols)} simboli configurati")
-            print(f"🎯 Simboli: {self.config.symbols}")  # Mostra la lista direttamente
-            logger.info(f"Avvio sistema con {len(self.config.symbols)} simboli")
-            
+
+            print(f"📋 Sistema con {len(symbols)} simboli configurati")
+            print(f"🎯 Simboli: {symbols}")  # Mostra la lista direttamente
+            logger.info(f"Avvio sistema con {len(symbols)} simboli")
+
             if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
                 raise RuntimeError("Componenti critici non inizializzati")
-            
+
             print("✅ Componenti critici inizializzati correttamente")
             self.running = True
             logger.info("Sistema di trading avviato correttamente")
-            
+
             print("🔄 Inizio loop principale...")
-            
+
             while self.running:
                 try:
                     self._main_loop()
@@ -2397,7 +2409,7 @@ class QuantumTradingSystem:
                     logger.error(f"Errore durante l'esecuzione: {str(e)}", exc_info=True)
                     print(f"❌ Errore nel loop: {e}")
                     time.sleep(5)
-                    
+
         except Exception as e:
             logger.critical(f"Errore fatale: {str(e)}", exc_info=True)
             print(f"💀 Errore fatale: {e}")
