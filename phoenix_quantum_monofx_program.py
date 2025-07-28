@@ -1,4 +1,34 @@
- # ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
+import os
+import json
+import logging
+import time
+
+from datetime import datetime, time as dt_time, timedelta
+from typing import Dict, Tuple, List, Any, Optional
+from collections import deque, defaultdict
+from logging.handlers import RotatingFileHandler
+from functools import lru_cache
+import threading
+import traceback
+import numpy as np
+
+
+# Dipendenze esterne/metatrader5
+try:
+    import MetaTrader5 as mt5
+except ImportError as e:
+    print(f"[IMPORT ERROR] {e}. Alcune funzionalità potrebbero non funzionare correttamente.")
+
+# Stub temporanei per funzioni mancanti
+def auto_correct_symbols(config):
+    """Stub temporaneo: restituisce la config senza modifiche."""
+    return config
+
+def validate_config(config):
+    """Stub temporaneo: non fa nulla, da implementare."""
+    pass
+
+# ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 # Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
 CONFIG_FILE: str = "config/config_autonomous_challenge_production_ready.json"
 DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
@@ -57,8 +87,8 @@ def set_logger(logger_obj):
     global logger
     logger = logger_obj
 
-def setup_logger():
-    """Stub: crea e restituisce un logger base."""
+def setup_logger(config_path=None):
+    """Crea e restituisce un logger base. Accetta un argomento opzionale per compatibilità futura."""
     logger = logging.getLogger("phoenix_quantum")
     if not logger.handlers:
         handler = logging.StreamHandler()
@@ -72,148 +102,79 @@ def get_logger():
     """Stub: restituisce il logger globale."""
     return globals().get('logger', setup_logger())
 
+
 def clean_old_logs():
-    """Stub: pulizia log vecchi (non implementato)."""
     pass
 
-def setup_logger(config_path=None):
-    """Crea e restituisce un logger base. Accetta config_path per compatibilità futura."""
-    import os
-    import logging
-    # Recupera la configurazione globale
-    config = globals().get('_GLOBAL_CONFIG', None)
-    conf = getattr(config, 'config', config) if config is not None else {}
-    log_conf = conf.get('logging', {}) if isinstance(conf, dict) else {}
+# ===================== CONFIG MANAGER (RIPRISTINATO) =====================
+class ConfigManager:
+    def __init__(self, config_path: str):
+        self._lock = threading.Lock()
+        self._config_path = config_path
+        self._config = self._load_configuration(config_path)
+        self._validate_config(self._config)
 
-    # Parametri di default
-    log_file = log_conf.get('log_file', DEFAULT_LOG_FILE)
-    log_level_str = log_conf.get('log_level', 'INFO')
-    max_size_mb = log_conf.get('max_size_mb', DEFAULT_LOG_MAX_SIZE_MB)
-    backup_count = log_conf.get('backup_count', DEFAULT_LOG_BACKUP_COUNT)
+    def _load_configuration(self, config_path):
+        if not os.path.isabs(config_path):
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
+        with open(config_path) as f:
+            loaded = json.load(f)
+        return loaded
 
-    # Conversione livello log
-    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+    def _validate_config(self, config):
+        required_top = ["logging", "metatrader5", "quantum_params", "risk_parameters", "symbols"]
+        for key in required_top:
+            if key not in config:
+                raise ValueError(f"Parametro mancante nella configurazione: '{key}'")
+        # Logica di fallback e default per metatrader5
+        mt5_conf = config.get("metatrader5", {})
+        mt5_defaults = {
+            "login": 0,
+            "password": "",
+            "server": "",
+            "path": "",
+            "port": 0
+        }
+        for k, v in mt5_defaults.items():
+            if k not in mt5_conf:
+                mt5_conf[k] = v
+                logger.warning(f"[Config] {k} non trovato in metatrader5, uso default {v}")
+        config["metatrader5"] = mt5_conf
 
-    logger = logging.getLogger("phoenix_quantum")
-    # Rimuovi tutti gli handler esistenti per evitare duplicati
-    for h in list(logger.handlers):
-        logger.removeHandler(h)
+    @property
+    def config(self):
+        with self._lock:
+            return self._config
 
-    # Crea la cartella se non esiste
-    log_dir = os.path.dirname(log_file)
-    if log_dir and not os.path.exists(log_dir):
-        os.makedirs(log_dir, exist_ok=True)
+    def get(self, key, default=None):
+        with self._lock:
+            return self._config.get(key, default)
 
-    # File handler con rotazione
-    try:
-        from logging.handlers import RotatingFileHandler
-        file_handler = RotatingFileHandler(log_file, maxBytes=max_size_mb*1024*1024, backupCount=backup_count, encoding='utf-8')
-        file_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
-        file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(log_level)
-        logger.addHandler(file_handler)
-    except Exception as e:
-        print(f"[setup_logger] Errore creazione file di log: {e}")
+    def set(self, key, value):
+        with self._lock:
+            self._config[key] = value
 
-    # Anche lo stream handler su console
-    stream_handler = logging.StreamHandler()
-    stream_formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
-    stream_handler.setFormatter(stream_formatter)
-    stream_handler.setLevel(log_level)
-    logger.addHandler(stream_handler)
-
-    logger.setLevel(log_level)
-    return logger
-import os
-import sys
-import json
-import logging
-import threading
-import time
-import traceback
-import numpy as np
-from collections import defaultdict, deque
-from datetime import datetime, timedelta, time as dt_time
-from typing import Dict, List, Any, Optional, Tuple
-import MetaTrader5 as mt5
-import sys
-import json
-from functools import lru_cache
-
-from threading import Lock
-
-
-
-
-# ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
-# Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
-CONFIG_FILE: str = "config/config_autonomous_challenge_production_ready.json"
-DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
-DEFAULT_LOG_FILE: str = "logs/default.log"
-DEFAULT_LOG_MAX_SIZE_MB: int = 10
-DEFAULT_LOG_BACKUP_COUNT: int = 5
-DEFAULT_LOG_MAX_BACKUPS: int = 10
-DEFAULT_TRADING_HOURS: str = "00:00-24:00"
-DEFAULT_TIME_RANGE: tuple = (0, 0, 23, 59)  # (h1, m1, h2, m2)
-
-# Eventuali altre costanti di dominio possono essere aggiunte qui
-
-# Lock globali
-import threading
-_config_lock = threading.Lock()
-_logger_lock = threading.Lock()
-_logfile_lock = threading.Lock()
-
-# Carica la configurazione JSON all'avvio
-def auto_correct_symbols(config: dict) -> dict:
-    """
-    Versione semplificata: non effettua correzioni automatiche, restituisce la configurazione invariata.
-    """
-    return config
-
-
-def validate_config(config):
-    """
-    Valida la configurazione principale: controlla la presenza dei campi obbligatori e la coerenza dei valori.
-    Logga warning/error e solleva ValueError in caso di problemi bloccanti.
-    """
-    # Garantisce che logger sia sempre disponibile
-    global logger
-    if 'logger' not in globals() or logger is None:
-        logger = get_logger()
-    required_top = ["logging", "metatrader5", "quantum_params", "risk_parameters", "symbols"]
-    for key in required_top:
-        if key not in config:
-            logger.error(f"Parametro mancante nella configurazione: '{key}'")
-            raise ValueError(f"Parametro mancante nella configurazione: '{key}'")
-
-
-    # Fallback e default per logging
-    log_conf = config["logging"]
-    if "log_file" not in log_conf:
-        log_conf["log_file"] = "logs/default.log"
-        logger.warning("[Config] log_file non trovato, uso default logs/default.log")
-    if "max_size_mb" not in log_conf or log_conf.get("max_size_mb", 0) <= 0:
-        log_conf["max_size_mb"] = 10
-        logger.warning("[Config] max_size_mb non trovato o non valido, uso default 10")
-    if "backup_count" not in log_conf or log_conf.get("backup_count", 0) < 1:
+    def get_risk_params(self, symbol: Optional[str] = None) -> Dict:
+        with self._lock:
+            base = self._config.get('risk_parameters', {})
+            if not symbol:
+                return base
+            symbol_config = self._config.get('symbols', {}).get(symbol, {}).get('risk_management', {})
+            trailing_base = base.get('trailing_stop', {})
+            trailing_symbol = symbol_config.get('trailing_stop', {})
+            return {
+                **base,
+                **symbol_config,
+                'trailing_stop': {
+                    **trailing_base,
+                    **trailing_symbol
+                }
+            }
         log_conf["backup_count"] = 5
         logger.warning("[Config] backup_count non trovato o troppo basso, uso default 5")
 
 
-    # Fallback e default per metatrader5
-    mt5_conf = config["metatrader5"]
-    mt5_defaults = {
-        "login": 0,
-        "password": "",
-        "server": "",
-        "path": "",
-        "port": 0
-    }
-    for k, v in mt5_defaults.items():
-        if k not in mt5_conf:
-            mt5_conf[k] = v
-            logger.warning(f"[Config] {k} non trovato in metatrader5, uso default {v}")
 
 
 ## --- Tutte le funzioni e classi rimangono qui ---
@@ -522,6 +483,7 @@ basati sull'entropia e stati quantistici. Dipende dalla configurazione.
 
 
 class QuantumEngine:
+    # get_quantum_params è già definito in fondo alla classe, quindi questa versione viene rimossa per evitare duplicazione.
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
         global logger
         if 'logger' not in globals() or logger is None:
@@ -594,7 +556,7 @@ class QuantumEngine:
         Returns:
             dict: Configurazione del simbolo.
         """
-        return self._config.get('symbols', {}).get(symbol, {})
+        return self.config.get('symbols', {}).get(symbol, {})
     """
     1. Inizializzazione e Setup
     Costruttore della classe, carica i parametri di configurazione e inizializza buffer, cache e variabili di stato.
@@ -615,7 +577,7 @@ class QuantumEngine:
             self._config = config
 
         # Lock per tutte le strutture dati runtime condivise
-        self._runtime_lock = Lock()
+        self._runtime_lock = threading.Lock()
 
         # Strutture dati protette
         self._tick_buffer = defaultdict(deque)
@@ -627,7 +589,7 @@ class QuantumEngine:
         self._last_warning_time = {}
 
         # Parametri buffer/config
-        quantum_params = self._config.get('quantum_params', {})
+        quantum_params = self.config.get('quantum_params', {})
         self.buffer_size = quantum_params.get('buffer_size', 100)
         self.spin_window = quantum_params.get('spin_window', 20)
         self.min_spin_samples = quantum_params.get('min_spin_samples', 10)
@@ -635,7 +597,7 @@ class QuantumEngine:
         self.signal_cooldown = quantum_params.get('signal_cooldown', 300)
 
         # Inizializza buffer per simboli
-        for symbol in self._config.get('symbols', {}):
+        for symbol in self.config.get('symbols', {}):
             self._tick_buffer[symbol] = deque(maxlen=self.buffer_size)
 
         self._cache_timeout = 60  # secondi
@@ -728,7 +690,7 @@ class QuantumEngine:
     @property
     def config(self):
         """Property per accesso alla configurazione"""
-        return self._config    
+        return self._config
     
     def is_in_cooldown_period(self, symbol: str) -> bool:
         """Verifica se il simbolo è in un periodo di cooldown"""
@@ -896,7 +858,7 @@ class QuantumEngine:
             float: Volatilità quantistica.
         """
         def _calculate():
-            ticks = list(self.tick_buffer.get(symbol, []))
+            ticks = list(self.get_tick_buffer(symbol))
             if len(ticks) < window:
                 return 1.0
 
@@ -906,7 +868,7 @@ class QuantumEngine:
             spin, _ = self._calculate_spin_impl(ticks)
             return 1 + abs(spin) * entropy
 
-        return self._get_cached(self._volatility_cache, symbol, _calculate)
+        return self._get_cached(self.get_volatility_cache(), symbol, _calculate)
         
         
         
@@ -947,6 +909,7 @@ class QuantumEngine:
                 'direction': direction,
                 'time': time.time()
             })
+            # Usa sempre il getter anche per il debug
             logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.get_tick_buffer(symbol))}")
         except Exception as e:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
@@ -1120,14 +1083,14 @@ class QuantumEngine:
         """Restituisce i secondi rimanenti di cooldown per un simbolo"""
         # 1. Controlla cooldown normale posizioni (1800s)
         position_cooldown = self.config.get('risk_parameters', {}).get('position_cooldown', 1800)
-        last_close = self.position_cooldown.get(symbol, 0)
+        last_close = self.get_position_cooldown(symbol)
         position_remaining = max(0, position_cooldown - (time.time() - last_close))
-        
+
         # 2. Controlla cooldown segnali (900s)
         signal_cooldown = self.config.get('quantum_params', {}).get('signal_cooldown', 900)
-        last_signal = self.last_signal_time.get(symbol, 0)
+        last_signal = self.get_last_signal_time(symbol)
         signal_remaining = max(0, signal_cooldown - (time.time() - last_signal))
-        
+
         # Restituisce il cooldown più lungo rimanente
         return max(position_remaining, signal_remaining)
         
@@ -1141,16 +1104,31 @@ class QuantumEngine:
         (metodo interno)
         Gestisce una cache con timeout per ottimizzare calcoli ripetuti (es. volatilità).
         Helper per gestire cache con timeout
+        Tutto thread-safe.
         """
-        now = time.time()
-        if key in cache_dict:
-            value, timestamp = cache_dict[key]
-            if now - timestamp < self._cache_timeout:
-                return value
-        
-        value = calculate_func(*args)
-        cache_dict[key] = (value, now)
-        return value
+        with self._runtime_lock:
+            now = time.time()
+            # Usa sempre i getter/setter per accedere alle cache se disponibili
+            if cache_dict is self._volatility_cache:
+                cache = self.get_volatility_cache()
+            elif cache_dict is self._spin_cache:
+                cache = self.get_spin_cache()
+            else:
+                cache = cache_dict
+            if key in cache:
+                value, timestamp = cache[key]
+                if now - timestamp < self._cache_timeout:
+                    return value
+            value = calculate_func(*args)
+            cache[key] = (value, now)
+            # Aggiorna la cache tramite setter se disponibile
+            if cache_dict is self._volatility_cache:
+                self.set_volatility_cache(key, (value, now))
+            elif cache_dict is self._spin_cache:
+                self.set_spin_cache(key, (value, now))
+            else:
+                cache_dict[key] = (value, now)
+            return value
         
     
         
@@ -1158,36 +1136,34 @@ class QuantumEngine:
     def _get_pip_size(self, symbol: str) -> float:
         """
         Calcola la dimensione di un pip in modo robusto (supporta simboli come BTCUSD, XAUUSD).
-        Calcola la dimensione di un pip in modo robusto
+        Tutto thread-safe.
         """
-        try:
-            # 1. Prova a ottenere info da MT5
-            info = mt5.symbol_info(symbol)
-            if info and info.point > 0:
-                return info.point
-                
-            # 2. Fallback per simboli speciali
-            pip_map = {
-                'BTCUSD': 1.0,
-                'ETHUSD': 0.1,
-                'XAUUSD': 0.01,
-                'SP500': 0.1,
-                'NAS100': 0.1,
-                'default': 0.0001
-            }
-            base_symbol = symbol.split('.')[0]  # Rimuove .cash/.pro
-            return pip_map.get(base_symbol, pip_map['default'])
-            
-        except Exception as e:
-            logger.debug(f"Errore pip size per {symbol}: {str(e)}")
-            return 0.0001  # Valore di fallback sicuro    
+        with self._runtime_lock:
+            try:
+                # 1. Prova a ottenere info da MT5
+                info = mt5.symbol_info(symbol)
+                if info and info.point > 0:
+                    return info.point
+                # 2. Fallback per simboli speciali
+                pip_map = {
+                    'BTCUSD': 1.0,
+                    'ETHUSD': 0.1,
+                    'XAUUSD': 0.01,
+                    'SP500': 0.1,
+                    'NAS100': 0.1,
+                    'default': 0.0001
+                }
+                base_symbol = symbol.split('.')[0]  # Rimuove .cash/.pro
+                return pip_map.get(base_symbol, pip_map['default'])
+            except Exception as e:
+                logger.debug(f"Errore pip size per {symbol}: {str(e)}")
+                return 0.0001  # Valore di fallback sicuro
 
 
     def get_quantum_params(self, symbol: str) -> dict:
         """Restituisce i parametri quantistici con eventuali override"""
-        base_params = self._config.get('quantum_params', {})
-        symbol_config = self._config.get('symbols', {}).get(symbol, {})
-        
+        base_params = self.config.get('quantum_params', {})
+        symbol_config = self.config.get('symbols', {}).get(symbol, {})
         # Applica override se presente
         if 'quantum_params_override' in symbol_config:
             return {**base_params, **symbol_config['quantum_params_override']}
@@ -1204,8 +1180,7 @@ class DailyDrawdownTracker:
     
     def __init__(self, initial_equity: float, config: Dict):
         """Inizializzazione con accesso sicuro alla configurazione e protezione thread-safe"""
-        from threading import Lock
-        self._lock = Lock()
+        self._lock = threading.Lock()
         actual_config = config.config if hasattr(config, 'config') else config
         self._daily_high = initial_equity
         self._current_equity = initial_equity
@@ -1330,8 +1305,7 @@ class QuantumRiskManager:
     """
     def __init__(self, config, engine, trading_system=None):
         """Initialize with either ConfigManager or dict, thread-safe runtime"""
-        from threading import Lock
-        self._lock = Lock()
+        self._lock = threading.Lock()
         if hasattr(config, 'get_risk_params'):
             self._config_manager = config
             self._config = config.config
@@ -2233,8 +2207,8 @@ class QuantumTradingSystem:
         self.max_positions = self._config.config.get('risk_parameters', {}).get('max_positions', 4)
         self.current_positions = 0
         self.trade_count = defaultdict(int)
-        self.metrics_lock = Lock()
-        self.position_lock = Lock()
+        self.metrics_lock = threading.Lock()
+        self.position_lock = threading.Lock()
         self.metrics = TradingMetrics()
         self.account_info = mt5.account_info()
         self.currency = (
