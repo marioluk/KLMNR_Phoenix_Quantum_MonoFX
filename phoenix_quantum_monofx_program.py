@@ -483,6 +483,14 @@ basati sull'entropia e stati quantistici. Dipende dalla configurazione.
 
 
 class QuantumEngine:
+    @property
+    def config_dict(self):
+        """Restituisce sempre il dict di configurazione, sia che il config manager sia un dict che un oggetto complesso"""
+        if hasattr(self.config_manager, 'config') and isinstance(self.config_manager.config, dict):
+            return self.config_manager.config
+        elif isinstance(self.config_manager, dict):
+            return self.config_manager
+        return {}
     # get_quantum_params è già definito in fondo alla classe, quindi questa versione viene rimossa per evitare duplicazione.
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
         global logger
@@ -569,12 +577,84 @@ class QuantumEngine:
         Args:
             config (ConfigManager|dict): Oggetto di configurazione.
         """
-        if hasattr(config, 'get_risk_params'):  # It's a ConfigManager
+        # Se riceve un ConfigManager, usa direttamente
+        if hasattr(config, 'get_risk_params') and hasattr(config, 'config'):
             self._config_manager = config
             self._config = config.config
-        else:  # It's a raw dict
-            self._config_manager = None
-            self._config = config
+        else:
+            # Se riceve un dict puro, crea un ConfigManager temporaneo
+            from types import SimpleNamespace
+            if isinstance(config, dict):
+                from copy import deepcopy
+                config_obj = SimpleNamespace(config=deepcopy(config))
+                from threading import Lock
+
+                class DummyConfigManager:
+                    def __init__(self, config):
+                        self.config = config.config if hasattr(config, 'config') else config
+                        self._lock = Lock()
+
+                    @property
+                    def config_dict(self):
+                        return self.config
+
+                    def get_risk_params(self, symbol=None):
+                        with self._lock:
+                            base = self.config.get('risk_parameters', {})
+                            if not symbol:
+                                return base
+                            symbol_config = self.config.get('symbols', {}).get(symbol, {}).get('risk_management', {})
+                            trailing_base = base.get('trailing_stop', {})
+                            trailing_symbol = symbol_config.get('trailing_stop', {})
+                            return {
+                                **base,
+                                **symbol_config,
+                                'trailing_stop': {
+                                    **trailing_base,
+                                    **trailing_symbol
+                                }
+                            }
+
+                    @property
+                    def symbols(self):
+                        # Restituisce la lista dei simboli come in ConfigManager
+                        syms = self.config.get('symbols', {})
+                        if isinstance(syms, dict):
+                            return list(syms.keys())
+                        return syms
+
+                    def _get_max_allowed_spread(self, symbol: str) -> float:
+                        """Restituisce lo spread massimo consentito per un simbolo (compatibilità ConfigManager)"""
+                        try:
+                            DEFAULT_SPREADS = {
+                                'SP500': 10.0,
+                                'NAS100': 15.0,
+                                'XAUUSD': 30.0,
+                                'BTCUSD': 50.0,
+                                'ETHUSD': 40.0,
+                                'default': 20.0
+                            }
+                            risk_params = self.config.get('risk_parameters', {})
+                            spread_config = risk_params.get('max_spread', {})
+                            if isinstance(spread_config, dict):
+                                symbol_spread = spread_config.get(symbol, spread_config.get('default', 'auto'))
+                            else:
+                                symbol_spread = spread_config
+                            if isinstance(symbol_spread, str):
+                                symbol_spread = symbol_spread.lower()
+                                if symbol_spread == 'adaptive':
+                                    return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
+                                elif symbol_spread == 'auto':
+                                    return float(DEFAULT_SPREADS.get(symbol, DEFAULT_SPREADS['default']))
+                            return float(symbol_spread)
+                        except Exception as e:
+                            return float(20.0)
+
+                self._config_manager = DummyConfigManager(config_obj)
+                self._config = config
+            else:
+                self._config_manager = None
+                self._config = config
 
         # Lock per tutte le strutture dati runtime condivise
         self._runtime_lock = threading.Lock()
@@ -1039,12 +1119,12 @@ class QuantumEngine:
                     'timestamp': current_time
                 }
                 heartbeat_data.append(state)
-                if is_trading_hours(symbol, self._config_manager.config.config):
+                # Controlli spread e buffer solo se orari di trading
+                if is_trading_hours(symbol, self._config_manager.config_dict):
                     max_spread = self._config_manager._get_max_allowed_spread(symbol)
                     if spread > max_spread:
                         issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread:.1f}p")
-                if len(self.get_tick_buffer(symbol)) < self.min_spin_samples:
-                    if is_trading_hours(symbol, self._config_manager.config.config):
+                    if len(self.get_tick_buffer(symbol)) < self.min_spin_samples:
                         warning_symbols.append(symbol)
             except Exception as e:
                 logger.error(f"Errore monitoraggio {symbol}: {str(e)}", exc_info=True)
@@ -1067,9 +1147,16 @@ class QuantumEngine:
             logger.info(hb_msg)
             positions_count = len(mt5.positions_get() or [])
             logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
+        else:
+            logger.info("\n==================== [HEARTBEAT] ====================\n"
+                        "Nessun tick valido ricevuto per nessun simbolo!\n"
+                        "Possibile problema di connessione, dati o mercato chiuso.\n"
+                        "======================================================\n")
+            positions_count = len(mt5.positions_get() or [])
+            logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
         if warning_symbols:
             # Mostra il warning solo se almeno uno dei simboli è in orario di mercato
-            warning_symbols_open = [s for s in warning_symbols if is_trading_hours(s, self._config_manager.config.config)]
+            warning_symbols_open = [s for s in warning_symbols if is_trading_hours(s, self._config_manager.config_dict)]
             if warning_symbols_open:
                 logger.warning(f"Buffer insufficiente: {', '.join(warning_symbols_open[:3])}")
             else:
@@ -1958,15 +2045,104 @@ class TradingMetrics:
 """        
 
 class QuantumTradingSystem:
+    def _safe_sleep(self, seconds):
+        """Sleep frazionato che permette l'interruzione rapida con Ctrl+C"""
+        interval = 0.1
+        slept = 0
+        while self.running and slept < seconds:
+            time.sleep(min(interval, seconds - slept))
+            slept += interval
+
+    @property
+    def symbols(self):
+        """Restituisce la lista dei simboli configurati in modo robusto"""
+        # Prova a recuperare i simboli da diverse possibili strutture
+        if hasattr(self, '_config'):
+            if hasattr(self._config, 'symbols') and self._config.symbols:
+                # Caso: self._config ha attributo symbols
+                return list(self._config.symbols)
+            elif hasattr(self._config, 'config') and isinstance(self._config.config, dict) and 'symbols' in self._config.config:
+                # Caso: self._config.config['symbols']
+                return list(self._config.config['symbols'].keys())
+            elif isinstance(self._config, dict) and 'symbols' in self._config:
+                # Caso: self._config è un dict
+                return list(self._config['symbols'].keys())
+        return []
     def _main_loop(self):
-        """Ciclo principale di trading: elabora simboli, aggiorna buffer, logga heartbeat."""
-        try:
-            self._process_symbols()
-            self.check_buffers()
-            # Heartbeat/logging operativo
-            logger.debug("[Heartbeat] Ciclo trading completato.")
-        except Exception as e:
-            logger.error(f"Errore nel main loop: {e}", exc_info=True)
+        """
+        cuore pulsante
+        Loop principale con variabili di tempo come attributi di istanza
+        Loop principale di trading
+        """
+        # NB: KeyboardInterrupt viene gestito SOLO nel ciclo esterno (start)
+        while self.running:
+            try:
+                # Verifica connessione MT5
+                if not mt5.terminal_info().connected:
+                    logger.error("Connessione MT5 persa!")
+                    self._safe_sleep(5)
+                    continue
+                current_time = time.time()
+                # Controlli periodici
+                if current_time - self.last_connection_check > 30:  # Check più frequente
+                    if not self._verify_connection():
+                        self._safe_sleep(5)
+                        continue
+                    self.last_connection_check = current_time
+                if current_time - self.last_connection_check > 60:
+                    self._verify_connection()
+                    self.last_connection_check = current_time
+                if current_time - self.last_account_update > 60:
+                    self._update_account_info()
+                    self.last_account_update = current_time
+                    self._check_drawdown_limits()
+                if current_time - self.last_tick_check > 300:
+                    self.engine.check_tick_activity()  # Qui viene chiamato check_tick_activity()
+                    self.last_tick_check = current_time
+                    # Debug periodico dello stato trading (ogni 5 minuti, per tutti i simboli)
+                    for symbol in self.symbols:
+                        self.debug_trade_status(symbol)
+                if time.time() - self.last_buffer_check > 300:  # 5 minuti
+                    self.check_buffers()
+                    self.last_buffer_check = time.time()
+                if current_time - self.last_position_check > 30:
+                    self._monitor_open_positions()
+                    self._validate_positions()
+                    self.close_positions_before_weekend()  # <--- AGGIUNTO QUI
+                    self.last_position_check = current_time
+                for symbol in self.symbols:
+                    tick = mt5.symbol_info_tick(symbol)
+                    logger.debug(
+                        "\n-------------------- [DEBUG TICK] ----------------------\n"
+                        f"Symbol: {symbol}\n"
+                        f"Tick: {tick}\n"
+                        "------------------------------------------------------\n"
+                    )
+                    if tick:
+                        logger.debug(
+                            "\n-------------------- [DEBUG TICK] ----------------------\n"
+                            f"Symbol: {symbol}\n"
+                            f"Tick.bid: {getattr(tick, 'bid', None)}\n"
+                            "------------------------------------------------------\n"
+                        )
+                        self.engine.process_tick(symbol, tick.bid)
+                        buffer_size = len(self.engine.get_tick_buffer(symbol))
+                        logger.debug(
+                            "\n-------------------- [BUFFER-DEBUG] --------------------\n"
+                            f"Symbol: {symbol}\n"
+                            f"Buffer Size: {buffer_size}\n"
+                            "------------------------------------------------------\n"
+                        )
+                # Gestione errori SOLO per _process_symbols, non per KeyboardInterrupt
+                start_time = time.time()
+                self._process_symbols()
+                process_time = time.time() - start_time
+                if process_time > 5:
+                    logger.warning(f"Processamento simboli lento: {process_time:.2f}s")
+                self._safe_sleep(0.5)
+            except Exception as e:
+                logger.error(f"Errore nel processamento simboli: {str(e)}", exc_info=True)
+                self._safe_sleep(5)
     """
     Sistema completo di trading algoritmico quantistico
     """
@@ -2351,7 +2527,7 @@ class QuantumTradingSystem:
             if not mt5.terminal_info() or not mt5.terminal_info().connected:
                 logger.warning("Connessione MT5 challenge persa, tentativo di riconnessione...")
                 mt5.shutdown()
-                time.sleep(2)
+                self._safe_sleep(2)
                 
                 # Usa la stessa logica di _initialize_mt5 per riconnessione
                 mt5_config = self._config.config.get('metatrader5', {})
@@ -2407,54 +2583,27 @@ class QuantumTradingSystem:
             while self.running:
                 try:
                     self._main_loop()
-                    time.sleep(0.1)
+                    self._safe_sleep(0.1)
                 except KeyboardInterrupt:
                     logger.info("Arresto richiesto dall'utente")
                     self.running = False
                 except Exception as e:
                     logger.error(f"Errore durante l'esecuzione: {str(e)}", exc_info=True)
                     print(f"❌ Errore nel loop: {e}")
-                    time.sleep(5)
+                    self._safe_sleep(5)
 
         except Exception as e:
             logger.critical(f"Errore fatale: {str(e)}", exc_info=True)
             print(f"💀 Errore fatale: {e}")
             import traceback
             traceback.print_exc()
-        finally:
-            self.stop()
+        # finally:  # RIMOSSO: non serve più chiamare self.stop() qui
+        #     self.stop()
 
     def stop(self):
-        """Ferma il sistema"""
+        """Ferma il sistema e fa cleanup"""
         self.running = False
-        # Pulizia variabili di stato
-        try:
-            if not hasattr(self, '_config') or not hasattr(self._config, 'config') or 'symbols' not in self._config.config:
-                raise RuntimeError("Configurazione non valida - simboli mancanti")
-            print(f"📋 Sistema con {len(self._config.config['symbols'])} simboli configurati")
-            print(f"🎯 Simboli: {list(self._config.config['symbols'].keys())}")  # Mostra la lista direttamente
-            logger.info(f"Avvio sistema con {len(self._config.config['symbols'])} simboli")
-            if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
-                raise RuntimeError("Componenti critici non inizializzati")
-            print("✅ Componenti critici inizializzati correttamente")
-            self.running = True
-            logger.info("Sistema di trading avviato correttamente")
-            print("🔄 Inizio loop principale...")
-            while self.running:
-                try:
-                    self._main_loop()
-                    time.sleep(0.1)
-                except KeyboardInterrupt:
-                    logger.info("Arresto richiesto dall'utente")
-                    self.running = False
-                except Exception as e:
-                    logger.error(f"Errore durante l'esecuzione: {str(e)}", exc_info=True)
-                    print(f"❌ Errore nel loop: {e}")
-                    time.sleep(5)
-        except Exception as e:
-            logger.critical(f"Errore fatale: {str(e)}", exc_info=True)
-            print(f"💀 Errore fatale: {e}")
-            traceback.print_exc()
+        logger.info("Sistema di trading fermato. Cleanup completato.")
 
     def _process_symbols(self):
         """Processa tutti i simboli configurati"""
@@ -2639,7 +2788,7 @@ class QuantumTradingSystem:
                 logger.error(f"Errore aggiornamento metriche per {symbol}: {str(e)}")
             
             # 8. Pausa di sicurezza post-trade
-            time.sleep(1)
+            self._safe_sleep(1)
             return True
             
         except Exception as e:
@@ -3059,30 +3208,34 @@ class QuantumTradingSystem:
         try:
             # Verifica can_trade
             can_trade = self.engine.can_trade(symbol)
-            
-            # Verifica orari
-            trading_hours = is_trading_hours(symbol, self._config.config)
-            
+            # Verifica orari (usa config_dict per compatibilità)
+            config_dict = None
+            if hasattr(self, 'config_manager') and self.config_manager is not None:
+                if hasattr(self.config_manager, 'config_dict'):
+                    config_dict = self.config_manager.config_dict
+                elif hasattr(self.config_manager, 'config'):
+                    config = self.config_manager.config
+                    config_dict = config.config if hasattr(config, 'config') else config
+            else:
+                config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+            trading_hours = is_trading_hours(symbol, config_dict)
             # Verifica posizioni esistenti
             positions = mt5.positions_get(symbol=symbol)
             has_position = positions and len(positions) > 0
-            
             # Verifica limite trades giornalieri
             daily_count = self.trade_count.get(symbol, 0)
-            daily_limit = self._config.config['risk_parameters']['max_daily_trades']
-            
-            # Verifica buffer
-            buffer_size = len(self.engine.tick_buffer.get(symbol, []))
-            min_samples = self.engine.min_spin_samples
-            
-            # non funziona stampa solo il primo simbolo EURUSD, non c'è un loop lo commento
-            """
+            daily_limit = 0
+            try:
+                daily_limit = config_dict.get('risk_parameters', {}).get('max_daily_trades', 0)
+            except Exception:
+                daily_limit = 0
+            # Verifica buffer (usa getter thread-safe)
+            buffer_size = len(self.engine.get_tick_buffer(symbol)) if hasattr(self.engine, 'get_tick_buffer') else 0
+            min_samples = getattr(self.engine, 'min_spin_samples', 0)
+            # Log informativo sullo stato trading
             logger.info(f"🔍 TRADE STATUS {symbol}: can_trade={can_trade}, trading_hours={trading_hours}, "
                         f"has_position={has_position}, daily_trades={daily_count}/{daily_limit}, "
                         f"buffer={buffer_size}/{min_samples}")
-            """
-
-                        
         except Exception as e:
             logger.error(f"Errore debug_trade_status per {symbol}: {str(e)}")
     
