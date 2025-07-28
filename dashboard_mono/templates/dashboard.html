@@ -188,119 +188,87 @@
 
 <body>
     <div class="container-fluid">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <div class="dashboard-title">
-                <i class="fas fa-chart-line"></i> THE5ERS Trading Dashboard
-                <span class="legacy-badge">Legacy System</span>
+        <div class="dashboard-header d-flex justify-content-between align-items-center">
+            <div>
+                <div class="dashboard-title">
+                    <i class="fas fa-chart-line"></i> THE5ERS Trading Dashboard
+                    <span class="legacy-badge">Legacy System</span>
+                </div>
+                <div class="dashboard-subtitle">
+                    Real-time Quantum Trading Monitor - Legacy Configuration
+                </div>
             </div>
-            <div class="dashboard-subtitle">
-                Real-time Quantum Trading Monitor - Legacy Configuration
+            <div class="text-end">
+                <div style="margin-bottom:8px;">
+                    <span class="badge bg-{{ 'success' if compliance and compliance.target.status == 'achieved' else 'warning' }}" style="font-size:1rem; padding:8px 16px; border-radius:18px;">
+                        <i class="fas fa-server"></i> MT5: {% if 'Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning %} <span style="color:#ffb700;">OFFLINE</span> {% else %} <span style="color:#00ffe7;">ONLINE</span> {% endif %}
+                    </span>
+                </div>
+                <form method="get" action="/dashboard">
+                    <button type="submit" class="btn btn-primary" style="font-size:1rem; padding:8px 18px;">
+                        <i class="fas fa-sync-alt"></i> Refresh MT5
+                    </button>
+                </form>
             </div>
         </div>
-
-        <!-- Refresh Indicator -->
-        <div class="refresh-indicator" id="refreshIndicator">
-            <i class="fas fa-sync-alt"></i>
-        </div>
-
-        <!-- MT5 Refresh Button -->
-        <div style="position: fixed; top: 20px; right: 80px; z-index: 1000;">
-            <button class="btn btn-primary btn-sm" id="refreshMT5" onclick="refreshMT5Data()">
-                <i class="fas fa-download"></i> Refresh MT5
-            </button>
-        </div>
-
-        <!-- Compliance Status -->
+        {{ mt5_warning|safe }}
         <div class="row">
             <div class="col-12">
                 <div class="metric-card">
                     <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
-                    <div id="complianceStatus">
-                        <div class="text-center">
-                            <div class="loading-spinner">
-                                <i class="fas fa-spinner fa-spin"></i> Loading compliance data...
-                            </div>
-                        </div>
-                    </div>
+                    <div class="compliance-badge badge-{{ compliance.target.status }}">{{ compliance.target.message }}</div>
+                    <div class="compliance-badge badge-{{ compliance.drawdown.status }}">{{ compliance.drawdown.message }}</div>
                 </div>
             </div>
         </div>
-
-        <!-- Key Metrics -->
+        <hr style="border-top:2px solid #00ffe7; margin: 18px 0 24px 0; opacity:0.25;">
         <div class="row">
             <div class="col-md-3">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-target"></i> Profit Percentage
-                    </div>
-                    <div class="metric-value" id="profitPercentage">0.00%</div>
-                    <div class="metric-change" id="profitChange">Loading...</div>
+                    <div class="metric-label"><i class="fas fa-target"></i> Profit Percentage</div>
+                    <div class="metric-value">{{ metrics.profit_percentage|round(2) }}%</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-chart-line"></i> Total P&L
-                    </div>
-                    <div class="metric-value" id="totalPnl">$0.00</div>
-                    <div class="metric-change" id="pnlChange">Loading...</div>
+                    <div class="metric-label"><i class="fas fa-chart-line"></i> Total P&L</div>
+                    <div class="metric-value">${{ metrics.total_pnl|round(2) }}</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-percentage"></i> Win Rate
-                    </div>
-                    <div class="metric-value" id="winRate">0.0%</div>
-                    <div class="metric-change" id="winRateChange">Loading...</div>
+                    <div class="metric-label"><i class="fas fa-percentage"></i> Win Rate</div>
+                    <div class="metric-value">{{ metrics.win_rate|round(1) }}%</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-arrow-down"></i> Max Drawdown
-                    </div>
-                    <div class="metric-value" id="maxDrawdown">0.0%</div>
-                    <div class="metric-change" id="drawdownChange">Loading...</div>
+                    <div class="metric-label"><i class="fas fa-arrow-down"></i> Max Drawdown</div>
+                    <div class="metric-value">{{ metrics.max_drawdown|round(2) }}%</div>
                 </div>
             </div>
         </div>
-
-        <!-- Trading Metrics -->
         <div class="row">
             <div class="col-md-4">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-exchange-alt"></i> Total Trades
-                    </div>
-                    <div class="metric-value" id="totalTrades">0</div>
-                    <div class="metric-change">
-                        <span id="dailyTrades">0</span> today
-                    </div>
+                    <div class="metric-label"><i class="fas fa-exchange-alt"></i> Total Trades</div>
+                    <div class="metric-value">{{ metrics.total_trades }}</div>
+                    <div class="metric-change">{{ metrics.daily_trades }} today</div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-calculator"></i> Profit Factor
-                    </div>
-                    <div class="metric-value" id="profitFactor">0.00</div>
-                    <div class="metric-change">Higher is better</div>
+                    <div class="metric-label"><i class="fas fa-calculator"></i> Profit Factor</div>
+                    <div class="metric-value">{{ metrics.profit_factor|round(2) }}</div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="metric-card">
-                    <div class="metric-label">
-                        <i class="fas fa-layer-group"></i> Open Positions
-                    </div>
-                    <div class="metric-value" id="openPositions">0</div>
-                    <div class="metric-change">Current exposure</div>
+                    <div class="metric-label"><i class="fas fa-layer-group"></i> Open Positions</div>
+                    <div class="metric-value">{{ metrics.positions_open }}</div>
                 </div>
             </div>
         </div>
-
-        <!-- Quantum Signals -->
         <div class="row">
             <div class="col-12">
                 <div class="metric-card">
@@ -308,331 +276,91 @@
                     <div class="quantum-indicators">
                         <div class="quantum-indicator">
                             <div class="metric-label">Total Signals</div>
-                            <div class="metric-value" style="font-size: 1.5rem;" id="totalSignals">0</div>
+                            <div class="metric-value" style="font-size: 1.5rem;">{{ metrics.quantum_signals.total }}</div>
                         </div>
                         <div class="quantum-indicator">
                             <div class="metric-label">Buy Signals</div>
-                            <div class="metric-value" style="font-size: 1.5rem; color: #28a745;" id="buySignals">0</div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #28a745;">{{ metrics.quantum_signals.buy }}</div>
                         </div>
                         <div class="quantum-indicator">
                             <div class="metric-label">Sell Signals</div>
-                            <div class="metric-value" style="font-size: 1.5rem; color: #dc3545;" id="sellSignals">0
-                            </div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{ metrics.quantum_signals.sell }}</div>
                         </div>
                         <div class="quantum-indicator">
                             <div class="metric-label">Avg Entropy</div>
-                            <div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;" id="avgEntropy">0.000
-                            </div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;">{{ metrics.quantum_signals.avg_entropy|round(3) }}</div>
                         </div>
                         <div class="quantum-indicator">
                             <div class="metric-label">Avg Spin</div>
-                            <div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;" id="avgSpin">0.000
-                            </div>
+                            <div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;">{{ metrics.quantum_signals.avg_spin|round(3) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Charts -->
         <div class="row">
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="pnlChart"></div>
+                    <div id="pnl_chart"></div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="drawdownChart"></div>
+                    <div id="drawdown_chart"></div>
                 </div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="balanceChart"></div>
+                    <div id="balance_chart"></div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="hourlyChart"></div>
+                    <div id="hourly_chart"></div>
                 </div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="symbolsChart"></div>
+                    <div id="symbols_chart"></div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="chart-container">
-                    <div id="signalsChart"></div>
+                    <div id="signals_chart"></div>
                 </div>
             </div>
         </div>
-
-        <!-- Last Update -->
         <div class="last-update">
-            <i class="fas fa-clock"></i> Last updated: <span id="lastUpdate">Never</span>
+            <i class="fas fa-clock"></i> Last updated: {{ last_update }}
         </div>
+        <footer class="text-center mt-4 mb-2" style="color:#888; font-size:0.95rem;">
+            THE5ERS Dashboard Legacy &bull; v2.0 &bull; Powered by Phoenix Quantum MonoFX
+        </footer>
     </div>
-
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-        // Global variables
-        let refreshInterval;
-        let previousMetrics = {};
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function () {
-            startDashboard();
-        });
-
-        function startDashboard() {
-            // Initial load
-            updateDashboard();
-
-            // Set refresh interval (every 2 seconds)
-            refreshInterval = setInterval(updateDashboard, 2000);
-
-            console.log('🚀 THE5ERS Dashboard Started - Legacy System');
+        // Forza il tema dark per tutti i grafici
+        function applyDarkTheme(layout) {
+            if (!layout) layout = {};
+            layout.template = 'plotly_dark';
+            return layout;
         }
-
-        function updateDashboard() {
-            const refreshIndicator = document.getElementById('refreshIndicator');
-            refreshIndicator.classList.add('active');
-
-            // Update all data
-            Promise.all([
-                fetchMetrics(),
-                fetchCompliance(),
-                fetchCharts()
-            ]).then(() => {
-                refreshIndicator.classList.remove('active');
-                updateLastUpdate();
-            }).catch(error => {
-                console.error('Error updating dashboard:', error);
-                refreshIndicator.classList.remove('active');
-            });
-        }
-
-        function fetchMetrics() {
-            return fetch('/api/metrics')
-                .then(response => response.json())
-                .then(data => {
-                    updateMetricsDisplay(data);
-                    previousMetrics = data;
-                });
-        }
-
-        function fetchCompliance() {
-            return fetch('/api/compliance')
-                .then(response => response.json())
-                .then(data => {
-                    updateComplianceDisplay(data);
-                });
-        }
-
-        function fetchCharts() {
-            // Fetch all charts
-            const chartPromises = [
-                fetchChart('/api/charts/pnl', 'pnlChart'),
-                fetchChart('/api/charts/drawdown', 'drawdownChart'),
-                fetchChart('/api/charts/balance', 'balanceChart'),
-                fetchChart('/api/charts/hourly', 'hourlyChart'),
-                fetchChart('/api/charts/symbols', 'symbolsChart'),
-                fetchChart('/api/charts/signals', 'signalsChart')
-            ];
-
-            return Promise.all(chartPromises);
-        }
-
-        function fetchChart(url, elementId) {
-            return fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.data && data.data.length > 0) {
-                        // Applica tema scuro ai grafici
-                        const darkLayout = Object.assign({}, data.layout, {
-                            plot_bgcolor: '#181c20',
-                            paper_bgcolor: '#23272f',
-                            font: { color: '#e0e0e0', family: 'Montserrat, Segoe UI, Tahoma, Geneva, Verdana, sans-serif' },
-                            xaxis: Object.assign({}, data.layout.xaxis, {
-                                color: '#e0e0e0',
-                                gridcolor: '#23272f',
-                                zeroline: true,
-                                zerolinecolor: '#00ffe7',
-                                zerolinewidth: 2,
-                                linecolor: '#e0e0e0',
-                                tickfont: { color: '#e0e0e0' },
-                                title: Object.assign({}, (data.layout.xaxis||{}).title, { font: { color: '#e0e0e0' } })
-                            }),
-                            yaxis: Object.assign({}, data.layout.yaxis, {
-                                color: '#e0e0e0',
-                                gridcolor: '#23272f',
-                                zeroline: true,
-                                zerolinecolor: '#00ffe7',
-                                zerolinewidth: 2,
-                                linecolor: '#e0e0e0',
-                                tickfont: { color: '#e0e0e0' },
-                                title: Object.assign({}, (data.layout.yaxis||{}).title, { font: { color: '#e0e0e0' } })
-                            })
-                        });
-                        Plotly.newPlot(elementId, data.data, darkLayout, {
-                            responsive: true,
-                            displayModeBar: false
-                        });
-                    }
-                });
-        }
-
-        function updateMetricsDisplay(metrics) {
-            // Profit percentage
-            const profitPercentage = document.getElementById('profitPercentage');
-            profitPercentage.textContent = `${metrics.profit_percentage.toFixed(2)}%`;
-            profitPercentage.className = `metric-value ${getProfitClass(metrics.profit_percentage)}`;
-
-            // Total P&L
-            const totalPnl = document.getElementById('totalPnl');
-            totalPnl.textContent = `$${metrics.total_pnl.toFixed(2)}`;
-            totalPnl.className = `metric-value ${getProfitClass(metrics.total_pnl)}`;
-
-            // Win Rate
-            document.getElementById('winRate').textContent = `${metrics.win_rate.toFixed(1)}%`;
-
-            // Max Drawdown
-            const maxDrawdown = document.getElementById('maxDrawdown');
-            maxDrawdown.textContent = `${metrics.max_drawdown.toFixed(2)}%`;
-            maxDrawdown.className = `metric-value ${getDrawdownClass(metrics.max_drawdown)}`;
-
-            // Total Trades
-            document.getElementById('totalTrades').textContent = metrics.total_trades;
-            document.getElementById('dailyTrades').textContent = metrics.daily_trades;
-
-            // Profit Factor
-            const profitFactor = document.getElementById('profitFactor');
-            profitFactor.textContent = metrics.profit_factor === Infinity ? '∞' : metrics.profit_factor.toFixed(2);
-
-            // Open Positions
-            document.getElementById('openPositions').textContent = metrics.positions_open;
-
-            // Quantum Signals
-            const qs = metrics.quantum_signals;
-            document.getElementById('totalSignals').textContent = qs.total;
-            document.getElementById('buySignals').textContent = qs.buy;
-            document.getElementById('sellSignals').textContent = qs.sell;
-            document.getElementById('avgEntropy').textContent = qs.avg_entropy.toFixed(3);
-            document.getElementById('avgSpin').textContent = qs.avg_spin.toFixed(3);
-        }
-
-        function updateComplianceDisplay(compliance) {
-            const complianceDiv = document.getElementById('complianceStatus');
-            let html = '';
-
-            // Target status
-            if (compliance.target) {
-                html += `<div class="compliance-badge badge-${compliance.target.status}">
-                    ${compliance.target.message}
-                </div>`;
-            }
-
-            // Drawdown status
-            if (compliance.drawdown) {
-                html += `<div class="compliance-badge badge-${compliance.drawdown.status}">
-                    ${compliance.drawdown.message}
-                </div>`;
-            }
-
-            complianceDiv.innerHTML = html;
-        }
-
-        function getProfitClass(value) {
-            if (value > 0) return 'profit-positive';
-            if (value < 0) return 'profit-negative';
-            return 'profit-neutral';
-        }
-
-        function getDrawdownClass(value) {
-            if (value >= 5) return 'profit-negative';
-            if (value >= 2) return 'profit-neutral';
-            return 'profit-positive';
-        }
-
-        function updateLastUpdate() {
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
-        }
-
-        // Handle page visibility changes
-        document.addEventListener('visibilitychange', function () {
-            if (document.hidden) {
-                // Page is hidden, pause updates
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                }
-            } else {
-                // Page is visible, resume updates
-                startDashboard();
-            }
-        });
-
-        // Handle window focus
-        window.addEventListener('focus', function () {
-            updateDashboard();
-        });
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function () {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-        });
-
-        // Refresh MT5 data manually
-        function refreshMT5Data() {
-            const button = document.getElementById('refreshMT5');
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-            button.disabled = true;
-
-            fetch('/api/refresh_mt5')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Force immediate dashboard update
-                        updateDashboard();
-
-                        // Show success message
-                        button.innerHTML = '<i class="fas fa-check"></i> Success!';
-                        button.classList.add('btn-success');
-                        button.classList.remove('btn-primary');
-
-                        setTimeout(() => {
-                            button.innerHTML = '<i class="fas fa-download"></i> Refresh MT5';
-                            button.classList.remove('btn-success');
-                            button.classList.add('btn-primary');
-                            button.disabled = false;
-                        }, 2000);
-                    } else {
-                        button.innerHTML = '<i class="fas fa-times"></i> Error';
-                        button.classList.add('btn-danger');
-                        button.classList.remove('btn-primary');
-
-                        setTimeout(() => {
-                            button.innerHTML = '<i class="fas fa-download"></i> Refresh MT5';
-                            button.classList.remove('btn-danger');
-                            button.classList.add('btn-primary');
-                            button.disabled = false;
-                        }, 2000);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error refreshing MT5 data:', error);
-                    button.innerHTML = '<i class="fas fa-times"></i> Error';
-                    button.disabled = false;
-                });
-        }
+        var pnlLayout = applyDarkTheme(JSON.parse(`{{ pnl_chart.layout|default({})|tojson|safe }}`));
+        var drawdownLayout = applyDarkTheme(JSON.parse(`{{ drawdown_chart.layout|default({})|tojson|safe }}`));
+        var balanceLayout = applyDarkTheme(JSON.parse(`{{ balance_chart.layout|default({})|tojson|safe }}`));
+        var hourlyLayout = applyDarkTheme(JSON.parse(`{{ hourly_chart.layout|default({})|tojson|safe }}`));
+        var symbolsLayout = applyDarkTheme(JSON.parse(`{{ symbols_chart.layout|default({})|tojson|safe }}`));
+        var signalsLayout = applyDarkTheme(JSON.parse(`{{ signals_chart.layout|default({})|tojson|safe }}`));
+        Plotly.newPlot('pnl_chart', ({{ pnl_chart.data|tojson }}), pnlLayout, {responsive: true});
+        Plotly.newPlot('drawdown_chart', ({{ drawdown_chart.data|tojson }}), drawdownLayout, {responsive: true});
+        Plotly.newPlot('balance_chart', ({{ balance_chart.data|tojson }}), balanceLayout, {responsive: true});
+        Plotly.newPlot('hourly_chart', ({{ hourly_chart.data|tojson }}), hourlyLayout, {responsive: true});
+        Plotly.newPlot('symbols_chart', ({{ symbols_chart.data|tojson }}), symbolsLayout, {responsive: true});
+        Plotly.newPlot('signals_chart', ({{ signals_chart.data|tojson }}), signalsLayout, {responsive: true});
     </script>
 </body>
 

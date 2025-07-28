@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stato MT5</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+        ul { font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h2>Stato MetaTrader 5</h2>
+    <ul>
+        <li><b>Connessione:</b> {{ mt5_info.connessione }}</li>
+        <li><b>Account:</b> {{ mt5_info.account }}</li>
+        <li><b>Server:</b> {{ mt5_info.server }}</li>
+        <li><b>Saldo:</b> {{ mt5_info.saldo }}</li>
+        <li><b>Equity:</b> {{ mt5_info.equity }}</li>
+        <li><b>Posizioni aperte:</b> {{ mt5_info.posizioni_aperte }}</li>
+    </ul>
+    <a href="/">&#8592; Torna alla dashboard</a>
+</body>
+</html>

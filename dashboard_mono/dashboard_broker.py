@@ -69,37 +69,11 @@ class The5ersGraphicalDashboard:
         # Auto-detect config file se non specificato (per sistema legacy)
         if config_file is None:
             config_file = self.get_default_config_path()
-        
+
         self.config_file = config_file
-        print(f"[DEBUG] Config file utilizzato: {self.config_file}")
-        raw_config = self.load_config()
-        # Supporta sia struttura con chiave 'config' sia senza
-        if isinstance(raw_config, dict) and 'config' in raw_config and isinstance(raw_config['config'], dict):
-            self.config = raw_config['config']
-            print("[DEBUG] Configurazione: wrapper 'config' rilevato, uso raw_config['config']")
-        else:
-            self.config = raw_config
-            print("[DEBUG] Configurazione: uso raw_config diretto")
-        self.use_mt5 = use_mt5 and MT5_AVAILABLE
-        
-        # Auto-detect log file se non specificato
-        if log_file is None:
-            self.log_file = self.get_default_log_path(self.config)
-        else:
-            self.log_file = log_file
-            
-        # Parametri The5ers
-        self.the5ers_params = self.config.get('THE5ERS_specific', {})
-        self.step1_target = self.the5ers_params.get('step1_target', 8)
-        self.drawdown_soft = self.the5ers_params.get('drawdown_protection', {}).get('soft_limit', 2)
-        self.drawdown_hard = self.the5ers_params.get('drawdown_protection', {}).get('hard_limit', 5)
-        
-        # Configurazione MT5
-        if self.use_mt5:
-            self.mt5_config = self.config.get('metatrader5', {})
-            self.challenge_start = datetime(2025, 7, 7, 0, 0, 0)  # Inizio challenge
-            
-        # Dati per grafici (con buffer limitato per performance)
+        # Inizializza attributi fondamentali PRIMA di qualsiasi metodo che li usa
+        self.mt5_connected = False
+        self.challenge_start = datetime(2025, 7, 7, 0, 0, 0)
         self.max_data_points = 1000
         self.pnl_history = deque(maxlen=self.max_data_points)
         self.drawdown_history = deque(maxlen=self.max_data_points)
@@ -108,8 +82,6 @@ class The5ersGraphicalDashboard:
         self.signals_timeline = deque(maxlen=self.max_data_points)
         self.hourly_performance = defaultdict(lambda: {'pnl': 0, 'trades': 0})
         self.symbol_performance = defaultdict(lambda: {'pnl': 0, 'trades': 0, 'win_rate': 0})
-        
-        # Metriche real-time
         self.current_metrics = {
             'total_trades': 0,
             'winning_trades': 0,
@@ -131,168 +103,158 @@ class The5ersGraphicalDashboard:
                 'avg_spin': 0.0
             }
         }
-        
-        # Status monitoring
         self.is_monitoring = False
         self.last_log_position = 0
         self.last_update = datetime.now()
-        self.mt5_connected = False
-        
-        # Flask app
+
+
+        print(f"[DEBUG] Config file utilizzato: {self.config_file}")
+        raw_config = self.load_config()
+        # Gestione errori caricamento config
+        if not raw_config or not isinstance(raw_config, dict):
+            print("❌ Errore: file di configurazione non valido o non caricato. Controlla il percorso e il formato JSON.")
+            self.config = {}
+            self.use_mt5 = False
+        elif 'config' in raw_config and isinstance(raw_config['config'], dict):
+            self.config = raw_config['config']
+            print("[DEBUG] Configurazione: wrapper 'config' rilevato, uso raw_config['config']")
+        else:
+            self.config = raw_config
+            print("[DEBUG] Configurazione: uso raw_config diretto")
+        self.use_mt5 = use_mt5 and MT5_AVAILABLE and bool(self.config)
+
+        # Auto-detect log file se non specificato
+        if log_file is None:
+            self.log_file = self.get_default_log_path(self.config)
+        else:
+            self.log_file = log_file
+
+        # Parametri The5ers
+        self.the5ers_params = self.config.get('THE5ERS_specific', {})
+        self.step1_target = self.the5ers_params.get('step1_target', 8)
+        self.drawdown_soft = self.the5ers_params.get('drawdown_protection', {}).get('soft_limit', 2)
+        self.drawdown_hard = self.the5ers_params.get('drawdown_protection', {}).get('hard_limit', 5)
+
+        # Configurazione MT5
+        if self.use_mt5:
+            self.mt5_config = self.config.get('metatrader5', {})
+            # self.challenge_start già impostato sopra, eventualmente sovrascrivilo qui se serve
+
+        # Flask app e route (SOLO ORA che tutto è pronto)
         self.app = Flask(__name__)
         self.setup_routes()
-        
-        print(f"🎨 THE5ERS GRAPHICAL DASHBOARD INIZIALIZZATO")
-        print(f"📊 Target Step 1: {self.step1_target}%")
-        print(f"⚠️  Drawdown Soft: {self.drawdown_soft}%")
-        print(f"🚨 Drawdown Hard: {self.drawdown_hard}%")
-        print(f"📄 Log File: {self.log_file}")
-        print(f"🔌 MT5 Integration: {'✅ Enabled' if self.use_mt5 else '❌ Disabled'}")
-        print("-" * 60)
+    def setup_routes(self):
+        app = self.app
+        from flask import render_template
+
+        @app.route('/')
+        def home_page():
+            return render_template('home.html')
+
+        @app.route('/dashboard')
+        def dashboard_page():
+            pnl_chart = self.create_pnl_chart()
+            drawdown_chart = self.create_drawdown_chart()
+            balance_chart = self.create_balance_chart()
+            hourly_chart = self.create_hourly_chart()
+            symbols_chart = self.create_symbols_chart()
+            signals_chart = self.create_signals_chart()
+            metrics = self.current_metrics
+            compliance = self.get_compliance_status()
+
+            mt5_warning = ""
+            if not MT5_AVAILABLE:
+                mt5_warning = "<div style='color:red; font-weight:bold; margin-bottom:10px;'>⚠️ Modulo MetaTrader5 non installato: dati live non disponibili.</div>"
+            elif not self.use_mt5:
+                mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ Connessione MT5 non attiva o file di configurazione non valido.</div>"
+            elif not self.mt5_connected:
+                mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ MT5 non connesso: mostra solo dati da log.</div>"
+
+            return render_template(
+                'dashboard.html',
+                pnl_chart=pnl_chart,
+                drawdown_chart=drawdown_chart,
+                balance_chart=balance_chart,
+                hourly_chart=hourly_chart,
+                symbols_chart=symbols_chart,
+                signals_chart=signals_chart,
+                metrics=metrics,
+                compliance=compliance,
+                mt5_warning=mt5_warning
+            )
+
+        @app.route('/mt5_status')
+        def _mt5_status_page():
+            mt5_info = {
+                'connessione': '✅ Connesso' if self.mt5_connected else '❌ Non connesso',
+                'account': self.mt5_config.get('login', 'N/A') if hasattr(self, 'mt5_config') else 'N/A',
+                'server': self.mt5_config.get('server', 'N/A') if hasattr(self, 'mt5_config') else 'N/A',
+                'saldo': self.current_metrics.get('current_balance', 'N/A'),
+                'equity': self.current_metrics.get('current_equity', 'N/A'),
+                'posizioni_aperte': self.current_metrics.get('positions_open', 'N/A')
+            }
+            return render_template('mt5_status.html', mt5_info=mt5_info)
 
     def load_config(self) -> Dict:
-        """Carica la configurazione JSON"""
+        """Carica solo il file di configurazione JSON e restituisce un dict."""
         try:
-            with open(self.config_file, 'r') as f:
-                return json.load(f)
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                config_data = json.load(f)
+            return config_data
         except Exception as e:
-            print(f"❌ Errore caricamento config: {e}")
+            print(f"❌ Errore caricamento file di configurazione: {e}")
             return {}
 
-    def setup_routes(self):
-        """Configura le route Flask"""
-        
-        @self.app.route('/')
-        def dashboard():
-            """Pagina principale dashboard"""
-            return render_template('dashboard.html')
-            
-        @self.app.route('/api/metrics')
-        def get_metrics():
-            """API per ottenere metriche correnti"""
-            return jsonify(self.current_metrics)
-            
-        @self.app.route('/api/compliance')
-        def get_compliance():
-            """API per stato compliance The5ers"""
-            return jsonify(self.get_compliance_status())
-            
-        @self.app.route('/api/charts/pnl')
-        def get_pnl_chart():
-            """API per grafico P&L nel tempo"""
-            return jsonify(self.create_pnl_chart())
-            
-        @self.app.route('/api/charts/drawdown')
-        def get_drawdown_chart():
-            """API per grafico drawdown"""
-            return jsonify(self.create_drawdown_chart())
-            
-        @self.app.route('/api/charts/balance')
-        def get_balance_chart():
-            """API per grafico balance"""
-            return jsonify(self.create_balance_chart())
-            
-        @self.app.route('/api/charts/hourly')
-        def get_hourly_chart():
-            """API per performance oraria"""
-            return jsonify(self.create_hourly_chart())
-            
-        @self.app.route('/api/charts/symbols')
-        def get_symbols_chart():
-            """API per performance per simbolo"""
-            return jsonify(self.create_symbols_chart())
-            
-        @self.app.route('/api/charts/signals')
-        def get_signals_chart():
-            """API per analisi segnali quantum"""
-            return jsonify(self.create_signals_chart())
-            
-        @self.app.route('/api/refresh_mt5')
-        def refresh_mt5_data():
-            """API per aggiornare dati completi da MT5"""
-            if self.use_mt5:
-                success = self.load_complete_mt5_data()
-                return jsonify({'success': success})
-            return jsonify({'success': False, 'message': 'MT5 not available'})
-
-    def connect_mt5(self) -> bool:
-        """Connette a MetaTrader5"""
-        if not self.use_mt5:
-            return False
-            
+    def load_complete_mt5_data(self):
+        """Carica i dati completi da MT5 e aggiorna le metriche."""
         try:
-            # Inizializza MT5
-            if not mt5.initialize():
-                print(f"❌ Errore inizializzazione MT5")
-                return False
-            
-            # Login
-            login = self.mt5_config.get('login')
-            password = self.mt5_config.get('password')
-            server = self.mt5_config.get('server')
-            print(f"[DEBUG] Parametri MT5: login={login!r}, password={'***' if password else None}, server={server!r}")
-            if not all([login, password, server]):
-                print(f"❌ Parametri MT5 mancanti o non validi: login={login!r}, password={'***' if password else None}, server={server!r}")
-                return False
-            if not mt5.login(login, password, server):
-                print(f"❌ Errore login MT5: {mt5.last_error()}")
-                return False
-            self.mt5_connected = True
-            print(f"✅ Connesso a MT5 - Account: {login}")
-            return True
-        except Exception as e:
-            print(f"❌ Errore connessione MT5: {e}")
-            return False
+            # Prima di ogni chiamata, verifica che la connessione sia attiva
+            if not mt5.initialize() and mt5.last_error() != (0, 'No error'):
+                print(f"❌ Errore connessione MT5 (durante update): {mt5.last_error()}")
+                self.mt5_connected = False
+                return
+            else:
+                self.mt5_connected = True
 
-    def load_complete_mt5_data(self) -> bool:
-        """Carica dati completi da MT5 per tutta la challenge"""
-        if not self.connect_mt5():
-            return False
-            
-        try:
             print("🔄 Caricando dati completi da MT5...")
-            
+
             # Ottieni account info
             account_info = mt5.account_info()
             if account_info:
                 self.current_metrics['current_balance'] = account_info.balance
                 self.current_metrics['current_equity'] = account_info.equity
                 self.current_metrics['positions_open'] = len(mt5.positions_get() or [])
-                
                 # Aggiorna balance history
                 self.balance_history.append({
                     'timestamp': datetime.now().isoformat(),
                     'balance': account_info.balance,
                     'equity': account_info.equity
                 })
-            
+
             # Ottieni storia completa deals
             deals = mt5.history_deals_get(self.challenge_start, datetime.now())
             if deals is None:
                 print("❌ Nessun deal trovato")
-                return False
-                
+                return
+
             # Reset dati per reload completo
             self.pnl_history.clear()
             self.symbol_performance.clear()
             self.hourly_performance.clear()
-            
+
             # Processa tutti i deals
             cumulative_pnl = 0
             total_trades = 0
             winning_trades = 0
-            
+
             for deal in deals:
                 if deal.type in [mt5.DEAL_TYPE_BUY, mt5.DEAL_TYPE_SELL]:
                     deal_time = datetime.fromtimestamp(deal.time)
-                    
                     # Aggiorna metriche
                     total_trades += 1
                     cumulative_pnl += deal.profit
-                    
                     if deal.profit > 0:
                         winning_trades += 1
-                        
                     # Aggiorna P&L history
                     self.pnl_history.append({
                         'timestamp': deal_time.isoformat(),
@@ -301,60 +263,52 @@ class The5ersGraphicalDashboard:
                         'symbol': deal.symbol,
                         'direction': 'BUY' if deal.type == mt5.DEAL_TYPE_BUY else 'SELL'
                     })
-                    
                     # Aggiorna performance per simbolo
                     self.symbol_performance[deal.symbol]['pnl'] += deal.profit
                     self.symbol_performance[deal.symbol]['trades'] += 1
-                    
                     # Aggiorna performance oraria
                     hour = deal_time.hour
                     self.hourly_performance[hour]['pnl'] += deal.profit
                     self.hourly_performance[hour]['trades'] += 1
-            
+
             # Aggiorna metriche globali
             self.current_metrics['total_trades'] = total_trades
             self.current_metrics['winning_trades'] = winning_trades
             self.current_metrics['total_pnl'] = cumulative_pnl
-            
+
             if total_trades > 0:
                 self.current_metrics['win_rate'] = (winning_trades / total_trades) * 100
-                
+
             if self.current_metrics['current_balance'] > 0:
                 self.current_metrics['profit_percentage'] = (cumulative_pnl / self.current_metrics['current_balance']) * 100
-                
+
             # Calcola profit factor
             total_profit = sum(deal.profit for deal in deals if deal.profit > 0)
             total_loss = sum(abs(deal.profit) for deal in deals if deal.profit < 0)
-            
+
             if total_loss > 0:
                 self.current_metrics['profit_factor'] = total_profit / total_loss
             else:
                 self.current_metrics['profit_factor'] = float('inf') if total_profit > 0 else 0
-                
+
             # Calcola Max Drawdown
             max_drawdown = self.calculate_max_drawdown()
             self.current_metrics['max_drawdown'] = max_drawdown
             self.current_metrics['current_drawdown'] = max_drawdown  # Aggiorna anche current drawdown
-                
+
             # Calcola win rate per simbolo
             for symbol, stats in self.symbol_performance.items():
                 if stats['trades'] > 0:
                     symbol_winning = sum(1 for deal in deals if deal.symbol == symbol and deal.profit > 0)
                     stats['win_rate'] = (symbol_winning / stats['trades']) * 100
-                    
+
             print(f"✅ Caricati {total_trades} trades da MT5")
             print(f"📊 P&L Totale: ${cumulative_pnl:.2f}")
             print(f"🎯 Profit %: {self.current_metrics['profit_percentage']:.2f}%")
-            
-            return True
-            
+
         except Exception as e:
             print(f"❌ Errore caricamento dati MT5: {e}")
-            return False
-        finally:
-            if self.mt5_connected:
-                mt5.shutdown()
-                self.mt5_connected = False
+        # Non chiudere la connessione qui!
 
     def calculate_max_drawdown(self) -> float:
         """Calcola il Max Drawdown dai dati P&L"""
@@ -1002,11 +956,18 @@ class The5ersGraphicalDashboard:
         # Carica dati iniziali dal log
         print("🔄 Caricamento iniziale dati dal log...")
         self.analyze_log_file()
-        
-        # Carica dati completi da MT5 se disponibile
+
+        # Forza connessione MT5 se richiesto
         if self.use_mt5:
-            print("🔄 Caricamento iniziale dati MT5...")
-            self.load_complete_mt5_data()
+            print("🔄 Tentativo connessione a MetaTrader5...")
+            if not mt5.initialize() and mt5.last_error() != (0, 'No error'):
+                print(f"❌ Errore connessione MT5: {mt5.last_error()}")
+                self.mt5_connected = False
+            else:
+                self.mt5_connected = True
+                print("✅ Connessione a MT5 riuscita!")
+                print("🔄 Caricamento iniziale dati MT5...")
+                self.load_complete_mt5_data()
         
         mt5_update_counter = 0
         
@@ -1068,14 +1029,16 @@ def main():
     
     # Crea dashboard (auto-detect config se None)
     dashboard = The5ersGraphicalDashboard(config_file, log_file)
-    
+
     try:
         # Avvia dashboard con accesso remoto
         dashboard.start_dashboard(host='0.0.0.0', port=5000, debug=False)
-        
     except KeyboardInterrupt:
         print("\n\n🛑 Dashboard interrotta dall'utente")
         dashboard.is_monitoring = False
+        # Chiudi la connessione MT5 solo alla fine
+        if hasattr(mt5, 'shutdown'):
+            mt5.shutdown()
 
 if __name__ == "__main__":
     main()

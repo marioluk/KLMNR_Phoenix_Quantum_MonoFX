@@ -1,3 +1,15 @@
+# Changelog (Modifiche recenti a phoenix_quantum_monofx_program.py)
+
+## 28-07-2025
+
+- **Correzione funzione setup_logger:**
+  - Ora accetta un argomento opzionale `config_path` per compatibilità futura con chiamate da altre classi (es. ConfigManager).
+  - Risolto il TypeError "setup_logger() takes 0 positional arguments but 1 was given" che impediva l'avvio del sistema.
+  - Test di logging e avvio sistema ora funzionano senza errori.
+- **Commit dedicato:**
+  - Le modifiche sono state committate separatamente solo su questo file per tracciabilità.
+
+---
 # Novità: Opzione Trailing Stop Dinamico e Limite Trade Giornaliero Globale/Per-Simbolo
 ## 🚨 AGGIORNAMENTO - 24 LUGLIO 2025: Limite trade giornaliero globale/per-simbolo
 
