@@ -446,27 +446,27 @@ class The5ersGraphicalDashboard:
             spin = float(match_spin.group(1))
             entropy = self._last_entropy
             symbol = self._last_symbol
-            # ...existing code...
-            if entropy > 0 or abs(spin) > 0:
-                self.current_metrics['quantum_signals']['total'] += 1
-                if spin > 0:
-                    self.current_metrics['quantum_signals']['buy'] += 1
-                else:
-                    self.current_metrics['quantum_signals']['sell'] += 1
-                total = self.current_metrics['quantum_signals']['total']
-                self.current_metrics['quantum_signals']['avg_entropy'] = (
-                    (self.current_metrics['quantum_signals']['avg_entropy'] * (total - 1) + entropy) / total
-                )
-                self.current_metrics['quantum_signals']['avg_spin'] = (
-                    (self.current_metrics['quantum_signals']['avg_spin'] * (total - 1) + spin) / total
-                )
-                self.signals_timeline.append({
-                    'timestamp': timestamp.isoformat(),
-                    'symbol': symbol,
-                    'direction': 'BUY' if spin > 0 else 'SELL',
-                    'entropy': entropy,
-                    'spin': spin
-                })
+            # Conta sempre il blocco heartbeat, anche se entropy/spin sono zero
+            self.current_metrics['quantum_signals']['total'] += 1
+            if spin > 0:
+                self.current_metrics['quantum_signals']['buy'] += 1
+            elif spin < 0:
+                self.current_metrics['quantum_signals']['sell'] += 1
+            # Calcola media solo se total > 0
+            total = self.current_metrics['quantum_signals']['total']
+            self.current_metrics['quantum_signals']['avg_entropy'] = (
+                (self.current_metrics['quantum_signals']['avg_entropy'] * (total - 1) + entropy) / total
+            )
+            self.current_metrics['quantum_signals']['avg_spin'] = (
+                (self.current_metrics['quantum_signals']['avg_spin'] * (total - 1) + spin) / total
+            )
+            self.signals_timeline.append({
+                'timestamp': timestamp.isoformat(),
+                'symbol': symbol,
+                'direction': 'BUY' if spin > 0 else ('SELL' if spin < 0 else 'NEUTRAL'),
+                'entropy': entropy,
+                'spin': spin
+            })
             # Pulisce i dati temporanei
             del self._last_symbol
             del self._last_entropy
