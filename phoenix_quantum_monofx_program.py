@@ -1,3 +1,5 @@
+"""
+# debug estremo iniziale
 
 print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
 
@@ -56,7 +58,7 @@ try:
     print("[DEBUG-TRACE] Dopo import numpy as np")
 except Exception as e:
     print(f"[IMPORT ERROR] numpy: {e}")
-
+"""
 
 # Dipendenze esterne/metatrader5
 print("[DEBUG] Prima del blocco import MT5")
@@ -74,6 +76,8 @@ def auto_correct_symbols(config):
 def validate_config(config):
     """Stub temporaneo: non fa nulla, da implementare."""
     pass
+
+
 
 # ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 # Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
