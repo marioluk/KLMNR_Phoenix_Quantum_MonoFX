@@ -199,12 +199,15 @@
                 </div>
             </div>
             <div class="text-end">
-                <div style="margin-bottom:8px;">
+                <div style="margin-bottom:8px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
                     <span class="badge bg-{{ 'success' if compliance and compliance.target.status == 'achieved' else 'warning' }}" style="font-size:1rem; padding:8px 16px; border-radius:18px;">
                         <i class="fas fa-server"></i> MT5: {% if 'Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning %} <span style="color:#ffb700;">OFFLINE</span> {% else %} <span style="color:#00ffe7;">ONLINE</span> {% endif %}
                     </span>
+                    <a href="/" class="btn btn-success" style="font-size:1rem; padding:8px 18px;">
+                        <i class="fas fa-home"></i> Torna alla Home
+                    </a>
                 </div>
-                <form method="get" action="/dashboard">
+                <form method="get" action="/dashboard" style="margin-top:8px;">
                     <button type="submit" class="btn btn-primary" style="font-size:1rem; padding:8px 18px;">
                         <i class="fas fa-sync-alt"></i> Refresh MT5
                     </button>
@@ -356,20 +359,39 @@
             layout.template = 'plotly_dark';
             return layout;
         }
+
+        function renderPlotlyChart(divId, chartData, chartLayout) {
+            try {
+                if (!chartData || chartData.length === 0 || (chartData.length === 1 && chartData[0].y && chartData[0].y.length === 1 && chartData[0].y[0] === 0)) {
+                    document.getElementById(divId).innerHTML = '<div class="loading-spinner">Nessun dato disponibile per questo grafico.</div>';
+                    return;
+                }
+                Plotly.newPlot(divId, chartData, chartLayout, {responsive: true});
+            } catch (e) {
+                document.getElementById(divId).innerHTML = '<div class="loading-spinner">Errore rendering grafico.</div>';
+            }
+        }
+
         var pnlLayout = applyDarkTheme(JSON.parse(`{{ pnl_chart.layout|default({})|tojson|safe }}`));
         var drawdownLayout = applyDarkTheme(JSON.parse(`{{ drawdown_chart.layout|default({})|tojson|safe }}`));
         var balanceLayout = applyDarkTheme(JSON.parse(`{{ balance_chart.layout|default({})|tojson|safe }}`));
         var hourlyLayout = applyDarkTheme(JSON.parse(`{{ hourly_chart.layout|default({})|tojson|safe }}`));
         var symbolsLayout = applyDarkTheme(JSON.parse(`{{ symbols_chart.layout|default({})|tojson|safe }}`));
         var signalsLayout = applyDarkTheme(JSON.parse(`{{ signals_chart.layout|default({})|tojson|safe }}`));
-        {% raw %}
-        Plotly.newPlot('pnl_chart', ({{ pnl_chart.data|tojson|safe }}), pnlLayout, {responsive: true});
-        Plotly.newPlot('drawdown_chart', ({{ drawdown_chart.data|tojson|safe }}), drawdownLayout, {responsive: true});
-        Plotly.newPlot('balance_chart', ({{ balance_chart.data|tojson|safe }}), balanceLayout, {responsive: true});
-        Plotly.newPlot('hourly_chart', ({{ hourly_chart.data|tojson|safe }}), hourlyLayout, {responsive: true});
-        Plotly.newPlot('symbols_chart', ({{ symbols_chart.data|tojson|safe }}), symbolsLayout, {responsive: true});
-        Plotly.newPlot('signals_chart', ({{ signals_chart.data|tojson|safe }}), signalsLayout, {responsive: true});
-        {% endraw %}
+
+        var pnlData = JSON.parse(`{{ pnl_chart.data|tojson|safe }}`);
+        var drawdownData = JSON.parse(`{{ drawdown_chart.data|tojson|safe }}`);
+        var balanceData = JSON.parse(`{{ balance_chart.data|tojson|safe }}`);
+        var hourlyData = JSON.parse(`{{ hourly_chart.data|tojson|safe }}`);
+        var symbolsData = JSON.parse(`{{ symbols_chart.data|tojson|safe }}`);
+        var signalsData = JSON.parse(`{{ signals_chart.data|tojson|safe }}`);
+
+        renderPlotlyChart('pnl_chart', pnlData, pnlLayout);
+        renderPlotlyChart('drawdown_chart', drawdownData, drawdownLayout);
+        renderPlotlyChart('balance_chart', balanceData, balanceLayout);
+        renderPlotlyChart('hourly_chart', hourlyData, hourlyLayout);
+        renderPlotlyChart('symbols_chart', symbolsData, symbolsLayout);
+        renderPlotlyChart('signals_chart', signalsData, signalsLayout);
     </script>
 </body>
 
