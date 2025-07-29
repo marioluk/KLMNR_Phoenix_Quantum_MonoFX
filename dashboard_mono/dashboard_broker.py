@@ -867,21 +867,25 @@ class The5ersGraphicalDashboard:
         }
 
     def create_balance_chart(self) -> Dict:
-        """Crea grafico balance/equity"""
-        if not self.balance_history:
+        """Crea grafico balance/equity con colori ben distinti e sempre visibili"""
+        if not self.balance_history or len(self.balance_history) < 2:
+            # Mostra almeno due punti fittizi per evitare problemi di visualizzazione
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             balance_trace = go.Scatter(
-                x=[datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
-                y=[5000],
-                mode='lines',
+                x=[now, now],
+                y=[5000, 5000],
+                mode='lines+markers',
                 name='Balance',
-                line=dict(color='#4ecdc4', width=2)
+                line=dict(color='#00d4aa', width=2),  # Aqua
+                marker=dict(size=4)
             )
             equity_trace = go.Scatter(
-                x=[datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
-                y=[5000],
-                mode='lines',
+                x=[now, now],
+                y=[5000, 5000],
+                mode='lines+markers',
                 name='Equity',
-                line=dict(color='#f7b731', width=2)
+                line=dict(color='orange', width=2),  # Arancione
+                marker=dict(size=4)
             )
             layout = go.Layout(
                 title='Balance vs Equity',
@@ -910,16 +914,18 @@ class The5ersGraphicalDashboard:
         balance_trace = go.Scatter(
             x=timestamps,
             y=balances,
-            mode='lines',
+            mode='lines+markers',
             name='Balance',
-            line=dict(color='#4ecdc4', width=2)
+            line=dict(color='#00d4aa', width=2),  # Aqua
+            marker=dict(size=4)
         )
         equity_trace = go.Scatter(
             x=timestamps,
             y=equities,
-            mode='lines',
+            mode='lines+markers',
             name='Equity',
-            line=dict(color='#45b7d1', width=2)
+            line=dict(color='orange', width=2),  # Arancione
+            marker=dict(size=4)
         )
         layout = go.Layout(
             title='Account Balance & Equity',
