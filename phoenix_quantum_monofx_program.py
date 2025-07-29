@@ -2167,20 +2167,21 @@ class QuantumTradingSystem:
     import os
     def debug_trade_decision(self, symbol):
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo. Esporta anche i motivi in un file CSV."""
-        def write_report_row(step, detail):
+        def write_report_row(step, detail, extra=None):
             try:
                 report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trade_decision_report.csv')
                 file_exists = os.path.isfile(report_path)
                 with open(report_path, 'a', newline='', encoding='utf-8') as csvfile:
                     writer = csv.writer(csvfile)
                     if not file_exists:
-                        writer.writerow(['timestamp', 'symbol', 'step', 'detail'])
+                        writer.writerow(['timestamp', 'symbol', 'step', 'detail', 'extra'])
                     import datetime
                     writer.writerow([
                         datetime.datetime.now().isoformat(sep=' ', timespec='seconds'),
                         symbol,
                         step,
-                        detail
+                        detail,
+                        extra if extra is not None else ''
                     ])
             except Exception as e:
                 logger.error(f"Errore scrittura report trade decision: {str(e)}")
@@ -2191,8 +2192,12 @@ class QuantumTradingSystem:
             logger.info(f"can_trade: {can_trade}")
             if not can_trade:
                 msg = "Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)"
-                logger.info(msg)
-                write_report_row('can_trade', msg)
+                extra = None
+                # Esempio: se hai una variabile che indica il motivo specifico, puoi metterla qui
+                if hasattr(self.engine, 'last_block_reason'):
+                    extra = getattr(self.engine, 'last_block_reason', None)
+                logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
+                write_report_row('can_trade', msg, extra)
                 return
 
             # 2. Orari di trading
@@ -2260,8 +2265,13 @@ class QuantumTradingSystem:
             logger.info(f"Segnale calcolato: {signal} (Price: {price})")
             if signal not in ["BUY", "SELL"]:
                 msg = "Motivo: nessun segnale BUY/SELL valido (HOLD o None)"
-                logger.info(msg)
-                write_report_row('signal', msg)
+                extra = None
+                # Esempio: se la confidence è troppo bassa, puoi aggiungere qui il dettaglio
+                if hasattr(self.engine, 'last_confidence') and self.engine.last_confidence is not None:
+                    if self.engine.last_confidence < getattr(self.engine, 'min_confidence', 0.5):
+                        extra = f"Confidence troppo bassa: {self.engine.last_confidence:.3f}"
+                logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
+                write_report_row('signal', msg, extra)
                 return
 
             # 8. Cooldown segnale

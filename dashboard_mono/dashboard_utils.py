@@ -11,6 +11,9 @@ def read_trade_decision_report(max_rows: int = 100) -> List[Dict]:
     with open(report_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
+            # Garantisce compatibilità con vecchi file senza colonna 'extra'
+            if 'extra' not in row:
+                row['extra'] = ''
             rows.append(row)
     # Ritorna solo le ultime max_rows
     return rows[-max_rows:]
