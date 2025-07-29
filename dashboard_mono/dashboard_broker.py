@@ -169,17 +169,14 @@ class The5ersGraphicalDashboard:
         # Flask app e route (SOLO ORA che tutto è pronto)
         self.app = Flask(__name__)
         self.setup_routes()
+
     def setup_routes(self):
         app = self.app
         from flask import render_template
 
         @app.route('/')
-        def home_page():
-            return render_template('home.html')
-
-
-        @app.route('/dashboard')
-        def dashboard_page():
+        def home():
+            # Home page: mostra dashboard principale
             pnl_chart = self.create_pnl_chart()
             drawdown_chart = self.create_drawdown_chart()
             balance_chart = self.create_balance_chart()
@@ -213,52 +210,41 @@ class The5ersGraphicalDashboard:
                 trade_decision_table=trade_decision_table
             )
 
+        @app.route('/dashboard')
+        def dashboard():
+            # Alias per la dashboard principale
+            return home()
+
         @app.route('/diagnostics')
-        def diagnostics_page():
+        def diagnostics():
+            # Tabella segnali quantum
             signals_sequence_table = self.create_signals_sequence_table()
+            # Tabella decisioni trade
             trade_decision_table = read_trade_decision_report(100)
+            # Parametri quantum dal file di config
+            config = self.load_config()
+            quantum = config.get('config', {}).get('quantum_params', {})
+            entropy_thresholds = quantum.get('entropy_thresholds', {})
+            buy_entropy = entropy_thresholds.get('buy_signal', None)
+            sell_entropy = entropy_thresholds.get('sell_signal', None)
+            spin_window = quantum.get('spin_window', None)
+            min_spin_samples = quantum.get('min_spin_samples', None)
+            spin_threshold = quantum.get('spin_threshold', None)
+            signal_cooldown = quantum.get('signal_cooldown', None)
+            # Passa i parametri al template
             return render_template(
                 'diagnostics.html',
                 signals_sequence_table=signals_sequence_table,
-                trade_decision_table=trade_decision_table
+                trade_decision_table=trade_decision_table,
+                buy_entropy=buy_entropy,
+                sell_entropy=sell_entropy,
+                spin_window=spin_window,
+                min_spin_samples=min_spin_samples,
+                spin_threshold=spin_threshold,
+                signal_cooldown=signal_cooldown
             )
 
-        @app.route('/mt5_status')
-        def _mt5_status_page():
-            mt5_info = {
-                'connessione': '✅ Connesso' if self.mt5_connected else '❌ Non connesso',
-                'account': self.mt5_config.get('login', 'N/A') if hasattr(self, 'mt5_config') else 'N/A',
-                'server': self.mt5_config.get('server', 'N/A') if hasattr(self, 'mt5_config') else 'N/A',
-                'saldo': self.current_metrics.get('current_balance', 'N/A'),
-                'equity': self.current_metrics.get('current_equity', 'N/A'),
-                'posizioni_aperte': self.current_metrics.get('positions_open', 'N/A')
-            }
-            return render_template('mt5_status.html', mt5_info=mt5_info)
-
-    def load_config(self) -> Dict:
-        """Carica solo il file di configurazione JSON e restituisce un dict."""
         try:
-            with open(self.config_file, 'r', encoding='utf-8') as f:
-                config_data = json.load(f)
-            return config_data
-        except Exception as e:
-            print(f"❌ Errore caricamento file di configurazione: {e}")
-            return {}
-
-    def load_complete_mt5_data(self):
-        """Carica i dati completi da MT5 e aggiorna le metriche."""
-        try:
-            # Prima di ogni chiamata, verifica che la connessione sia attiva
-            if not mt5.initialize() and mt5.last_error() != (0, 'No error'):
-                print(f"❌ Errore connessione MT5 (durante update): {mt5.last_error()}")
-                self.mt5_connected = False
-                return
-            else:
-                self.mt5_connected = True
-
-            print("🔄 Caricando dati completi da MT5...")
-
-            # Ottieni account info
             account_info = mt5.account_info()
             if account_info:
                 self.current_metrics['current_balance'] = account_info.balance
