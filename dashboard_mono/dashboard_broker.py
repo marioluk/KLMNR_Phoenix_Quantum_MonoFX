@@ -26,6 +26,23 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    def create_signals_sequence_table(self, max_rows=100):
+        """Restituisce una lista di dict con la sequenza segnali e relativo esito."""
+        # Mostra solo gli ultimi max_rows segnali
+        rows = list(self.signals_timeline)[-max_rows:]
+        table = []
+        for s in rows:
+            table.append({
+                'timestamp': s['timestamp'],
+                'symbol': s['symbol'],
+                'direction': s['direction'],
+                'entropy': s['entropy'],
+                'spin': s['spin'],
+                'esito': s.get('esito', 'NESSUNA AZIONE') if s.get('esito') else 'NESSUNA AZIONE',
+                'trade_pnl': s.get('trade_pnl'),
+                'trade_time': s.get('trade_time')
+            })
+        return table
     @staticmethod
     def get_default_config_path():
         """Restituisce sempre il path assoluto del file di configurazione come nello script principale."""
@@ -79,6 +96,7 @@ class The5ersGraphicalDashboard:
         self.drawdown_history = deque(maxlen=self.max_data_points)
         self.balance_history = deque(maxlen=self.max_data_points)
         self.trades_timeline = deque(maxlen=self.max_data_points)
+        # Ogni elemento: {'timestamp', 'symbol', 'direction', 'entropy', 'spin', 'esito', 'trade_pnl', 'trade_time'}
         self.signals_timeline = deque(maxlen=self.max_data_points)
         self.hourly_performance = defaultdict(lambda: {'pnl': 0, 'trades': 0})
         self.symbol_performance = defaultdict(lambda: {'pnl': 0, 'trades': 0, 'win_rate': 0})
@@ -168,6 +186,7 @@ class The5ersGraphicalDashboard:
             signals_chart = self.create_signals_chart()
             metrics = self.current_metrics
             compliance = self.get_compliance_status()
+            signals_sequence_table = self.create_signals_sequence_table()
 
             mt5_warning = ""
             if not MT5_AVAILABLE:
@@ -187,7 +206,8 @@ class The5ersGraphicalDashboard:
                 signals_chart=signals_chart,
                 metrics=metrics,
                 compliance=compliance,
-                mt5_warning=mt5_warning
+                mt5_warning=mt5_warning,
+                signals_sequence_table=signals_sequence_table
             )
 
         @app.route('/mt5_status')
@@ -383,7 +403,6 @@ class The5ersGraphicalDashboard:
             symbol = match.group(1)
             direction = match.group(2)
             pnl = float(match.group(5))
-            # ...existing code...
             self.current_metrics['total_trades'] += 1
             self.current_metrics['total_pnl'] += pnl
             if pnl > 0:
@@ -400,6 +419,18 @@ class The5ersGraphicalDashboard:
                 'symbol': symbol,
                 'direction': direction
             })
+            # Associa il trade al segnale quantum più recente compatibile (stesso symbol, stessa direzione, esito None, entro 1 ora)
+            for s in reversed(self.signals_timeline):
+                if (
+                    s['symbol'] == symbol and
+                    s['direction'] == direction and
+                    s.get('esito') is None and
+                    abs((timestamp - datetime.fromisoformat(s['timestamp'])).total_seconds()) < 3600
+                ):
+                    s['esito'] = 'TRADE'
+                    s['trade_pnl'] = pnl
+                    s['trade_time'] = timestamp.isoformat()
+                    break
             if self.current_metrics['total_trades'] > 0:
                 self.current_metrics['win_rate'] = (self.current_metrics['winning_trades'] / self.current_metrics['total_trades']) * 100
             current_drawdown = self.calculate_max_drawdown()
