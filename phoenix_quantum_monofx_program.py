@@ -1103,7 +1103,7 @@ class QuantumEngine:
         except Exception as e:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
 
-    def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
+    def get_signal(self, symbol: str, for_trading: bool = False, motivo_for_csv: list = None) -> Tuple[str, float]:
         global logger
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
@@ -1125,6 +1125,8 @@ class QuantumEngine:
                     logger.warning(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 else:
                     logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} (mercato chiuso) | Dettagli: {dettagli}")
+                if motivo_for_csv is not None:
+                    motivo_for_csv.append(motivo)
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
             recent_ticks = ticks[-spin_window:]
@@ -1142,6 +1144,8 @@ class QuantumEngine:
                     "timestamp": datetime.now().isoformat(),
                 }
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
+                if motivo_for_csv is not None:
+                    motivo_for_csv.append(motivo)
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
             # 3. Cooldown attivo
@@ -1155,6 +1159,8 @@ class QuantumEngine:
                     "timestamp": datetime.now().isoformat(),
                 }
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
+                if motivo_for_csv is not None:
+                    motivo_for_csv.append(motivo)
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
             entropy = self.calculate_entropy(deltas)
@@ -1208,9 +1214,13 @@ class QuantumEngine:
                     "timestamp": datetime.now().isoformat(),
                 }
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
+                if motivo_for_csv is not None:
+                    motivo_for_csv.append(motivazione)
             return signal, last_tick_price
         except Exception as e:
             logger.error(f"[get_signal] Errore durante la generazione del segnale per {symbol}: {e}", exc_info=True)
+            if motivo_for_csv is not None:
+                motivo_for_csv.append(f"Errore get_signal: {e}")
             return "HOLD", 0.0
         
         
@@ -2323,7 +2333,8 @@ class QuantumTradingSystem:
                 return
 
             # 7. Ottieni segnale
-            signal, price = self.engine.get_signal(symbol, for_trading=False)
+            motivi_hold = []
+            signal, price = self.engine.get_signal(symbol, for_trading=False, motivo_for_csv=motivi_hold)
             logger.info(f"Segnale calcolato: {signal} (Price: {price})")
             if signal not in ["BUY", "SELL"]:
                 msg = "Motivo: nessun segnale BUY/SELL valido (HOLD o None)"
@@ -2364,6 +2375,9 @@ class QuantumTradingSystem:
                 else:
                     motivi.append("Spin: N/A")
                 motivi.append(f"Buffer tick: {len(ticks)}")
+                # Aggiungi il motivo tecnico preciso del HOLD in cima
+                if motivi_hold:
+                    motivi.insert(0, f"Motivo tecnico: {motivi_hold[0]}")
                 extra = "; ".join(motivi)
                 logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
                 write_report_row('signal', msg, extra)
