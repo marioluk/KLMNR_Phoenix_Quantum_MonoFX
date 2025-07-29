@@ -289,6 +289,19 @@ class The5ersGraphicalDashboard:
         app = self.app
         from flask import render_template
 
+        @app.route('/api/mt5_status')
+        def api_mt5_status():
+            # Raccogli info stato MT5
+            info = {
+                'connessione': 'OK' if self.mt5_connected else 'DISCONNESSO',
+                'account': self.current_metrics.get('current_balance', None),
+                'server': getattr(self, 'mt5_config', {}).get('server', ''),
+                'saldo': self.current_metrics.get('current_balance', None),
+                'equity': self.current_metrics.get('current_equity', None),
+                'posizioni_aperte': self.current_metrics.get('positions_open', None)
+            }
+            return jsonify(info)
+
         @app.route('/')
         def home():
             # Pagina di benvenuto separata
