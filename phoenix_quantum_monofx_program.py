@@ -2139,26 +2139,165 @@ class TradingMetrics:
 
 
 class QuantumTradingSystem:
-    def _safe_sleep(self, seconds):
-        """Sleep frazionato che permette l'interruzione rapida con Ctrl+C"""
-        interval = 0.1
-        slept = 0
-        while self.running and slept < seconds:
-            time.sleep(min(interval, seconds - slept))
-            slept += interval
 
-    @property
-    def symbols(self):
-        """Restituisce la lista dei simboli configurati in modo robusto"""
-        # Prova a recuperare i simboli da diverse possibili strutture
-        if hasattr(self, '_config'):
-            if hasattr(self._config, 'symbols') and self._config.symbols:
-                # Caso: self._config ha attributo symbols
-                return list(self._config.symbols)
-            elif hasattr(self._config, 'config') and isinstance(self._config.config, dict) and 'symbols' in self._config.config:
-                # Caso: self._config.config['symbols']
-                return list(self._config.config['symbols'].keys())
-            elif isinstance(self._config, dict) and 'symbols' in self._config:
+    def debug_trade_decision(self, symbol):
+        """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo."""
+        try:
+            logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
+            # 1. Può fare trading?
+            can_trade = self.engine.can_trade(symbol)
+            logger.info(f"can_trade: {can_trade}")
+            if not can_trade:
+                logger.info("Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)")
+                return
+
+            # 2. Orari di trading
+            config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+            trading_hours = is_trading_hours(symbol, config_dict)
+            logger.info(f"trading_hours: {trading_hours}")
+            if not trading_hours:
+                logger.info("Motivo: fuori orario di trading")
+                return
+
+            # 3. Posizioni già aperte
+            existing_positions = mt5.positions_get(symbol=symbol)
+            has_position = existing_positions and len(existing_positions) > 0
+            logger.info(f"has_position: {has_position}")
+    import csv
+    import os
+    def debug_trade_decision(self, symbol):
+        """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo. Esporta anche i motivi in un file CSV."""
+        def write_report_row(step, detail):
+            try:
+                report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trade_decision_report.csv')
+                file_exists = os.path.isfile(report_path)
+                with open(report_path, 'a', newline='', encoding='utf-8') as csvfile:
+                    writer = csv.writer(csvfile)
+                    if not file_exists:
+                        writer.writerow(['timestamp', 'symbol', 'step', 'detail'])
+                    import datetime
+                    writer.writerow([
+                        datetime.datetime.now().isoformat(sep=' ', timespec='seconds'),
+                        symbol,
+                        step,
+                        detail
+                    ])
+            except Exception as e:
+                logger.error(f"Errore scrittura report trade decision: {str(e)}")
+        try:
+            logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
+            # 1. Può fare trading?
+            can_trade = self.engine.can_trade(symbol)
+            logger.info(f"can_trade: {can_trade}")
+            if not can_trade:
+                msg = "Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)"
+                logger.info(msg)
+                write_report_row('can_trade', msg)
+                return
+
+            # 2. Orari di trading
+            config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+            trading_hours = is_trading_hours(symbol, config_dict)
+            logger.info(f"trading_hours: {trading_hours}")
+            if not trading_hours:
+                msg = "Motivo: fuori orario di trading"
+                logger.info(msg)
+                write_report_row('trading_hours', msg)
+                return
+
+            # 3. Posizioni già aperte
+            existing_positions = mt5.positions_get(symbol=symbol)
+            has_position = existing_positions and len(existing_positions) > 0
+            logger.info(f"has_position: {has_position}")
+            if has_position:
+                msg = "Motivo: posizione già aperta su questo simbolo"
+                logger.info(msg)
+                write_report_row('has_position', msg)
+                return
+
+            # 4. Limite posizioni totali
+            current_positions = len(mt5.positions_get() or [])
+            logger.info(f"current_positions: {current_positions} / max_positions: {self.max_positions}")
+            if current_positions >= self.max_positions:
+                msg = "Motivo: raggiunto limite massimo posizioni totali"
+                logger.info(msg)
+                write_report_row('max_positions', msg)
+                return
+
+            # 5. Limite trade giornalieri
+            risk_params = self._config.config.get('risk_parameters', {})
+            daily_limit = risk_params.get('max_daily_trades', 5)
+            limit_mode = risk_params.get('daily_trade_limit_mode', 'global')
+            if limit_mode == 'global':
+                total_trades_today = sum(self.trade_count.values())
+                logger.info(f"total_trades_today: {total_trades_today} / daily_limit: {daily_limit}")
+                if total_trades_today >= daily_limit:
+                    msg = f"Motivo: raggiunto limite trade giornalieri globali ({total_trades_today}/{daily_limit})"
+                    logger.info(msg)
+                    write_report_row('daily_limit_global', msg)
+                    return
+            else:
+                trades_for_symbol = self.trade_count.get(symbol, 0)
+                logger.info(f"trades_for_symbol: {trades_for_symbol} / daily_limit: {daily_limit}")
+                if trades_for_symbol >= daily_limit:
+                    msg = f"Motivo: raggiunto limite trade giornalieri per simbolo ({trades_for_symbol}/{daily_limit})"
+                    logger.info(msg)
+                    write_report_row('daily_limit_symbol', msg)
+                    return
+
+            # 6. Buffer tick sufficiente
+            buffer_size = len(self.engine.get_tick_buffer(symbol))
+            min_samples = getattr(self.engine, 'min_spin_samples', 0)
+            logger.info(f"buffer_size: {buffer_size} / min_spin_samples: {min_samples}")
+            if buffer_size < min_samples:
+                msg = "Motivo: buffer tick insufficiente per generare segnale"
+                logger.info(msg)
+                write_report_row('buffer_tick', msg)
+                return
+
+            # 7. Ottieni segnale
+            signal, price = self.engine.get_signal(symbol, for_trading=False)
+            logger.info(f"Segnale calcolato: {signal} (Price: {price})")
+            if signal not in ["BUY", "SELL"]:
+                msg = "Motivo: nessun segnale BUY/SELL valido (HOLD o None)"
+                logger.info(msg)
+                write_report_row('signal', msg)
+                return
+
+            # 8. Cooldown segnale
+            if hasattr(self.engine, 'last_signal_time') and symbol in self.engine.last_signal_time:
+                time_since_last = time.time() - self.engine.last_signal_time[symbol]
+                if time_since_last < self.engine.signal_cooldown:
+                    msg = f"Motivo: cooldown segnale attivo ({self.engine.signal_cooldown - time_since_last:.1f}s rimanenti)"
+                    logger.info(msg)
+                    write_report_row('signal_cooldown', msg)
+                    return
+
+            # 9. Conferma segnale per trading
+            trading_signal, trading_price = self.engine.get_signal(symbol, for_trading=True)
+            logger.info(f"Segnale confermato per trading: {trading_signal} (Price: {trading_price})")
+            if trading_signal not in ["BUY", "SELL"]:
+                msg = "Motivo: segnale non confermato per trading effettivo"
+                logger.info(msg)
+                write_report_row('signal_confirm', msg)
+                return
+
+            # 10. Calcola size
+            size = self.risk_manager.calculate_position_size(symbol, trading_price, trading_signal)
+            logger.info(f"Size calcolata: {size}")
+            if size <= 0:
+                msg = "Motivo: size calcolata nulla o negativa"
+                logger.info(msg)
+                write_report_row('size', msg)
+                return
+
+            # 11. Pronto per esecuzione trade
+            msg = f"TUTTE LE CONDIZIONI OK: pronto per esecuzione trade {trading_signal} su {symbol} (size: {size})"
+            logger.info(msg)
+            write_report_row('ok', msg)
+            # (Non esegue realmente il trade, solo debug)
+        except Exception as e:
+            logger.error(f"[DEBUG TRADE DECISION] Errore per {symbol}: {str(e)}", exc_info=True)
                 # Caso: self._config è un dict
                 return list(self._config['symbols'].keys())
         return []
@@ -2739,6 +2878,7 @@ class QuantumTradingSystem:
         try:
             # 1. Verifica se possiamo fare trading
             if not self.engine.can_trade(symbol):
+                self.debug_trade_decision(symbol)
                 return
 
             # 1.1. Controllo limite trade giornalieri (opzionale: globale o per simbolo)
@@ -2750,24 +2890,29 @@ class QuantumTradingSystem:
                 total_trades_today = sum(self.trade_count.values())
                 if total_trades_today >= daily_limit:
                     logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {total_trades_today}/{daily_limit}. Nessun nuovo trade verrà aperto oggi.")
+                    self.debug_trade_decision(symbol)
                     return
             else:  # per_symbol
                 trades_for_symbol = self.trade_count.get(symbol, 0)
                 if trades_for_symbol >= daily_limit:
                     logger.info(f"🚫 Limite trade giornalieri per {symbol} raggiunto: {trades_for_symbol}/{daily_limit}. Nessun nuovo trade su questo simbolo oggi.")
+                    self.debug_trade_decision(symbol)
                     return
 
             # 2. Verifica orari di trading
             if not is_trading_hours(symbol, self._config.config):
+                self.debug_trade_decision(symbol)
                 return
 
             # 3. Verifica posizioni esistenti
             existing_positions = mt5.positions_get(symbol=symbol)
             if existing_positions and len(existing_positions) > 0:
+                self.debug_trade_decision(symbol)
                 return
 
             # 4. Verifica limite posizioni totali
             if current_positions >= self.max_positions:
+                self.debug_trade_decision(symbol)
                 return
 
             # 5. Ottieni segnale (senza attivare cooldown)
@@ -2783,6 +2928,7 @@ class QuantumTradingSystem:
                     time_since_last = time.time() - self.engine.last_signal_time[symbol]
                     if time_since_last < self.engine.signal_cooldown:
                         logger.info(f"⏰ {symbol}: In cooldown, salto trade (tempo rimanente: {self.engine.signal_cooldown - time_since_last:.1f}s)")
+                        self.debug_trade_decision(symbol)
                         return
 
                 # 5.2 Se tutto ok, ottieni segnale per trading (questo attiva il cooldown)
@@ -2800,16 +2946,19 @@ class QuantumTradingSystem:
                         logger.info(f"✅ Esecuzione trade autorizzata per {symbol} - Size: {size}")
                         # 7. Esegui il trade
                         success = self._execute_trade(symbol, trading_signal, tick, trading_price, size)
-                        if success:
-                            logger.info(f"🎉 Trade {symbol} eseguito con successo!")
+                        if not success:
+                            self.debug_trade_decision(symbol)
                         else:
-                            logger.error(f"❌ Trade {symbol} fallito durante esecuzione")
+                            logger.info(f"🎉 Trade {symbol} eseguito con successo!")
                     else:
                         logger.warning(f"⚠️ Trade {symbol} bloccato: size = 0")
+                        self.debug_trade_decision(symbol)
                 else:
                     logger.warning(f"🚫 {symbol}: Segnale non confermato per trading effettivo")
+                    self.debug_trade_decision(symbol)
             else:
                 logger.debug(f"💤 {symbol}: HOLD - nessuna azione")
+                self.debug_trade_decision(symbol)
 
         except Exception as e:
             logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)

@@ -1,3 +1,26 @@
+# 📊 Esportazione motivi blocco ordini (trade_decision_report.csv)
+
+Da luglio 2025, ogni volta che il sistema valuta la possibilità di eseguire un ordine (BUY/SELL) e questo viene bloccato (o tutte le condizioni sono OK), il motivo viene salvato automaticamente in un file CSV chiamato `trade_decision_report.csv` nella cartella principale del progetto.
+
+**Cosa contiene il file:**
+
+- `timestamp`: data e ora del controllo
+- `symbol`: simbolo valutato
+- `step`: fase della logica (es: can_trade, trading_hours, buffer_tick, ecc)
+- `detail`: dettaglio del motivo o conferma che tutte le condizioni sono OK
+
+**Esempio di riga CSV:**
+
+```
+2025-07-29 15:32:10,EURUSD,can_trade,Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)
+2025-07-29 15:32:11,EURUSD,trading_hours,Motivo: fuori orario di trading
+2025-07-29 15:32:12,EURUSD,ok,TUTTE LE CONDIZIONI OK: pronto per esecuzione trade BUY su EURUSD (size: 0.10)
+```
+
+Questo report può essere aperto con Excel o strumenti di analisi dati per capire in modo rapido e trasparente tutti i motivi per cui un ordine non viene eseguito.
+
+**Nota:** il file viene aggiornato automaticamente ad ogni ciclo di valutazione, non serve alcuna azione manuale.
+
 
 # [29/07/2025] Novità: Logging segnali tick-by-tick
 
