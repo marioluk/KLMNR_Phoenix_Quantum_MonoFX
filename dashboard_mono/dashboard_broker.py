@@ -95,9 +95,31 @@ class The5ersGraphicalDashboard:
             else:
                 self.current_metrics['profit_factor'] = float('inf') if total_profit > 0 else 0
 
-            max_drawdown = self.calculate_max_drawdown()
-            self.current_metrics['max_drawdown'] = max_drawdown
-            self.current_metrics['current_drawdown'] = max_drawdown
+
+            # Ricostruisci drawdown_history per mostrare l'andamento storico
+            self.drawdown_history.clear()
+            if self.pnl_history:
+                initial_balance = self.current_metrics.get('current_balance', 5000.0)
+                max_balance = initial_balance
+                for entry in self.pnl_history:
+                    current_balance = initial_balance + entry['cumulative_pnl']
+                    if current_balance > max_balance:
+                        max_balance = current_balance
+                    if max_balance > 0:
+                        current_drawdown = ((max_balance - current_balance) / max_balance) * 100
+                    else:
+                        current_drawdown = 0.0
+                    self.drawdown_history.append({
+                        'timestamp': entry['timestamp'],
+                        'drawdown': current_drawdown
+                    })
+                # Aggiorna le metriche con il max drawdown storico
+                max_drawdown = max((item['drawdown'] for item in self.drawdown_history), default=0.0)
+                self.current_metrics['max_drawdown'] = max_drawdown
+                self.current_metrics['current_drawdown'] = self.drawdown_history[-1]['drawdown'] if self.drawdown_history else 0.0
+            else:
+                self.current_metrics['max_drawdown'] = 0.0
+                self.current_metrics['current_drawdown'] = 0.0
 
             for symbol, stats in self.symbol_performance.items():
                 if stats['trades'] > 0:
