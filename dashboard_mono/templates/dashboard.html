@@ -298,6 +298,57 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tabella sequenza segnali e relativo esito -->
+        <div class="row">
+            <div class="col-12">
+                <div class="metric-card">
+                    <h5><i class="fas fa-stream"></i> Sequenza Segnali &amp; Esito</h5>
+                    <div style="overflow-x:auto;">
+                        <table class="table table-dark table-striped table-bordered align-middle" style="font-size:0.98rem;">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Symbol</th>
+                                    <th>Direzione</th>
+                                    <th>Entropy</th>
+                                    <th>Spin</th>
+                                    <th>Esito</th>
+                                    <th>P&amp;L</th>
+                                    <th>Trade Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in signals_sequence_table %}
+                                <tr>
+                                    <td>{{ row.timestamp }}</td>
+                                    <td>{{ row.symbol }}</td>
+                                    <td>{{ row.direction }}</td>
+                                    <td>{{ row.entropy|round(3) }}</td>
+                                    <td>{{ row.spin|round(3) }}</td>
+                                    <td>
+                                        {% if row.esito == 'TRADE' %}
+                                            <span class="badge bg-success">Trade aperto</span>
+                                        {% elif row.esito == 'NESSUNA AZIONE' %}
+                                            <span class="badge bg-secondary">Nessuna azione</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">{{ row.esito }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if row.trade_pnl is not none %}
+                                            <span class="{{ 'profit-positive' if row.trade_pnl > 0 else ('profit-negative' if row.trade_pnl < 0 else 'profit-neutral') }}">{{ row.trade_pnl|round(2) }}</span>
+                                        {% else %}-{% endif %}
+                                    </td>
+                                    <td>{{ row.trade_time if row.trade_time else '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="chart-container">
@@ -355,12 +406,14 @@
         var hourlyLayout = applyDarkTheme(JSON.parse(`{{ hourly_chart.layout|default({})|tojson|safe }}`));
         var symbolsLayout = applyDarkTheme(JSON.parse(`{{ symbols_chart.layout|default({})|tojson|safe }}`));
         var signalsLayout = applyDarkTheme(JSON.parse(`{{ signals_chart.layout|default({})|tojson|safe }}`));
-        Plotly.newPlot('pnl_chart', ({{ pnl_chart.data|tojson }}), pnlLayout, {responsive: true});
-        Plotly.newPlot('drawdown_chart', ({{ drawdown_chart.data|tojson }}), drawdownLayout, {responsive: true});
-        Plotly.newPlot('balance_chart', ({{ balance_chart.data|tojson }}), balanceLayout, {responsive: true});
-        Plotly.newPlot('hourly_chart', ({{ hourly_chart.data|tojson }}), hourlyLayout, {responsive: true});
-        Plotly.newPlot('symbols_chart', ({{ symbols_chart.data|tojson }}), symbolsLayout, {responsive: true});
-        Plotly.newPlot('signals_chart', ({{ signals_chart.data|tojson }}), signalsLayout, {responsive: true});
+        {% raw %}
+        Plotly.newPlot('pnl_chart', ({{ pnl_chart.data|tojson|safe }}), pnlLayout, {responsive: true});
+        Plotly.newPlot('drawdown_chart', ({{ drawdown_chart.data|tojson|safe }}), drawdownLayout, {responsive: true});
+        Plotly.newPlot('balance_chart', ({{ balance_chart.data|tojson|safe }}), balanceLayout, {responsive: true});
+        Plotly.newPlot('hourly_chart', ({{ hourly_chart.data|tojson|safe }}), hourlyLayout, {responsive: true});
+        Plotly.newPlot('symbols_chart', ({{ symbols_chart.data|tojson|safe }}), symbolsLayout, {responsive: true});
+        Plotly.newPlot('signals_chart', ({{ signals_chart.data|tojson|safe }}), signalsLayout, {responsive: true});
+        {% endraw %}
     </script>
 </body>
 
