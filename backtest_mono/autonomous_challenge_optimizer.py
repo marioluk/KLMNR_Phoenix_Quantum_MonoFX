@@ -193,6 +193,7 @@ class AutonomousHighStakesOptimizer:
             'stop_loss_pips': [10, 12, 15, 18, 20, 25],
             'take_profit_pips': [15, 20, 25, 30, 35, 40],
             'signal_threshold': [0.55, 0.60, 0.65, 0.70, 0.75],
+            'spin_threshold': [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
             'volatility_filter': [0.60, 0.65, 0.70, 0.75, 0.80],
             'trend_strength': [0.50, 0.55, 0.60, 0.65, 0.70]
         }
@@ -273,22 +274,24 @@ class AutonomousHighStakesOptimizer:
                 for sl_pips in self.param_ranges['stop_loss_pips']:
                     for tp_pips in self.param_ranges['take_profit_pips']:
                         for signal_th in self.param_ranges['signal_threshold']:
-                            score = self.simulate_backtest_score(
-                                symbol, risk, trades, sl_pips, tp_pips, signal_th, days
-                            )
-                            if score > best_score:
-                                best_score = score
-                                best_params = {
-                                    'risk_percent': risk,
-                                    'max_daily_trades': trades,
-                                    'stop_loss_pips': sl_pips,
-                                    'take_profit_pips': tp_pips,
-                                    'signal_threshold': signal_th,
-                                    'score': score
-                                }
+                            for spin_th in self.param_ranges['spin_threshold']:
+                                score = self.simulate_backtest_score(
+                                    symbol, risk, trades, sl_pips, tp_pips, signal_th, days, spin_th
+                                )
+                                if score > best_score:
+                                    best_score = score
+                                    best_params = {
+                                        'risk_percent': risk,
+                                        'max_daily_trades': trades,
+                                        'stop_loss_pips': sl_pips,
+                                        'take_profit_pips': tp_pips,
+                                        'signal_threshold': signal_th,
+                                        'spin_threshold': spin_th,
+                                        'score': score
+                                    }
         return best_params
 
-    def simulate_backtest_score(self, symbol: str, risk: float, trades: int, sl_pips: int, tp_pips: int, signal_th: float, days: int) -> float:
+    def simulate_backtest_score(self, symbol: str, risk: float, trades: int, sl_pips: int, tp_pips: int, signal_th: float, days: int, spin_th: float) -> float:
         import random
         symbol_characteristics = {
             'EURUSD': {'volatility': 0.7, 'trend': 0.8, 'spread': 1.2},
@@ -314,6 +317,13 @@ class AutonomousHighStakesOptimizer:
         directions = [random.choice([1, -1]) for _ in range(n_ticks)]
         ticks = [{'direction': d} for d in directions]
         spin = self.calculate_normalized_spin(ticks)
+        # Simula la logica di filtro come nello script principale
+        confidence = 1.0  # semplificazione, puoi raffinare se vuoi
+        buy_condition = spin > spin_th * confidence and signal_th > 0.5
+        sell_condition = spin < -spin_th * confidence and signal_th < 0.5
+        # Penalizza se non si generano mai segnali
+        if not (buy_condition or sell_condition):
+            return 0.0
         rr_ratio = tp_pips / sl_pips if sl_pips > 0 else 2.0
         optimal_risk = 0.007
         risk_penalty = abs(risk - optimal_risk) * 10
@@ -414,6 +424,7 @@ class AutonomousHighStakesOptimizer:
             'signal_buy_threshold': signal_buy_threshold,
             'signal_sell_threshold': signal_sell_threshold,
             'confidence_threshold': confidence_threshold,
+            'spin_threshold': base_params.get('spin_threshold', 0.25),
             'max_spread': self.get_symbol_max_spread(symbol),
             'trading_hours': self.optimize_trading_hours(symbol, score),
             'optimization_score': score,
@@ -538,11 +549,14 @@ class AutonomousHighStakesOptimizer:
             "buffer_size": config.get("quantum_params", {}).get("buffer_size", 880),
             "spin_window": config.get("quantum_params", {}).get("spin_window", 67),
             "min_spin_samples": config.get("quantum_params", {}).get("min_spin_samples", 23),
-            "spin_threshold": config.get("quantum_params", {}).get("spin_threshold", 1.777),
+            "spin_threshold": config.get("quantum_params", {}).get("spin_threshold", 0.25),
             "signal_cooldown": config.get("quantum_params", {}).get("signal_cooldown", 600),
             "entropy_thresholds": config.get("quantum_params", {}).get("entropy_thresholds", {"buy_signal": 0.825, "sell_signal": 0.275}),
             "volatility_scale": config.get("quantum_params", {}).get("volatility_scale", 4.54)
         }
+        # Se ottimizzato, inserisci spin_threshold migliore trovato
+        if 'spin_threshold' in config:
+            quantum_params['spin_threshold'] = config['spin_threshold']
 
         # --- RISK PARAMETERS ---
         risk_parameters = {
@@ -698,8 +712,8 @@ def main():
                     "4": "position"
                 }
                 mode = mode_map.get(mode_choice, "intraday")
-                days = input("�📅 Giorni per ottimizzazione (default: 30): ").strip()
-                optimization_days = int(days) if days.isdigit() else 30
+                days = input("�📅 Giorni per ottimizzazione (default: 60): ").strip()
+                optimization_days = int(days) if days.isdigit() else 60
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
                 levels = ["conservative", "moderate", "aggressive"]
                 print(f"\n🔄 Generazione configurazioni per tipologia '{mode}'...")
