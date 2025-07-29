@@ -455,6 +455,7 @@ class ConfigManager:
         # Stampa subito il report segnali (anche vuoto) nel main thread
         if hasattr(self.engine, '_flush_signal_report'):
             self.engine._flush_signal_report(force_empty=True, startup=True)
+            logger.info("[DEBUG] Chiamata a _flush_signal_report(force_empty=True, startup=True) eseguita nel main thread")
         self.engine.start_signal_reporting()
         logger.info("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
