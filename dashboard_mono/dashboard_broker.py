@@ -28,7 +28,7 @@ except ImportError:
 
 class The5ersGraphicalDashboard:
     def load_complete_mt5_data(self):
-        """Carica solo dati di stato da MT5 (balance, equity, posizioni aperte) e aggiorna solo queste metriche."""
+        """Carica tutti i dati da MT5 e aggiorna tutte le metriche e le timeline (comportamento storico)."""
         if not MT5_AVAILABLE or not self.use_mt5:
             print("[MT5] Modulo non disponibile o non abilitato, skip load_complete_mt5_data.")
             return
@@ -38,13 +38,75 @@ class The5ersGraphicalDashboard:
                 self.current_metrics['current_balance'] = account_info.balance
                 self.current_metrics['current_equity'] = account_info.equity
                 self.current_metrics['positions_open'] = len(mt5.positions_get() or [])
-                # Aggiorna balance history
                 self.balance_history.append({
                     'timestamp': datetime.now().isoformat(),
                     'balance': account_info.balance,
                     'equity': account_info.equity
                 })
-            print("[MT5] Stato account aggiornato (balance/equity/posizioni)")
+
+            deals = mt5.history_deals_get(self.challenge_start, datetime.now())
+            if deals is None:
+                print("❌ Nessun deal trovato")
+                return
+
+            self.pnl_history.clear()
+            self.symbol_performance.clear()
+            self.hourly_performance.clear()
+
+            cumulative_pnl = 0
+            total_trades = 0
+            winning_trades = 0
+
+            for deal in deals:
+                if deal.type in [mt5.DEAL_TYPE_BUY, mt5.DEAL_TYPE_SELL]:
+                    deal_time = datetime.fromtimestamp(deal.time)
+                    total_trades += 1
+                    cumulative_pnl += deal.profit
+                    if deal.profit > 0:
+                        winning_trades += 1
+                    self.pnl_history.append({
+                        'timestamp': deal_time.isoformat(),
+                        'pnl': deal.profit,
+                        'cumulative_pnl': cumulative_pnl,
+                        'symbol': deal.symbol,
+                        'direction': 'BUY' if deal.type == mt5.DEAL_TYPE_BUY else 'SELL'
+                    })
+                    self.symbol_performance[deal.symbol]['pnl'] += deal.profit
+                    self.symbol_performance[deal.symbol]['trades'] += 1
+                    hour = deal_time.hour
+                    self.hourly_performance[hour]['pnl'] += deal.profit
+                    self.hourly_performance[hour]['trades'] += 1
+
+            self.current_metrics['total_trades'] = total_trades
+            self.current_metrics['winning_trades'] = winning_trades
+            self.current_metrics['total_pnl'] = cumulative_pnl
+
+            if total_trades > 0:
+                self.current_metrics['win_rate'] = (winning_trades / total_trades) * 100
+
+            if self.current_metrics['current_balance'] > 0:
+                self.current_metrics['profit_percentage'] = (cumulative_pnl / self.current_metrics['current_balance']) * 100
+
+            total_profit = sum(deal.profit for deal in deals if deal.profit > 0)
+            total_loss = sum(abs(deal.profit) for deal in deals if deal.profit < 0)
+
+            if total_loss > 0:
+                self.current_metrics['profit_factor'] = total_profit / total_loss
+            else:
+                self.current_metrics['profit_factor'] = float('inf') if total_profit > 0 else 0
+
+            max_drawdown = self.calculate_max_drawdown()
+            self.current_metrics['max_drawdown'] = max_drawdown
+            self.current_metrics['current_drawdown'] = max_drawdown
+
+            for symbol, stats in self.symbol_performance.items():
+                if stats['trades'] > 0:
+                    symbol_winning = sum(1 for deal in deals if deal.symbol == symbol and deal.profit > 0)
+                    stats['win_rate'] = (symbol_winning / stats['trades']) * 100
+
+            print(f"✅ Caricati {total_trades} trades da MT5")
+            print(f"📊 P&L Totale: ${cumulative_pnl:.2f}")
+            print(f"🎯 Profit %: {self.current_metrics['profit_percentage']:.2f}%")
         except Exception as e:
             print(f"❌ Errore caricamento dati MT5: {e}")
         # Non chiudere la connessione qui!
