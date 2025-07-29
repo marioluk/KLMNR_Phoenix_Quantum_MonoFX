@@ -1,33 +1,21 @@
-# [29/07/2025] Novità: Logging segnali e report periodico
+
+# [29/07/2025] Novità: Logging segnali tick-by-tick
 
 ## Logging avanzato dei segnali di trading
 
-Il motore QuantumEngine ora implementa un sistema di logging avanzato per i segnali di trading:
+Il motore QuantumEngine ora stampa un log dettagliato dei segnali ad ogni tick (tick-by-tick), senza più report periodico. Ogni segnale viene loggato subito con tutte le informazioni utili (simbolo, entropy, spin, motivazione, ecc). La dashboard si occuperà di aggregare e visualizzare i dati in forma tabellare/grafica.
 
-- **Buffer thread-safe**: tutti i segnali generati (BUY, SELL, SCARTATO, HOLD) vengono accumulati in un buffer protetto da lock.
-- **Report periodico**: ogni 5 minuti viene stampato nei log un riepilogo sintetico dei segnali generati, in formato tabellare (simbolo, tipo, motivo).
-- **Riduzione rumore**: il report periodico sostituisce la stampa di ogni singolo segnale, rendendo i log molto più leggibili e utili per la diagnosi.
-- **Motivazione dettagliata**: ogni segnale scartato riporta il motivo (es. buffer insufficiente, confidence bassa, cooldown attivo, ecc.).
-- **Formato compatto**: il report è facilmente leggibile e adatto anche a esportazione futura.
-
-### Esempio di report loggato
+### Esempio di log tick-by-tick
 
 ```
-==================== [SIGNAL REPORT - 2025-07-29T10:00:00] ====================
-Segnali generati negli ultimi 5 minuti: 7
-Simbolo      | Tipo      | Motivo
-------------------------------------------------------------
-EURUSD       | BUY       | Condizioni soddisfatte per segnale 'BUY'
-GBPUSD       | SCARTATO  | Confidence troppo bassa
-SP500        | HOLD      | Buffer tick insufficiente
-...
-===============================================================
+[SIGNAL-DEBUG] [APERTURA] EURUSD | MOTIVO: Condizioni soddisfatte per segnale 'BUY' | Dettagli: {...}
+[SIGNAL-DEBUG] [SCARTATO] EURUSD | MOTIVO: Buffer tick insufficiente | Dettagli: {...}
 ```
 
 ## Prossimi sviluppi
 
-- Visualizzazione nella dashboard della sequenza segnali e relativo esito.
-- Esportazione CSV/JSON dei report periodici per analisi esterna.
+- Visualizzazione nella dashboard della sequenza segnali e relativo esito (aggregazione lato dashboard).
+- Esportazione CSV/JSON dei log tick-by-tick per analisi esterna.
 
 # 🆕 [29/07/2025] Logging dettagliato dei segnali di trading
 
