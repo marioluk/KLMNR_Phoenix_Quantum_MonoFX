@@ -1,3 +1,34 @@
+# [29/07/2025] Novità: Logging segnali e report periodico
+
+## Logging avanzato dei segnali di trading
+
+Il motore QuantumEngine ora implementa un sistema di logging avanzato per i segnali di trading:
+
+- **Buffer thread-safe**: tutti i segnali generati (BUY, SELL, SCARTATO, HOLD) vengono accumulati in un buffer protetto da lock.
+- **Report periodico**: ogni 5 minuti viene stampato nei log un riepilogo sintetico dei segnali generati, in formato tabellare (simbolo, tipo, motivo).
+- **Riduzione rumore**: il report periodico sostituisce la stampa di ogni singolo segnale, rendendo i log molto più leggibili e utili per la diagnosi.
+- **Motivazione dettagliata**: ogni segnale scartato riporta il motivo (es. buffer insufficiente, confidence bassa, cooldown attivo, ecc.).
+- **Formato compatto**: il report è facilmente leggibile e adatto anche a esportazione futura.
+
+### Esempio di report loggato
+
+```
+==================== [SIGNAL REPORT - 2025-07-29T10:00:00] ====================
+Segnali generati negli ultimi 5 minuti: 7
+Simbolo      | Tipo      | Motivo
+------------------------------------------------------------
+EURUSD       | BUY       | Condizioni soddisfatte per segnale 'BUY'
+GBPUSD       | SCARTATO  | Confidence troppo bassa
+SP500        | HOLD      | Buffer tick insufficiente
+...
+===============================================================
+```
+
+## Prossimi sviluppi
+
+- Visualizzazione nella dashboard della sequenza segnali e relativo esito.
+- Esportazione CSV/JSON dei report periodici per analisi esterna.
+
 # 🆕 [29/07/2025] Logging dettagliato dei segnali di trading
 
 Da luglio 2025, ogni segnale generato dal sistema (BUY, SELL, HOLD) viene tracciato nei log con una struttura dettagliata e motivazione, per massima trasparenza e diagnosi.

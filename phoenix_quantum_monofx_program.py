@@ -452,6 +452,7 @@ class ConfigManager:
         logger.info("✅ Simboli attivati")
         logger.info("🧠 Inizializzazione Quantum Engine...")
         self.engine = QuantumEngine(self)
+        self.engine.start_signal_reporting()
         logger.info("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
         self.max_positions = self.get_risk_params().get('max_positions', 4)
@@ -583,6 +584,45 @@ basati sull'entropia e stati quantistici. Dipende dalla configurazione.
 
 
 class QuantumEngine:
+    # Buffer thread-safe per segnali e thread di report
+    _signal_report_buffer = []
+    _signal_report_lock = threading.Lock()
+    _signal_report_interval = 300  # 5 minuti
+    _signal_report_thread_started = False
+
+    def _start_signal_report_thread(self):
+        if getattr(self, '_signal_report_thread_started', False):
+            return
+        self._signal_report_thread_started = True
+        def report_loop():
+            while True:
+                time.sleep(self._signal_report_interval)
+                self._flush_signal_report()
+        t = threading.Thread(target=report_loop, daemon=True)
+        t.start()
+
+    def _flush_signal_report(self):
+        with self._signal_report_lock:
+            if not self._signal_report_buffer:
+                return
+            try:
+                report_time = datetime.now().isoformat()
+                # Sintesi: simbolo | tipo | motivo
+                lines = [
+                    f"{e['symbol']:<12} | {e['status']:<9} | {e['motivo']}"
+                    for e in self._signal_report_buffer
+                ]
+                table = "Simbolo      | Tipo      | Motivo\n" + "-"*60 + "\n" + "\n".join(lines)
+                logger.info(f"\n==================== [SIGNAL REPORT - {report_time}] ====================\n"
+                            f"Segnali generati negli ultimi 5 minuti: {len(self._signal_report_buffer)}\n"
+                            f"{table}\n"
+                            f"===============================================================\n")
+            except Exception as e:
+                logger.error(f"[SIGNAL REPORT] Errore generazione report: {e}")
+            self._signal_report_buffer.clear()
+
+    def start_signal_reporting(self):
+        self._start_signal_report_thread()
     @property
     def config_dict(self):
         """Restituisce sempre il dict di configurazione, sia che il config manager sia un dict che un oggetto complesso"""
@@ -1117,10 +1157,16 @@ class QuantumEngine:
                     "min_spin_samples": self.min_spin_samples,
                     "timestamp": datetime.now().isoformat(),
                 }
-                if is_trading_hours(symbol, config_dict):
-                    logger.warning(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
-                else:
-                    logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} (mercato chiuso) | Dettagli: {dettagli}")
+                status = "SCARTATO"
+                if not is_trading_hours(symbol, config_dict):
+                    motivo += " (mercato chiuso)"
+                with self._signal_report_lock:
+                    self._signal_report_buffer.append({
+                        "symbol": symbol,
+                        "status": status,
+                        "motivo": motivo,
+                        "dettagli": dettagli
+                    })
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
             recent_ticks = ticks[-spin_window:]
@@ -1136,7 +1182,14 @@ class QuantumEngine:
                     "spin": spin,
                     "timestamp": datetime.now().isoformat(),
                 }
-                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
+                status = "SCARTATO"
+                with self._signal_report_lock:
+                    self._signal_report_buffer.append({
+                        "symbol": symbol,
+                        "status": status,
+                        "motivo": motivo,
+                        "dettagli": dettagli
+                    })
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
             # 3. Cooldown attivo
@@ -1149,7 +1202,14 @@ class QuantumEngine:
                     "cooldown": self.signal_cooldown,
                     "timestamp": datetime.now().isoformat(),
                 }
-                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
+                status = "SCARTATO"
+                with self._signal_report_lock:
+                    self._signal_report_buffer.append({
+                        "symbol": symbol,
+                        "status": status,
+                        "motivo": motivo,
+                        "dettagli": dettagli
+                    })
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
             entropy = self.calculate_entropy(deltas)
@@ -1183,12 +1243,15 @@ class QuantumEngine:
                     "price": last_tick_price,
                     "timestamp": datetime.now().isoformat(),
                 }
-                logger.info(f"[SIGNAL-DEBUG] [APERTURA] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
+                status = "APERTURA"
+                with self._signal_report_lock:
+                    self._signal_report_buffer.append({
+                        "symbol": symbol,
+                        "status": status,
+                        "motivo": motivazione,
+                        "dettagli": dettagli
+                    })
                 self._log_signal_bias(symbol, stats, buy_ratio)
-                if signal == "SELL":
-                    logger.debug(f"SELL signal conditions met for {symbol}: "
-                                f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
-                                f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
             else:
                 motivazione = "Nessuna condizione soddisfatta per BUY/SELL"
                 dettagli = {
@@ -1202,7 +1265,14 @@ class QuantumEngine:
                     "price": last_tick_price,
                     "timestamp": datetime.now().isoformat(),
                 }
-                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
+                status = "HOLD"
+                with self._signal_report_lock:
+                    self._signal_report_buffer.append({
+                        "symbol": symbol,
+                        "status": status,
+                        "motivo": motivazione,
+                        "dettagli": dettagli
+                    })
             return signal, last_tick_price
         except Exception as e:
             logger.error(f"[get_signal] Errore durante la generazione del segnale per {symbol}: {e}", exc_info=True)

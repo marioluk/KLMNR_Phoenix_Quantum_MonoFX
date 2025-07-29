@@ -1,3 +1,15 @@
+# [29/07/2025] Miglioramento logging segnali e report periodico
+
+- Implementato buffer thread-safe per accumulo segnali generati (BUY, SELL, SCARTATO, HOLD) in QuantumEngine.
+- Aggiunto thread di report periodico ogni 5 minuti che stampa un riepilogo sintetico dei segnali generati (simbolo, tipo, motivo) in formato tabellare nei log.
+- Il report riduce il rumore nei log e migliora la leggibilità per la diagnosi.
+- Tutti i punti di generazione segnale (inclusi scarti per buffer insufficiente, confidence bassa, cooldown, ecc.) ora accumulano l'evento nel buffer per il report.
+- Il formato del report è compatto e facilmente leggibile.
+
+TODO PROSSIMI PASSI:
+- [ ] Visualizzazione nella dashboard della sequenza segnali e relativo esito (integrazione con dashboard_broker.py).
+- [ ] Eventuale esportazione CSV/JSON dei report periodici per analisi esterna.
+
 # TODO Dashboard Phoenix Quantum MonoFX
 
 ## Analisi Segnali Trading & Apertura Posizioni (2025-07-29)
