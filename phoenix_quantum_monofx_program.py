@@ -2196,10 +2196,37 @@ class QuantumTradingSystem:
             logger.info(f"can_trade: {can_trade}")
             if not can_trade:
                 msg = "Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)"
-                extra = None
-                # Esempio: se hai una variabile che indica il motivo specifico, puoi metterla qui
-                if hasattr(self.engine, 'last_block_reason'):
-                    extra = getattr(self.engine, 'last_block_reason', None)
+                # Dettagli tecnici anche qui
+                ticks = list(self.engine.get_tick_buffer(symbol))
+                buffer_tick = len(ticks)
+                spin = None
+                confidence = None
+                entropy = None
+                spin_window = min(getattr(self.engine, 'spin_window', 20), buffer_tick)
+                recent_ticks = ticks[-spin_window:]
+                deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10) if recent_ticks else ()
+                try:
+                    if deltas:
+                        entropy = self.engine.calculate_entropy(deltas)
+                    if recent_ticks:
+                        spin, confidence = self.engine.calculate_spin(recent_ticks)
+                except Exception as e:
+                    logger.warning(f"Errore calcolo diagnostica can_trade: {e}")
+                motivi = []
+                if confidence is not None:
+                    motivi.append(f"Confidence: {confidence:.3f}")
+                else:
+                    motivi.append("Confidence: N/A")
+                if entropy is not None:
+                    motivi.append(f"Entropia: {entropy:.3f}")
+                else:
+                    motivi.append("Entropia: N/A")
+                if spin is not None:
+                    motivi.append(f"Spin: {spin:.3f}")
+                else:
+                    motivi.append("Spin: N/A")
+                motivi.append(f"Buffer tick: {buffer_tick}")
+                extra = "; ".join(motivi)
                 logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
                 write_report_row('can_trade', msg, extra)
                 return
@@ -2210,8 +2237,39 @@ class QuantumTradingSystem:
             logger.info(f"trading_hours: {trading_hours}")
             if not trading_hours:
                 msg = "Motivo: fuori orario di trading"
-                logger.info(msg)
-                write_report_row('trading_hours', msg)
+                # Dettagli tecnici anche qui
+                ticks = list(self.engine.get_tick_buffer(symbol))
+                buffer_tick = len(ticks)
+                spin = None
+                confidence = None
+                entropy = None
+                spin_window = min(getattr(self.engine, 'spin_window', 20), buffer_tick)
+                recent_ticks = ticks[-spin_window:]
+                deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10) if recent_ticks else ()
+                try:
+                    if deltas:
+                        entropy = self.engine.calculate_entropy(deltas)
+                    if recent_ticks:
+                        spin, confidence = self.engine.calculate_spin(recent_ticks)
+                except Exception as e:
+                    logger.warning(f"Errore calcolo diagnostica trading_hours: {e}")
+                motivi = []
+                if confidence is not None:
+                    motivi.append(f"Confidence: {confidence:.3f}")
+                else:
+                    motivi.append("Confidence: N/A")
+                if entropy is not None:
+                    motivi.append(f"Entropia: {entropy:.3f}")
+                else:
+                    motivi.append("Entropia: N/A")
+                if spin is not None:
+                    motivi.append(f"Spin: {spin:.3f}")
+                else:
+                    motivi.append("Spin: N/A")
+                motivi.append(f"Buffer tick: {buffer_tick}")
+                extra = "; ".join(motivi)
+                logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
+                write_report_row('trading_hours', msg, extra)
                 return
 
             # 3. Posizioni già aperte
