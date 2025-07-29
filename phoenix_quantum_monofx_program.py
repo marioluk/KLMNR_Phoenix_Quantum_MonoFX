@@ -2,70 +2,70 @@
 import os
 # debug estremo iniziale
 
-#print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
+print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
 
-#print("[DEBUG-TRACE] Prima di import os")
+print("[DEBUG-TRACE] Prima di import os")
 import os
-#print("[DEBUG-TRACE] Dopo import os")
-#print("[DEBUG-TRACE] Prima di import json")
+print("[DEBUG-TRACE] Dopo import os")
+print("[DEBUG-TRACE] Prima di import json")
 import json
-#print("[DEBUG-TRACE] Dopo import json")
-#print("[DEBUG-TRACE] Prima di import logging")
+print("[DEBUG-TRACE] Dopo import json")
+print("[DEBUG-TRACE] Prima di import logging")
 import logging
-#print("[DEBUG-TRACE] Dopo import logging")
-#print("[DEBUG-TRACE] Prima di import time")
+print("[DEBUG-TRACE] Dopo import logging")
+print("[DEBUG-TRACE] Prima di import time")
 import time
-#print("[DEBUG-TRACE] Dopo import time")
+print("[DEBUG-TRACE] Dopo import time")
 
 
-#print("[DEBUG] Import base completati")
+print("[DEBUG] Import base completati")
 
-#print("[DEBUG-TRACE] Prima di import datetime")
+print("[DEBUG-TRACE] Prima di import datetime")
 from datetime import datetime, time as dt_time, timedelta
-#print("[DEBUG-TRACE] Dopo import datetime")
-#print("[DEBUG-TRACE] Prima di import typing")
+print("[DEBUG-TRACE] Dopo import datetime")
+print("[DEBUG-TRACE] Prima di import typing")
 from typing import Dict, Tuple, List, Any, Optional
-#print("[DEBUG-TRACE] Dopo import typing")
-#print("[DEBUG-TRACE] Prima di import collections")
+print("[DEBUG-TRACE] Dopo import typing")
+print("[DEBUG-TRACE] Prima di import collections")
 from collections import deque, defaultdict
-#print("[DEBUG-TRACE] Dopo import collections")
-#print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
+print("[DEBUG-TRACE] Dopo import collections")
+print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
 try:
     from logging.handlers import RotatingFileHandler
-    #print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
+    print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
 except Exception as e:
     print(f"[IMPORT ERROR] logging.handlers: {e}")
-#print("[DEBUG-TRACE] Prima di import lru_cache")
+print("[DEBUG-TRACE] Prima di import lru_cache")
 try:
     from functools import lru_cache
-    #print("[DEBUG-TRACE] Dopo import lru_cache")
+    print("[DEBUG-TRACE] Dopo import lru_cache")
 except Exception as e:
     print(f"[IMPORT ERROR] functools.lru_cache: {e}")
-#print("[DEBUG-TRACE] Prima di import threading")
+print("[DEBUG-TRACE] Prima di import threading")
 try:
     import threading
-    #print("[DEBUG-TRACE] Dopo import threading")
+    print("[DEBUG-TRACE] Dopo import threading")
 except Exception as e:
     print(f"[IMPORT ERROR] threading: {e}")
-#print("[DEBUG-TRACE] Prima di import traceback")
+print("[DEBUG-TRACE] Prima di import traceback")
 try:
     import traceback
-    #print("[DEBUG-TRACE] Dopo import traceback")
+    print("[DEBUG-TRACE] Dopo import traceback")
 except Exception as e:
     print(f"[IMPORT ERROR] traceback: {e}")
-#print("[DEBUG-TRACE] Prima di import numpy as np")
+print("[DEBUG-TRACE] Prima di import numpy as np")
 try:
     import numpy as np
-    #print("[DEBUG-TRACE] Dopo import numpy as np")
+    print("[DEBUG-TRACE] Dopo import numpy as np")
 except Exception as e:
     print(f"[IMPORT ERROR] numpy: {e}")
 
 
 # Dipendenze esterne/metatrader5
-#print("[DEBUG] Prima del blocco import MT5")
+print("[DEBUG] Prima del blocco import MT5")
 try:
     import MetaTrader5 as mt5
-    #print("[DEBUG] Import MT5 completato")
+    print("[DEBUG] Import MT5 completato")
 except ImportError as e:
     print(f"[IMPORT ERROR] {e}. Alcune funzionalità potrebbero non funzionare correttamente.")
 
@@ -82,7 +82,7 @@ def validate_config(config):
 
 # ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 # Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
-#print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
+print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE: str = os.path.join(PROJECT_ROOT, "config", "config_autonomous_challenge_production_ready.json")
 DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
@@ -92,7 +92,7 @@ DEFAULT_LOG_BACKUP_COUNT: int = 5
 DEFAULT_LOG_MAX_BACKUPS: int = 10
 DEFAULT_TRADING_HOURS: str = "00:00-24:00"
 DEFAULT_TIME_RANGE: tuple = (0, 0, 23, 59)  # (h1, m1, h2, m2)
-#print("[DEBUG] Costanti globali definite")
+print("[DEBUG] Costanti globali definite")
 
 # ===================== STUB FUNZIONI DI UTILITÀ MANCANTI =====================
 # Queste funzioni sono placeholder per evitare errori di import/esecuzione.
@@ -452,18 +452,6 @@ class ConfigManager:
         logger.info("✅ Simboli attivati")
         logger.info("🧠 Inizializzazione Quantum Engine...")
         self.engine = QuantumEngine(self)
-        # Stampa subito il report segnali (anche vuoto) nel main thread
-        if hasattr(self.engine, '_flush_signal_report'):
-            self.engine._flush_signal_report(force_empty=True, startup=True)
-            logger.info("[DEBUG] Chiamata a _flush_signal_report(force_empty=True, startup=True) eseguita nel main thread")
-            # Forza la stampa del report sintetico anche se vuoto, per visibilità assoluta
-            report_time = datetime.now().isoformat()
-            msg = ("\n==================== [SIGNAL REPORT - {time}] ====================\n"
-                   "[AVVIO] Sistema di log segnali attivato.\n"
-                   "Nessun segnale generato finora.\n"
-                   "===============================================================\n")
-            logger.info(msg.format(time=report_time))
-        self.engine.start_signal_reporting()
         logger.info("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
         self.max_positions = self.get_risk_params().get('max_positions', 4)
@@ -595,58 +583,6 @@ basati sull'entropia e stati quantistici. Dipende dalla configurazione.
 
 
 class QuantumEngine:
-    # Buffer thread-safe per segnali e thread di report
-    _signal_report_buffer = []
-    _signal_report_lock = threading.Lock()
-    _signal_report_interval = 300  # 5 minuti
-    _signal_report_thread_started = False
-
-    def _start_signal_report_thread(self):
-        if getattr(self, '_signal_report_thread_started', False):
-            return
-        self._signal_report_thread_started = True
-        def report_loop():
-            # Stampa subito un report all'avvio per confermare attivazione
-            self._flush_signal_report(force_empty=True, startup=True)
-            while True:
-                time.sleep(self._signal_report_interval)
-                self._flush_signal_report(force_empty=True)
-        t = threading.Thread(target=report_loop, daemon=True)
-        t.start()
-
-    def _flush_signal_report(self, force_empty=False, startup=False):
-        with self._signal_report_lock:
-            report_time = datetime.now().isoformat()
-            if not self._signal_report_buffer:
-                if force_empty:
-                    # Stampa comunque un report vuoto
-                    msg = ("\n==================== [SIGNAL REPORT - {time}] ====================\n"
-                           "Nessun segnale generato negli ultimi 5 minuti.\n"
-                           "===============================================================\n")
-                    if startup:
-                        msg = ("\n==================== [SIGNAL REPORT - {time}] ====================\n"
-                               "[AVVIO] Sistema di log segnali attivato.\n"
-                               "Nessun segnale generato finora.\n"
-                               "===============================================================\n")
-                    logger.info(msg.format(time=report_time))
-                return
-            try:
-                # Sintesi: simbolo | tipo | motivo
-                lines = [
-                    f"{e['symbol']:<12} | {e['status']:<9} | {e['motivo']}"
-                    for e in self._signal_report_buffer
-                ]
-                table = "Simbolo      | Tipo      | Motivo\n" + "-"*60 + "\n" + "\n".join(lines)
-                logger.info(f"\n==================== [SIGNAL REPORT - {report_time}] ====================\n"
-                            f"Segnali generati negli ultimi 5 minuti: {len(self._signal_report_buffer)}\n"
-                            f"{table}\n"
-                            f"===============================================================\n")
-            except Exception as e:
-                logger.error(f"[SIGNAL REPORT] Errore generazione report: {e}")
-            self._signal_report_buffer.clear()
-
-    def start_signal_reporting(self):
-        self._start_signal_report_thread()
     @property
     def config_dict(self):
         """Restituisce sempre il dict di configurazione, sia che il config manager sia un dict che un oggetto complesso"""
@@ -1053,7 +989,7 @@ class QuantumEngine:
         """
         # print debug rimosso
         if not ticks or len(ticks) < self.min_spin_samples:
-            #print(f"[DEBUG-TEST] [calculate_spin] POCHI TICK: {len(ticks)} < {self.min_spin_samples}")
+            print(f"[DEBUG-TEST] [calculate_spin] POCHI TICK: {len(ticks)} < {self.min_spin_samples}")
             return 0.0, 0.0
         cache_key = hash(tuple((t['price'], t['direction']) for t in ticks[-self.spin_window:]))
         # print debug rimosso
@@ -1088,7 +1024,7 @@ class QuantumEngine:
             confidence = min(1.0, balance_deviation * np.sqrt(total))
             return raw_spin, confidence
         except Exception as e:
-            #print(f"[DEBUG-TEST] [_calculate_spin_impl] EXCEPTION: {e}")
+            print(f"[DEBUG-TEST] [_calculate_spin_impl] EXCEPTION: {e}")
             import logging
             logging.getLogger("phoenix_quantum").error(f"[QuantumEngine._calculate_spin_impl] EXCEPTION: {e}")
             return 0.0, 0.0
@@ -1181,16 +1117,10 @@ class QuantumEngine:
                     "min_spin_samples": self.min_spin_samples,
                     "timestamp": datetime.now().isoformat(),
                 }
-                status = "SCARTATO"
-                if not is_trading_hours(symbol, config_dict):
-                    motivo += " (mercato chiuso)"
-                with self._signal_report_lock:
-                    self._signal_report_buffer.append({
-                        "symbol": symbol,
-                        "status": status,
-                        "motivo": motivo,
-                        "dettagli": dettagli
-                    })
+                if is_trading_hours(symbol, config_dict):
+                    logger.warning(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
+                else:
+                    logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} (mercato chiuso) | Dettagli: {dettagli}")
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
             recent_ticks = ticks[-spin_window:]
@@ -1206,14 +1136,7 @@ class QuantumEngine:
                     "spin": spin,
                     "timestamp": datetime.now().isoformat(),
                 }
-                status = "SCARTATO"
-                with self._signal_report_lock:
-                    self._signal_report_buffer.append({
-                        "symbol": symbol,
-                        "status": status,
-                        "motivo": motivo,
-                        "dettagli": dettagli
-                    })
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
             # 3. Cooldown attivo
@@ -1226,14 +1149,7 @@ class QuantumEngine:
                     "cooldown": self.signal_cooldown,
                     "timestamp": datetime.now().isoformat(),
                 }
-                status = "SCARTATO"
-                with self._signal_report_lock:
-                    self._signal_report_buffer.append({
-                        "symbol": symbol,
-                        "status": status,
-                        "motivo": motivo,
-                        "dettagli": dettagli
-                    })
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
             entropy = self.calculate_entropy(deltas)
@@ -1267,15 +1183,12 @@ class QuantumEngine:
                     "price": last_tick_price,
                     "timestamp": datetime.now().isoformat(),
                 }
-                status = "APERTURA"
-                with self._signal_report_lock:
-                    self._signal_report_buffer.append({
-                        "symbol": symbol,
-                        "status": status,
-                        "motivo": motivazione,
-                        "dettagli": dettagli
-                    })
+                logger.info(f"[SIGNAL-DEBUG] [APERTURA] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
                 self._log_signal_bias(symbol, stats, buy_ratio)
+                if signal == "SELL":
+                    logger.debug(f"SELL signal conditions met for {symbol}: "
+                                f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
+                                f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
             else:
                 motivazione = "Nessuna condizione soddisfatta per BUY/SELL"
                 dettagli = {
@@ -1289,14 +1202,7 @@ class QuantumEngine:
                     "price": last_tick_price,
                     "timestamp": datetime.now().isoformat(),
                 }
-                status = "HOLD"
-                with self._signal_report_lock:
-                    self._signal_report_buffer.append({
-                        "symbol": symbol,
-                        "status": status,
-                        "motivo": motivazione,
-                        "dettagli": dettagli
-                    })
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
             return signal, last_tick_price
         except Exception as e:
             logger.error(f"[get_signal] Errore durante la generazione del segnale per {symbol}: {e}", exc_info=True)
@@ -1447,9 +1353,9 @@ class QuantumEngine:
                 cache = cache_dict
             if key in cache:
                 value, timestamp = cache[key]
-                #print(f"[DEBUG-TEST] [_get_cached] CACHE HIT: value={value}, timestamp={timestamp}")
+                print(f"[DEBUG-TEST] [_get_cached] CACHE HIT: value={value}, timestamp={timestamp}")
                 if now - timestamp < self._cache_timeout:
-                    #print(f"[DEBUG-TEST] [_get_cached] CACHE VALID RETURN {value}")
+                    print(f"[DEBUG-TEST] [_get_cached] CACHE VALID RETURN {value}")
                     return value
             # print debug rimosso
             # Timeout per la funzione di calcolo
@@ -1460,12 +1366,12 @@ class QuantumEngine:
                     future = executor.submit(calculate_func, *args)
                     value = future.result(timeout=2.0)
             except concurrent.futures.TimeoutError:
-                #print(f"[DEBUG-TEST] [_get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
+                print(f"[DEBUG-TEST] [_get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
                 import logging
                 logging.getLogger("phoenix_quantum").error("[QuantumEngine._get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
                 value = (0.0, 0.0)
             except Exception as e:
-                #print(f"[DEBUG-TEST] [_get_cached] EXCEPTION in calculate_func: {e}")
+                print(f"[DEBUG-TEST] [_get_cached] EXCEPTION in calculate_func: {e}")
                 import logging
                 logging.getLogger("phoenix_quantum").error(f"[QuantumEngine._get_cached] EXCEPTION in calculate_func: {e}")
                 value = (0.0, 0.0)
