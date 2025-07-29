@@ -595,18 +595,31 @@ class QuantumEngine:
             return
         self._signal_report_thread_started = True
         def report_loop():
+            # Stampa subito un report all'avvio per confermare attivazione
+            self._flush_signal_report(force_empty=True, startup=True)
             while True:
                 time.sleep(self._signal_report_interval)
-                self._flush_signal_report()
+                self._flush_signal_report(force_empty=True)
         t = threading.Thread(target=report_loop, daemon=True)
         t.start()
 
-    def _flush_signal_report(self):
+    def _flush_signal_report(self, force_empty=False, startup=False):
         with self._signal_report_lock:
+            report_time = datetime.now().isoformat()
             if not self._signal_report_buffer:
+                if force_empty:
+                    # Stampa comunque un report vuoto
+                    msg = ("\n==================== [SIGNAL REPORT - {time}] ====================\n"
+                           "Nessun segnale generato negli ultimi 5 minuti.\n"
+                           "===============================================================\n")
+                    if startup:
+                        msg = ("\n==================== [SIGNAL REPORT - {time}] ====================\n"
+                               "[AVVIO] Sistema di log segnali attivato.\n"
+                               "Nessun segnale generato finora.\n"
+                               "===============================================================\n")
+                    logger.info(msg.format(time=report_time))
                 return
             try:
-                report_time = datetime.now().isoformat()
                 # Sintesi: simbolo | tipo | motivo
                 lines = [
                     f"{e['symbol']:<12} | {e['status']:<9} | {e['motivo']}"
