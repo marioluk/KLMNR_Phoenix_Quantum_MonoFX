@@ -179,13 +179,19 @@ class The5ersGraphicalDashboard:
         self.app = Flask(__name__)
         self.setup_routes()
 
+
     def setup_routes(self):
         app = self.app
         from flask import render_template
 
         @app.route('/')
         def home():
-            # Home page: mostra dashboard principale
+            # Pagina di benvenuto separata
+            return render_template('home.html')
+
+        @app.route('/dashboard')
+        def dashboard():
+            # Dashboard principale con grafici
             pnl_chart = self.create_pnl_chart()
             drawdown_chart = self.create_drawdown_chart()
             balance_chart = self.create_balance_chart()
@@ -218,11 +224,6 @@ class The5ersGraphicalDashboard:
                 signals_sequence_table=signals_sequence_table,
                 trade_decision_table=trade_decision_table
             )
-
-        @app.route('/dashboard')
-        def dashboard():
-            # Alias per la dashboard principale
-            return home()
 
         @app.route('/diagnostics')
         def diagnostics():
