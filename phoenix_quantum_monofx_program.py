@@ -2270,34 +2270,43 @@ class QuantumTradingSystem:
             if signal not in ["BUY", "SELL"]:
                 msg = "Motivo: nessun segnale BUY/SELL valido (HOLD o None)"
                 # Inserisci sempre i dettagli tecnici nella colonna extra
-                extra = None
-                # Recupera ultimi valori tecnici
                 entropy = None
                 spin = None
                 confidence = None
+                ticks = list(self.engine.get_tick_buffer(symbol))
+                spin_window = min(getattr(self.engine, 'spin_window', 20), len(ticks))
+                recent_ticks = ticks[-spin_window:]
+                deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10) if recent_ticks else ()
                 try:
-                    ticks = list(self.engine.get_tick_buffer(symbol))
-                    spin_window = min(getattr(self.engine, 'spin_window', 20), len(ticks))
-                    recent_ticks = ticks[-spin_window:]
+                    if deltas:
+                        entropy = self.engine.calculate_entropy(deltas)
                     if recent_ticks:
-                        deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
-                        entropy = self.engine.calculate_entropy(deltas) if deltas else None
                         spin, confidence = self.engine.calculate_spin(recent_ticks)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Errore calcolo diagnostica HOLD: {e}")
                 motivi = []
-                if confidence is not None and confidence < 0.8:
-                    motivi.append(f"Confidence troppo bassa: {confidence:.3f}")
+                if confidence is not None:
+                    motivi.append(f"Confidence: {confidence:.3f}")
+                    if confidence < 0.8:
+                        motivi.append(f"Confidence troppo bassa")
+                else:
+                    motivi.append("Confidence: N/A")
                 if entropy is not None:
                     buy_thresh = getattr(self.engine, 'entropy_thresholds', {'buy_signal': 0.55}).get('buy_signal', 0.55)
                     sell_thresh = getattr(self.engine, 'entropy_thresholds', {'sell_signal': 0.45}).get('sell_signal', 0.45)
+                    motivi.append(f"Entropia: {entropy:.3f}")
                     if entropy <= buy_thresh:
-                        motivi.append(f"Entropia bassa: {entropy:.3f} <= {buy_thresh:.3f}")
+                        motivi.append(f"Entropia bassa (<= {buy_thresh:.3f})")
                     if entropy >= sell_thresh:
-                        motivi.append(f"Entropia alta: {entropy:.3f} >= {sell_thresh:.3f}")
+                        motivi.append(f"Entropia alta (>= {sell_thresh:.3f})")
+                else:
+                    motivi.append("Entropia: N/A")
                 if spin is not None:
                     motivi.append(f"Spin: {spin:.3f}")
-                extra = "; ".join(motivi) if motivi else "N/A"
+                else:
+                    motivi.append("Spin: N/A")
+                motivi.append(f"Buffer tick: {len(ticks)}")
+                extra = "; ".join(motivi)
                 logger.info(msg + (f" | Dettaglio: {extra}" if extra else ""))
                 write_report_row('signal', msg, extra)
                 return
