@@ -1,5 +1,12 @@
 # TODO - Migliorie e Refactoring Phoenix Quantum MonoFX
 
+## Analisi e trasparenza segnali trading (2025-07-29)
+
+- [ ] Log motivazione apertura/scarto posizione per ogni segnale.
+- [ ] Dashboard: aggiungere tabella cronologia segnali con esito e motivazione.
+- [ ] Migliorare i log per diagnosi rapida dei filtri che bloccano l'apertura.
+# TODO - Migliorie e Refactoring Phoenix Quantum MonoFX
+
 ## Validazione e Gestione Configurazione
 - [x] Implementare validazione automatica del file di configurazione all’avvio
 - [x] Segnalare parametri mancanti, incoerenti o valori fuori range (log warning/error)

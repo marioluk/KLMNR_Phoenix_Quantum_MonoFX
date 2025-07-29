@@ -1,3 +1,16 @@
+# 🆕 [29/07/2025] Logging dettagliato dei segnali di trading
+
+Da luglio 2025, ogni segnale generato dal sistema (BUY, SELL, HOLD) viene tracciato nei log con una struttura dettagliata e motivazione, per massima trasparenza e diagnosi.
+
+Esempio di log:
+
+```
+[SIGNAL-DEBUG] [APERTURA] EURUSD | MOTIVO: Condizioni soddisfatte per segnale 'BUY' | Dettagli: {'symbol': 'EURUSD', 'signal': 'BUY', 'entropy': 0.62, 'spin': 0.3, 'confidence': 0.9, 'volatility': 1.12, 'buy_thresh': 0.55, 'sell_thresh': 0.45, 'price': 1.12345, 'timestamp': '2025-07-29T10:15:00'}
+[SIGNAL-DEBUG] [SCARTATO] EURUSD | MOTIVO: Buffer tick insufficiente | Dettagli: {'symbol': 'EURUSD', 'ticks': 7, 'min_spin_samples': 10, 'timestamp': '2025-07-29T10:14:59'}
+```
+
+Questo permette di capire in tempo reale perché un segnale viene accettato o scartato, con tutti i parametri rilevanti.
+
 # Debug e Diagnostica (Segnali e Strategie)
 
 ---

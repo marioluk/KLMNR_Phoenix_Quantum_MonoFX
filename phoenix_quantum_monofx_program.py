@@ -1099,66 +1099,66 @@ class QuantumEngine:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
 
     def get_signal(self, symbol: str, for_trading: bool = False) -> Tuple[str, float]:
-        # print debug rimosso
         global logger
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
             logger = getLogger("phoenix_quantum")
-        """
-        Genera un segnale di trading ("BUY"/"SELL"/"HOLD") basato su entropia, spin e soglie adattive.
-
-        Args:
-            symbol (str): Simbolo.
-            for_trading (bool, optional): Se True aggiorna lo stato per trading reale.
-
-        Returns:
-            Tuple[str, float]: Segnale ("BUY"/"SELL"/"HOLD"), prezzo di riferimento.
-        """
         try:
-            print(f"[DEBUG-TEST] [get_signal] Prima di get_tick_buffer({symbol})")
             ticks = list(self.get_tick_buffer(symbol))
-            print(f"[DEBUG-TEST] [get_signal] ticks: {ticks}")
-            from phoenix_quantum_monofx_program import is_trading_hours  # Import assoluto per evitare errori
+            from phoenix_quantum_monofx_program import is_trading_hours
             config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-            print(f"[DEBUG-TEST] [get_signal] config_dict: {config_dict}")
+            # 1. Buffer insufficiente
             if len(ticks) < self.min_spin_samples:
-                print(f"[DEBUG-TEST] [get_signal] Buffer insufficiente: {len(ticks)}/{self.min_spin_samples}")
+                motivo = "Buffer tick insufficiente"
+                dettagli = {
+                    "symbol": symbol,
+                    "ticks": len(ticks),
+                    "min_spin_samples": self.min_spin_samples,
+                    "timestamp": datetime.now().isoformat(),
+                }
                 if is_trading_hours(symbol, config_dict):
-                    logger.warning(f"[EdgeCase] {symbol}: Buffer insufficiente ({len(ticks)}/{self.min_spin_samples} ticks) - segnale non affidabile 🚩")
+                    logger.warning(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 else:
-                    logger.debug(f"[NO WARNING] {symbol}: Buffer insufficiente ma mercato chiuso (weekend/festivo/orario)")
-                print(f"[DEBUG-TEST] [get_signal] RETURN HOLD (buffer insufficiente)")
+                    logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} (mercato chiuso) | Dettagli: {dettagli}")
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
-            print(f"[DEBUG-TEST] [get_signal] spin_window: {spin_window}")
             recent_ticks = ticks[-spin_window:]
-            print(f"[DEBUG-TEST] [get_signal] recent_ticks: {recent_ticks}")
             spin, confidence = self.calculate_spin(recent_ticks)
-            print(f"[DEBUG-TEST] [get_signal] spin: {spin}, confidence: {confidence}")
             last_tick_price = recent_ticks[-1]['price'] if recent_ticks else 0.0
-            print(f"[DEBUG-TEST] [get_signal] last_tick_price: {last_tick_price}")
-            logger.debug(f"{symbol}: Ultimo prezzo buffer={last_tick_price}, Confidenza calcolata={confidence:.3f}, Spin={spin:.3f}, Buffer size={len(ticks)}")
+            # 2. Confidence troppo bassa
             if confidence < 0.8:
-                print(f"[DEBUG-TEST] [get_signal] Confidence troppo bassa: {confidence}")
-                logger.debug(f"{symbol}: Confidence troppo bassa ({confidence:.2f}/0.8) -> HOLD. Prezzo={last_tick_price}")
-                print(f"[DEBUG-TEST] [get_signal] RETURN HOLD (confidence)")
+                motivo = "Confidence troppo bassa"
+                dettagli = {
+                    "symbol": symbol,
+                    "confidence": confidence,
+                    "threshold": 0.8,
+                    "spin": spin,
+                    "timestamp": datetime.now().isoformat(),
+                }
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
-            print(f"[DEBUG-TEST] [get_signal] last_signal_time: {last_signal_time}")
+            # 3. Cooldown attivo
             if self._check_signal_cooldown(symbol, last_signal_time):
-                print(f"[DEBUG-TEST] [get_signal] In cooldown, RETURN HOLD")
+                motivo = "Cooldown segnale attivo"
+                dettagli = {
+                    "symbol": symbol,
+                    "last_signal_time": last_signal_time,
+                    "now": time.time(),
+                    "cooldown": self.signal_cooldown,
+                    "timestamp": datetime.now().isoformat(),
+                }
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
-            print(f"[DEBUG-TEST] [get_signal] deltas: {deltas}")
             entropy = self.calculate_entropy(deltas)
-            print(f"[DEBUG-TEST] [get_signal] entropy: {entropy}")
             volatility = 1 + abs(spin) * entropy
-            print(f"[DEBUG-TEST] [get_signal] volatility: {volatility}")
             buy_thresh, sell_thresh = self._calculate_signal_thresholds(volatility)
             signal = "HOLD"
             buy_condition = entropy > buy_thresh and spin > self.spin_threshold * confidence
             sell_condition = entropy < sell_thresh and spin < -self.spin_threshold * confidence
             self._log_signal_debug(symbol, entropy, spin, confidence, buy_thresh, sell_thresh, buy_condition, sell_condition, last_tick_price)
+            # 4. BUY/SELL
             if buy_condition:
                 signal = "BUY"
             elif sell_condition:
@@ -1169,18 +1169,39 @@ class QuantumEngine:
                 self.inc_signal_stats(signal)
                 stats = self.get_signal_stats()
                 buy_ratio = stats['BUY'] / (stats['BUY'] + stats['SELL']) if (stats['BUY'] + stats['SELL']) > 0 else 0
-                logger.info(
-                    f"Segnale {signal} per {symbol}: "
-                    f"E={entropy:.2f} S={spin:.2f} V={volatility:.2f} C={confidence:.2f} | "
-                    f"Soglie: B={buy_thresh:.2f} S={sell_thresh:.2f} | "
-                    f"Bias Check: BUY={stats['BUY']} SELL={stats['SELL']} Ratio={buy_ratio:.2f} | "
-                    f"Cooldown segnale attivato (900s) | Prezzo={last_tick_price}"
-                )
+                motivazione = "Condizioni soddisfatte per segnale 'BUY'" if signal == "BUY" else "Condizioni soddisfatte per segnale 'SELL'"
+                dettagli = {
+                    "symbol": symbol,
+                    "signal": signal,
+                    "entropy": round(entropy, 4),
+                    "spin": round(spin, 4),
+                    "confidence": round(confidence, 4),
+                    "volatility": round(volatility, 4),
+                    "buy_thresh": round(buy_thresh, 4),
+                    "sell_thresh": round(sell_thresh, 4),
+                    "price": last_tick_price,
+                    "timestamp": datetime.now().isoformat(),
+                }
+                logger.info(f"[SIGNAL-DEBUG] [APERTURA] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
                 self._log_signal_bias(symbol, stats, buy_ratio)
                 if signal == "SELL":
                     logger.debug(f"SELL signal conditions met for {symbol}: "
                                 f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
                                 f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
+            else:
+                motivazione = "Nessuna condizione soddisfatta per BUY/SELL"
+                dettagli = {
+                    "symbol": symbol,
+                    "entropy": round(entropy, 4),
+                    "spin": round(spin, 4),
+                    "confidence": round(confidence, 4),
+                    "volatility": round(volatility, 4),
+                    "buy_thresh": round(buy_thresh, 4),
+                    "sell_thresh": round(sell_thresh, 4),
+                    "price": last_tick_price,
+                    "timestamp": datetime.now().isoformat(),
+                }
+                logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
             return signal, last_tick_price
         except Exception as e:
             logger.error(f"[get_signal] Errore durante la generazione del segnale per {symbol}: {e}", exc_info=True)

@@ -1,5 +1,13 @@
 # TODO Dashboard Phoenix Quantum MonoFX
 
+## Analisi Segnali Trading & Apertura Posizioni (2025-07-29)
+
+- [ ] Log dettagliato dei segnali: per ogni segnale, loggare simbolo, entropy, spin, timestamp, esito (aperta/scartata) e motivazione.
+- [ ] Tabella segnali nella dashboard: mostrare cronologia segnali con esito e motivazione.
+- [ ] Individuare e loggare nel codice di trading i punti in cui viene valutato/aperto/scartato un segnale.
+- [ ] Visualizzazione nella dashboard della sequenza segnali e relativo esito.
+# TODO Dashboard Phoenix Quantum MonoFX
+
 Checklist miglioramenti e attività suggerite per la dashboard:
 
 - [x] **Aggiungere pagina di stato MT5**
