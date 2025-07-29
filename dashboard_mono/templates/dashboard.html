@@ -299,54 +299,10 @@
             </div>
         </div>
 
-        <!-- Tabella sequenza segnali e relativo esito -->
+        <!-- Link diagnostica -->
         <div class="row">
-            <div class="col-12">
-                <div class="metric-card">
-                    <h5><i class="fas fa-stream"></i> Sequenza Segnali &amp; Esito</h5>
-                    <div style="overflow-x:auto;">
-                        <table class="table table-dark table-striped table-bordered align-middle" style="font-size:0.98rem;">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Symbol</th>
-                                    <th>Direzione</th>
-                                    <th>Entropy</th>
-                                    <th>Spin</th>
-                                    <th>Esito</th>
-                                    <th>P&amp;L</th>
-                                    <th>Trade Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in signals_sequence_table %}
-                                <tr>
-                                    <td>{{ row.timestamp }}</td>
-                                    <td>{{ row.symbol }}</td>
-                                    <td>{{ row.direction }}</td>
-                                    <td>{{ row.entropy|round(3) }}</td>
-                                    <td>{{ row.spin|round(3) }}</td>
-                                    <td>
-                                        {% if row.esito == 'TRADE' %}
-                                            <span class="badge bg-success">Trade aperto</span>
-                                        {% elif row.esito == 'NESSUNA AZIONE' %}
-                                            <span class="badge bg-secondary">Nessuna azione</span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark">{{ row.esito }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if row.trade_pnl is not none %}
-                                            <span class="{{ 'profit-positive' if row.trade_pnl > 0 else ('profit-negative' if row.trade_pnl < 0 else 'profit-neutral') }}">{{ row.trade_pnl|round(2) }}</span>
-                                        {% else %}-{% endif %}
-                                    </td>
-                                    <td>{{ row.trade_time if row.trade_time else '-' }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="col-12 text-center mb-4">
+                <a href="/diagnostics" class="btn btn-primary btn-lg"><i class="fas fa-tools"></i> Vai alla Diagnostica (Motivi Blocco &amp; Segnali)</a>
             </div>
         </div>
         <div class="row">

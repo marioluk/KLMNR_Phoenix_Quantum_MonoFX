@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Tuple
 import threading
 import sys
 from flask import Flask, render_template, jsonify
+from dashboard_utils import read_trade_decision_report
 from collections import defaultdict, deque
 import plotly.graph_objs as go
 import plotly.utils
@@ -176,6 +177,7 @@ class The5ersGraphicalDashboard:
         def home_page():
             return render_template('home.html')
 
+
         @app.route('/dashboard')
         def dashboard_page():
             pnl_chart = self.create_pnl_chart()
@@ -186,8 +188,6 @@ class The5ersGraphicalDashboard:
             signals_chart = self.create_signals_chart()
             metrics = self.current_metrics
             compliance = self.get_compliance_status()
-            signals_sequence_table = self.create_signals_sequence_table()
-
             mt5_warning = ""
             if not MT5_AVAILABLE:
                 mt5_warning = "<div style='color:red; font-weight:bold; margin-bottom:10px;'>⚠️ Modulo MetaTrader5 non installato: dati live non disponibili.</div>"
@@ -195,7 +195,9 @@ class The5ersGraphicalDashboard:
                 mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ Connessione MT5 non attiva o file di configurazione non valido.</div>"
             elif not self.mt5_connected:
                 mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ MT5 non connesso: mostra solo dati da log.</div>"
-
+            # Le tabelle diagnostiche sono ora su /diagnostics
+            signals_sequence_table = None
+            trade_decision_table = None
             return render_template(
                 'dashboard.html',
                 pnl_chart=pnl_chart,
@@ -207,7 +209,18 @@ class The5ersGraphicalDashboard:
                 metrics=metrics,
                 compliance=compliance,
                 mt5_warning=mt5_warning,
-                signals_sequence_table=signals_sequence_table
+                signals_sequence_table=signals_sequence_table,
+                trade_decision_table=trade_decision_table
+            )
+
+        @app.route('/diagnostics')
+        def diagnostics_page():
+            signals_sequence_table = self.create_signals_sequence_table()
+            trade_decision_table = read_trade_decision_report(100)
+            return render_template(
+                'diagnostics.html',
+                signals_sequence_table=signals_sequence_table,
+                trade_decision_table=trade_decision_table
             )
 
         @app.route('/mt5_status')
