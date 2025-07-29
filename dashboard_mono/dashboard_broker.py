@@ -27,6 +27,15 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    def load_config(self) -> dict:
+        """Carica il file di configurazione JSON e restituisce un dizionario. Se fallisce, restituisce {}."""
+        try:
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+            return config
+        except Exception as e:
+            print(f"❌ Errore caricamento file di configurazione {self.config_file}: {e}")
+            return {}
     def create_signals_sequence_table(self, max_rows=100):
         """Restituisce una lista di dict con la sequenza segnali e relativo esito."""
         # Mostra solo gli ultimi max_rows segnali
