@@ -27,6 +27,27 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    def load_complete_mt5_data(self):
+        """Carica solo dati di stato da MT5 (balance, equity, posizioni aperte) e aggiorna solo queste metriche."""
+        if not MT5_AVAILABLE or not self.use_mt5:
+            print("[MT5] Modulo non disponibile o non abilitato, skip load_complete_mt5_data.")
+            return
+        try:
+            account_info = mt5.account_info()
+            if account_info:
+                self.current_metrics['current_balance'] = account_info.balance
+                self.current_metrics['current_equity'] = account_info.equity
+                self.current_metrics['positions_open'] = len(mt5.positions_get() or [])
+                # Aggiorna balance history
+                self.balance_history.append({
+                    'timestamp': datetime.now().isoformat(),
+                    'balance': account_info.balance,
+                    'equity': account_info.equity
+                })
+            print("[MT5] Stato account aggiornato (balance/equity/posizioni)")
+        except Exception as e:
+            print(f"❌ Errore caricamento dati MT5: {e}")
+        # Non chiudere la connessione qui!
     def load_config(self) -> dict:
         """Carica il file di configurazione JSON e restituisce un dizionario. Se fallisce, restituisce {}."""
         try:
@@ -999,12 +1020,12 @@ class The5ersGraphicalDashboard:
     def monitoring_loop(self):
         """Loop di monitoraggio in background"""
         self.is_monitoring = True
-        
-        # Carica dati iniziali dal log
+
+        # Carica dati iniziali dal log (popola tutte le metriche aggregate)
         print("🔄 Caricamento iniziale dati dal log...")
         self.analyze_log_file()
 
-        # Forza connessione MT5 se richiesto
+        # Forza connessione MT5 se richiesto SOLO per balance/equity/posizioni
         if self.use_mt5:
             print("🔄 Tentativo connessione a MetaTrader5...")
             if not mt5.initialize() and mt5.last_error() != (0, 'No error'):
@@ -1013,33 +1034,33 @@ class The5ersGraphicalDashboard:
             else:
                 self.mt5_connected = True
                 print("✅ Connessione a MT5 riuscita!")
-                print("🔄 Caricamento iniziale dati MT5...")
+                print("🔄 Caricamento stato account MT5...")
                 self.load_complete_mt5_data()
-        
+
         mt5_update_counter = 0
-        
+
         while self.is_monitoring:
             try:
                 # Leggi nuove entry dal log (per real-time updates)
                 new_lines = self.read_new_log_entries()
-                
-                # Processa nuove entry
+
+                # Processa nuove entry (aggiorna metriche aggregate)
                 for line in new_lines:
                     self.analyze_log_line(line)
-                
-                # Aggiorna dati MT5 ogni 30 secondi
+
+                # Aggiorna solo balance/equity/posizioni da MT5 ogni 30 secondi
                 if self.use_mt5 and mt5_update_counter >= 30:
                     self.load_complete_mt5_data()
                     mt5_update_counter = 0
                 else:
                     mt5_update_counter += 1
-                
+
                 # Aggiorna timestamp
                 self.last_update = datetime.now()
-                
+
                 # Attendi prima del prossimo update
                 time.sleep(1)  # Update ogni secondo per real-time
-                
+
             except Exception as e:
                 print(f"❌ Errore nel monitoring loop: {e}")
                 time.sleep(5)
