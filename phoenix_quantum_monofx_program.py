@@ -2,70 +2,70 @@
 import os
 # debug estremo iniziale
 
-print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
+#print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
 
-print("[DEBUG-TRACE] Prima di import os")
+#print("[DEBUG-TRACE] Prima di import os")
 import os
-print("[DEBUG-TRACE] Dopo import os")
-print("[DEBUG-TRACE] Prima di import json")
+#print("[DEBUG-TRACE] Dopo import os")
+#print("[DEBUG-TRACE] Prima di import json")
 import json
-print("[DEBUG-TRACE] Dopo import json")
-print("[DEBUG-TRACE] Prima di import logging")
+#print("[DEBUG-TRACE] Dopo import json")
+#print("[DEBUG-TRACE] Prima di import logging")
 import logging
-print("[DEBUG-TRACE] Dopo import logging")
-print("[DEBUG-TRACE] Prima di import time")
+#print("[DEBUG-TRACE] Dopo import logging")
+#print("[DEBUG-TRACE] Prima di import time")
 import time
-print("[DEBUG-TRACE] Dopo import time")
+#print("[DEBUG-TRACE] Dopo import time")
 
 
-print("[DEBUG] Import base completati")
+#print("[DEBUG] Import base completati")
 
-print("[DEBUG-TRACE] Prima di import datetime")
+#print("[DEBUG-TRACE] Prima di import datetime")
 from datetime import datetime, time as dt_time, timedelta
-print("[DEBUG-TRACE] Dopo import datetime")
-print("[DEBUG-TRACE] Prima di import typing")
+#print("[DEBUG-TRACE] Dopo import datetime")
+#print("[DEBUG-TRACE] Prima di import typing")
 from typing import Dict, Tuple, List, Any, Optional
-print("[DEBUG-TRACE] Dopo import typing")
-print("[DEBUG-TRACE] Prima di import collections")
+#print("[DEBUG-TRACE] Dopo import typing")
+#print("[DEBUG-TRACE] Prima di import collections")
 from collections import deque, defaultdict
-print("[DEBUG-TRACE] Dopo import collections")
-print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
+#print("[DEBUG-TRACE] Dopo import collections")
+#print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
 try:
     from logging.handlers import RotatingFileHandler
-    print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
+    #print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
 except Exception as e:
     print(f"[IMPORT ERROR] logging.handlers: {e}")
-print("[DEBUG-TRACE] Prima di import lru_cache")
+#print("[DEBUG-TRACE] Prima di import lru_cache")
 try:
     from functools import lru_cache
-    print("[DEBUG-TRACE] Dopo import lru_cache")
+    #print("[DEBUG-TRACE] Dopo import lru_cache")
 except Exception as e:
     print(f"[IMPORT ERROR] functools.lru_cache: {e}")
-print("[DEBUG-TRACE] Prima di import threading")
+#print("[DEBUG-TRACE] Prima di import threading")
 try:
     import threading
-    print("[DEBUG-TRACE] Dopo import threading")
+    #print("[DEBUG-TRACE] Dopo import threading")
 except Exception as e:
     print(f"[IMPORT ERROR] threading: {e}")
-print("[DEBUG-TRACE] Prima di import traceback")
+#print("[DEBUG-TRACE] Prima di import traceback")
 try:
     import traceback
-    print("[DEBUG-TRACE] Dopo import traceback")
+    #print("[DEBUG-TRACE] Dopo import traceback")
 except Exception as e:
     print(f"[IMPORT ERROR] traceback: {e}")
-print("[DEBUG-TRACE] Prima di import numpy as np")
+#print("[DEBUG-TRACE] Prima di import numpy as np")
 try:
     import numpy as np
-    print("[DEBUG-TRACE] Dopo import numpy as np")
+    #print("[DEBUG-TRACE] Dopo import numpy as np")
 except Exception as e:
     print(f"[IMPORT ERROR] numpy: {e}")
 
 
 # Dipendenze esterne/metatrader5
-print("[DEBUG] Prima del blocco import MT5")
+#print("[DEBUG] Prima del blocco import MT5")
 try:
     import MetaTrader5 as mt5
-    print("[DEBUG] Import MT5 completato")
+    #print("[DEBUG] Import MT5 completato")
 except ImportError as e:
     print(f"[IMPORT ERROR] {e}. Alcune funzionalità potrebbero non funzionare correttamente.")
 
@@ -82,7 +82,7 @@ def validate_config(config):
 
 # ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
 # Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
-print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
+#print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE: str = os.path.join(PROJECT_ROOT, "config", "config_autonomous_challenge_production_ready.json")
 DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
@@ -92,7 +92,7 @@ DEFAULT_LOG_BACKUP_COUNT: int = 5
 DEFAULT_LOG_MAX_BACKUPS: int = 10
 DEFAULT_TRADING_HOURS: str = "00:00-24:00"
 DEFAULT_TIME_RANGE: tuple = (0, 0, 23, 59)  # (h1, m1, h2, m2)
-print("[DEBUG] Costanti globali definite")
+#print("[DEBUG] Costanti globali definite")
 
 # ===================== STUB FUNZIONI DI UTILITÀ MANCANTI =====================
 # Queste funzioni sono placeholder per evitare errori di import/esecuzione.
@@ -282,9 +282,9 @@ class ConfigManager:
 
 # --- Avvio sistema solo se eseguito come script principale ---
 def main():
-    print("[DEBUG] Inizio main()")
+    #print("[DEBUG] Inizio main()")
     set_config(auto_correct_symbols(load_config()))
-    print("[DEBUG] Configurazione caricata e impostata")
+    #print("[DEBUG] Configurazione caricata e impostata")
 
     def periodic_reload_config(interval: int = DEFAULT_CONFIG_RELOAD_INTERVAL) -> None:
         while True:
@@ -298,28 +298,28 @@ def main():
 
     reload_thread = threading.Thread(target=periodic_reload_config, daemon=True)
     reload_thread.start()
-    print("[DEBUG] Thread di reload configurazione avviato")
+    #print("[DEBUG] Thread di reload configurazione avviato")
 
     set_log_file(get_log_file())
-    print("[DEBUG] Log file impostato")
+    #print("[DEBUG] Log file impostato")
     set_logger(setup_logger())
-    print("[DEBUG] Logger impostato")
+    #print("[DEBUG] Logger impostato")
     clean_old_logs()
-    print("[DEBUG] Pulizia vecchi log eseguita")
+    #print("[DEBUG] Pulizia vecchi log eseguita")
     global logger
     logger = get_logger()
-    print("[DEBUG] Logger globale ottenuto")
+    #print("[DEBUG] Logger globale ottenuto")
 
     # --- TEST LOGGING CONFIGURAZIONE ---
-    logger.debug("[TEST] Questo è un messaggio DEBUG (dovrebbe vedersi solo se log_level=DEBUG)")
-    logger.info("[TEST] Questo è un messaggio INFO (dovrebbe vedersi se log_level=INFO o inferiore)")
-    logger.warning("[TEST] Questo è un messaggio WARNING (dovrebbe vedersi sempre)")
-    logger.error("[TEST] Questo è un messaggio ERROR (dovrebbe vedersi sempre)")
-    logger.critical("[TEST] Questo è un messaggio CRITICAL (dovrebbe vedersi sempre)")
-    print("[LOG TEST] Livello logger:", logger.level)
-    for h in logger.handlers:
-        print("[LOG TEST] Handler:", h, "Level:", h.level)
-    print("[DEBUG] Fine main() - setup completato")
+    #logger.debug("[TEST] Questo è un messaggio DEBUG (dovrebbe vedersi solo se log_level=DEBUG)")
+    #logger.info("[TEST] Questo è un messaggio INFO (dovrebbe vedersi se log_level=INFO o inferiore)")
+    #logger.warning("[TEST] Questo è un messaggio WARNING (dovrebbe vedersi sempre)")
+    #logger.error("[TEST] Questo è un messaggio ERROR (dovrebbe vedersi sempre)")
+    #logger.critical("[TEST] Questo è un messaggio CRITICAL (dovrebbe vedersi sempre)")
+    #print("[LOG TEST] Livello logger:", logger.level)
+    #for h in logger.handlers:
+        #print("[LOG TEST] Handler:", h, "Level:", h.level)
+    #print("[DEBUG] Fine main() - setup completato")
 
 
 
