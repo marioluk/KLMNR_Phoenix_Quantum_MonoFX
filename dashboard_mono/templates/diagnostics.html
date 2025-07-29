@@ -21,6 +21,36 @@
         </div>
         <div>Motivi di blocco trade e sequenza segnali</div>
         <a href="/" class="btn btn-primary mt-3"><i class="fas fa-home"></i> Torna alla Home</a>
+        <a href="/diagnostics" class="btn btn-success mt-3 ms-2"><i class="fas fa-sync-alt"></i> Aggiorna</a>
+        <script>
+            // Auto-refresh ogni 30 secondi
+            setTimeout(function() { window.location.reload(); }, 30000);
+        </script>
+        <div class="alert alert-info mt-3" style="font-size:1.05rem; background: #23272f; color: #b6faff; border: 1px solid #00ffe7;">
+            <b>Come funziona la logica dei segnali:</b><br>
+            <ul>
+                <li><b>BUY / SELL</b>: il sistema apre un trade solo se tutte le condizioni sono favorevoli.</li>
+                <li><b>HOLD</b>: il sistema <b>non entra a mercato</b> se almeno una di queste condizioni non è soddisfatta:
+                    <ul>
+                        <li><b>Confidenza bassa o nulla</b>: il segnale non è affidabile.</li>
+                        <li><b>Entropia alta</b>: il mercato è troppo casuale/caotico, quindi è rischioso entrare.<br>
+                            <i>Soglie attuali: BUY ≤ <b>{{ buy_entropy }}</b>, SELL ≥ <b>{{ sell_entropy }}</b></i>
+                        </li>
+                        <li><b>Spin basso</b>: non c’è una direzione chiara nel mercato.<br>
+                            <i>Soglia attuale: <b>{{ spin_threshold }}</b></i>
+                        </li>
+                        <li><b>Buffer tick insufficiente</b>: servono almeno <b>{{ min_spin_samples }}</b> tick per una valutazione affidabile.</li>
+                    </ul>
+                </li>
+            </ul>
+            <b>Altri parametri chiave:</b>
+            <ul>
+                <li>Finestra spin: <b>{{ spin_window }}</b> tick</li>
+                <li>Cooldown segnale: <b>{{ signal_cooldown }}</b> secondi</li>
+            </ul>
+            <b>Nota:</b> Nella colonna <b>Extra</b> trovi sempre i dettagli tecnici che spiegano il motivo preciso di ogni blocco o segnale HOLD.<br>
+            <span style="color:#ffb700;"><b>Attenzione:</b> Questi parametri possono variare in base all'ottimizzazione e alla configurazione attiva.</span>
+        </div>
     </div>
     <div class="row">
         <div class="col-12">
