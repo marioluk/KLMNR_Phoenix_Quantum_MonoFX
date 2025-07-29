@@ -1,5 +1,6 @@
 
 import os
+import csv
 # debug estremo iniziale
 
 #print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
@@ -2142,27 +2143,26 @@ class QuantumTradingSystem:
 
     def debug_trade_decision(self, symbol):
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo."""
-        try:
-            logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
-            # 1. Può fare trading?
-            can_trade = self.engine.can_trade(symbol)
-            logger.info(f"can_trade: {can_trade}")
-            if not can_trade:
-                logger.info("Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)")
-                return
+        logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
+        # 1. Può fare trading?
+        can_trade = self.engine.can_trade(symbol)
+        logger.info(f"can_trade: {can_trade}")
+        if not can_trade:
+            logger.info("Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)")
+            return
 
-            # 2. Orari di trading
-            config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-            trading_hours = is_trading_hours(symbol, config_dict)
-            logger.info(f"trading_hours: {trading_hours}")
-            if not trading_hours:
-                logger.info("Motivo: fuori orario di trading")
-                return
+        # 2. Orari di trading
+        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+        trading_hours = is_trading_hours(symbol, config_dict)
+        logger.info(f"trading_hours: {trading_hours}")
+        if not trading_hours:
+            logger.info("Motivo: fuori orario di trading")
+            return
 
-            # 3. Posizioni già aperte
-            existing_positions = mt5.positions_get(symbol=symbol)
-            has_position = existing_positions and len(existing_positions) > 0
-            logger.info(f"has_position: {has_position}")
+        # 3. Posizioni già aperte
+        existing_positions = mt5.positions_get(symbol=symbol)
+        has_position = existing_positions and len(existing_positions) > 0
+        logger.info(f"has_position: {has_position}")
     import csv
     import os
     def debug_trade_decision(self, symbol):
@@ -2298,8 +2298,8 @@ class QuantumTradingSystem:
             # (Non esegue realmente il trade, solo debug)
         except Exception as e:
             logger.error(f"[DEBUG TRADE DECISION] Errore per {symbol}: {str(e)}", exc_info=True)
-                # Caso: self._config è un dict
-                return list(self._config['symbols'].keys())
+            # Caso: self._config è un dict
+            return list(self._config['symbols'].keys())
         return []
     def _main_loop(self):
         """
