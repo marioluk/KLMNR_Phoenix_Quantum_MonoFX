@@ -2644,29 +2644,23 @@ class QuantumTradingSystem:
         self.last_account_update = 0
         self.last_tick_check = 0
         self.last_buffer_check = 0
+        # Imposta la lista dei simboli come attributo di istanza
+        self.symbols = list(self._config.config['symbols'].keys())
         logger.info(
             "\n==================== [SISTEMA INIZIALIZZATO] ====================\n"
-            f"Simboli configurati: {list(self._config.config['symbols'].keys())}\n"
+            f"Simboli configurati: {self.symbols}\n"
             f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}\n"
             "======================================================\n"
         )
-        initial_equity = self.account_info.equity if self.account_info else 10000
-        self.drawdown_tracker = DailyDrawdownTracker(
-            initial_equity=initial_equity,
-            config=self._config.config
-        )
-
-        # Stato sistema
-        self.last_position_check = 0
-        self.last_connection_check = 0
-        self.last_account_update = 0
-        self.last_tick_check = 0
-        self.last_buffer_check = 0
-
         logger.info("Sistema inizializzato correttamente")
-
-        logger.info(f"Simboli configurati: {list(self._config.config['symbols'].keys())}")
+        logger.info(f"Simboli configurati: {self.symbols}")
         logger.info(f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}")
+    def _safe_sleep(self, seconds):
+        """Sleep sicuro che ignora eventuali eccezioni"""
+        try:
+            time.sleep(seconds)
+        except Exception:
+            pass
     
     def _activate_symbols(self):
         """Attiva automaticamente i simboli richiesti in MT5"""
