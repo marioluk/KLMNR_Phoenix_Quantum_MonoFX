@@ -1,33 +1,18 @@
-# TODO Analisi Segnali Trading & Apertura Posizioni
 
-## Obiettivo
-Capire perché l'algoritmo non apre posizioni e avere chiarezza sui segnali di trading, sia nei log che nella dashboard.
 
-## Azioni da implementare
-
-1. **Log dettagliato dei segnali (tick-by-tick)**
-   - Ogni segnale viene loggato subito (tick-by-tick), senza report periodico.
-   - Il log include:
-     - Segnale ricevuto (simbolo, entropy, spin, timestamp, ecc.)
-     - Motivazione per cui viene aperta o scartata una posizione
-     - Eventuali filtri o condizioni che bloccano l'apertura
-
-2. **Dashboard: tabella segnali e aggregazione**
-   - La dashboard dovrà aggregare i log tick-by-tick e mostrare:
-     - Timestamp, simbolo, entropy, spin, direzione, esito (aperta/scartata), motivazione
-     - Statistiche e grafici aggregati
-
-3. **Codice di trading**
-   - Individuare dove viene gestito il segnale e dove viene chiamata la funzione di apertura ordine
-   - Aggiungere log come descritto sopra
-
-4. **Visualizzazione**
-   - Aggiungere nella dashboard una sezione che mostri la sequenza dei segnali e il relativo esito
+# ATTENZIONE: Questo file è stato accorpato nel nuovo TODO.md centrale.
+# Consulta e aggiorna solo `TODO.md` nella root del progetto per la roadmap completa e aggiornata.
+# Qui puoi mantenere solo note storiche, dettagli specifici o idee temporanee non ancora consolidate che non sono già in TODO.md.
 
 ---
 
-## Note
-- Il logging dei segnali è ora tick-by-tick, senza report periodico.
-- La dashboard dovrà occuparsi di aggregazione e visualizzazione.
-- La logica di apertura posizione probabilmente non è in `dashboard_broker.py` ma nello script di trading principale.
-- Serve collaborazione tra log, codice di trading e dashboard per una diagnosi efficace.
+## Idee temporanee o dettagli non ancora consolidati
+
+## File coinvolti principali
+
+## Note operative
+- Il logging dei segnali è già tick-by-tick nel metodo `get_signal`, ma va verificata la completezza delle informazioni e la facilità di parsing per la dashboard.
+- La dashboard dovrà occuparsi di aggregazione e visualizzazione, ma serve un formato dati chiaro e accessibile.
+- La logica di apertura posizione è nel metodo `get_signal` e nei punti dove viene chiamato per il trading reale.
+- Serve collaborazione tra log, codice di trading e dashboard per una diagnosi efficace e una visualizzazione chiara.
+- L'obiettivo è rendere trasparente e facilmente analizzabile il processo di generazione e blocco dei segnali, per poter agire in modo mirato sui parametri o sulla logica.
