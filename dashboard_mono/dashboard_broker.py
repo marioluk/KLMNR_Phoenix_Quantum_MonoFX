@@ -45,14 +45,22 @@ class The5ersGraphicalDashboard:
                 rows = list(reader)[-max_rows:]
                 for row in rows:
                     # Conversione tipi
+                    spin = float(row['spin'])
+                    if spin > 0:
+                        direction = 'BUY'
+                    elif spin < 0:
+                        direction = 'SELL'
+                    else:
+                        direction = 'NEUTRAL'
                     signal = {
                         'timestamp': row['timestamp'],
                         'symbol': row['symbol'],
                         'entropy': float(row['entropy']),
-                        'spin': float(row['spin']),
+                        'spin': spin,
                         'confidence': float(row['confidence']),
                         'price': float(row['price']),
-                        'esito': row['esito']
+                        'esito': row['esito'],
+                        'direction': direction
                     }
                     self.signals_timeline.append(signal)
             print(f"[CSV] Caricati {len(self.signals_timeline)} segnali da {csv_path}")
