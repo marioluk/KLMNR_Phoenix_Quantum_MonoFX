@@ -244,8 +244,9 @@
                                     <th>Simbolo</th>
                                     <th>Segnale</th>
                                     <th>Motivo Blocco</th>
+                                    <th>Parametro non soddisfatto</th>
+                                    <th>Dettagli tecnici</th>
                                     <th>Dettaglio</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -474,13 +475,14 @@
                             <td>${row.symbol}</td>
                             <td>${row.segnale}</td>
                             <td>${row.motivo_blocco || ''}</td>
-                            <td>${row.dettaglio_blocco || ''}</td>
+                            <td>${row.parametro_non_soddisfatto || ''}</td>
+                            <td>${row.dettagli_tecnici || ''}</td>
                             <td><a href='/diagnostics' class='btn btn-sm btn-link'>Dettagli</a></td>
                         `;
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = `<tr><td colspan='6' class='text-center text-muted'>Nessun segnale non eseguito trovato. Genera prima il report incrociato.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan='7' class='text-center text-muted'>Nessun segnale non eseguito trovato. Genera prima il report incrociato.</td></tr>`;
                 }
               });
         }
