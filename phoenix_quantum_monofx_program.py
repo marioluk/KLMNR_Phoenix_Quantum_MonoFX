@@ -1690,7 +1690,7 @@ class QuantumRiskManager:
             sl_pips = self._calculate_sl_pips(symbol)
 
             # 5. Usa pip value dai dati caricati
-            symbol_data = self.symbol_data[symbol]
+            symbol_data = self._symbol_data[symbol]
             pip_value = symbol_data['pip_value']
             contract_size = symbol_data.get('contract_size', 1.0)
             volume_min = symbol_data.get('volume_min', None)
@@ -1965,10 +1965,10 @@ class QuantumRiskManager:
     
     def _round_to_step(self, size: float, symbol: str) -> float:
         """Arrotonda la dimensione al passo di volume"""
-        step = self.symbol_data[symbol]['volume_step']
+        step = self._symbol_data[symbol]['volume_step']
         if step > 0:
             size = round(size / step) * step
-        return max(size, self.symbol_data[symbol]['volume_min'])
+        return max(size, self._symbol_data[symbol]['volume_min'])
         
         
         
@@ -2051,7 +2051,7 @@ class QuantumRiskManager:
     def _load_symbol_data(self, symbol: str) -> bool:
         """Calcolo preciso del pip value per tutti i tipi di strumenti"""
         try:
-            if symbol in self.symbol_data:
+            if symbol in self._symbol_data:
                 return True
                 
             info = mt5.symbol_info(symbol)
@@ -2083,7 +2083,7 @@ class QuantumRiskManager:
                 # contract_size 0.01 = mini lotto = $10 * 0.01 = $0.10 per pip
                 pip_value = 10.0 * contract_size  # $10 per pip per lotto standard * contract_size
             
-            self.symbol_data[symbol] = {
+            self._symbol_data[symbol] = {
                 'pip_value': pip_value,
                 'volume_step': info.volume_step,
                 'digits': info.digits,
