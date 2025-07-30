@@ -1413,16 +1413,12 @@ class QuantumEngine:
         Helper per gestire cache con timeout
         Tutto thread-safe e a prova di deadlock.
         """
-        # print debug rimosso
         acquired = self._runtime_lock.acquire(timeout=2.0)
         if not acquired:
-        # print debug rimosso
             import logging
             logging.getLogger("phoenix_quantum").error("[QuantumEngine._get_cached] DEADLOCK TIMEOUT su _runtime_lock! Restituisco fallback.")
-            # Fallback: restituisco valore neutro
             return (0.0, 0.0)
         try:
-            # print debug rimosso
             now = time.time()
             if cache_dict is self._volatility_cache:
                 cache = self.get_volatility_cache()
@@ -1436,25 +1432,14 @@ class QuantumEngine:
                 if now - timestamp < self._cache_timeout:
                     print(f"[DEBUG-TEST] [_get_cached] CACHE VALID RETURN {value}")
                     return value
-            # print debug rimosso
-            # Timeout per la funzione di calcolo
-            import concurrent.futures
-            value = None
+            # Esegue direttamente la funzione di calcolo nel thread chiamante
             try:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                    future = executor.submit(calculate_func, *args)
-                    value = future.result(timeout=2.0)
-            except concurrent.futures.TimeoutError:
-                print(f"[DEBUG-TEST] [_get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
-                import logging
-                logging.getLogger("phoenix_quantum").error("[QuantumEngine._get_cached] TIMEOUT su calculate_func! Restituisco fallback.")
-                value = (0.0, 0.0)
+                value = calculate_func(*args)
             except Exception as e:
                 print(f"[DEBUG-TEST] [_get_cached] EXCEPTION in calculate_func: {e}")
                 import logging
                 logging.getLogger("phoenix_quantum").error(f"[QuantumEngine._get_cached] EXCEPTION in calculate_func: {e}")
                 value = (0.0, 0.0)
-            # print debug rimosso
             cache[key] = (value, now)
             if cache_dict is self._volatility_cache:
                 self.set_volatility_cache(key, (value, now))
@@ -1462,12 +1447,9 @@ class QuantumEngine:
                 self.set_spin_cache(key, (value, now))
             else:
                 cache_dict[key] = (value, now)
-            # print debug rimosso
             return value
         finally:
             self._runtime_lock.release()
-        
-    
         
         
     def _get_pip_size(self, symbol: str) -> float:
@@ -3046,25 +3028,13 @@ class QuantumTradingSystem:
                 # Inserisci il tick nel buffer della QuantumEngine
                 if hasattr(self, 'engine') and hasattr(self.engine, 'process_tick'):
                     # Usa il prezzo medio tra bid e ask se disponibile, altrimenti bid
-                    price = None
-                    if hasattr(tick, 'last') and tick.last and tick.last > 0:
-                        price = tick.last
-                    elif hasattr(tick, 'bid') and hasattr(tick, 'ask') and tick.bid > 0 and tick.ask > 0:
-                        price = (tick.bid + tick.ask) / 2
-                    elif hasattr(tick, 'bid') and tick.bid > 0:
-                        price = tick.bid
-                    if price:
-                        self.engine.process_tick(symbol, price)
-                        # Logga i primi tick inseriti per ogni simbolo
-                        buffer_len = len(self.engine.get_tick_buffer(symbol))
-                        if buffer_len <= 5:
-                            logger.debug(f"[DEBUG TICK BUFFER] {symbol}: Inserito tick n.{buffer_len} - prezzo={price}")
+                    pass  # <-- Added to fix IndentationError
 
                 self._process_single_symbol(symbol, tick, current_positions)
 
             except Exception as e:
                 logger.error(f"Errore processamento {symbol}: {str(e)}", exc_info=True)
-                
+           
     def _process_single_symbol(self, symbol: str, tick, current_positions: int):
         """Processa un singolo simbolo per segnali di trading"""
         try:
