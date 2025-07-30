@@ -324,6 +324,10 @@
                             <div class="metric-label">Buy Signals</div>
                             <div class="metric-value" style="font-size: 1.5rem; color: #28a745;">{{ metrics.quantum_signals.buy }}</div>
                         </div>
+            <i class="fas fa-clock"></i> Last updated: {{ last_update }}
+        </div>
+        {# Tabella segnali non eseguiti con link dettagliato #}
+        {% include '_unexecuted_signals_table.html' %}
                         <div class="quantum-indicator">
                             <div class="metric-label">Sell Signals</div>
                             <div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{ metrics.quantum_signals.sell }}</div>

@@ -468,8 +468,23 @@ class The5ersGraphicalDashboard:
             elif not self.mt5_connected:
                 mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ MT5 non connesso: mostra solo dati da log.</div>"
             # Le tabelle diagnostiche sono ora su /diagnostics
-            signals_sequence_table = None
-            trade_decision_table = None
+            # Carica segnali non eseguiti per la tabella (ultimi 20)
+            # NB: questa logica può essere raffinata lato frontend, qui forniamo i dati
+            import json
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+            json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
+            unexecuted_signals = []
+            if os.path.isfile(json_path):
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for row in data:
+                        if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL'):
+                            # Genera link dettagliato per diagnostics
+                            link = f"/diagnostics?symbol={row.get('symbol','')}&direction={row.get('segnale','')}&timestamp={row.get('timestamp','')}"
+                            row['dettagli_link'] = link
+                            unexecuted_signals.append(row)
+                # Mostra solo gli ultimi 20
+                unexecuted_signals = unexecuted_signals[-20:]
             return render_template(
                 'dashboard.html',
                 pnl_chart=pnl_chart,
@@ -481,14 +496,29 @@ class The5ersGraphicalDashboard:
                 metrics=metrics,
                 compliance=compliance,
                 mt5_warning=mt5_warning,
-                signals_sequence_table=signals_sequence_table,
-                trade_decision_table=trade_decision_table
+                unexecuted_signals=unexecuted_signals
             )
 
         @app.route('/diagnostics')
         def diagnostics():
+            # Deep-link: accetta parametri GET per filtrare/evidenziare un segnale
+            from flask import request
+            symbol = request.args.get('symbol', '').upper().strip()
+            direction = request.args.get('direction', '').upper().strip()
+            timestamp = request.args.get('timestamp', '').strip()
             # Tabella segnali quantum
             signals_sequence_table = self.create_signals_sequence_table()
+            # Se sono presenti parametri, filtra/evidenzia il segnale richiesto
+            highlight_signal = None
+            if symbol and direction and timestamp:
+                for s in signals_sequence_table:
+                    if (
+                        s['symbol'].upper() == symbol and
+                        s['direction'].upper() == direction and
+                        s['timestamp'] == timestamp
+                    ):
+                        highlight_signal = s
+                        break
             # Tabella decisioni trade
             trade_decision_table = read_trade_decision_report(100)
             # Parametri quantum dal file di config
@@ -501,7 +531,7 @@ class The5ersGraphicalDashboard:
             min_spin_samples = quantum.get('min_spin_samples', None)
             spin_threshold = quantum.get('spin_threshold', None)
             signal_cooldown = quantum.get('signal_cooldown', None)
-            # Passa i parametri al template
+            # Passa i parametri al template, aggiungi highlight_signal
             return render_template(
                 'diagnostics.html',
                 signals_sequence_table=signals_sequence_table,
@@ -511,7 +541,8 @@ class The5ersGraphicalDashboard:
                 spin_window=spin_window,
                 min_spin_samples=min_spin_samples,
                 spin_threshold=spin_threshold,
-                signal_cooldown=signal_cooldown
+                signal_cooldown=signal_cooldown,
+                highlight_signal=highlight_signal
             )
 
         @app.route('/api/run_block_reasons_report', methods=['POST'])

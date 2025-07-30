@@ -1,0 +1,32 @@
+{# Tabella segnali non eseguiti con link dettagliato diagnostics #}
+{% if unexecuted_signals %}
+  <h3>Segnali BUY/SELL non eseguiti (ultimi 20)</h3>
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Symbol</th>
+        <th>Segnale</th>
+        <th>Motivo Blocco</th>
+        <th>Dettagli</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in unexecuted_signals %}
+      <tr>
+        <td>{{ s.timestamp }}</td>
+        <td>{{ s.symbol }}</td>
+        <td>{{ s.segnale }}</td>
+        <td>{{ s.motivo_blocco or '' }}</td>
+        <td>
+          <a href="{{ s.dettagli_link }}" class="btn btn-sm btn-info" title="Vai al dettaglio su diagnostics" target="_blank">
+            Dettagli
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="alert alert-info">Nessun segnale BUY/SELL non eseguito trovato.</div>
+{% endif %}

@@ -1,0 +1,31 @@
+{# Tabella segnali quantum con evidenziazione riga se highlight_signal è presente #}
+<table class="table table-striped table-sm">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Symbol</th>
+      <th>Direzione</th>
+      <th>Entropy</th>
+      <th>Spin</th>
+      <th>Esito</th>
+      <th>Motivo Blocco</th>
+      <th>PnL</th>
+      <th>Trade Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in signals_sequence_table %}
+    <tr {% if highlight_signal and s.timestamp == highlight_signal.timestamp and s.symbol == highlight_signal.symbol and s.direction == highlight_signal.direction %}style="background-color: #ffe066; font-weight:bold;"{% endif %}>
+      <td>{{ s.timestamp }}</td>
+      <td>{{ s.symbol }}</td>
+      <td>{{ s.direction }}</td>
+      <td>{{ s.entropy }}</td>
+      <td>{{ s.spin }}</td>
+      <td>{{ s.esito }}</td>
+      <td>{{ s.motivo_blocco or '' }}</td>
+      <td>{{ s.trade_pnl or '' }}</td>
+      <td>{{ s.trade_time or '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
