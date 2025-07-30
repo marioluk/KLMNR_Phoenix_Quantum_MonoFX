@@ -31,6 +31,7 @@ def log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito):
 
 # ===================== BLOCCO CONTATORI MOTIVI DI BLOCCO =====================
 import threading
+from collections import defaultdict
 _block_reason_counter = defaultdict(int)
 _block_reason_counter_lock = threading.Lock()
 _block_reason_total = 0
