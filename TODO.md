@@ -9,8 +9,8 @@
 - [x] **[ALTA] Logging tick-by-tick di ogni segnale (BUY/SELL/HOLD/SCARTATO)** con:
     - [x] **[ALTA] Simbolo, entropy, spin, confidence, timestamp, prezzo**
     - [x] **[ALTA] Esito e motivazione (apertura/scarto)** *(solo motivazione: parziale, da completare per dettaglio blocchi)*
-    - [ ] **[ALTA] Dettaglio su filtri/blocchi** (buffer insufficiente, confidence bassa, cooldown, spread, orario, max trade, ecc.)
-- [ ] **[MEDIA] Esportazione segnali e motivi di blocco in CSV/JSON per analisi esterna**
+- [x] **[ALTA] Dettaglio su filtri/blocchi** (buffer insufficiente, confidence bassa, cooldown, spread, orario, max trade, ecc.)
+- [x] **[MEDIA] Esportazione segnali e motivi di blocco in CSV/JSON per analisi esterna**
 - [ ] **[MEDIA] Aggiungere contatori per ogni tipo di blocco e report periodico sintetico nei log**
 - [ ] **[MEDIA] Uniformare la struttura dei dati tra log, dashboard e funzioni di analisi**
 
