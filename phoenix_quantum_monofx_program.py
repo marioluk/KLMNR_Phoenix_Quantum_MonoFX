@@ -1706,7 +1706,12 @@ class QuantumRiskManager:
             size = risk_amount / (sl_pips * pip_value)
 
             # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
-            max_size_limit = 0.1  # Massimo 0.1 lotti per posizioni conservative
+            # Leggi max_size_limit da config simbolo, poi globale, poi fallback 0.1
+            max_size_limit = self._get_config(symbol, 'max_size_limit', None)
+            if max_size_limit is None:
+                # Prova a leggere da risk_parameters globale
+                config = self.config.config if hasattr(self.config, 'config') else self.config
+                max_size_limit = config.get('risk_parameters', {}).get('max_size_limit', 0.1)
             if size > max_size_limit:
                 logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
@@ -2049,40 +2054,35 @@ class QuantumRiskManager:
     """
     
     def _load_symbol_data(self, symbol: str) -> bool:
-        """Calcolo preciso del pip value per tutti i tipi di strumenti"""
+        """Calcolo preciso del pip value per tutti i tipi di strumenti, con supporto pip_value_map da config"""
         try:
             if symbol in self._symbol_data:
                 return True
-                
+
             info = mt5.symbol_info(symbol)
             if not info:
                 logger.error(f"Impossibile ottenere info MT5 per {symbol}")
                 return False
-            
+
             # Accesso alla configurazione universale
             config = self.config.config if hasattr(self.config, 'config') else self.config
             symbol_config = config.get('symbols', {}).get(symbol, {})
             risk_config = symbol_config.get('risk_management', {})
-            
-            point = info.point
             contract_size = risk_config.get('contract_size', 1.0)
-            
-            logger.debug(f"Raw data for {symbol}: point={point}, contract_size={contract_size}")
-            
-            # Calcolo preciso del pip value
-            if symbol in ['XAUUSD', 'XAGUSD']:
-                # Per XAUUSD: 1 lotto = 100 once, 1 pip = $0.01 per oncia
-                # Quindi 1 pip su 1 lotto = $1.00 (100 once x $0.01)
-                pip_value = 1.0 * contract_size  # $1.00 per pip per lotto
-            elif symbol in ['SP500', 'NAS100', 'US30']:
-                # Per indici: 1 pip = $1.0 per lotto standard
-                # Con contract_size 0.01 = $1.0 * 0.01 = $0.01 per pip
-                pip_value = 1.0 * contract_size  # $1.0 per pip per lotto standard * contract_size
-            else:  # Forex (EURUSD, GBPUSD, ecc.)
-                # Per forex standard: 1 pip = $10 per lotto standard (100,000 unità)
-                # contract_size 0.01 = mini lotto = $10 * 0.01 = $0.10 per pip
-                pip_value = 10.0 * contract_size  # $10 per pip per lotto standard * contract_size
-            
+            point = info.point
+
+            # 1. Cerca pip_value per simbolo in config (override per simbolo)
+            pip_value = None
+            if 'pip_value' in risk_config:
+                pip_value = float(risk_config['pip_value'])
+            else:
+                # 2. Cerca pip_value_map globale
+                pip_map = config.get('pip_value_map', {})
+                pip_value = pip_map.get(symbol)
+                if pip_value is None:
+                    pip_value = pip_map.get('default', 10.0)
+                pip_value = float(pip_value) * contract_size
+
             self._symbol_data[symbol] = {
                 'pip_value': pip_value,
                 'volume_step': info.volume_step,
@@ -2091,18 +2091,14 @@ class QuantumRiskManager:
                 'volume_max': info.volume_max,
                 'contract_size': contract_size
             }
-            
+
             logger.debug(f"Dati caricati per {symbol}: PipValue=${pip_value:.2f}, ContractSize={contract_size}, Point={point}")
-            
-            # Log dettagliato per debug
             logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
-                       f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
-                       f"ContractSize={contract_size} | "
-                       f"PipValue=${pip_value:.4f} | "
-                       f"Point={point}")
-            
+                        f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
+                        f"ContractSize={contract_size} | "
+                        f"PipValue=${pip_value:.4f} | "
+                        f"Point={point}")
             return True
-            
         except Exception as e:
             logger.error(f"Errore critico in _load_symbol_data: {str(e)}")
             return False
