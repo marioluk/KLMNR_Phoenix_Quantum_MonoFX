@@ -330,6 +330,9 @@ class The5ersGraphicalDashboard:
 
 
     def setup_routes(self):
+        app = self.app
+        from flask import render_template
+        from flask import request
 
         @app.route('/api/archive_and_cleanup_logs', methods=['POST'])
         def api_archive_and_cleanup_logs():
@@ -345,9 +348,6 @@ class The5ersGraphicalDashboard:
                 })
             except Exception as e:
                 return jsonify({'success': False, 'error': str(e)}), 500
-        app = self.app
-        from flask import render_template
-        from flask import request
 
         @app.route('/api/refresh_signals', methods=['POST'])
         def api_refresh_signals():
