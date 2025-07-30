@@ -1,5 +1,16 @@
 # TODO Analisi Segnali, Dashboard e Migliorie Phoenix Quantum MonoFX
 
+## 🚨 PRIORITÀ: Debug Pipeline Segnali → Ordini
+
+- [ ] **Verificare generazione segnali** (log, dashboard, parametri corretti)
+- [ ] **Controllare motivi di blocco** (colonna motivazione, filtri attivi)
+- [ ] **Analizzare pipeline segnali→ordini** (funzioni di trasformazione, chiamate effettive)
+- [ ] **Controllare errori runtime** (log, eccezioni, connessione broker)
+- [ ] **Verificare condizioni operative** (saldo, leva, modalità, parametri rischio)
+- [ ] **Test manuale** (forzare segnale valido, ridurre filtri temporaneamente)
+- [ ] **Analisi codice** (condizioni if, chiamate effettive invio ordini)
+
+
 > Questo file è la **roadmap e checklist ufficiale** del progetto Phoenix Quantum MonoFX.
 > Contiene tutte le attività aperte, le priorità, le idee di miglioramento e le implementazioni pianificate.
 > Aggiorna solo qui la lista delle cose da fare: tutti i file TODO secondari sono storici o di appoggio temporaneo.
@@ -11,10 +22,12 @@
     - [x] **[ALTA] Esito e motivazione (apertura/scarto)** *(solo motivazione: parziale, da completare per dettaglio blocchi)*
 - [x] **[ALTA] Dettaglio su filtri/blocchi** (buffer insufficiente, confidence bassa, cooldown, spread, orario, max trade, ecc.)
     - [note] Tutti i motivi di blocco ora sono loggati, esportati e visualizzati in dashboard/diagnostica. Report e automazione completati.
+    - [done 30/07/2025] Visualizzazione avanzata, filtro motivi attivi e uniformità tra log, dashboard e diagnostica completati.
 - [x] **[MEDIA] Esportazione segnali e motivi di blocco in CSV/JSON per analisi esterna**
 - [x] **[MEDIA] Aggiungere contatori per ogni tipo di blocco e report periodico sintetico nei log**
     - [note] Ogni 100 segnali viene scritto nei log un riepilogo automatico dei motivi di blocco, con contatori thread-safe e reset.
-- [ ] **[MEDIA] Uniformare la struttura dei dati tra log, dashboard e funzioni di analisi**
+- [x] **[MEDIA] Uniformare la struttura dei dati tra log, dashboard e funzioni di analisi**
+    - [done 30/07/2025] Struttura dati ora coerente tra log, dashboard e funzioni di analisi. Tutti i motivi di blocco e i dettagli sono esportati e visualizzati in modo uniforme.
 
 ## 2. Dashboard: Visualizzazione, Aggregazione e UX
 - [x] **[ALTA] Tabella cronologia/sequenza segnali con esito e motivazione** *(con refresh manuale e auto)*
@@ -24,7 +37,8 @@
 - [ ] **[MEDIA] Consentire modifica rapida dei parametri di filtro dalla dashboard**
 - [ ] **[ALTA] Notifiche real-time** (es. disconnessione MT5, drawdown critico, target raggiunto)
 - [ ] **[ALTA] Storico errori/warning** e miglioramento UI/UX (responsive, dark/light, icone)
-- [ ] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
++ [x] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
++     - [done 30/07/2025] Implementato bottone, API Flask e logica JS per generazione e download CSV direttamente dalla dashboard.
 
 ## 3. Parsing, Analisi e Debug Strategia
 
