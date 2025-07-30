@@ -50,11 +50,26 @@ class AutonomousHighStakesOptimizer:
         optimal_symbols = self.select_optimal_symbols(aggressiveness)
         optimized_symbols = {}
         total_score = 0
+        spin_thresholds = []
         for symbol in optimal_symbols:
             symbol_params = self.optimize_symbol_parameters(symbol, aggressiveness)
+            # Normalizza spin_threshold tra 0.15 e 1.0
+            st = symbol_params.get('spin_threshold', 0.25)
+            st = max(0.15, min(float(st), 1.0))
+            symbol_params['spin_threshold'] = st
+            # Inserisci anche come quantum_params_override per ogni simbolo
+            if 'quantum_params_override' not in symbol_params:
+                symbol_params['quantum_params_override'] = {}
+            symbol_params['quantum_params_override']['spin_threshold'] = st
+            spin_thresholds.append(st)
             optimized_symbols[symbol] = symbol_params
             total_score += symbol_params['optimization_score']
         config['symbols'] = optimized_symbols
+        # Media dei valori spin_threshold per quantum_params globale
+        if spin_thresholds:
+            config['quantum_params']['spin_threshold'] = round(sum(spin_thresholds) / len(spin_thresholds), 3)
+        else:
+            config['quantum_params']['spin_threshold'] = 0.25
         avg_score = total_score / len(optimal_symbols)
         config['quantum_params']['adaptive_threshold'] = 0.60 + (avg_score / 200)
         config['quantum_params']['volatility_filter'] = 0.70 + (avg_score / 300)
@@ -627,16 +642,37 @@ class AutonomousHighStakesOptimizer:
             }
 
         # --- MAX SPREAD ---
+        # Popola sempre max_spread per tutti i simboli selezionati
         max_spread = get_param("risk_parameters", "max_spread", {})
-        if not max_spread:
-            # Ricava max_spread per simbolo se non presente
-            max_spread = {s: params.get("max_spread", 20) for s, params in config.get('symbols', {}).items()}
-        risk_parameters["max_spread"] = max_spread
+        # Ricava max_spread per ogni simbolo selezionato, fallback 20
+        all_symbols = list(config.get('symbols', {}).keys())
+        max_spread_dict = {}
+        for s in all_symbols:
+            val = None
+            # 1. Dal config generato
+            if s in max_spread:
+                val = max_spread[s]
+            # 2. Dal params del simbolo
+            elif 'max_spread' in config['symbols'][s]:
+                val = config['symbols'][s]['max_spread']
+            # 3. Dal metodo get_symbol_max_spread
+            else:
+                val = self.get_symbol_max_spread(s)
+            # 4. Fallback
+            if val is None:
+                val = 20
+            max_spread_dict[s] = val
+        risk_parameters["max_spread"] = max_spread_dict
 
         # --- TRAILING STOP ---
+        # Assicura che trailing_stop sia sempre presente e coerente
         trailing_stop = get_param("risk_parameters", "trailing_stop", {})
-        if not trailing_stop:
+        if not trailing_stop or not isinstance(trailing_stop, dict):
             trailing_stop = {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}
+        # Fai merge con eventuali override da config
+        trailing_stop_override = config.get("risk_parameters", {}).get("trailing_stop", {})
+        if isinstance(trailing_stop_override, dict):
+            trailing_stop = {**trailing_stop, **trailing_stop_override}
         risk_parameters["trailing_stop"] = trailing_stop
 
         # --- PRODUZIONE CONFIG ---
@@ -660,6 +696,20 @@ class AutonomousHighStakesOptimizer:
             "quantum_params": quantum_params,
             "risk_parameters": risk_parameters,
             "symbols": symbols,
+            "pip_value_map": {
+                "EURUSD": 10.0,
+                "GBPUSD": 10.0,
+                "USDJPY": 10.0,
+                "USDCHF": 10.0,
+                "XAUUSD": 1.0,
+                "XAGUSD": 0.5,
+                "SP500": 1.0,
+                "NAS100": 1.0,
+                "US30": 1.0,
+                "BTCUSD": 0.01,
+                "ETHUSD": 0.01,
+                "default": 10.0
+            },
             "challenge_specific": get_section("challenge_specific", {
                 "step1_target": 8,
                 "max_daily_loss_percent": 5,
