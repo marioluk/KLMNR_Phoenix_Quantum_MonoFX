@@ -5,12 +5,12 @@
     <thead>
       <tr>
         <th>Timestamp</th>
-        <th>Symbol</th>
+        <th>Simbolo</th>
         <th>Segnale</th>
         <th>Motivo Blocco</th>
         <th>Parametro non soddisfatto</th>
         <th>Dettagli tecnici</th>
-        <th>Dettagli</th>
+        <th>Dettaglio</th>
       </tr>
     </thead>
     <tbody>
@@ -18,14 +18,16 @@
       <tr>
         <td>{{ s.timestamp }}</td>
         <td>{{ s.symbol }}</td>
-        <td>{{ s.segnale }}</td>
+        <td>{{ s.direction }}</td>
         <td>{{ s.motivo_blocco or '' }}</td>
         <td>{{ s.parametro_non_soddisfatto or '' }}</td>
         <td>{{ s.dettagli_tecnici or '' }}</td>
         <td>
-          <a href="{{ s.dettagli_link }}" class="btn btn-sm btn-info" title="Vai al dettaglio su diagnostics" target="_blank">
-            Dettagli
-          </a>
+          {% if s.dettagli_link %}
+            <a href="{{ s.dettagli_link }}" class="btn btn-sm btn-outline-info" title="Vai al dettaglio su diagnostics" target="_blank">
+              Dettaglio
+            </a>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
