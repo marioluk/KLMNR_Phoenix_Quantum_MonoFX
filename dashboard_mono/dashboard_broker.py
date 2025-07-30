@@ -27,6 +27,37 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    def load_signals_from_csv(self, csv_path=None, max_rows=1000):
+        """Carica i segnali dal file CSV strutturato e popola signals_timeline."""
+        import csv
+        import os
+        if csv_path is None:
+            # Default path: logs/signals_tick_log.csv nella root del progetto
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            csv_path = os.path.join(project_root, 'logs', 'signals_tick_log.csv')
+        if not os.path.exists(csv_path):
+            print(f"[CSV] File non trovato: {csv_path}")
+            return
+        self.signals_timeline.clear()
+        try:
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                rows = list(reader)[-max_rows:]
+                for row in rows:
+                    # Conversione tipi
+                    signal = {
+                        'timestamp': row['timestamp'],
+                        'symbol': row['symbol'],
+                        'entropy': float(row['entropy']),
+                        'spin': float(row['spin']),
+                        'confidence': float(row['confidence']),
+                        'price': float(row['price']),
+                        'esito': row['esito']
+                    }
+                    self.signals_timeline.append(signal)
+            print(f"[CSV] Caricati {len(self.signals_timeline)} segnali da {csv_path}")
+        except Exception as e:
+            print(f"[CSV] Errore lettura segnali: {e}")
     def load_complete_mt5_data(self):
         """Carica tutti i dati da MT5 e aggiorna tutte le metriche e le timeline (comportamento storico)."""
         if not MT5_AVAILABLE or not self.use_mt5:
@@ -280,6 +311,9 @@ class The5ersGraphicalDashboard:
             self.mt5_config = self.config.get('metatrader5', {})
             # self.challenge_start già impostato sopra, eventualmente sovrascrivilo qui se serve
 
+        # Carica segnali dal CSV all'avvio
+        self.load_signals_from_csv()
+
         # Flask app e route (SOLO ORA che tutto è pronto)
         self.app = Flask(__name__)
         self.setup_routes()
@@ -288,6 +322,14 @@ class The5ersGraphicalDashboard:
     def setup_routes(self):
         app = self.app
         from flask import render_template
+        from flask import request
+
+        @app.route('/api/refresh_signals', methods=['POST'])
+        def api_refresh_signals():
+            # Ricarica i segnali dal CSV e restituisce la tabella aggiornata
+            self.load_signals_from_csv()
+            table = self.create_signals_sequence_table()
+            return jsonify({'signals_sequence_table': table})
 
         @app.route('/api/mt5_status')
         def api_mt5_status():

@@ -1,7 +1,24 @@
 
 import os
 import csv
-# debug estremo iniziale
+
+# ===================== LOG SIGNAL TICK (CSV) =====================
+import csv
+import os
+def log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito):
+    log_path = os.path.join("logs", "signals_tick_log.csv")
+    header = ['timestamp', 'symbol', 'entropy', 'spin', 'confidence', 'price', 'esito']
+    row = [timestamp, symbol, round(entropy, 4), round(spin, 4), round(confidence, 4), price, esito]
+    try:
+        file_exists = os.path.isfile(log_path)
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        with open(log_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(header)
+            writer.writerow(row)
+    except Exception as e:
+        logger.error(f"Errore scrittura log segnali: {e}")
 
 #print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
 
@@ -1127,6 +1144,7 @@ class QuantumEngine:
                     logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} (mercato chiuso) | Dettagli: {dettagli}")
                 if motivo_for_csv is not None:
                     motivo_for_csv.append(motivo)
+                log_signal_tick(symbol, 0.0, 0.0, 0.0, dettagli["timestamp"], 0.0, "HOLD")
                 return "HOLD", 0.0
             spin_window = min(self.spin_window, len(ticks))
             recent_ticks = ticks[-spin_window:]
@@ -1146,6 +1164,7 @@ class QuantumEngine:
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 if motivo_for_csv is not None:
                     motivo_for_csv.append(motivo)
+                log_signal_tick(symbol, 0.0, spin, confidence, dettagli["timestamp"], last_tick_price, "HOLD")
                 return "HOLD", last_tick_price
             last_signal_time = self.get_last_signal_time(symbol)
             # 3. Cooldown attivo
@@ -1161,6 +1180,7 @@ class QuantumEngine:
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivo} | Dettagli: {dettagli}")
                 if motivo_for_csv is not None:
                     motivo_for_csv.append(motivo)
+                log_signal_tick(symbol, 0.0, spin, confidence, dettagli["timestamp"], last_tick_price, "HOLD")
                 return "HOLD", last_tick_price
             deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
             entropy = self.calculate_entropy(deltas)
@@ -1200,6 +1220,7 @@ class QuantumEngine:
                     logger.debug(f"SELL signal conditions met for {symbol}: "
                                 f"Entropy={entropy:.2f} < {sell_thresh:.2f} "
                                 f"and Spin={spin:.2f} < {-self.spin_threshold*confidence:.2f} | Prezzo={last_tick_price}")
+                log_signal_tick(symbol, entropy, spin, confidence, dettagli["timestamp"], last_tick_price, signal)
             else:
                 motivazione = "Nessuna condizione soddisfatta per BUY/SELL"
                 dettagli = {
@@ -1216,11 +1237,13 @@ class QuantumEngine:
                 logger.info(f"[SIGNAL-DEBUG] [SCARTATO] {symbol} | MOTIVO: {motivazione} | Dettagli: {dettagli}")
                 if motivo_for_csv is not None:
                     motivo_for_csv.append(motivazione)
+                log_signal_tick(symbol, entropy, spin, confidence, dettagli["timestamp"], last_tick_price, "SCARTATO")
             return signal, last_tick_price
         except Exception as e:
             logger.error(f"[get_signal] Errore durante la generazione del segnale per {symbol}: {e}", exc_info=True)
             if motivo_for_csv is not None:
                 motivo_for_csv.append(f"Errore get_signal: {e}")
+            log_signal_tick(symbol, 0.0, 0.0, 0.0, datetime.now().isoformat(), 0.0, "HOLD")
             return "HOLD", 0.0
         
         

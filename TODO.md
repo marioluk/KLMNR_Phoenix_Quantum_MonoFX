@@ -6,17 +6,16 @@
 
 ## 1. Logging, Diagnostica e Trasparenza Segnali
 
-- [ ] **[ALTA] Logging tick-by-tick di ogni segnale (BUY/SELL/HOLD/SCARTATO)** con:
-    - [ ] **[ALTA] Simbolo, entropy, spin, confidence, timestamp, prezzo**
-    - [ ] **[ALTA] Esito e motivazione (apertura/scarto)**
+- [x] **[ALTA] Logging tick-by-tick di ogni segnale (BUY/SELL/HOLD/SCARTATO)** con:
+    - [x] **[ALTA] Simbolo, entropy, spin, confidence, timestamp, prezzo**
+    - [x] **[ALTA] Esito e motivazione (apertura/scarto)** *(solo motivazione: parziale, da completare per dettaglio blocchi)*
     - [ ] **[ALTA] Dettaglio su filtri/blocchi** (buffer insufficiente, confidence bassa, cooldown, spread, orario, max trade, ecc.)
 - [ ] **[MEDIA] Esportazione segnali e motivi di blocco in CSV/JSON per analisi esterna**
 - [ ] **[MEDIA] Aggiungere contatori per ogni tipo di blocco e report periodico sintetico nei log**
 - [ ] **[MEDIA] Uniformare la struttura dei dati tra log, dashboard e funzioni di analisi**
 
 ## 2. Dashboard: Visualizzazione, Aggregazione e UX
-
-- [ ] **[ALTA] Tabella cronologia/sequenza segnali con esito e motivazione**
+- [x] **[ALTA] Tabella cronologia/sequenza segnali con esito e motivazione** *(con refresh manuale e auto)*
 - [ ] **[MEDIA] Statistiche e grafici aggregati** (ratio BUY/SELL, motivi di scarto, distribuzione segnali)
 - [ ] **[MEDIA] Visualizzazione parametri attivi di filtro** (entropy, spin, confidence, cooldown, orari, spread, ecc.)
 - [ ] **[MEDIA] Evidenziare parametri troppo restrittivi rispetto ai dati storici**
@@ -45,7 +44,7 @@
 ## 5. Collaborazione log-dashboard e Documentazione
 
 - [ ] **[MEDIA] Definire formato dati condiviso (JSON, CSV, DB) tra codice e dashboard**
-- [ ] **[MEDIA] Coordinare periodicità di aggiornamento/lettura tra log e dashboard**
+- [x] **[MEDIA] Coordinare periodicità di aggiornamento/lettura tra log e dashboard** *(refresh segnali implementato)*
 - [ ] **[MEDIA] Documentare chiaramente tutti i motivi di blocco e la loro logica**
 - [ ] **[MEDIA] Aggiornare guida utente/dashboard con sezione debug segnali e best practice**
 
