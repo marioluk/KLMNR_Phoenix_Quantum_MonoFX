@@ -18,8 +18,17 @@
     - [done 30/07/2025] Test manuale completato: trade eseguito correttamente dopo fix pipeline.
 - [x] **Analisi codice** (condizioni if, chiamate effettive invio ordini)
 
-- [IN CORSO] **Fix lot size:** il calcolo della size va sempre a 0.1, verificare override parametri da config e log [SIZE-DEBUG]
-    - [in analisi 30/07/2025] Analisi in corso in questa sessione: controllare funzione calculate_position_size, parametri da config e log.
+
+[IN VALIDAZIONE] **Fix lot size e parametri rischio:**
+    - [in validazione 30/07/2025] Nuova generazione config: pip_value_map, spin_threshold, max_spread e trailing_stop sempre presenti e robusti. Size, SL e TP ora dovrebbero essere corretti e coerenti. Da monitorare live.
+
+    - Se i test live confermano il comportamento corretto, spuntare anche:
+        - [MEDIA] Validazione automatica della configurazione all’avvio
+        - [MEDIA] Centralizzare magic number e fallback/configurazioni
+        - [MEDIA] Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono
+        - [MEDIA] Togliere tutti i riferimenti a legacy e sostituire con mono
+
+    - Se emergono nuovi edge case, aggiorna la checklist e procedi con fix mirati.
 
 
 > Questo file è la **roadmap e checklist ufficiale** del progetto Phoenix Quantum MonoFX.
