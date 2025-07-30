@@ -3177,7 +3177,7 @@ class QuantumTradingSystem:
                 "sl": sl_price,
                 "tp": tp_price,
                 "deviation": 10,
-                "magic": self.config.config['magic_number'],
+                "magic": self._config['magic_number'] if isinstance(self._config, dict) else self._config.config['magic_number'],
                 "comment": "QTS-AUTO",
                 "type_time": mt5.ORDER_TIME_GTC,
                 "type_filling": mt5.ORDER_FILLING_FOK,  # Prova FOK prima, poi IOC se fallisce
