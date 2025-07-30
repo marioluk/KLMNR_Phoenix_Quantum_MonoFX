@@ -27,6 +27,27 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+        @app.route('/api/unexecuted_signals', methods=['GET'])
+        def api_unexecuted_signals():
+            """Restituisce segnali BUY/SELL non eseguiti, filtrabili per simbolo e numero righe."""
+            import csv
+            symbol = request.args.get('symbol', '').upper().strip()
+            try:
+                max_rows = int(request.args.get('max_rows', 20))
+            except Exception:
+                max_rows = 20
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+            json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
+            if not os.path.isfile(json_path):
+                return jsonify({'success': False, 'error': 'Report non trovato, genera prima il report incrociato.'}), 404
+            import json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            filtered = [row for row in data if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL')]
+            if symbol:
+                filtered = [row for row in filtered if row.get('symbol', '').upper() == symbol]
+            filtered = filtered[-max_rows:]
+            return jsonify({'success': True, 'rows': filtered})
     def load_signals_from_csv(self, csv_path=None, max_rows=1000):
         """Carica i segnali dal file CSV strutturato e popola signals_timeline."""
         import csv
@@ -333,6 +354,45 @@ class The5ersGraphicalDashboard:
         app = self.app
         from flask import render_template
         from flask import request
+        import subprocess
+        import sys
+        import os
+        from flask import send_file
+        @app.route('/api/run_signals_vs_trades_report', methods=['POST'])
+        def api_run_signals_vs_trades_report():
+            """Lancia lo script di analisi incrociata segnali/trade/blocchi e restituisce output e stato."""
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'analyze_signals_vs_trades.py'))
+            python_exe = sys.executable or 'python'
+            try:
+                result = subprocess.run(
+                    [python_exe, script_path],
+                    capture_output=True, text=True, timeout=120, cwd=os.path.dirname(script_path)
+                )
+                # Percorsi output
+                logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+                csv_path = os.path.join(logs_dir, 'signals_vs_trades_report.csv')
+                json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
+                return jsonify({
+                    'success': result.returncode == 0,
+                    'stdout': result.stdout,
+                    'stderr': result.stderr,
+                    'csv_report': '/download/signals_vs_trades_report.csv',
+                    'json_report': '/download/signals_vs_trades_report.json'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
+
+        @app.route('/download/signals_vs_trades_report.csv')
+        def download_signals_vs_trades_csv():
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+            csv_path = os.path.join(logs_dir, 'signals_vs_trades_report.csv')
+            return send_file(csv_path, as_attachment=True)
+
+        @app.route('/download/signals_vs_trades_report.json')
+        def download_signals_vs_trades_json():
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+            json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
+            return send_file(json_path, as_attachment=True)
 
         @app.route('/mt5_status')
         def mt5_status_page():

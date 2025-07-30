@@ -216,6 +216,45 @@
         </div>
         {{ mt5_warning|safe }}
         <div class="row">
+        <!-- Pulsante analisi incrociata segnali/trade/blocchi e tabella segnali non eseguiti -->
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <button id="runSignalsVsTradesReport" class="btn btn-warning btn-lg" style="font-weight:bold;">
+                    <i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco
+                </button>
+                <div id="signalsVsTradesReportResult" style="margin-top:12px;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 style="margin:0;"><i class="fas fa-ban"></i> Segnali BUY/SELL non eseguiti</h5>
+                        <div>
+                            <input id="unexecSymbol" type="text" placeholder="Simbolo (es. EURUSD)" style="width:110px; margin-right:6px;">
+                            <input id="unexecRows" type="number" min="1" max="100" value="10" style="width:60px; margin-right:6px;">
+                            <button id="refreshUnexecTable" class="btn btn-sm btn-info">Filtra</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="table table-dark table-striped table-sm" id="unexecSignalsTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Simbolo</th>
+                                    <th>Segnale</th>
+                                    <th>Motivo Blocco</th>
+                                    <th>Dettaglio</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-end"><a href="/diagnostics" class="btn btn-link">Vedi tutti i dettagli &rarr;</a></div>
+                </div>
+            </div>
+        </div>
             <div class="col-12">
                 <div class="metric-card">
                     <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
@@ -352,6 +391,71 @@
         </footer>
     </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('runSignalsVsTradesReport');
+        if(btn) {
+            btn.addEventListener('click', function() {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analisi in corso...';
+                fetch('/api/run_signals_vs_trades_report', {method: 'POST'})
+                  .then(r => r.json())
+                  .then(data => {
+                    let html = '';
+                    if(data.success) {
+                        html += '<span style="color:#00ffe7;font-weight:bold;">Report generato!</span><br>';
+                        html += `<a href="${data.csv_report}" class="btn btn-success btn-sm mt-2" download>Scarica CSV</a> `;
+                        html += `<a href="${data.json_report}" class="btn btn-info btn-sm mt-2" download>Scarica JSON</a>`;
+                        // Aggiorna tabella segnali non eseguiti
+                        refreshUnexecSignalsTable();
+                    } else {
+                        html += '<span style="color:#ff3c3c;font-weight:bold;">Errore generazione report!</span><br>';
+                        html += data.error ? data.error : (data.stderr || '');
+                    }
+                    document.getElementById('signalsVsTradesReportResult').innerHTML = html;
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
+                  })
+                  .catch(err => {
+                    document.getElementById('signalsVsTradesReportResult').innerHTML = '<span style="color:#ff3c3c;font-weight:bold;">Errore di rete!</span>';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
+                  });
+            });
+        }
+
+        // Tabella segnali non eseguiti
+        function refreshUnexecSignalsTable() {
+            const symbol = document.getElementById('unexecSymbol').value;
+            const maxRows = document.getElementById('unexecRows').value || 10;
+            fetch(`/api/unexecuted_signals?symbol=${encodeURIComponent(symbol)}&max_rows=${maxRows}`)
+              .then(r => r.json())
+              .then(data => {
+                const tbody = document.querySelector('#unexecSignalsTable tbody');
+                tbody.innerHTML = '';
+                if(data.success && data.rows.length > 0) {
+                    data.rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.timestamp}</td>
+                            <td>${row.symbol}</td>
+                            <td>${row.segnale}</td>
+                            <td>${row.motivo_blocco || ''}</td>
+                            <td>${row.dettaglio_blocco || ''}</td>
+                            <td><a href='/diagnostics' class='btn btn-sm btn-link'>Dettagli</a></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan='6' class='text-center text-muted'>Nessun segnale non eseguito trovato. Genera prima il report incrociato.</td></tr>`;
+                }
+              });
+        }
+        document.getElementById('refreshUnexecTable').addEventListener('click', refreshUnexecSignalsTable);
+        // Carica la tabella all'avvio
+        refreshUnexecSignalsTable();
+    });
+    </script>
     <script>
         // Forza il tema dark per tutti i grafici
         function applyDarkTheme(layout) {
