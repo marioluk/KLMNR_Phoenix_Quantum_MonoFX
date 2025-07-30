@@ -424,6 +424,28 @@ class The5ersGraphicalDashboard:
                 signal_cooldown=signal_cooldown
             )
 
+        @app.route('/api/run_block_reasons_report', methods=['POST'])
+        def api_run_block_reasons_report():
+            """Lancia il report motivi di blocco (orario/daily) e restituisce output e stato."""
+            import subprocess
+            from flask import request
+            period = request.json.get('period', 'hourly')
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'block_reasons_report.py'))
+            python_exe = sys.executable or 'python'
+            try:
+                result = subprocess.run(
+                    [python_exe, script_path, '--period', period],
+                    capture_output=True, text=True, timeout=60, cwd=os.path.dirname(script_path)
+                )
+                return jsonify({
+                    'success': result.returncode == 0,
+                    'stdout': result.stdout,
+                    'stderr': result.stderr,
+                    'period': period
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e), 'period': period}), 500
+
         try:
             account_info = mt5.account_info()
             if account_info:
