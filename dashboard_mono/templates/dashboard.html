@@ -252,6 +252,10 @@
                         </table>
                     </div>
                     <div class="text-end"><a href="/diagnostics" class="btn btn-link">Vedi tutti i dettagli &rarr;</a></div>
+                    <button id="generateSignalsTickLog" class="btn btn-info" style="font-size:1rem; padding:8px 18px; font-weight:600; margin-top:10px;">
+                        <i class="fas fa-file-csv"></i> Genera signals_tick_log.csv
+                    </button>
+                    <div id="signalsTickLogStatus" style="margin-bottom:8px;"></div>
                 </div>
             </div>
         </div>
@@ -424,6 +428,33 @@
                     document.getElementById('signalsVsTradesReportResult').innerHTML = '<span style="color:#ff3c3c;font-weight:bold;">Errore di rete!</span>';
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
+                  });
+            });
+        }
+
+        // Bottone per generare signals_tick_log.csv
+        const btnTickLog = document.getElementById('generateSignalsTickLog');
+        const tickLogStatus = document.getElementById('signalsTickLogStatus');
+        if(btnTickLog && tickLogStatus) {
+            btnTickLog.addEventListener('click', function() {
+                btnTickLog.disabled = true;
+                btnTickLog.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generazione in corso...';
+                tickLogStatus.innerHTML = '<span class="text-info">⏳ Generazione signals_tick_log.csv in corso...</span>';
+                fetch('/api/generate_signals_tick_log', {method: 'POST'})
+                  .then(r => r.json())
+                  .then(data => {
+                    if(data.success) {
+                        tickLogStatus.innerHTML = `<span class='text-success'>✅ signals_tick_log.csv generato!</span><br><pre style='background:#23272f; color:#b6faff; margin-top:10px; max-height:200px; overflow:auto;'>${data.stdout || ''}</pre>`;
+                    } else {
+                        tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${data.error || data.stderr}</span>`;
+                    }
+                    btnTickLog.disabled = false;
+                    btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
+                  })
+                  .catch(e => {
+                    tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${e}</span>`;
+                    btnTickLog.disabled = false;
+                    btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
                   });
             });
         }

@@ -384,6 +384,30 @@ class The5ersGraphicalDashboard:
             except Exception as e:
                 return jsonify({'success': False, 'error': str(e)}), 500
 
+        @app.route('/api/generate_signals_tick_log', methods=['POST'])
+        def api_generate_signals_tick_log():
+            """Lancia la generazione del file signals_tick_log.csv (segnali tick) e restituisce output e stato."""
+            # Qui si assume che la generazione avvenga tramite script Python dedicato o funzione
+            # Se esiste uno script, ad esempio export_signals_to_json.py, si può adattare
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'export_signals_to_json.py'))
+            python_exe = sys.executable or 'python'
+            try:
+                result = subprocess.run(
+                    [python_exe, script_path],
+                    capture_output=True, text=True, timeout=120, cwd=os.path.dirname(script_path)
+                )
+                logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+                csv_path = os.path.join(logs_dir, 'signals_tick_log.csv')
+                json_path = os.path.join(logs_dir, 'signals_tick_log.json')
+                return jsonify({
+                    'success': result.returncode == 0,
+                    'stdout': result.stdout,
+                    'stderr': result.stderr,
+                    'csv_path': '/download/signals_tick_log.csv',
+                    'json_path': '/download/signals_tick_log.json'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
         @app.route('/download/signals_vs_trades_report.csv')
         def download_signals_vs_trades_csv():
             logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
