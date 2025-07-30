@@ -489,6 +489,11 @@ class The5ersGraphicalDashboard:
                             timestamp = row.get('timestamp', '')
                             link = f"/diagnostics?symbol={symbol}&direction={direction}&timestamp={timestamp}"
                             row['dettagli_link'] = link
+                            # Aggiungi dettagli extra per la tabella dashboard
+                            row['motivo_blocco'] = row.get('motivo_blocco', '')
+                            row['parametro_non_soddisfatto'] = row.get('parametro_non_soddisfatto', '')
+                            row['dettagli_tecnici'] = row.get('dettagli_tecnici', '')
+                            # Se disponibili, aggiungi anche altri dettagli utili
                             unexecuted_signals.append(row)
                 # Mostra solo gli ultimi 20
                 unexecuted_signals = unexecuted_signals[-20:]
