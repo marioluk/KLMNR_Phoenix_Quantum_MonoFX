@@ -517,12 +517,29 @@ class The5ersGraphicalDashboard:
             signals_sequence_table = self.create_signals_sequence_table()
             # Se sono presenti parametri, filtra/evidenzia il segnale richiesto
             highlight_signal = None
+            def normalize_ts(ts):
+                # Normalizza il timestamp a stringa 'YYYY-MM-DD HH:MM:SS' (ignora ms, T, Z, ecc)
+                from datetime import datetime
+                if not ts:
+                    return ''
+                # Prova vari formati comuni
+                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S.%f', '%d/%m/%Y %H:%M:%S', '%d-%m-%Y %H:%M:%S'):
+                    try:
+                        dt = datetime.strptime(ts[:19], fmt)
+                        return dt.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        pass
+                # fallback: taglia a 19 caratteri se sembra ISO
+                if len(ts) >= 19:
+                    return ts[:19].replace('T', ' ')
+                return ts
             if symbol and direction and timestamp:
+                ts_norm = normalize_ts(timestamp)
                 for s in signals_sequence_table:
                     if (
                         s['symbol'].upper() == symbol and
                         s['direction'].upper() == direction and
-                        s['timestamp'] == timestamp
+                        normalize_ts(s['timestamp']) == ts_norm
                     ):
                         highlight_signal = s
                         break
