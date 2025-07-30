@@ -1687,6 +1687,7 @@ class QuantumRiskManager:
         try:
             # 1. Verifica parametri iniziali
             if not self._load_symbol_data(symbol):
+                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
                 logger.error(f"Impossibile caricare dati simbolo {symbol}")
                 return 0.0
 
@@ -1695,6 +1696,7 @@ class QuantumRiskManager:
             account = mt5.account_info()
 
             if not account:
+                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
                 logger.error("Impossibile ottenere info account")
                 return 0.0
 
@@ -1715,6 +1717,7 @@ class QuantumRiskManager:
 
             # 6. Calcola size base
             if sl_pips <= 0 or pip_value <= 0:
+                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su sl_pips={sl_pips}, pip_value={pip_value} per {symbol}")
                 logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
                 return 0.0
 
