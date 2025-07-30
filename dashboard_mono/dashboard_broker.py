@@ -27,27 +27,6 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
-        @app.route('/api/unexecuted_signals', methods=['GET'])
-        def api_unexecuted_signals():
-            """Restituisce segnali BUY/SELL non eseguiti, filtrabili per simbolo e numero righe."""
-            import csv
-            symbol = request.args.get('symbol', '').upper().strip()
-            try:
-                max_rows = int(request.args.get('max_rows', 20))
-            except Exception:
-                max_rows = 20
-            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
-            json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
-            if not os.path.isfile(json_path):
-                return jsonify({'success': False, 'error': 'Report non trovato, genera prima il report incrociato.'}), 404
-            import json
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            filtered = [row for row in data if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL')]
-            if symbol:
-                filtered = [row for row in filtered if row.get('symbol', '').upper() == symbol]
-            filtered = filtered[-max_rows:]
-            return jsonify({'success': True, 'rows': filtered})
     def load_signals_from_csv(self, csv_path=None, max_rows=1000):
         """Carica i segnali dal file CSV strutturato e popola signals_timeline."""
         import csv
@@ -351,6 +330,28 @@ class The5ersGraphicalDashboard:
 
 
     def setup_routes(self):
+        @app.route('/api/unexecuted_signals', methods=['GET'])
+        def api_unexecuted_signals():
+            """Restituisce segnali BUY/SELL non eseguiti, filtrabili per simbolo e numero righe."""
+            import csv
+            from flask import request
+            symbol = request.args.get('symbol', '').upper().strip()
+            try:
+                max_rows = int(request.args.get('max_rows', 20))
+            except Exception:
+                max_rows = 20
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+            json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
+            if not os.path.isfile(json_path):
+                return jsonify({'success': False, 'error': 'Report non trovato, genera prima il report incrociato.'}), 404
+            import json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            filtered = [row for row in data if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL')]
+            if symbol:
+                filtered = [row for row in filtered if row.get('symbol', '').upper() == symbol]
+            filtered = filtered[-max_rows:]
+            return jsonify({'success': True, 'rows': filtered})
         app = self.app
         from flask import render_template
         from flask import request
