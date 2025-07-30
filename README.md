@@ -1,6 +1,6 @@
-# 📊 Esportazione motivi blocco ordini (trade_decision_report.csv)
+# 📊 Esportazione motivi blocco ordini (logs/trade_decision_report.csv)
 
-Da luglio 2025, ogni volta che il sistema valuta la possibilità di eseguire un ordine (BUY/SELL) e questo viene bloccato (o tutte le condizioni sono OK), il motivo viene salvato automaticamente in un file CSV chiamato `trade_decision_report.csv` nella cartella principale del progetto.
+Da luglio 2025, ogni volta che il sistema valuta la possibilità di eseguire un ordine (BUY/SELL) e questo viene bloccato (o tutte le condizioni sono OK), il motivo viene salvato automaticamente in un file CSV chiamato `logs/trade_decision_report.csv` nella cartella dei log del progetto.
 
 **Cosa contiene il file:**
 

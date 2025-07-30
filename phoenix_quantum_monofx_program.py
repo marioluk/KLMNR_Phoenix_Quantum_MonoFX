@@ -2220,7 +2220,7 @@ class QuantumTradingSystem:
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo. Esporta anche i motivi in un file CSV."""
         def write_report_row(step, detail, extra=None):
             try:
-                report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trade_decision_report.csv')
+                report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_decision_report.csv')
                 file_exists = os.path.isfile(report_path)
                 with open(report_path, 'a', newline='', encoding='utf-8') as csvfile:
                     writer = csv.writer(csvfile)

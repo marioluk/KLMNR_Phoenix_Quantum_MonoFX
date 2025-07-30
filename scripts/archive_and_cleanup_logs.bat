@@ -11,6 +11,11 @@ if exist %LOGDIR%\signals_tick_log.csv (
     move %LOGDIR%\signals_tick_log.csv %LOGDIR%\signals_tick_log_%DATETIME%.csv
 )
 
+REM Archivia trade_decision_report.csv
+if exist %LOGDIR%\trade_decision_report.csv (
+    move %LOGDIR%\trade_decision_report.csv %LOGDIR%\trade_decision_report_%DATETIME%.csv
+)
+
 REM Archivia block_reasons_report_*.csv e *.json
 for %%F in (%LOGDIR%\block_reasons_report_*.csv) do (
     if exist "%%F" move "%%F" "%%~dpnF_%DATETIME%%%~xF"
