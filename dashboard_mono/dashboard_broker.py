@@ -330,6 +330,21 @@ class The5ersGraphicalDashboard:
 
 
     def setup_routes(self):
+
+        @app.route('/api/archive_and_cleanup_logs', methods=['POST'])
+        def api_archive_and_cleanup_logs():
+            """Lancia lo script batch di archiviazione/pulizia log e restituisce output."""
+            import subprocess
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts', 'archive_and_cleanup_logs.bat'))
+            try:
+                result = subprocess.run([script_path], capture_output=True, text=True, timeout=60, shell=True, cwd=os.path.dirname(script_path))
+                return jsonify({
+                    'success': result.returncode == 0,
+                    'stdout': result.stdout,
+                    'stderr': result.stderr
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
         app = self.app
         from flask import render_template
         from flask import request

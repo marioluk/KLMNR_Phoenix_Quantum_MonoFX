@@ -28,10 +28,14 @@
             <option value="daily">Giornaliero</option>
         </select>
         <div id="block-report-status" class="mt-3"></div>
+        <button id="archive-cleanup-logs" class="btn btn-danger mt-3 ms-2"><i class="fas fa-broom"></i> Archivia &amp; Pulisci Log</button>
+        <div id="archive-cleanup-status" class="mt-2"></div>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const btn = document.getElementById('run-block-report');
             const statusDiv = document.getElementById('block-report-status');
+            const btnArchive = document.getElementById('archive-cleanup-logs');
+            const archiveStatusDiv = document.getElementById('archive-cleanup-status');
             btn.addEventListener('click', function() {
                 const period = document.getElementById('block-report-period').value;
                 statusDiv.innerHTML = '<span class="text-info">⏳ Generazione report in corso...</span>';
@@ -55,6 +59,24 @@
                 })
                 .catch(e => {
                     statusDiv.innerHTML = `<span class='text-danger'>❌ Errore: ${e}</span>`;
+                });
+            });
+
+            btnArchive.addEventListener('click', function() {
+                archiveStatusDiv.innerHTML = '<span class="text-info">⏳ Archiviazione e pulizia in corso...</span>';
+                fetch('/api/archive_and_cleanup_logs', {
+                    method: 'POST'
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        archiveStatusDiv.innerHTML = `<span class='text-success'>✅ Log archiviati e puliti.</span><pre style='background:#23272f; color:#b6faff; margin-top:10px; max-height:200px; overflow:auto;'>${data.stdout}</pre>`;
+                    } else {
+                        archiveStatusDiv.innerHTML = `<span class='text-danger'>❌ Errore: ${data.error || data.stderr}</span>`;
+                    }
+                })
+                .catch(e => {
+                    archiveStatusDiv.innerHTML = `<span class='text-danger'>❌ Errore: ${e}</span>`;
                 });
             });
         });
