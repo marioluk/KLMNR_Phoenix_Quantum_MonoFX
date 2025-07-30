@@ -330,6 +330,10 @@ class The5ersGraphicalDashboard:
 
 
     def setup_routes(self):
+        app = self.app
+        from flask import render_template
+        from flask import request
+
         @app.route('/mt5_status')
         def mt5_status_page():
             # Ottieni info MT5 come nel JSON API
@@ -342,9 +346,6 @@ class The5ersGraphicalDashboard:
                 'posizioni_aperte': self.current_metrics.get('positions_open', None)
             }
             return render_template('mt5_status.html', mt5_info=info)
-        app = self.app
-        from flask import render_template
-        from flask import request
 
         @app.route('/api/archive_and_cleanup_logs', methods=['POST'])
         def api_archive_and_cleanup_logs():
