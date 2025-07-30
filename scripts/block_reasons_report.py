@@ -32,7 +32,7 @@ def parse_timestamp(ts):
 
 def aggregate_block_reasons(period="hourly", output_dir=DEFAULT_OUTPUT_DIR):
     if not os.path.exists(LOG_PATH):
-        print(f"❌ Log file non trovato: {LOG_PATH}")
+        print(f"[ERRORE] Log file non trovato: {LOG_PATH}")
         return
     counts = defaultdict(lambda: defaultdict(int))  # {period_key: {reason: count}}
     with open(LOG_PATH, newline='', encoding='utf-8') as f:
@@ -64,7 +64,7 @@ def aggregate_block_reasons(period="hourly", output_dir=DEFAULT_OUTPUT_DIR):
     json_path = os.path.join(output_dir, f"block_reasons_report_{period}.json")
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(counts, f, indent=2, ensure_ascii=False)
-    print(f"✅ Report motivi di blocco generato: {csv_path}\n✅ Anche in JSON: {json_path}")
+    print(f"[OK] Report motivi di blocco generato: {csv_path}\n[OK] Anche in JSON: {json_path}")
 
 if __name__ == "__main__":
     import argparse
