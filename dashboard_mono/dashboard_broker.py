@@ -60,7 +60,8 @@ class The5ersGraphicalDashboard:
                         'confidence': float(row['confidence']),
                         'price': float(row['price']),
                         'esito': row['esito'],
-                        'direction': direction
+                        'direction': direction,
+                        'motivo_blocco': row.get('motivo_blocco', '')
                     }
                     self.signals_timeline.append(signal)
             print(f"[CSV] Caricati {len(self.signals_timeline)} segnali da {csv_path}")
@@ -193,6 +194,7 @@ class The5ersGraphicalDashboard:
                 'entropy': s['entropy'],
                 'spin': s['spin'],
                 'esito': s.get('esito', 'NESSUNA AZIONE') if s.get('esito') else 'NESSUNA AZIONE',
+                'motivo_blocco': s.get('motivo_blocco', ''),
                 'trade_pnl': s.get('trade_pnl'),
                 'trade_time': s.get('trade_time')
             })

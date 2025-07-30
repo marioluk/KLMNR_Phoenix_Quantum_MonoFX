@@ -97,6 +97,7 @@
                                 <th>Entropy</th>
                                 <th>Spin</th>
                                 <th>Esito</th>
+                                <th>Motivo Blocco</th>
                                 <th>P&amp;L</th>
                                 <th>Trade Time</th>
                             </tr>
@@ -117,6 +118,11 @@
                                     {% else %}
                                         <span class="badge bg-warning text-dark">{{ row.esito }}</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.motivo_blocco %}
+                                        <span class="text-info">{{ row.motivo_blocco }}</span>
+                                    {% else %}-{% endif %}
                                 </td>
                                 <td>
                                     {% if row.trade_pnl is not none %}
