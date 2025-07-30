@@ -230,9 +230,14 @@
                 <div class="metric-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 style="margin:0;"><i class="fas fa-ban"></i> Segnali BUY/SELL non eseguiti</h5>
-                        <div>
-                            <input id="unexecSymbol" type="text" placeholder="Simbolo (es. EURUSD)" style="width:110px; margin-right:6px;">
-                            <input id="unexecRows" type="number" min="1" max="100" value="10" style="width:60px; margin-right:6px;">
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input id="unexecSymbol" type="text" placeholder="Simbolo (es. EURUSD)" style="width:110px;">
+                            <input id="unexecRows" type="number" min="1" max="100" value="10" style="width:60px;">
+                            <select id="unexecBlockFilter" class="form-select form-select-sm" style="width:170px;">
+                                <option value="all">Tutti i segnali</option>
+                                <option value="blocked">Solo con motivo di blocco</option>
+                                <option value="noblock">Solo senza motivo di blocco</option>
+                            </select>
                             <button id="refreshUnexecTable" class="btn btn-sm btn-info">Filtra</button>
                         </div>
                     </div>
@@ -468,25 +473,37 @@
                 const tbody = document.querySelector('#unexecSignalsTable tbody');
                 tbody.innerHTML = '';
                 if(data.success && data.rows.length > 0) {
-                    data.rows.forEach(row => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${row.timestamp}</td>
-                            <td>${row.symbol}</td>
-                            <td>${row.segnale}</td>
-                            <td>${row.motivo_blocco || ''}</td>
-                            <td>${row.parametro_non_soddisfatto || ''}</td>
-                            <td>${row.dettagli_tecnici || ''}</td>
-                            <td><a href='/diagnostics' class='btn btn-sm btn-link'>Dettagli</a></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+                    const blockFilter = document.getElementById('unexecBlockFilter').value;
+                    let filteredRows = data.rows;
+                    if(blockFilter === 'blocked') {
+                        filteredRows = filteredRows.filter(row => (row.motivo_blocco || row.parametro_non_soddisfatto || row.dettagli_tecnici));
+                    } else if(blockFilter === 'noblock') {
+                        filteredRows = filteredRows.filter(row => !(row.motivo_blocco || row.parametro_non_soddisfatto || row.dettagli_tecnici));
+                    }
+                    if(filteredRows.length > 0) {
+                        filteredRows.forEach(row => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${row.timestamp}</td>
+                                <td>${row.symbol}</td>
+                                <td>${row.segnale}</td>
+                                <td>${row.motivo_blocco || ''}</td>
+                                <td>${row.parametro_non_soddisfatto || ''}</td>
+                                <td>${row.dettagli_tecnici || ''}</td>
+                                <td><a href='/diagnostics' class='btn btn-sm btn-link'>Dettagli</a></td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan='7' class='text-center text-muted'>Nessun segnale non eseguito trovato per il filtro selezionato.</td></tr>`;
+                    }
                 } else {
                     tbody.innerHTML = `<tr><td colspan='7' class='text-center text-muted'>Nessun segnale non eseguito trovato. Genera prima il report incrociato.</td></tr>`;
                 }
               });
         }
         document.getElementById('refreshUnexecTable').addEventListener('click', refreshUnexecSignalsTable);
+        document.getElementById('unexecBlockFilter').addEventListener('change', refreshUnexecSignalsTable);
         // Carica la tabella all'avvio
         refreshUnexecSignalsTable();
     });
