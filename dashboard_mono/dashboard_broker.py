@@ -330,6 +330,7 @@ class The5ersGraphicalDashboard:
 
 
     def setup_routes(self):
+        app = self.app
         @app.route('/api/unexecuted_signals', methods=['GET'])
         def api_unexecuted_signals():
             """Restituisce segnali BUY/SELL non eseguiti, filtrabili per simbolo e numero righe."""
