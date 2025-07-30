@@ -3053,43 +3053,56 @@ class QuantumTradingSystem:
     def _process_single_symbol(self, symbol: str, tick, current_positions: int):
         """Processa un singolo simbolo per segnali di trading"""
         try:
+            # --- DEBUG avanzato: raccolta motivi blocco trade ---
+            motivi_blocco = []
             # 1. Verifica se possiamo fare trading
             if not self.engine.can_trade(symbol):
+                motivi_blocco.append('can_trade=False')
                 self.debug_trade_decision(symbol)
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: can_trade=False")
                 return
 
             # 1.1. Controllo limite trade giornalieri (opzionale: globale o per simbolo)
             risk_params = self._config.config['risk_parameters']
             daily_limit = risk_params.get('max_daily_trades', 5)
-            # Nuovo parametro opzionale: 'daily_trade_limit_mode' ('global' o 'per_symbol')
             limit_mode = risk_params.get('daily_trade_limit_mode', 'global')
             if limit_mode == 'global':
                 total_trades_today = sum(self.trade_count.values())
                 if total_trades_today >= daily_limit:
+                    motivi_blocco.append('max_daily_trades_global')
                     logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {total_trades_today}/{daily_limit}. Nessun nuovo trade verrà aperto oggi.")
                     self.debug_trade_decision(symbol)
+                    logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: max_daily_trades_global")
                     return
             else:  # per_symbol
                 trades_for_symbol = self.trade_count.get(symbol, 0)
                 if trades_for_symbol >= daily_limit:
+                    motivi_blocco.append('max_daily_trades_per_symbol')
                     logger.info(f"🚫 Limite trade giornalieri per {symbol} raggiunto: {trades_for_symbol}/{daily_limit}. Nessun nuovo trade su questo simbolo oggi.")
                     self.debug_trade_decision(symbol)
+                    logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: max_daily_trades_per_symbol")
                     return
 
             # 2. Verifica orari di trading
             if not is_trading_hours(symbol, self._config.config):
+                motivi_blocco.append('fuori_orario')
                 self.debug_trade_decision(symbol)
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: fuori_orario")
                 return
 
             # 3. Verifica posizioni esistenti
             existing_positions = mt5.positions_get(symbol=symbol)
             if existing_positions and len(existing_positions) > 0:
+                motivi_blocco.append('posizioni_aperte_su_symbol')
                 self.debug_trade_decision(symbol)
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: posizioni_aperte_su_symbol")
                 return
 
             # 4. Verifica limite posizioni totali
             if current_positions >= self.max_positions:
+                motivi_blocco.append('max_positions_totali')
                 self.debug_trade_decision(symbol)
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: max_positions_totali")
                 return
 
             # 5. Ottieni segnale (senza attivare cooldown)
@@ -3104,8 +3117,10 @@ class QuantumTradingSystem:
                 if hasattr(self.engine, 'last_signal_time') and symbol in self.engine.last_signal_time:
                     time_since_last = time.time() - self.engine.last_signal_time[symbol]
                     if time_since_last < self.engine.signal_cooldown:
+                        motivi_blocco.append('cooldown_attivo')
                         logger.info(f"⏰ {symbol}: In cooldown, salto trade (tempo rimanente: {self.engine.signal_cooldown - time_since_last:.1f}s)")
                         self.debug_trade_decision(symbol)
+                        logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: cooldown_attivo")
                         return
 
                 # 5.2 Se tutto ok, ottieni segnale per trading (questo attiva il cooldown)
@@ -3124,18 +3139,26 @@ class QuantumTradingSystem:
                         # 7. Esegui il trade
                         success = self._execute_trade(symbol, trading_signal, tick, trading_price, size)
                         if not success:
+                            motivi_blocco.append('errore_esecuzione_trade')
                             self.debug_trade_decision(symbol)
+                            logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: errore_esecuzione_trade")
                         else:
                             logger.info(f"🎉 Trade {symbol} eseguito con successo!")
                     else:
+                        motivi_blocco.append('size_zero')
                         logger.warning(f"⚠️ Trade {symbol} bloccato: size = 0")
                         self.debug_trade_decision(symbol)
+                        logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: size_zero")
                 else:
+                    motivi_blocco.append('segnale_non_confermato')
                     logger.warning(f"🚫 {symbol}: Segnale non confermato per trading effettivo")
                     self.debug_trade_decision(symbol)
+                    logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: segnale_non_confermato")
             else:
+                motivi_blocco.append(f'segnale_non_operativo_{signal}')
                 logger.debug(f"💤 {symbol}: HOLD - nessuna azione")
                 self.debug_trade_decision(symbol)
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: segnale_non_operativo_{signal}")
 
         except Exception as e:
             logger.error(f"Errore processo simbolo {symbol}: {str(e)}", exc_info=True)
