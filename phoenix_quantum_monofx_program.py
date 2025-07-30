@@ -1709,6 +1709,9 @@ class QuantumRiskManager:
             symbol_data = self.symbol_data[symbol]
             pip_value = symbol_data['pip_value']
             contract_size = symbol_data.get('contract_size', 1.0)
+            volume_min = symbol_data.get('volume_min', None)
+            volume_max = symbol_data.get('volume_max', None)
+            volume_step = symbol_data.get('volume_step', None)
 
             # 6. Calcola size base
             if sl_pips <= 0 or pip_value <= 0:
@@ -1734,24 +1737,33 @@ class QuantumRiskManager:
             else:
                 symbol_type = 'Forex'
 
-            logger.debug("\n" +
-                "-------------------- [SIZE-DEBUG] --------------------\n" +
-                f"Symbol: {symbol} ({symbol_type})\n" +
-                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n" +
-                f"SL: {sl_pips:.2f} pips\n" +
-                f"Pip Value: ${pip_value:.4f}\n" +
-                f"Contract Size: {contract_size}\n" +
-                f"Size: {size:.4f}\n" +
+            # LOG DETTAGLIATO DEBUG
+            logger.debug(
+                f"\n-------------------- [SIZE-DEBUG] --------------------\n"
+                f"Symbol: {symbol} ({symbol_type})\n"
+                f"Risk Config: {risk_config}\n"
+                f"Account Equity: {account.equity}\n"
+                f"Risk Percent: {risk_percent}\n"
+                f"Risk Amount: {risk_amount}\n"
+                f"SL Pips: {sl_pips}\n"
+                f"Pip Value: {pip_value}\n"
+                f"Contract Size: {contract_size}\n"
+                f"Volume Min: {volume_min}\n"
+                f"Volume Max: {volume_max}\n"
+                f"Volume Step: {volume_step}\n"
+                f"Size (pre-limiti): {risk_amount / (sl_pips * pip_value) if sl_pips > 0 and pip_value > 0 else 'N/A'}\n"
+                f"Size (post-limiti): {size}\n"
                 "------------------------------------------------------\n"
             )
-            logger.info("\n" +
-                "==================== [SIZE-DEBUG] ====================\n" +
-                f"Symbol: {symbol} ({symbol_type})\n" +
-                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n" +
-                f"SL: {sl_pips:.2f} pips\n" +
-                f"Pip Value: ${pip_value:.4f}\n" +
-                f"Contract Size: {contract_size}\n" +
-                f"Size: {size:.4f}\n" +
+
+            logger.info(
+                f"\n==================== [SIZE-DEBUG] ====================\n"
+                f"Symbol: {symbol} ({symbol_type})\n"
+                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
+                f"SL: {sl_pips:.2f} pips\n"
+                f"Pip Value: ${pip_value:.4f}\n"
+                f"Contract Size: {contract_size}\n"
+                f"Size: {size:.4f}\n"
                 "======================================================\n"
             )
 
