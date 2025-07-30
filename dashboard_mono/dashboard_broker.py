@@ -478,9 +478,16 @@ class The5ersGraphicalDashboard:
                 with open(json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     for row in data:
-                        if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL'):
-                            # Genera link dettagliato per diagnostics
-                            link = f"/diagnostics?symbol={row.get('symbol','')}&direction={row.get('segnale','')}&timestamp={row.get('timestamp','')}"
+                        # Assicura che direction sia presente e coerente con signals_sequence_table
+                        direction = row.get('direction')
+                        if not direction and row.get('segnale') in ('BUY', 'SELL'):
+                            direction = row.get('segnale')
+                            row['direction'] = direction
+                        if not row.get('trade_aperto') and direction in ('BUY', 'SELL'):
+                            # Genera link dettagliato per diagnostics usando direction
+                            symbol = row.get('symbol', '')
+                            timestamp = row.get('timestamp', '')
+                            link = f"/diagnostics?symbol={symbol}&direction={direction}&timestamp={timestamp}"
                             row['dettagli_link'] = link
                             unexecuted_signals.append(row)
                 # Mostra solo gli ultimi 20
