@@ -28,7 +28,33 @@ def log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito):
     except Exception as e:
         logger.error(f"Errore scrittura log segnali: {e}")
 
+
+# ===================== BLOCCO CONTATORI MOTIVI DI BLOCCO =====================
+import threading
+_block_reason_counter = defaultdict(int)
+_block_reason_counter_lock = threading.Lock()
+_block_reason_total = 0
+_block_reason_period = 100  # Ogni 100 segnali logga il riepilogo
+
 def log_signal_tick_with_reason(symbol, entropy, spin, confidence, timestamp, price, esito, motivo_blocco):
+    global _block_reason_total
+    # Incrementa il contatore per il motivo di blocco
+    if motivo_blocco:
+        with _block_reason_counter_lock:
+            _block_reason_counter[motivo_blocco] += 1
+            _block_reason_total += 1
+            # Logga il riepilogo ogni _block_reason_period
+            if _block_reason_total % _block_reason_period == 0:
+                try:
+                    from datetime import datetime
+                    summary = f"[BLOCK REASONS SUMMARY] {datetime.now().isoformat()} | Totale ultimi {_block_reason_period} segnali:\n"
+                    for reason, count in _block_reason_counter.items():
+                        summary += f"  - {reason}: {count}\n"
+                    logger.info(summary.strip())
+                    # Reset contatori
+                    _block_reason_counter.clear()
+                except Exception as e:
+                    logger.error(f"Errore logging riepilogo motivi di blocco: {e}")
     # Wrapper per passare il motivo_blocco
     log_signal_tick._motivo_blocco = motivo_blocco
     log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito)

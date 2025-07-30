@@ -10,8 +10,10 @@
     - [x] **[ALTA] Simbolo, entropy, spin, confidence, timestamp, prezzo**
     - [x] **[ALTA] Esito e motivazione (apertura/scarto)** *(solo motivazione: parziale, da completare per dettaglio blocchi)*
 - [x] **[ALTA] Dettaglio su filtri/blocchi** (buffer insufficiente, confidence bassa, cooldown, spread, orario, max trade, ecc.)
+    - [note] Tutti i motivi di blocco ora sono loggati, esportati e visualizzati in dashboard/diagnostica. Report e automazione completati.
 - [x] **[MEDIA] Esportazione segnali e motivi di blocco in CSV/JSON per analisi esterna**
-- [ ] **[MEDIA] Aggiungere contatori per ogni tipo di blocco e report periodico sintetico nei log**
+- [x] **[MEDIA] Aggiungere contatori per ogni tipo di blocco e report periodico sintetico nei log**
+    - [note] Ogni 100 segnali viene scritto nei log un riepilogo automatico dei motivi di blocco, con contatori thread-safe e reset.
 - [ ] **[MEDIA] Uniformare la struttura dei dati tra log, dashboard e funzioni di analisi**
 
 ## 2. Dashboard: Visualizzazione, Aggregazione e UX
