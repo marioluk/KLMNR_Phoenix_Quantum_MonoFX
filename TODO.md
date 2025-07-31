@@ -32,6 +32,8 @@
 
 - [ ] **[ALTA]** controllare tutti i parametri che determinano l'estensione oraria della    strategia, ossia paragonare la dimensione del buffer e degli altri parametri che incidono sul periodo e confrontarli con i timeframe da m1 a h1
 
+- [ ] **[ALTA]** controllare stop E TAKE PROFIT PERCHé SONO ANCORA STRETTI E TROPPO VICINI AL PREZZO D'INGRESSO
+
 - [ ] **[ALTA]** controllare trailing stop
 
 - [ ] **[ALTA]** avvicinarsi alla soglia soft del 2% del drawdown tra 1% e il 2%

@@ -596,7 +596,7 @@ class AutonomousHighStakesOptimizer:
 
         # --- RISK PARAMETERS ---
         risk_parameters = {
-            "magic_number": config.get("risk_parameters", {}).get("magic_number", 147251),
+            #"magic_number": config.get("risk_parameters", {}).get("magic_number", 147251),
             "position_cooldown": config.get("risk_parameters", {}).get("position_cooldown", 900),
             "max_daily_trades": config.get("risk_parameters", {}).get("max_daily_trades", 4),
             "max_positions": config.get("risk_parameters", {}).get("max_positions", 1),
