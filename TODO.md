@@ -144,3 +144,12 @@ revers signal, può avere senso con cooldawn?
 ---
 
 > Aggiorna questa checklist man mano che completi le attività o identifichi nuove aree di intervento. Le priorità sono indicate tra parentesi quadre: **[ALTA]**, **[MEDIA]**, **[BASSA]**.
+
+
+- [ ] Mi spieghi questi parametri che si vedono all'avvio nella shel ma non vengono riportati nei log?
+🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀
+📋 Sistema con 4 simboli configurati
+🎯 Simboli: {'EURUSD': {'risk_management': {'contract_size': 0.01, 'profit_multiplier': 2.2, 'risk_percent': 0.007, 'trailing_stop': {'activation_pips': 24, 'step_pips': 12}, 'target_pip_value': 10.0, 'max_global_exposure': 50000.0}, 'timezone': 'Europe/Rome', 'trading_hours': ['08:00-12:00', '13:00-17:00', '18:00-20:00'], 'comment': 'Override generato dinamicamente per EURUSD - score 778.68', 'quantum_params_override': {}}, 'USDJPY': {'risk_management': {'contract_size': 0.01, 'profit_multiplier': 2.2, 'risk_percent': 0.005, 'trailing_stop': {'activation_pips': 24, 'step_pips': 12}, 'target_pip_value': 10.0, 'max_global_exposure': 50000.0}, 'timezone': 'Europe/Rome', 'trading_hours': ['08:00-12:00', '13:00-17:00', '18:00-20:00'], 'comment': 'Override generato dinamicamente per USDJPY - score 687.99', 'quantum_params_override': {}}, 'USDCHF': {'risk_management': {'contract_size': 0.01, 'profit_multiplier': 2.2, 'risk_percent': 0.007, 'trailing_stop': {'activation_pips': 24, 'step_pips': 12}, 'target_pip_value': 10.0, 'max_global_exposure': 50000.0}, 'timezone': 'Europe/Rome', 'trading_hours': ['09:00-11:00'], 'comment': 'Override generato dinamicamente per USDCHF - score 677.35', 'quantum_params_override': {}}, 'SP500': {'risk_management': {'contract_size': 0.01, 'profit_multiplier': 2.2, 'risk_percent': 0.007, 'trailing_stop': {'activation_pips': 24, 'step_pips': 12}, 'target_pip_value': 10.0, 'max_global_exposure': 50000.0}, 'timezone': 'Europe/Rome', 'trading_hours': ['15:00-22:00', '13:00-14:30'], 'comment': 'Override generato dinamicamente per SP500 - score 705.14', 'quantum_params_override': {}}}
+[2025-08-01 01:44:43,256] INFO: Avvio sistema con 4 simboli
+✅ Componenti critici inizializzati correttamente
+[2025-08-01 01:44:43,257] INFO: Sistema di trading avviato correttamente
