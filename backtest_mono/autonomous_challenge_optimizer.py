@@ -566,7 +566,7 @@ class AutonomousHighStakesOptimizer:
             "min_spin_samples": config.get("quantum_params", {}).get("min_spin_samples", 23),
             "spin_threshold": config.get("quantum_params", {}).get("spin_threshold", 0.25),
             "signal_cooldown": config.get("quantum_params", {}).get("signal_cooldown", 600),
-            "entropy_thresholds": config.get("quantum_params", {}).get("entropy_thresholds", {"buy_signal": 0.825, "sell_signal": 0.275}),
+            "entropy_thresholds": config.get("quantum_params", {}).get("entropy_thresholds", {"buy_signal": 0.54, "sell_signal": 0.46}),
             "volatility_scale": config.get("quantum_params", {}).get("volatility_scale", 4.54)
         }
         # Se ottimizzato, inserisci spin_threshold migliore trovato
@@ -618,8 +618,6 @@ class AutonomousHighStakesOptimizer:
             # Ricostruisci la sezione risk_management per ogni simbolo
             risk_management = {
                 "contract_size": params.get("contract_size", 0.01),
-                "min_sl_distance_pips": params.get("min_sl_distance_pips", 12),
-                "base_sl_pips": params.get("base_sl_pips", 12),
                 "profit_multiplier": params.get("profit_multiplier", 2.2),
                 "risk_percent": params.get("risk_percent", 0.08),
                 "trailing_stop": params.get("trailing_stop", {"activation_pips": 24, "step_pips": 12})
