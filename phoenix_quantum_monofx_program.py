@@ -1237,8 +1237,7 @@ class QuantumEngine:
             elif sell_condition:
                 signal = "SELL"
             if signal != "HOLD":
-                if for_trading:
-                    self.set_last_signal_time(symbol, time.time())
+                # La chiamata a set_last_signal_time è stata spostata: ora viene eseguita solo dopo l'effettiva apertura di una posizione
                 self.inc_signal_stats(signal)
                 stats = self.get_signal_stats()
                 buy_ratio = stats['BUY'] / (stats['BUY'] + stats['SELL']) if (stats['BUY'] + stats['SELL']) > 0 else 0
@@ -3220,7 +3219,13 @@ class QuantumTradingSystem:
                 
             logger.info(f"Trade eseguito {symbol} {size} lots a {execution_price} | SL: {sl_price:.2f} | TP: {tp_price:.2f}")
             logger.info(f"Ticket: {result.order} | Deal: {result.deal}")
-            
+
+            # Aggiorna il cooldown segnale SOLO dopo trade effettivo
+            try:
+                self.engine.set_last_signal_time(symbol, time.time())
+            except Exception as e:
+                logger.error(f"Errore aggiornamento cooldown segnale per {symbol}: {str(e)}")
+
             # 7. Aggiornamento metriche con timeout
             try:
                 with self.metrics_lock:
@@ -3229,7 +3234,7 @@ class QuantumTradingSystem:
                 logger.info(f"Metriche aggiornate per {symbol}")
             except Exception as e:
                 logger.error(f"Errore aggiornamento metriche per {symbol}: {str(e)}")
-            
+
             # 8. Pausa di sicurezza post-trade
             self._safe_sleep(1)
             return True
