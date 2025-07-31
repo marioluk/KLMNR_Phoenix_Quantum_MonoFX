@@ -31,17 +31,21 @@
     - Se emergono nuovi edge case, aggiorna la checklist e procedi con fix mirati.
 
 
-- [x] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
+- [test] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
 
-- [ ] **[ALTA]** il lot size è sempre a 0.1 controllare la funizone di calcolo tenendo in cosiderazione che la size deve essere dimensionata in base alla massima esposizione consentita e proporzionalmente nei vari simboli in modo tale che profitti e perdite dei singoli simboli siano simili
+- [x] **[ALTA]** il lot size è sempre a 0.1 controllare la funizone di calcolo tenendo in cosiderazione che la size deve essere dimensionata in base alla massima esposizione consentita e proporzionalmente nei vari simboli in modo tale che profitti e perdite dei singoli simboli siano simili
 
-- [ ] **[ALTA]** il livello di sl e tp degli indici è troppo avvicinato
+- [x] **[ALTA]** Controllare se funziona il COOLDOWN
+
+- [ ] **[ALTA]** comportamento anomalo su SP500 E NAS100 vanno in cooldown senza aver aperto posizioni di trading
+
+- [ ] **[ALTA]** il livello di sl e tp degli indici è troppo stretto 
 
 - [ ] **[ALTA]** controllare tutti i parametri che determinano l'estensione oraria della    strategia, ossia paragonare la dimensione del buffer e degli altri parametri che incidono sul periodo e confrontarli con i timeframe da m1 a h1
 
 - [ ] **[ALTA]** controllare stop E TAKE PROFIT PERCHé SONO ANCORA STRETTI E TROPPO VICINI AL PREZZO D'INGRESSO
 
-- [ ] **[ALTA]** controllare trailing stop
+- [x] **[ALTA]** controllare trailing stop
 
 - [ ] **[ALTA]** avvicinarsi alla soglia soft del 2% del drawdown tra 1% e il 2%
 
