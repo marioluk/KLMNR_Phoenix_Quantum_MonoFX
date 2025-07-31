@@ -1,3 +1,28 @@
+## 🚨 PRIORITÀ: Debug Pipeline Segnali → Ordini
+
+...
+
+---
+**[TODO] Integrazione Performance Analytics automatica**
+
+- Integrare una funzione/modulo che analizzi automaticamente i report dei trade giornalieri e settimanali (esportati da MT5 o generati dal sistema), con:
+    - Calcolo di profitto/perdita netta, win rate, drawdown, commissioni, swap, profitto medio per trade, distribuzione per simbolo e orario.
+    - Riconoscimento pattern di errore (es. perdite consecutive, orari critici, simboli problematici).
+    - Generazione di report grafici e testuali (es. CSV, HTML, PDF) per audit e ottimizzazione.
+    - Notifiche automatiche in caso di anomalie o performance fuori target.
+    - Integrazione con la dashboard e log centralizzati.
+
+
+---
+[MEDIA] **Implementare pagina Performance Analytics nella dashboard_mono**
+    - Visualizzazione e analisi avanzata dei report trading direttamente dalla dashboard
+    - Statistiche, grafici, download, alert e filtri avanzati
+    - Vedi dettagli in TODO_DASHBOARD.md
+
+Obiettivo: automatizzare il monitoraggio della strategia, facilitare l’analisi e il tuning dei parametri, migliorare la trasparenza e la reattività operativa.
+
+...
+
 # TODO Analisi Segnali, Dashboard e Migliorie Phoenix Quantum MonoFX
 
 

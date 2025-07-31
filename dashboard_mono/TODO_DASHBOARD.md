@@ -21,6 +21,23 @@
 
 ---
 
+[TODO] Pagina Performance Analytics
+
+
+**[TODO] Pagina Performance Analytics**
+
+- Creare una pagina dedicata nella dashboard per l’analisi automatica dei report di trading:
+    - Statistiche aggregate: profitto/perdita netta, win rate, drawdown, commissioni, swap, profitto medio per trade
+    - Grafici interattivi: distribuzione per simbolo, orario, andamento equity
+    - Report dettagliati e download (CSV, PDF)
+    - Notifiche e alert automatici su anomalie o performance fuori target
+    - Filtri avanzati per periodo, simbolo, tipo operazione
+    - Integrazione con log e dati live
+
+Obiettivo: rendere la dashboard uno strumento completo per monitoraggio, audit e tuning operativo.
+
+
+
 ## Idee storiche e dettagli temporanei
 
 - Eventuale esportazione CSV/JSON dei report periodici per analisi esterna. _(rimandato, non prioritario al momento)_
