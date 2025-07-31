@@ -279,7 +279,11 @@ class AutonomousHighStakesOptimizer:
                 "daily_loss_limit": 0.05,
                 "max_drawdown": 0.08,
                 "risk_reward_ratio": 1.8,
-                "daily_trade_limit_mode": "per_symbol"
+                # daily_trade_limit_mode: modalità di conteggio trade giornalieri.
+                # "per_symbol": il limite max_daily_trades viene applicato separatamente a ciascun simbolo (es: 6 trade per EURUSD, 6 per USDJPY, ...)
+                # "global": il limite max_daily_trades viene applicato come somma totale su tutti i simboli (es: 6 trade totali su tutti i simboli)
+                # Modifica questo parametro per cambiare la logica del counter giornaliero.
+                "daily_trade_limit_mode": "global"
             },
             "symbols": {},
             "trading_sessions": {
