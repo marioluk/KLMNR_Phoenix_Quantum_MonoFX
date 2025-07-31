@@ -1741,7 +1741,9 @@ class QuantumRiskManager:
                     if sym == symbol:
                         total_exposure += size * contract_size
                     else:
-                        # Stima size attuale per altri simboli (puoi migliorare con posizioni aperte reali)
+                        # Salta simboli non ancora presenti in _symbol_data per evitare KeyError
+                        if sym not in self._symbol_data:
+                            continue
                         total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
                 if total_exposure > max_global_exposure:
                     logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
