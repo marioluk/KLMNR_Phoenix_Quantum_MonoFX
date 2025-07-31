@@ -2796,14 +2796,12 @@ class QuantumTradingSystem:
         self.current_positions = 0
         self.trade_count = defaultdict(int)
         self._last_trade_count_reset = datetime.now().date()
-    def _reset_trade_count_if_new_day(self):
-        """Resetta il trade_count se è iniziato un nuovo giorno e logga lo stato precedente."""
-        today = datetime.now().date()
-        if getattr(self, '_last_trade_count_reset', None) != today:
-            old_counts = dict(self.trade_count)
-            logger.info(f"🔄 [TRADE_COUNT RESET] Nuovo giorno {today}. Stato precedente: {old_counts}")
-            self.trade_count = defaultdict(int)
-            self._last_trade_count_reset = today
+        # Inizializza qui tutte le variabili di tempo per evitare AttributeError
+        self.last_position_check = 0
+        self.last_connection_check = 0
+        self.last_account_update = 0
+        self.last_tick_check = 0
+        self.last_buffer_check = 0
         self.metrics_lock = threading.Lock()
         self.position_lock = threading.Lock()
         self.metrics = TradingMetrics()
@@ -2827,11 +2825,6 @@ class QuantumTradingSystem:
             initial_equity=initial_equity,
             config=self._config.config
         )
-        self.last_position_check = 0
-        self.last_connection_check = 0
-        self.last_account_update = 0
-        self.last_tick_check = 0
-        self.last_buffer_check = 0
         # Imposta la lista dei simboli come attributo di istanza
         self.symbols = list(self._config.config['symbols'].keys())
         logger.info(
@@ -2843,6 +2836,15 @@ class QuantumTradingSystem:
         logger.info("Sistema inizializzato correttamente")
         logger.info(f"Simboli configurati: {self.symbols}")
         logger.info(f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}")
+
+    def _reset_trade_count_if_new_day(self):
+        """Resetta il trade_count se è iniziato un nuovo giorno e logga lo stato precedente."""
+        today = datetime.now().date()
+        if getattr(self, '_last_trade_count_reset', None) != today:
+            old_counts = dict(self.trade_count)
+            logger.info(f"🔄 [TRADE_COUNT RESET] Nuovo giorno {today}. Stato precedente: {old_counts}")
+            self.trade_count = defaultdict(int)
+            self._last_trade_count_reset = today
     def _safe_sleep(self, seconds):
         """Sleep sicuro che ignora eventuali eccezioni"""
         try:
