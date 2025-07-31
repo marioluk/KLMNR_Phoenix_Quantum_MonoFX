@@ -49,6 +49,10 @@
 
 - [ ] **[ALTA]** reintrodurre la possibilità di applicare il massimo numero di trade giornalieri al singolo simbolo o globali
 
+Giorni per ottimizzazione (default: 60):
+
+revers signal, può avere senso con cooldawn?
+
 
 
 > Questo file è la **roadmap e checklist ufficiale** del progetto Phoenix Quantum MonoFX.

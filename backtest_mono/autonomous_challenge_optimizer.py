@@ -9,7 +9,29 @@ from typing import Dict, List, Tuple, Optional, Any
 import itertools
 import time
 
-# Setup logging
+
+# =============================================================
+# CORRELAZIONE TRA TIPOLOGIA DI TRADING E PARAMETRI SL/TP/TS
+# =============================================================
+# | Tipologia   | Stop Loss (SL)         | Take Profit (TP)         | Trailing Stop (TS)                | Note operative                       |
+# |-------------|------------------------|--------------------------|------------------------------------|--------------------------------------|
+# | Scalping    | 6-12 pips (molto stretto) | 10-20 pips (stretto)      | Attivazione rapida, step piccoli   | Protezione immediata, trade brevi    |
+# | Intraday    | 15-30 pips (medio)     | 30-60 pips (medio)       | Attivazione media, step medi       | Nessuna posizione overnight          |
+# | Swing       | 50-120 pips (ampio)    | 100-250 pips (ampio)     | Attivazione solo dopo movimenti ampi, step larghi | Posizioni multi-day, oscillazioni ampie |
+# | Position    | 150-400 pips (molto ampio) | 300-800 pips (molto ampio) | Attivazione tardiva, step molto larghi | Segue trend di fondo, trade lunghi   |
+#
+# Questi parametri sono definiti nei preset di get_trading_mode_params e ottimizzati dinamicamente in optimize_symbol_parameters.
+# La funzione calculate_sl_tp_with_volatility calcola SL/TP in base alla volatilità del simbolo:
+#   - SL = max(base_sl * volatility_factor, min_sl)
+#   - TP = SL * profit_multiplier
+# Il trailing stop viene configurato per ogni tipologia e simbolo, con step e attivazione coerenti con l'orizzonte temporale.
+#
+# Esempio di calcolo nel codice:
+#   sl_pips, tp_pips = self.calculate_sl_tp_with_volatility(symbol, base_sl, min_sl, profit_multiplier, volatility)
+#   trailing_stop = {"enable": True, "activation_pips": ..., "step_pips": ..., "lock_percentage": ...}
+#
+# Tutta la logica di ottimizzazione garantisce che i parametri siano coerenti con la tipologia di trading selezionata.
+# =============================================================
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -22,33 +44,37 @@ class AutonomousHighStakesOptimizer:
         """
         warnings = []
         ranges = {
+            # Scalping: operatività ultra-veloce su timeframe M1-M5, molti trade al giorno, posizioni di breve durata
             'scalping': {
-                'max_position_hours': (0, 0.5),
-                'buffer_size': (10, 100),
-                'spin_window': (2, 15),
-                'signal_cooldown': (10, 120),
-                'max_daily_trades': (20, 100)
+                'max_position_hours': (0.05, 2),      # Durata posizione: da pochi minuti a max 2 ore
+                'buffer_size': (100, 300),            # Storico tick/candele: sufficiente per pattern rapidi
+                'spin_window': (10, 30),              # Finestra di calcolo segnali: breve
+                'signal_cooldown': (60, 300),         # Attesa tra segnali: da 1 a 5 minuti
+                'max_daily_trades': (20, 100)         # Trade giornalieri: molto elevato
             },
+            # Intraday: operatività su timeframe M15-H1, nessuna posizione overnight, sfrutta volatilità giornaliera
             'intraday': {
-                'max_position_hours': (1, 12),
-                'buffer_size': (50, 300),
-                'spin_window': (10, 30),
-                'signal_cooldown': (60, 600),
-                'max_daily_trades': (5, 20)
+                'max_position_hours': (2, 12),        # Durata posizione: da 2 a 12 ore
+                'buffer_size': (300, 800),            # Storico tick/candele: copre l'intera giornata
+                'spin_window': (20, 60),              # Finestra di calcolo segnali: media
+                'signal_cooldown': (300, 1200),       # Attesa tra segnali: da 5 a 20 minuti
+                'max_daily_trades': (5, 20)           # Trade giornalieri: moderato
             },
+            # Swing: operatività su timeframe H1-D1, posizioni multi-day, coglie oscillazioni ampie
             'swing': {
-                'max_position_hours': (12, 120),
-                'buffer_size': (200, 800),
-                'spin_window': (20, 60),
-                'signal_cooldown': (600, 3600),
-                'max_daily_trades': (1, 6)
+                'max_position_hours': (24, 96),       # Durata posizione: da 1 a 4 giorni
+                'buffer_size': (800, 2000),           # Storico tick/candele: copre settimane
+                'spin_window': (40, 120),             # Finestra di calcolo segnali: ampia
+                'signal_cooldown': (1200, 3600),      # Attesa tra segnali: da 20 minuti a 1 ora
+                'max_daily_trades': (1, 6)            # Trade giornalieri: pochi
             },
+            # Position: operatività su timeframe D1-W1, posizioni di lungo periodo, segue trend
             'position': {
-                'max_position_hours': (120, 1000),
-                'buffer_size': (500, 2000),
-                'spin_window': (40, 120),
-                'signal_cooldown': (3600, 86400),
-                'max_daily_trades': (1, 2)
+                'max_position_hours': (96, 336),      # Durata posizione: da 4 a 14 giorni
+                'buffer_size': (1500, 5000),          # Storico tick/candele: copre mesi
+                'spin_window': (100, 300),            # Finestra di calcolo segnali: molto ampia
+                'signal_cooldown': (3600, 14400),     # Attesa tra segnali: da 1 a 4 ore
+                'max_daily_trades': (1, 2)            # Trade giornalieri: rarissimi
             }
         }
         ref = ranges.get(mode, ranges['intraday'])

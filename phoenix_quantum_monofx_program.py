@@ -2237,6 +2237,22 @@ class TradingMetrics:
 
 
 class QuantumTradingSystem:
+# =============================================================
+# CORRELAZIONE TRA TIPOLOGIA DI TRADING E CALCOLO SL/TP/TS
+# =============================================================
+# | Tipologia   | Stop Loss (SL)         | Take Profit (TP)         | Trailing Stop (TS)                | Note operative                       |
+# |-------------|------------------------|--------------------------|------------------------------------|--------------------------------------|
+# | Scalping    | 6-12 pips (molto stretto) | 10-20 pips (stretto)      | Attivazione rapida, step piccoli   | Protezione immediata, trade brevi    |
+# | Intraday    | 15-30 pips (medio)     | 30-60 pips (medio)       | Attivazione media, step medi       | Nessuna posizione overnight          |
+# | Swing       | 50-120 pips (ampio)    | 100-250 pips (ampio)     | Attivazione solo dopo movimenti ampi, step larghi | Posizioni multi-day, oscillazioni ampie |
+# | Position    | 150-400 pips (molto ampio) | 300-800 pips (molto ampio) | Attivazione tardiva, step molto larghi | Segue trend di fondo, trade lunghi   |
+#
+# Il calcolo di SL/TP/TS avviene in QuantumRiskManager:
+#   - SL/TP sono calcolati dinamicamente in base a parametri di config, volatilità e tipologia trading.
+#   - Trailing Stop viene configurato per ogni simbolo e tipologia, con step e attivazione coerenti.
+#   - La logica segue la stessa struttura dell'optimizer: per operatività più lunga, parametri più ampi; per operatività breve, parametri più stretti e reattivi.
+#   - Esempio: sl_price, tp_price = self.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
+# =============================================================
 
     def debug_trade_decision(self, symbol):
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo."""

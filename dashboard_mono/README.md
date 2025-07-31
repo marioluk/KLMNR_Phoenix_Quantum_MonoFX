@@ -119,6 +119,23 @@ pip install flask plotly pandas MetaTrader5
 - **Profit Factor**: Total Profit / Total Loss
 - **Max Drawdown**: Peak-to-trough decline
 
+# =============================================================
+# CORRELAZIONE TRA TIPOLOGIA DI TRADING E CALCOLO SL/TP/TS
+# =============================================================
+# | Tipologia   | Stop Loss (SL)         | Take Profit (TP)         | Trailing Stop (TS)                | Note operative                       |
+# |-------------|------------------------|--------------------------|------------------------------------|--------------------------------------|
+# | Scalping    | 6-12 pips (molto stretto) | 10-20 pips (stretto)      | Attivazione rapida, step piccoli   | Protezione immediata, trade brevi    |
+# | Intraday    | 15-30 pips (medio)     | 30-60 pips (medio)       | Attivazione media, step medi       | Nessuna posizione overnight          |
+# | Swing       | 50-120 pips (ampio)    | 100-250 pips (ampio)     | Attivazione solo dopo movimenti ampi, step larghi | Posizioni multi-day, oscillazioni ampie |
+# | Position    | 150-400 pips (molto ampio) | 300-800 pips (molto ampio) | Attivazione tardiva, step molto larghi | Segue trend di fondo, trade lunghi   |
+#
+# Il calcolo di SL/TP/TS avviene sia nell'optimizer che nel sistema di trading:
+#   - SL/TP sono calcolati dinamicamente in base a parametri di config, volatilità e tipologia trading.
+#   - Trailing Stop viene configurato per ogni simbolo e tipologia, con step e attivazione coerenti.
+#   - La logica segue la stessa struttura: per operatività più lunga, parametri più ampi; per operatività breve, parametri più stretti e reattivi.
+#   - Esempio: sl_price, tp_price = self.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
+# =============================================================
+
 ## 🚨 TROUBLESHOOTING
 
 ### Config Non Trovato

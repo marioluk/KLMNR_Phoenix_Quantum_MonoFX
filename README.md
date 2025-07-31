@@ -838,12 +838,6 @@ dove:
 H = entropia normalizzata (disordine del mercato)
 ```
 
-**Spiegazione Matematica:**
-- **Base = 1**: Volatilità neutra
-- **|S|**: Amplifica con momentum direzionale forte
-- **H**: Amplifica con alta aleatorietà/incertezza
-- **Risultato**: Volatilità adattiva che aumenta con instabilità e directional bias
-
 ### **4. Position Sizing Formula**
 
 **Algoritmo Kelly-Based Modificato:**
@@ -856,7 +850,7 @@ SL_pips = max(Min_SL, Base_SL × (1 + 0.5 × V_quantum))
 Pip_Value = valore monetario per pip (da broker)
 ```
 
-**Controllo Margine:**
+#### **Controllo Margine:**
 ```
 Safe_Size = Position_Size × min(1, Max_Margin / Required_Margin)
 
@@ -994,7 +988,53 @@ Gross_Loss = ∑(tutti i trade perdenti)
 
 ---
 
-Per la descrizione completa di tutti i parametri accettati, consulta la tabella in `config/README.md`.
-Per la struttura delle cartelle e la generazione/gestione delle configurazioni, vedi anche `docs/CONFIG_ORGANIZATION_GUIDE.md`.
+# 📊 Range parametri per tipologia di trading
+
+Dal 1 agosto 2025, la validazione automatica dei parametri (sia in config che nell’optimizer) utilizza i seguenti range ottimizzati per ciascuna tipologia di trading. Questi valori sono allineati a best practice e risultati di backtest.
+
+| Tipologia     | buffer_size | spin_window | signal_cooldown | max_position_hours | max_daily_trades | Descrizione |
+|--------------|-------------|-------------|-----------------|-------------------|------------------|-------------|
+| Scalping     | 100–300     | 10–30       | 60–300          | 0.05–2            | 20–100           | M1–M5, operatività ultra-veloce |
+| Intraday     | 300–800     | 20–60       | 300–1200        | 2–12              | 5–20             | M15–H1, nessuna posizione overnight |
+| Swing        | 800–2000    | 40–120      | 1200–3600       | 24–96             | 1–6              | H1–D1, posizioni multi-day |
+| Position     | 1500–5000   | 100–300     | 3600–14400      | 96–336            | 1–2              | D1–W1, posizioni di lungo periodo |
+
+Questi range sono usati nella funzione `validate_trading_params` di `autonomous_challenge_optimizer.py` e sono commentati direttamente nel codice per massima leggibilità.
+
+**Esempio di commento nel codice:**
+```python
+ranges = {
+    # Scalping: operatività ultra-veloce su timeframe M1-M5, molti trade al giorno, posizioni di breve durata
+    'scalping': {
+        'max_position_hours': (0.05, 2),      # Durata posizione: da pochi minuti a max 2 ore
+        'buffer_size': (100, 300),            # Storico tick/candele: sufficiente per pattern rapidi
+        'spin_window': (10, 30),              # Finestra di calcolo segnali: breve
+        'signal_cooldown': (60, 300),         # Attesa tra segnali: da 1 a 5 minuti
+        'max_daily_trades': (20, 100)         # Trade giornalieri: molto elevato
+    },
+    # ... (vedi file per tutte le tipologie)
+}
+```
+
+**Nota:** La validazione automatica blocca la generazione della configurazione se i parametri sono fuori range, con log dettagliato e riepilogo dei warning.
+
+Per dettagli e override dei parametri, consulta anche `config/README.md` e la documentazione tecnica.
 
 ---
+
+# =============================================================
+# CORRELAZIONE TRA TIPOLOGIA DI TRADING E CALCOLO SL/TP/TS
+# =============================================================
+# | Tipologia   | Stop Loss (SL)         | Take Profit (TP)         | Trailing Stop (TS)                | Note operative                       |
+# |-------------|------------------------|--------------------------|------------------------------------|--------------------------------------|
+# | Scalping    | 6-12 pips (molto stretto) | 10-20 pips (stretto)      | Attivazione rapida, step piccoli   | Protezione immediata, trade brevi    |
+# | Intraday    | 15-30 pips (medio)     | 30-60 pips (medio)       | Attivazione media, step medi       | Nessuna posizione overnight          |
+# | Swing       | 50-120 pips (ampio)    | 100-250 pips (ampio)     | Attivazione solo dopo movimenti ampi, step larghi | Posizioni multi-day, oscillazioni ampie |
+# | Position    | 150-400 pips (molto ampio) | 300-800 pips (molto ampio) | Attivazione tardiva, step molto larghi | Segue trend di fondo, trade lunghi   |
+#
+# Il calcolo di SL/TP/TS avviene sia nell'optimizer che nel sistema di trading:
+#   - SL/TP sono calcolati dinamicamente in base a parametri di config, volatilità e tipologia trading.
+#   - Trailing Stop viene configurato per ogni simbolo e tipologia, con step e attivazione coerenti.
+#   - La logica segue la stessa struttura: per operatività più lunga, parametri più ampi; per operatività breve, parametri più stretti e reattivi.
+#   - Esempio: sl_price, tp_price = self.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
+# =============================================================
