@@ -1,3 +1,19 @@
+import os
+import sys
+import json
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import logging
+from typing import Dict, List, Tuple, Optional, Any
+import itertools
+import time
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+class AutonomousHighStakesOptimizer:
     def validate_trading_params(self, params: dict, mode: str, log_file: str = None) -> list:
         """
         Valida i parametri di trading rispetto alla tipologia selezionata.
@@ -50,35 +66,6 @@
             except Exception as e:
                 print(f"[VALIDAZIONE PARAMETRI] Errore scrittura log: {e}")
         return warnings
-
-# ===============================
-# AUTONOMOUS HIGH STAKES OPTIMIZER
-# ===============================
-
-# Inserisco la versione avanzata del file di produzione qui sotto
-#!/usr/bin/env python3
-# ====================================================================================
-# AUTONOMOUS HIGH STAKES OPTIMIZER - OTTIMIZZATORE AUTONOMO SENZA JSON SORGENTE
-# Genera configurazioni ottimizzate da zero basandosi solo su algoritmo e dati MT5
-# ====================================================================================
-
-import os
-import sys
-import json
-import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-import logging
-from typing import Dict, List, Tuple, Optional, Any
-import itertools
-import time
-
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-# ... Tutta la classe AutonomousHighStakesOptimizer come da file di produzione ...
-class AutonomousHighStakesOptimizer:
     def generate_optimized_config_for_mode(self, aggressiveness: str, mode: str) -> Dict:
         # Ottieni parametri tipologia trading
         params = self.get_trading_mode_params(mode)
