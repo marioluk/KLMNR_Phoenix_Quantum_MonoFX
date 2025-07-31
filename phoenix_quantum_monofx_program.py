@@ -1619,15 +1619,15 @@ Dipende da QuantumEngine e dalla configurazione.
     
 class QuantumRiskManager:
     def __init__(self, config_manager, engine, parent=None):
-        self.config_manager = config_manager
+        self._config_manager = config_manager
         self.engine = engine
         self.parent = parent
         # ... eventuali altre inizializzazioni ...
 
     @property
     def symbols(self):
-        # Accesso ai simboli tramite config_manager
-        return list(self.config_manager.config.get('symbols', {}).keys())
+        # Accesso ai simboli tramite _config_manager
+        return list(self._config_manager.config.get('symbols', {}).keys())
 
     # ... qui prosegue la classe con i metodi che ora useranno self.config_manager.symbols invece di self.symbols ...
     """
