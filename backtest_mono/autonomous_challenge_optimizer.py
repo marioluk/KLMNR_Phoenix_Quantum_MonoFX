@@ -629,22 +629,31 @@ class AutonomousHighStakesOptimizer:
             "profit_multiplier": config.get("risk_parameters", {}).get("profit_multiplier", 2.2),
             "max_position_hours": config.get("risk_parameters", {}).get("max_position_hours", 6),
             "risk_percent": config.get("risk_parameters", {}).get("risk_percent", 0.005),
-            "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5})
-            
+            "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}),
+            # Nuovi parametri globali per normalizzazione size e rischio globale
+            "target_pip_value": 10.0,
+            "max_global_exposure": 50000.0
         }
 
         # --- SYMBOLS ---
         symbols = {}
+        # Parametri di normalizzazione e rischio globale
+        # Valori di default robusti, possono essere raffinati in futuro
+        default_target_pip_value = 10.0  # USD per pip, normalizzazione P&L
+        default_max_global_exposure = 50000.0  # Esposizione massima in USD
         for symbol, params in config.get('symbols', {}).items():
             # Ricostruisci la sezione risk_management per ogni simbolo
             risk_management = {
                 "contract_size": params.get("contract_size", 0.01),
                 "profit_multiplier": params.get("profit_multiplier", 2.2),
                 "risk_percent": params.get("risk_percent", 0.08),
-                "trailing_stop": params.get("trailing_stop", {"activation_pips": 24, "step_pips": 12})
+                "trailing_stop": params.get("trailing_stop", {"activation_pips": 24, "step_pips": 12}),
+                # Nuovi parametri per normalizzazione size e rischio globale
+                "target_pip_value": params.get("target_pip_value", default_target_pip_value),
+                "max_global_exposure": params.get("max_global_exposure", default_max_global_exposure)
             }
             # Permetti override dei parametri ottimizzati
-            for k in ["contract_size", "min_sl_distance_pips", "base_sl_pips", "profit_multiplier", "risk_percent", "trailing_stop"]:
+            for k in ["contract_size", "min_sl_distance_pips", "base_sl_pips", "profit_multiplier", "risk_percent", "trailing_stop", "target_pip_value", "max_global_exposure"]:
                 if k in params:
                     risk_management[k] = params[k]
             # Quantum override
