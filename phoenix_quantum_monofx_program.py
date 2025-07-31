@@ -2790,6 +2790,7 @@ class QuantumTradingSystem:
             f"File configurazione: {config_path}\n"
             "------------------------------------------------------\n"
         )
+        self.symbols = []  # fallback sicuro
         self._setup_logger(config_path)
         logger.info("✅ Logger configurato")
         self._config_path = config_path
@@ -2799,12 +2800,14 @@ class QuantumTradingSystem:
         logger.info("✅ Configurazione caricata")
         if not hasattr(self._config, 'config') or 'symbols' not in self._config.config:
             logger.error("Configurazione simboli non valida nel file di configurazione")
-            raise ValueError("Sezione symbols mancante nella configurazione")
-        logger.info(
-            "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
-            f"Simboli trovati: {list(self._config.config['symbols'].keys())}\n"
-            "------------------------------------------------------\n"
-        )
+            # symbols rimane lista vuota, nessun raise qui
+        else:
+            self.symbols = list(self._config.config['symbols'].keys())
+            logger.info(
+                "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
+                f"Simboli trovati: {self.symbols}\n"
+                "------------------------------------------------------\n"
+            )
         logger.info("🔄 Inizializzazione componenti core...")
         if not self._initialize_mt5():
             raise RuntimeError("Inizializzazione MT5 fallita")
