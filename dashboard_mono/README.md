@@ -1,3 +1,36 @@
+# =============================================================
+# RIEPILOGO SCORE CONFIGURAZIONI OTTIMIZZATE
+# =============================================================
+
+Ad ogni generazione delle configurazioni (conservative, moderate, aggressive), il sistema salva un riepilogo degli score medi e totali in:
+`../logs/score_summary_configurazioni.log`
+
+**Cosa contiene il file di log:**
+- Score medio e totale per ciascun livello di aggressività
+- Evidenziazione automatica della configurazione con score più alto
+- Nome file di ciascuna configurazione generata
+- Data e ora della generazione
+
+**Esempio di log:**
+```
+===== RIEPILOGO SCORE CONFIGURAZIONI GENERATE (2025-08-01T12:34:56) =====
+  Conservative  | Avg Score: 68.20 | Total Score: 272.80 | File: config_autonomous_challenge_conservative_production_ready.json
+⭐ Moderate     | Avg Score: 72.50 | Total Score: 362.50 | File: config_autonomous_challenge_moderate_production_ready.json
+  Aggressive   | Avg Score: 70.10 | Total Score: 420.60 | File: config_autonomous_challenge_aggressive_production_ready.json
+
+La configurazione con score medio più alto è: Moderate (config_autonomous_challenge_moderate_production_ready.json)
+Puoi scegliere quale mettere in produzione tramite production_converter.py.
+```
+
+**Significato degli score:**
+- Lo score medio rappresenta la qualità/efficacia della configurazione (profit factor, win rate, penalità rischio, spread, ecc.)
+- Lo score totale è la somma degli score dei simboli selezionati
+- La configurazione migliore viene solo evidenziata, il deploy rimane manuale
+
+**Come scegliere la configurazione migliore:**
+Consulta il file di log per confrontare gli score e scegli la configurazione più adatta alle tue esigenze tramite lo script `production_converter.py`.
+
+**Nota:** Il log viene aggiornato ad ogni generazione, puoi consultarlo in qualsiasi momento.
 # THE5ERS DASHBOARD - LEGACY SYSTEM
 
 Dashboard web interattiva per il monitoraggio del sistema di trading legacy The5ers.

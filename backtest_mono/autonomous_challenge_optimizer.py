@@ -333,13 +333,50 @@ class AutonomousHighStakesOptimizer:
         }
         self.optimized_configs = {}
 
-    def generate_all_configs(self) -> Dict[str, str]:
+    def generate_all_configs(self) -> Dict[str, dict]:
+        """
+        Genera e salva tutte le configurazioni per i tre livelli di aggressività.
+        Al termine, stampa un riepilogo degli score medi e totali, evidenziando la migliore.
+        """
         levels = ["conservative", "moderate", "aggressive"]
         results = {}
+        score_summary = []
         for level in levels:
             config = self.generate_optimized_config(level)
             filepath = self.save_config(config, level)
-            results[level] = filepath
+            opt_res = config.get('optimization_results', {})
+            avg_score = opt_res.get('average_optimization_score', 0)
+            total_score = opt_res.get('total_optimization_score', 0)
+            results[level] = {
+                "filepath": filepath,
+                "average_score": avg_score,
+                "total_score": total_score
+            }
+            score_summary.append({
+                "level": level,
+                "filepath": filepath,
+                "average_score": avg_score,
+                "total_score": total_score
+            })
+        # Riepilogo finale
+        print("\n===== RIEPILOGO SCORE CONFIGURAZIONI GENERATE =====")
+        best = max(score_summary, key=lambda x: x["average_score"])
+        log_dir = os.path.join(self.base_dir, "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        log_path = os.path.join(log_dir, "score_summary_configurazioni.log")
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"===== RIEPILOGO SCORE CONFIGURAZIONI GENERATE ({datetime.now().isoformat()}) =====\n")
+            for item in score_summary:
+                star = "⭐" if item["level"] == best["level"] else "  "
+                line = f"{star} {item['level'].capitalize():12} | Avg Score: {item['average_score']:.2f} | Total Score: {item['total_score']:.2f} | File: {os.path.basename(item['filepath'])}"
+                print(line)
+                f.write(line + "\n")
+            best_line = f"\nLa configurazione con score medio più alto è: {best['level'].capitalize()} ({os.path.basename(best['filepath'])})\n"
+            print(best_line)
+            f.write(best_line)
+            f.write("Puoi scegliere quale mettere in produzione tramite production_converter.py.\n\n")
+        print("Puoi scegliere quale mettere in produzione tramite production_converter.py.")
+        print(f"Riepilogo score salvato in: {log_path}")
         return results
 
     def create_base_config_template(self) -> Dict:
@@ -905,7 +942,7 @@ def main():
                 print("2. Intraday (Day Trading)")
                 print("3. Swing Trading")
                 print("4. Position Trading")
-                mode_choice = input("� Scegli tipologia (1-4): ").strip()
+                mode_choice = input("👉 Scegli tipologia (1-4): ").strip()
                 mode_map = {
                     "1": "scalping",
                     "2": "intraday",
@@ -913,15 +950,12 @@ def main():
                     "4": "position"
                 }
                 mode = mode_map.get(mode_choice, "intraday")
-                days = input("�📅 Giorni per ottimizzazione (default: 60): ").strip()
+                days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
                 optimization_days = int(days) if days.isdigit() else 60
                 optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                levels = ["conservative", "moderate", "aggressive"]
                 print(f"\n🔄 Generazione configurazioni per tipologia '{mode}'...")
-                for level in levels:
-                    config = optimizer.generate_optimized_config_for_mode(level, mode)
-                    filepath = optimizer.save_config(config, f"{level}_{mode}")
-                    print(f"   ✅ {level.upper()}: {os.path.basename(filepath)}")
+                # Genera e salva tutte le configurazioni, stampa riepilogo score
+                optimizer.generate_all_configs()
                 print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
             elif choice == "2":
                 print("\n🎯 Scegli livello aggressività:")

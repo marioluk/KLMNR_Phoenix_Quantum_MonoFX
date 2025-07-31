@@ -1,3 +1,67 @@
+# =============================================================
+# CONFIGURAZIONI OTTIMIZZATE: LOGICA, SCORE, VALIDAZIONE E DEPLOY
+# =============================================================
+
+## Generazione automatica delle configurazioni
+Il sistema genera automaticamente tre configurazioni ottimizzate (conservative, moderate, aggressive) tramite lo script `autonomous_challenge_optimizer.py`. Ogni configurazione viene validata e bloccata se i parametri non sono coerenti con la tipologia di trading.
+
+## Validazione parametri
+La funzione di validazione controlla che tutti i parametri (buffer_size, spin_window, max_daily_trades, ecc.) siano nel range corretto per la tipologia selezionata. Se un parametro è fuori range, la configurazione viene bloccata e il motivo viene salvato nei log (`logs/log_param_validation_...`).
+
+## Correlazione tra tipologia di trading e parametri SL/TP/TS
+La tabella di correlazione tra tipologia di trading e parametri di rischio (Stop Loss, Take Profit, Trailing Stop) è documentata nel codice e qui di seguito:
+
+| Tipologia   | Stop Loss (SL)         | Take Profit (TP)         | Trailing Stop (TS)                | Note operative                       |
+|-------------|------------------------|--------------------------|------------------------------------|--------------------------------------|
+| Scalping    | 6-12 pips (molto stretto) | 10-20 pips (stretto)      | Attivazione rapida, step piccoli   | Protezione immediata, trade brevi    |
+| Intraday    | 15-30 pips (medio)     | 30-60 pips (medio)       | Attivazione media, step medi       | Nessuna posizione overnight          |
+| Swing       | 50-120 pips (ampio)    | 100-250 pips (ampio)     | Attivazione solo dopo movimenti ampi, step larghi | Posizioni multi-day, oscillazioni ampie |
+| Position    | 150-400 pips (molto ampio) | 300-800 pips (molto ampio) | Attivazione tardiva, step molto larghi | Segue trend di fondo, trade lunghi   |
+
+## Score delle configurazioni
+Ad ogni generazione, viene creato un file di log riepilogativo (`logs/score_summary_configurazioni.log`) con score medio e totale per ciascun livello di aggressività. La configurazione migliore viene evidenziata ma il deploy rimane manuale.
+
+## Esempio di deploy manuale
+Per mettere in produzione la configurazione desiderata, usa lo script:
+```
+python backtest_mono/production_converter.py
+```
+Segui le istruzioni a video per scegliere quale configurazione copiare come principale.
+
+---
+# =============================================================
+# RIEPILOGO SCORE CONFIGURAZIONI OTTIMIZZATE
+# =============================================================
+
+Ad ogni generazione delle configurazioni (conservative, moderate, aggressive), il sistema salva un riepilogo degli score medi e totali in:
+`logs/score_summary_configurazioni.log`
+
+**Cosa contiene il file di log:**
+- Score medio e totale per ciascun livello di aggressività
+- Evidenziazione automatica della configurazione con score più alto
+- Nome file di ciascuna configurazione generata
+- Data e ora della generazione
+
+**Esempio di log:**
+```
+===== RIEPILOGO SCORE CONFIGURAZIONI GENERATE (2025-08-01T12:34:56) =====
+  Conservative  | Avg Score: 68.20 | Total Score: 272.80 | File: config_autonomous_challenge_conservative_production_ready.json
+⭐ Moderate     | Avg Score: 72.50 | Total Score: 362.50 | File: config_autonomous_challenge_moderate_production_ready.json
+  Aggressive   | Avg Score: 70.10 | Total Score: 420.60 | File: config_autonomous_challenge_aggressive_production_ready.json
+
+La configurazione con score medio più alto è: Moderate (config_autonomous_challenge_moderate_production_ready.json)
+Puoi scegliere quale mettere in produzione tramite production_converter.py.
+```
+
+**Significato degli score:**
+- Lo score medio rappresenta la qualità/efficacia della configurazione (profit factor, win rate, penalità rischio, spread, ecc.)
+- Lo score totale è la somma degli score dei simboli selezionati
+- La configurazione migliore viene solo evidenziata, il deploy rimane manuale
+
+**Come scegliere la configurazione migliore:**
+Consulta il file di log per confrontare gli score e scegli la configurazione più adatta alle tue esigenze tramite lo script `production_converter.py`.
+
+**Nota:** Il log viene aggiornato ad ogni generazione, puoi consultarlo in qualsiasi momento.
 # 📊 Esportazione motivi blocco ordini (logs/trade_decision_report.csv)
 
 Da luglio 2025, ogni volta che il sistema valuta la possibilità di eseguire un ordine (BUY/SELL) e questo viene bloccato (o tutte le condizioni sono OK), il motivo viene salvato automaticamente in un file CSV chiamato `logs/trade_decision_report.csv` nella cartella dei log del progetto.
