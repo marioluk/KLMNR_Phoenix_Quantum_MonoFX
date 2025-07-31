@@ -927,6 +927,7 @@ def main():
     print("Genera configurazioni ottimizzate DA ZERO senza JSON sorgente")
     print("="*70)
 
+
     while True:
         print("\n📋 OPZIONI DISPONIBILI:")
         print("1. 🚀 Genera tutte le configurazioni da zero")
@@ -937,41 +938,75 @@ def main():
 
         try:
             if choice == "1":
-                print("\n⚡ Tipologie disponibili:")
-                print("1. Scalping")
-                print("2. Intraday (Day Trading)")
-                print("3. Swing Trading")
-                print("4. Position Trading")
-                mode_choice = input("👉 Scegli tipologia (1-4): ").strip()
-                mode_map = {
-                    "1": "scalping",
-                    "2": "intraday",
-                    "3": "swing",
-                    "4": "position"
-                }
-                mode = mode_map.get(mode_choice, "intraday")
-                days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
-                optimization_days = int(days) if days.isdigit() else 60
-                optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                print(f"\n🔄 Generazione configurazioni per tipologia '{mode}'...")
-                # Genera e salva tutte le configurazioni, stampa riepilogo score
-                optimizer.generate_all_configs()
-                print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
+                while True:
+                    print("\n⚡ Tipologie disponibili:")
+                    print("1. Scalping")
+                    print("2. Intraday (Day Trading)")
+                    print("3. Swing Trading")
+                    print("4. Position Trading")
+                    print("5. 🔙 Torna al menu principale")
+                    mode_choice = input("👉 Scegli tipologia (1-5): ").strip()
+                    mode_map = {
+                        "1": "scalping",
+                        "2": "intraday",
+                        "3": "swing",
+                        "4": "position"
+                    }
+                    if mode_choice == "5":
+                        break
+                    mode = mode_map.get(mode_choice, None)
+                    if not mode:
+                        print("❌ Scelta non valida, riprova.")
+                        continue
+                    # Mostra parametri della tipologia selezionata
+                    optimizer = AutonomousHighStakesOptimizer()
+                    params = optimizer.get_trading_mode_params(mode)
+                    print(f"\n📊 Parametri per '{mode.upper()}':")
+                    for k, v in params.items():
+                        print(f"  {k}: {v}")
+                    conferma = input("\n✅ Confermi la selezione e vuoi generare le configurazioni? (s/n): ").strip().lower()
+                    if conferma != "s":
+                        print("🔙 Selezione annullata. Torna al menu tipologie.")
+                        continue
+                    days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
+                    optimization_days = int(days) if days.isdigit() else 60
+                    optimizer = AutonomousHighStakesOptimizer(optimization_days)
+                    print(f"\n🔄 Generazione configurazioni per tipologia '{mode}'...")
+                    optimizer.generate_all_configs()
+                    print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
+                    break
             elif choice == "2":
-                print("\n🎯 Scegli livello aggressività:")
-                print("1. 🟢 Conservative")
-                print("2. 🟡 Moderate")
-                print("3. 🔴 Aggressive")
-                level_choice = input("👉 Scegli (1-3): ").strip()
-                aggressiveness = {
-                    "1": "conservative",
-                    "2": "moderate",
-                    "3": "aggressive"
-                }.get(level_choice, "moderate")
-                optimizer = AutonomousHighStakesOptimizer()
-                config = optimizer.generate_optimized_config(aggressiveness)
-                filepath = optimizer.save_config(config, aggressiveness)
-                print(f"✅ Configurazione {aggressiveness} generata e salvata: {os.path.basename(filepath)}")
+                while True:
+                    print("\n🎯 Scegli livello aggressività:")
+                    print("1. 🟢 Conservative")
+                    print("2. 🟡 Moderate")
+                    print("3. 🔴 Aggressive")
+                    print("4. 🔙 Torna al menu principale")
+                    level_choice = input("👉 Scegli (1-4): ").strip()
+                    aggressiveness_map = {
+                        "1": "conservative",
+                        "2": "moderate",
+                        "3": "aggressive"
+                    }
+                    if level_choice == "4":
+                        break
+                    aggressiveness = aggressiveness_map.get(level_choice, None)
+                    if not aggressiveness:
+                        print("❌ Scelta non valida, riprova.")
+                        continue
+                    optimizer = AutonomousHighStakesOptimizer()
+                    config = optimizer.generate_optimized_config(aggressiveness)
+                    print(f"\n📊 Parametri principali per '{aggressiveness.upper()}':")
+                    print(f"  risk_percent: {config['risk_parameters']['risk_percent']}")
+                    print(f"  max_daily_trades: {config['risk_parameters']['max_daily_trades']}")
+                    print(f"  max_concurrent_trades: {config['risk_parameters']['max_concurrent_trades']}")
+                    conferma = input("\n✅ Confermi la selezione e vuoi generare la configurazione? (s/n): ").strip().lower()
+                    if conferma != "s":
+                        print("🔙 Selezione annullata. Torna al menu aggressività.")
+                        continue
+                    filepath = optimizer.save_config(config, aggressiveness)
+                    print(f"✅ Configurazione {aggressiveness} generata e salvata: {os.path.basename(filepath)}")
+                    break
             elif choice == "3":
                 print("Uscita dal programma.")
                 break
