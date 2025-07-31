@@ -2795,6 +2795,15 @@ class QuantumTradingSystem:
         self.max_positions = self._config.config.get('risk_parameters', {}).get('max_positions', 4)
         self.current_positions = 0
         self.trade_count = defaultdict(int)
+        self._last_trade_count_reset = datetime.now().date()
+    def _reset_trade_count_if_new_day(self):
+        """Resetta il trade_count se è iniziato un nuovo giorno e logga lo stato precedente."""
+        today = datetime.now().date()
+        if getattr(self, '_last_trade_count_reset', None) != today:
+            old_counts = dict(self.trade_count)
+            logger.info(f"🔄 [TRADE_COUNT RESET] Nuovo giorno {today}. Stato precedente: {old_counts}")
+            self.trade_count = defaultdict(int)
+            self._last_trade_count_reset = today
         self.metrics_lock = threading.Lock()
         self.position_lock = threading.Lock()
         self.metrics = TradingMetrics()
@@ -3047,6 +3056,8 @@ class QuantumTradingSystem:
                 return
 
             # 1.1. Controllo limite trade giornalieri (opzionale: globale o per simbolo)
+            # Reset trade_count se nuovo giorno
+            self._reset_trade_count_if_new_day()
             risk_params = self._config.config['risk_parameters']
             daily_limit = risk_params.get('max_daily_trades', 5)
             limit_mode = risk_params.get('daily_trade_limit_mode', 'global')
