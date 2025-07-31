@@ -1705,6 +1705,9 @@ class QuantumRiskManager:
 
             size = risk_amount / (sl_pips * pip_size)
 
+            # DEBUG: logga tutti i valori chiave prima di limiti
+            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_size={pip_size} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
+
             # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
             # Leggi max_size_limit da config simbolo, poi globale, poi fallback 0.1
             max_size_limit = self._get_config(symbol, 'max_size_limit', None)
