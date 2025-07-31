@@ -1626,8 +1626,15 @@ class QuantumRiskManager:
 
     @property
     def symbols(self):
-        # Accesso ai simboli tramite _config_manager
-        return list(self._config_manager.config.get('symbols', {}).keys())
+        # Accesso ai simboli tramite _config_manager o direttamente da _config
+        if self._config_manager is not None:
+            return list(self._config_manager.config.get('symbols', {}).keys())
+        elif self._config is not None:
+            # _config può essere un dict o avere l'attributo config
+            if hasattr(self._config, 'config'):
+                return list(self._config.config.get('symbols', {}).keys())
+            return list(self._config.get('symbols', {}).keys())
+        return []
 
     # ... qui prosegue la classe con i metodi che ora useranno self.config_manager.symbols invece di self.symbols ...
     """
