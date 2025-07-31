@@ -65,6 +65,27 @@ class AutonomousHighStakesOptimizer:
             optimized_symbols[symbol] = symbol_params
             total_score += symbol_params['optimization_score']
         config['symbols'] = optimized_symbols
+        # Inserisci sempre pip_size_map globale
+        config['pip_size_map'] = {
+            "EURUSD": 0.0001,
+            "GBPUSD": 0.0001,
+            "USDJPY": 0.01,
+            "USDCHF": 0.0001,
+            "AUDUSD": 0.0001,
+            "USDCAD": 0.0001,
+            "NZDUSD": 0.0001,
+            "BTCUSD": 0.01,
+            "ETHUSD": 0.01,
+            "XAUUSD": 0.1,
+            "XAGUSD": 0.01,
+            "SP500": 0.1,
+            "NAS100": 0.1,
+            "US30": 0.1,
+            "DAX40": 0.1,
+            "FTSE100": 0.1,
+            "JP225": 1.0,
+            "default": 0.0001
+        }
         # Media dei valori spin_threshold per quantum_params globale
         if spin_thresholds:
             config['quantum_params']['spin_threshold'] = round(sum(spin_thresholds) / len(spin_thresholds), 3)
@@ -674,6 +695,27 @@ class AutonomousHighStakesOptimizer:
         risk_parameters["trailing_stop"] = trailing_stop
 
         # --- PRODUZIONE CONFIG ---
+        # Inserisci sempre pip_size_map globale
+        config['pip_size_map'] = config.get('pip_size_map', {
+            "EURUSD": 0.0001,
+            "GBPUSD": 0.0001,
+            "USDJPY": 0.01,
+            "USDCHF": 0.0001,
+            "AUDUSD": 0.0001,
+            "USDCAD": 0.0001,
+            "NZDUSD": 0.0001,
+            "BTCUSD": 0.01,
+            "ETHUSD": 0.01,
+            "XAUUSD": 0.1,
+            "XAGUSD": 0.01,
+            "SP500": 0.1,
+            "NAS100": 0.1,
+            "US30": 0.1,
+            "DAX40": 0.1,
+            "FTSE100": 0.1,
+            "JP225": 1.0,
+            "default": 0.0001
+        })
         production_config = {
             "logging": {
                 "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready_{timestamp_str}.log",

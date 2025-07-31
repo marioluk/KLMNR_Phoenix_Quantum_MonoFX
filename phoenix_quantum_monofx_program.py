@@ -1691,19 +1691,19 @@ class QuantumRiskManager:
 
             # 5. Usa pip value dai dati caricati
             symbol_data = self._symbol_data[symbol]
-            pip_value = symbol_data['pip_value']
+            pip_size = symbol_data['pip_size']
             contract_size = symbol_data.get('contract_size', 1.0)
             volume_min = symbol_data.get('volume_min', None)
             volume_max = symbol_data.get('volume_max', None)
             volume_step = symbol_data.get('volume_step', None)
 
             # 6. Calcola size base
-            if sl_pips <= 0 or pip_value <= 0:
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su sl_pips={sl_pips}, pip_value={pip_value} per {symbol}")
-                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
+            if sl_pips <= 0 or pip_size <= 0:
+                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su sl_pips={sl_pips}, pip_size={pip_size} per {symbol}")
+                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_size={pip_size}")
                 return 0.0
 
-            size = risk_amount / (sl_pips * pip_value)
+            size = risk_amount / (sl_pips * pip_size)
 
             # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
             # Leggi max_size_limit da config simbolo, poi globale, poi fallback 0.1
@@ -1736,12 +1736,12 @@ class QuantumRiskManager:
                 f"Risk Percent: {risk_percent}\n"
                 f"Risk Amount: {risk_amount}\n"
                 f"SL Pips: {sl_pips}\n"
-                f"Pip Value: {pip_value}\n"
+                f"Pip Size: {pip_size}\n"
                 f"Contract Size: {contract_size}\n"
                 f"Volume Min: {volume_min}\n"
                 f"Volume Max: {volume_max}\n"
                 f"Volume Step: {volume_step}\n"
-                f"Size (pre-limiti): {risk_amount / (sl_pips * pip_value) if sl_pips > 0 and pip_value > 0 else 'N/A'}\n"
+                f"Size (pre-limiti): {risk_amount / (sl_pips * pip_size) if sl_pips > 0 and pip_size > 0 else 'N/A'}\n"
                 f"Size (post-limiti): {size}\n"
                 "------------------------------------------------------\n"
             )
@@ -1751,7 +1751,7 @@ class QuantumRiskManager:
                 f"Symbol: {symbol} ({symbol_type})\n"
                 f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
                 f"SL: {sl_pips:.2f} pips\n"
-                f"Pip Value: ${pip_value:.4f}\n"
+                f"Pip Size: {pip_size}\n"
                 f"Contract Size: {contract_size}\n"
                 f"Size: {size:.4f}\n"
                 "======================================================\n"
@@ -2071,20 +2071,20 @@ class QuantumRiskManager:
             contract_size = risk_config.get('contract_size', 1.0)
             point = info.point
 
-            # 1. Cerca pip_value per simbolo in config (override per simbolo)
-            pip_value = None
-            if 'pip_value' in risk_config:
-                pip_value = float(risk_config['pip_value'])
+            # 1. Cerca pip_size per simbolo in config (override per simbolo)
+            pip_size = None
+            if 'pip_size' in risk_config:
+                pip_size = float(risk_config['pip_size'])
             else:
-                # 2. Cerca pip_value_map globale
-                pip_map = config.get('pip_value_map', {})
-                pip_value = pip_map.get(symbol)
-                if pip_value is None:
-                    pip_value = pip_map.get('default', 10.0)
-                pip_value = float(pip_value) * contract_size
+                # 2. Cerca pip_size_map globale
+                pip_map = config.get('pip_size_map', {})
+                pip_size = pip_map.get(symbol)
+                if pip_size is None:
+                    pip_size = pip_map.get('default', 0.0001)
+                pip_size = float(pip_size)
 
             self._symbol_data[symbol] = {
-                'pip_value': pip_value,
+                'pip_size': pip_size,
                 'volume_step': info.volume_step,
                 'digits': info.digits,
                 'volume_min': info.volume_min,
@@ -2092,11 +2092,11 @@ class QuantumRiskManager:
                 'contract_size': contract_size
             }
 
-            logger.debug(f"Dati caricati per {symbol}: PipValue=${pip_value:.2f}, ContractSize={contract_size}, Point={point}")
+            logger.debug(f"Dati caricati per {symbol}: PipSize={pip_size}, ContractSize={contract_size}, Point={point}")
             logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
                         f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
                         f"ContractSize={contract_size} | "
-                        f"PipValue=${pip_value:.4f} | "
+                        f"PipSize={pip_size} | "
                         f"Point={point}")
             return True
         except Exception as e:
