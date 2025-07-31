@@ -968,10 +968,18 @@ def main():
                     if conferma != "s":
                         print("🔙 Selezione annullata. Torna al menu tipologie.")
                         continue
-                    days = input("📅 Giorni per ottimizzazione (default: 60): ").strip()
-                    optimization_days = int(days) if days.isdigit() else 60
+                    # Imposta giorni di ottimizzazione suggeriti in base alla tipologia
+                    giorni_ottimali = {
+                        "scalping": 30,
+                        "intraday": 60,
+                        "swing": 120,
+                        "position": 180
+                    }
+                    default_days = giorni_ottimali.get(mode, 60)
+                    days = input(f"📅 Giorni per ottimizzazione (default: {default_days}): ").strip()
+                    optimization_days = int(days) if days.isdigit() else default_days
                     optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                    print(f"\n🔄 Generazione configurazioni per tipologia '{mode}'...")
+                    print(f"\n🔄 Generazione configurazioni per tipologia '{mode}' ({optimization_days} giorni)...")
                     optimizer.generate_all_configs()
                     print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
                     break

@@ -3,13 +3,28 @@
 Ottimizzatore autonomo per la generazione di configurazioni di trading ad alte prestazioni per Phoenix Quantum MonoFX.
 
 ## Funzionalità principali
-- Generazione automatica di configurazioni per diverse tipologie di trading: scalping, intraday, swing, position.
-- Validazione automatica dei parametri per coerenza con la tipologia di trading selezionata.
-- Logging centralizzato di tutti i warning e errori di validazione nella cartella `logs`.
-- Blocco della generazione della configurazione in caso di errori critici sui parametri.
-- Riepilogo finale dei warning trovati, sia su console che su file.
-- Parametri ottimizzati per ogni simbolo selezionato, con override e normalizzazione.
-- Configurazioni pronte per l'utilizzo in ambiente di produzione MetaTrader5.
+
+## Novità: Menu Interattivo e Automazione Giorni Ottimali
+
+Lo script `autonomous_challenge_optimizer.py` ora include:
+
+- **Menu interattivo** per la selezione della tipologia di trading (Scalping, Intraday, Swing, Position).
+- Visualizzazione dei parametri principali per ogni tipologia prima della conferma.
+- Possibilità di annullare la selezione e tornare al menu senza uscire dal programma.
+- **Suggerimento automatico dei giorni ottimali** per il backtest in base alla tipologia scelta:
+  - Scalping: 30 giorni
+  - Intraday: 60 giorni
+  - Swing: 120 giorni
+  - Position: 180 giorni
+- Conferma esplicita prima della generazione delle configurazioni.
+
+Esempio di flusso:
+
+1. Scegli la tipologia di trading dal menu.
+2. Visualizza i parametri associati.
+3. Conferma la selezione.
+4. Inserisci (o accetta) il valore suggerito per i giorni di ottimizzazione.
+5. Genera e salva le configurazioni.
 
 ## Struttura delle cartelle
 - `backtest_mono/` : contiene lo script ottimizzatore e la logica di generazione.

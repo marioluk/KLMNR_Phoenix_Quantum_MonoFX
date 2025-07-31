@@ -1,5 +1,20 @@
 ## README Configurazione
 
+## Logica automatica: giorni ottimali e parametri per tipologia
+
+La generazione delle configurazioni tramite `autonomous_challenge_optimizer.py` è ora completamente automatizzata:
+
+- Il menu interattivo mostra i parametri principali per ogni tipologia di trading.
+- I giorni di ottimizzazione vengono suggeriti automaticamente in base alla tipologia selezionata:
+  - Scalping: 30 giorni
+  - Intraday: 60 giorni
+  - Swing: 120 giorni
+  - Position: 180 giorni
+- Tutti i parametri sono validati e coerenti con la tipologia scelta.
+- Possibilità di tornare indietro senza uscire dal programma.
+
+Consulta la tabella parametri nel codice per dettagli su SL/TP/TS e range operativi.
+
 ### Log dettagliato calcolo size (risk management)
 Per abilitare il log dettagliato del calcolo della size (incluso [SIZE-DEBUG] con risk_amount, sl_pips, pip_value, contract_size, size e tipo strumento):
 
