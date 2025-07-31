@@ -31,7 +31,9 @@
     - Se emergono nuovi edge case, aggiorna la checklist e procedi con fix mirati.
 
 
-- [ ] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
+- [x] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
+
+- [ ] **[ALTA]** il lot size è sempre a 0.1 controllare la funizone di calcolo tenendo in cosiderazione che la size deve essere dimensionata in base alla massima esposizione consentita e proporzionalmente nei vari simboli in modo tale che profitti e perdite dei singoli simboli siano simili
 
 - [ ] **[ALTA]** il livello di sl e tp degli indici è troppo avvicinato
 

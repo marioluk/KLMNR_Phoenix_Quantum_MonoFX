@@ -1665,31 +1665,24 @@ class QuantumRiskManager:
     2. Calcolo Dimensioni Posizione
     """
     def calculate_position_size(self, symbol: str, price: float, signal: str) -> float:
-        """Calcola dimensione posizione con gestione robusta degli errori e log dettagliato"""
+        """Calcola dimensione posizione normalizzata per rischio e pip value, con limiti di esposizione globale e log dettagliato"""
         try:
-            # 1. Verifica parametri iniziali
             if not self._load_symbol_data(symbol):
                 logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
                 logger.error(f"Impossibile caricare dati simbolo {symbol}")
                 return 0.0
 
-            # 2. Ottieni parametri di rischio NORMALIZZATI
             risk_config = self.get_risk_config(symbol)
             account = mt5.account_info()
-
             if not account:
                 logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
                 logger.error("Impossibile ottenere info account")
                 return 0.0
 
-            # 3. Calcola rischio assoluto in valuta base
-            risk_percent = risk_config.get('risk_percent', 0.02)  # 2% default
+            # Parametri base
+            risk_percent = risk_config.get('risk_percent', 0.02)
             risk_amount = account.equity * risk_percent
-
-            # 4. Calcola SL in pips con volatilità
             sl_pips = self._calculate_sl_pips(symbol)
-
-            # 5. Usa pip value dai dati caricati
             symbol_data = self._symbol_data[symbol]
             pip_size = symbol_data['pip_size']
             contract_size = symbol_data.get('contract_size', 1.0)
@@ -1697,40 +1690,52 @@ class QuantumRiskManager:
             volume_max = symbol_data.get('volume_max', None)
             volume_step = symbol_data.get('volume_step', None)
 
-            # 6. Calcola size base
-            if sl_pips <= 0 or pip_size <= 0:
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su sl_pips={sl_pips}, pip_size={pip_size} per {symbol}")
-                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_size={pip_size}")
+            # Calcolo pip_value (pip_size * contract_size)
+            pip_value = pip_size * contract_size
+            # Target pip value normalizzato (es: 10 USD a pip per tutti i simboli)
+            target_pip_value = self._get_config(symbol, 'target_pip_value', 10.0)
+            if pip_value <= 0 or sl_pips <= 0:
+                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
                 return 0.0
 
-            size = risk_amount / (sl_pips * pip_size)
+            # Size normalizzata per pip_value: size = (risk_amount / sl_pips) / pip_value
+            size = (risk_amount / sl_pips) / pip_value
 
-            # DEBUG: logga tutti i valori chiave prima di limiti
-            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_size={pip_size} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
+            # Normalizza per target_pip_value (opzionale, per rendere P&L simile tra simboli)
+            size = size * (pip_value / target_pip_value)
 
-            # SAFETY CHECK: Limite massimo assoluto per evitare position sizing eccessivi
-            # Leggi max_size_limit da config simbolo, poi globale, poi fallback 0.1
+            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
+
+            # Limite massimo assoluto per simbolo
             max_size_limit = self._get_config(symbol, 'max_size_limit', None)
             if max_size_limit is None:
-                # Prova a leggere da risk_parameters globale
                 config = self.config.config if hasattr(self.config, 'config') else self.config
                 max_size_limit = config.get('risk_parameters', {}).get('max_size_limit', 0.1)
             if size > max_size_limit:
                 logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
 
-            # 7. Applica limiti
+            # Limite esposizione globale (sommatoria size * contract_size su tutti i simboli)
+            max_global_exposure = self._get_config(symbol, 'max_global_exposure', None)
+            if max_global_exposure is not None:
+                total_exposure = 0.0
+                for sym in self.symbols:
+                    if sym == symbol:
+                        total_exposure += size * contract_size
+                    else:
+                        # Stima size attuale per altri simboli (puoi migliorare con posizioni aperte reali)
+                        total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
+                if total_exposure > max_global_exposure:
+                    logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
+                    size = 0.0
+
+            # Applica limiti broker e arrotondamenti
             size = self._apply_size_limits(symbol, size)
 
-            # Determina tipo strumento per log
-            if symbol in ['XAUUSD', 'XAGUSD']:
-                symbol_type = 'Metallo'
-            elif symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']:
-                symbol_type = 'Indice'
-            else:
-                symbol_type = 'Forex'
+            # Salva la size calcolata per uso futuro (esposizione globale)
+            self._symbol_data[symbol]['last_size'] = size
 
-            # LOG DETTAGLIATO DEBUG
+            symbol_type = 'Metallo' if symbol in ['XAUUSD', 'XAGUSD'] else ('Indice' if symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'] else 'Forex')
             logger.debug(
                 f"\n-------------------- [SIZE-DEBUG] --------------------\n"
                 f"Symbol: {symbol} ({symbol_type})\n"
@@ -1741,27 +1746,25 @@ class QuantumRiskManager:
                 f"SL Pips: {sl_pips}\n"
                 f"Pip Size: {pip_size}\n"
                 f"Contract Size: {contract_size}\n"
+                f"Pip Value: {pip_value}\n"
+                f"Target Pip Value: {target_pip_value}\n"
                 f"Volume Min: {volume_min}\n"
                 f"Volume Max: {volume_max}\n"
                 f"Volume Step: {volume_step}\n"
-                f"Size (pre-limiti): {risk_amount / (sl_pips * pip_size) if sl_pips > 0 and pip_size > 0 else 'N/A'}\n"
-                f"Size (post-limiti): {size}\n"
+                f"Size (post-normalizzazione): {size}\n"
                 "------------------------------------------------------\n"
             )
-
             logger.info(
                 f"\n==================== [SIZE-DEBUG] ====================\n"
                 f"Symbol: {symbol} ({symbol_type})\n"
                 f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
                 f"SL: {sl_pips:.2f} pips\n"
-                f"Pip Size: {pip_size}\n"
-                f"Contract Size: {contract_size}\n"
+                f"Pip Value: {pip_value}\n"
+                f"Target Pip Value: {target_pip_value}\n"
                 f"Size: {size:.4f}\n"
                 "======================================================\n"
             )
-
             return size
-
         except Exception as e:
             logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
             return 0.0
