@@ -19,19 +19,17 @@
 - [x] **Analisi codice** (condizioni if, chiamate effettive invio ordini)
 
 
-[IN VALIDAZIONE] **Fix lot size e parametri rischio:**
-    - [in validazione 30/07/2025] Nuova generazione config: pip_value_map, spin_threshold, max_spread e trailing_stop sempre presenti e robusti. Size, SL e TP ora dovrebbero essere corretti e coerenti. Da monitorare live.
+[x] **Fix lot size e parametri rischio:**
+    - [done 31/07/2025] Nuova generazione config: pip_value_map, spin_threshold, max_spread e trailing_stop sempre presenti e robusti. Size, SL e TP ora sono corretti e coerenti, validati anche live.
 
-    - Se i test live confermano il comportamento corretto, spuntare anche:
-        - [MEDIA] Validazione automatica della configurazione all’avvio
-        - [MEDIA] Centralizzare magic number e fallback/configurazioni
-        - [MEDIA] Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono
-        - [MEDIA] Togliere tutti i riferimenti a legacy e sostituire con mono
+    - TODO:
+        - [x] [MEDIA] Validazione automatica della configurazione all’avvio [done 31/07/2025]
+        - [x] [MEDIA] Centralizzare magic number e fallback/configurazioni [done 31/07/2025]
 
     - Se emergono nuovi edge case, aggiorna la checklist e procedi con fix mirati.
 
 
-- [test] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
+- [x] **[ALTA]** Limite massimo di operazioni giornaliere max_daily_trades ora robusto e persistente [fix 31/07/2025]
 
 - [x] **[ALTA]** il lot size è sempre a 0.1 controllare la funizone di calcolo tenendo in cosiderazione che la size deve essere dimensionata in base alla massima esposizione consentita e proporzionalmente nei vari simboli in modo tale che profitti e perdite dei singoli simboli siano simili
 
@@ -81,6 +79,8 @@
 - [ ] **[ALTA] Storico errori/warning** e miglioramento UI/UX (responsive, dark/light, icone)
 + [x] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
 +     - [done 30/07/2025] Implementato bottone, API Flask e logica JS per generazione e download CSV direttamente dalla dashboard.
+- [ ] **[MEDIA]** Possibilità di testare e confrontare tutti i tipi di trading in backtest_mono
+- [ ] **[MEDIA]** Togliere tutti i riferimenti a legacy e sostituire con mono
 
 ## 3. Parsing, Analisi e Debug Strategia
 
