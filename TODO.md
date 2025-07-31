@@ -37,7 +37,7 @@
 
 - [x] **[ALTA]** Controllare se funziona il COOLDOWN
 
-- [ ] **[ALTA]** comportamento anomalo su SP500 E NAS100 vanno in cooldown senza aver aperto posizioni di trading
+- [x] **[ALTA]** comportamento anomalo su SP500 E NAS100 vanno in cooldown senza aver aperto posizioni di trading
 
 - [ ] **[ALTA]** il livello di sl e tp degli indici è troppo stretto 
 

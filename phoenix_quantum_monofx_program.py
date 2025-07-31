@@ -2817,8 +2817,40 @@ class QuantumTradingSystem:
         self.risk_manager = QuantumRiskManager(self._config.config, self.engine, self)  # Passa il dict config
         self.max_positions = self._config.config.get('risk_parameters', {}).get('max_positions', 4)
         self.current_positions = 0
+        import json
         self.trade_count = defaultdict(int)
         self._last_trade_count_reset = datetime.now().date()
+        self._trade_count_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_count_state.json')
+        self._load_trade_count_state()
+    def _load_trade_count_state(self):
+        import json
+        try:
+            if os.path.isfile(self._trade_count_file):
+                with open(self._trade_count_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                file_date = data.get('date')
+                today = datetime.now().strftime('%Y-%m-%d')
+                if file_date == today:
+                    self.trade_count = defaultdict(int, data.get('trade_count', {}))
+                    self._last_trade_count_reset = datetime.strptime(file_date, '%Y-%m-%d').date()
+                else:
+                    self.trade_count = defaultdict(int)
+                    self._last_trade_count_reset = datetime.now().date()
+        except Exception as e:
+            logger.error(f"Errore caricamento stato trade_count: {e}")
+
+    def _save_trade_count_state(self):
+        import json
+        try:
+            os.makedirs(os.path.dirname(self._trade_count_file), exist_ok=True)
+            data = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'trade_count': dict(self.trade_count)
+            }
+            with open(self._trade_count_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f)
+        except Exception as e:
+            logger.error(f"Errore salvataggio stato trade_count: {e}")
         # Inizializza qui tutte le variabili di tempo per evitare AttributeError
         self.last_position_check = 0
         self.last_connection_check = 0
@@ -2861,13 +2893,14 @@ class QuantumTradingSystem:
         logger.info(f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}")
 
     def _reset_trade_count_if_new_day(self):
-        """Resetta il trade_count se è iniziato un nuovo giorno e logga lo stato precedente."""
+        """Resetta il trade_count se è iniziato un nuovo giorno e logga lo stato precedente. Salva su file."""
         today = datetime.now().date()
         if getattr(self, '_last_trade_count_reset', None) != today:
             old_counts = dict(self.trade_count)
             logger.info(f"🔄 [TRADE_COUNT RESET] Nuovo giorno {today}. Stato precedente: {old_counts}")
             self.trade_count = defaultdict(int)
             self._last_trade_count_reset = today
+            self._save_trade_count_state()
     def _safe_sleep(self, seconds):
         """Sleep sicuro che ignora eventuali eccezioni"""
         try:
@@ -3251,6 +3284,7 @@ class QuantumTradingSystem:
             try:
                 with self.metrics_lock:
                     self.trade_count[symbol] += 1
+                    self._save_trade_count_state()
                     self.engine.record_trade_close(symbol)
                 logger.info(f"Metriche aggiornate per {symbol}")
             except Exception as e:
