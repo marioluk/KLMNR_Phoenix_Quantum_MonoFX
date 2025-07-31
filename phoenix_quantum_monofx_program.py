@@ -2821,7 +2821,17 @@ class QuantumTradingSystem:
         self.trade_count = defaultdict(int)
         self._last_trade_count_reset = datetime.now().date()
         self._trade_count_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_count_state.json')
+        # Inizializza qui tutte le variabili di tempo per evitare AttributeError, PRIMA di qualsiasi return/errore
+        self.last_position_check = 0
+        self.last_connection_check = 0
+        self.last_account_update = 0
+        self.last_tick_check = 0
+        self.last_buffer_check = 0
+        self.metrics_lock = threading.Lock()
+        self.position_lock = threading.Lock()
+        self.metrics = TradingMetrics()
         self._load_trade_count_state()
+        # ...il resto dell'inizializzazione rimane invariato...
     def _load_trade_count_state(self):
         import json
         try:
