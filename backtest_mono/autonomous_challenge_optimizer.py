@@ -209,51 +209,51 @@ class AutonomousHighStakesOptimizer:
     def get_trading_mode_params(self, mode: str) -> dict:
         presets = {
             'scalping': {
-                'max_position_hours': 0.1,
-                'max_daily_trades': 40,
-                'position_cooldown': 60,
-                'stop_loss_pips': 6,
-                'take_profit_pips': 10,
-                'buffer_size': 60,
-                'spin_window': 8,
-                'min_spin_samples': 2,
-                'signal_cooldown': 60,
+                'max_position_hours': 0.5,           # Range valido: 0.05-2
+                'max_daily_trades': 30,              # Range valido: 20-100
+                'position_cooldown': 120,            # Valore tipico
+                'stop_loss_pips': 8,                 # SL stretto
+                'take_profit_pips': 15,              # TP stretto
+                'buffer_size': 150,                  # Range valido: 100-300
+                'spin_window': 15,                   # Range valido: 10-30
+                'min_spin_samples': 4,               # Valore tipico
+                'signal_cooldown': 120,              # Range valido: 60-300
                 'comment': 'Scalping: altissima velocità, molti trade al giorno, spread ridotto'
             },
             'intraday': {
-                'max_position_hours': 6,
-                'max_daily_trades': 12,
-                'position_cooldown': 600,
-                'stop_loss_pips': 18,
-                'take_profit_pips': 30,
-                'buffer_size': 200,
-                'spin_window': 20,
-                'min_spin_samples': 5,
-                'signal_cooldown': 300,
+                'max_position_hours': 8,             # Range valido: 2-12
+                'max_daily_trades': 10,              # Range valido: 5-20
+                'position_cooldown': 900,            # Valore tipico
+                'stop_loss_pips': 20,                # SL medio
+                'take_profit_pips': 40,              # TP medio
+                'buffer_size': 500,                  # Range valido: 300-800
+                'spin_window': 40,                   # Range valido: 20-60
+                'min_spin_samples': 8,               # Valore tipico
+                'signal_cooldown': 600,              # Range valido: 300-1200
                 'comment': 'Intraday: nessuna posizione overnight, sfrutta volatilità giornaliera'
             },
             'swing': {
-                'max_position_hours': 72,
-                'max_daily_trades': 4,
-                'position_cooldown': 3600,
-                'stop_loss_pips': 60,
-                'take_profit_pips': 120,
-                'buffer_size': 500,
-                'spin_window': 40,
-                'min_spin_samples': 10,
-                'signal_cooldown': 1800,
+                'max_position_hours': 48,            # Range valido: 24-96
+                'max_daily_trades': 3,               # Range valido: 1-6
+                'position_cooldown': 7200,           # Valore tipico
+                'stop_loss_pips': 80,                # SL ampio
+                'take_profit_pips': 180,             # TP ampio
+                'buffer_size': 1200,                 # Range valido: 800-2000
+                'spin_window': 80,                   # Range valido: 40-120
+                'min_spin_samples': 20,              # Valore tipico
+                'signal_cooldown': 2400,             # Range valido: 1200-3600
                 'comment': 'Swing Trading: coglie oscillazioni di prezzo più ampie'
             },
             'position': {
-                'max_position_hours': 720,
-                'max_daily_trades': 1,
-                'position_cooldown': 86400,
-                'stop_loss_pips': 200,
-                'take_profit_pips': 400,
-                'buffer_size': 1200,
-                'spin_window': 80,
-                'min_spin_samples': 20,
-                'signal_cooldown': 43200,
+                'max_position_hours': 168,           # Range valido: 96-336
+                'max_daily_trades': 1,               # Range valido: 1-2
+                'position_cooldown': 43200,          # Valore tipico
+                'stop_loss_pips': 300,               # SL molto ampio
+                'take_profit_pips': 600,             # TP molto ampio
+                'buffer_size': 2000,                 # Range valido: 1500-5000
+                'spin_window': 150,                  # Range valido: 100-300
+                'min_spin_samples': 40,              # Valore tipico
+                'signal_cooldown': 7200,             # Range valido: 3600-14400
                 'comment': 'Position Trading: segue trend di lungo periodo, operatività tranquilla'
             }
         }
