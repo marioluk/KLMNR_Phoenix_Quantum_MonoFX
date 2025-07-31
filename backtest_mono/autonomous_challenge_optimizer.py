@@ -1,3 +1,55 @@
+    def validate_trading_params(self, params: dict, mode: str, log_file: str = None) -> list:
+        """
+        Valida i parametri di trading rispetto alla tipologia selezionata.
+        Restituisce una lista di warning/suggerimenti.
+        Se log_file è fornito, scrive i warning anche su file.
+        """
+        warnings = []
+        ranges = {
+            'scalping': {
+                'max_position_hours': (0, 0.5),
+                'buffer_size': (10, 100),
+                'spin_window': (2, 15),
+                'signal_cooldown': (10, 120),
+                'max_daily_trades': (20, 100)
+            },
+            'intraday': {
+                'max_position_hours': (1, 12),
+                'buffer_size': (50, 300),
+                'spin_window': (10, 30),
+                'signal_cooldown': (60, 600),
+                'max_daily_trades': (5, 20)
+            },
+            'swing': {
+                'max_position_hours': (12, 120),
+                'buffer_size': (200, 800),
+                'spin_window': (20, 60),
+                'signal_cooldown': (600, 3600),
+                'max_daily_trades': (1, 6)
+            },
+            'position': {
+                'max_position_hours': (120, 1000),
+                'buffer_size': (500, 2000),
+                'spin_window': (40, 120),
+                'signal_cooldown': (3600, 86400),
+                'max_daily_trades': (1, 2)
+            }
+        }
+        ref = ranges.get(mode, ranges['intraday'])
+        for key, (min_val, max_val) in ref.items():
+            val = params.get(key)
+            if val is not None and not (min_val <= val <= max_val):
+                warnings.append(f"Parametro '{key}'={val} fuori range per '{mode}' [{min_val}-{max_val}]")
+        # Scrivi su file se richiesto
+        if log_file and warnings:
+            try:
+                with open(log_file, "a", encoding="utf-8") as f:
+                    f.write(f"[VALIDAZIONE PARAMETRI - {mode.upper()}] {datetime.now().isoformat()}\n")
+                    for w in warnings:
+                        f.write(f"  - {w}\n")
+            except Exception as e:
+                print(f"[VALIDAZIONE PARAMETRI] Errore scrittura log: {e}")
+        return warnings
 
 # ===============================
 # AUTONOMOUS HIGH STAKES OPTIMIZER
@@ -30,6 +82,20 @@ class AutonomousHighStakesOptimizer:
     def generate_optimized_config_for_mode(self, aggressiveness: str, mode: str) -> Dict:
         # Ottieni parametri tipologia trading
         params = self.get_trading_mode_params(mode)
+        # Validazione automatica parametri globali
+        logs_dir = os.path.join(self.base_dir, "logs")
+        os.makedirs(logs_dir, exist_ok=True)
+        log_file = os.path.join(logs_dir, f"log_param_validation_{mode}_{aggressiveness}.log")
+        summary_file = os.path.join(logs_dir, f"summary_param_validation_{mode}_{aggressiveness}.log")
+        all_warnings = []
+        warnings = self.validate_trading_params(params, mode, log_file=log_file)
+        if warnings:
+            print(f"[VALIDAZIONE PARAMETRI - {mode.upper()}] WARNING:")
+            for w in warnings:
+                print(f"  - {w}")
+            print(f"[VALIDAZIONE PARAMETRI] Log scritto su: {log_file}")
+            print(f"❌ Configurazione BLOCCATA: parametri globali fuori range.")
+            all_warnings.extend([f"GLOBAL: {w}" for w in warnings])
         config = self.create_base_config_template()
         config['metadata']['trading_mode'] = mode
         config['metadata']['comment'] = params['comment']
@@ -51,21 +117,41 @@ class AutonomousHighStakesOptimizer:
         optimized_symbols = {}
         total_score = 0
         spin_thresholds = []
+        # Validazione parametri dei singoli simboli
         for symbol in optimal_symbols:
             symbol_params = self.optimize_symbol_parameters(symbol, aggressiveness)
+            symbol_warnings = self.validate_trading_params(symbol_params, mode, log_file=log_file)
+            if symbol_warnings:
+                print(f"[VALIDAZIONE PARAMETRI - {mode.upper()}][{symbol}] WARNING:")
+                for w in symbol_warnings:
+                    print(f"  - {w}")
+                print(f"[VALIDAZIONE PARAMETRI] Log scritto su: {log_file}")
+                print(f"❌ Configurazione BLOCCATA: parametri simbolo '{symbol}' fuori range.")
+                all_warnings.extend([f"{symbol}: {w}" for w in symbol_warnings])
             # Normalizza spin_threshold tra 0.15 e 1.0
             st = symbol_params.get('spin_threshold', 0.25)
             st = max(0.15, min(float(st), 1.0))
             symbol_params['spin_threshold'] = st
-            # Inserisci anche come quantum_params_override per ogni simbolo
             if 'quantum_params_override' not in symbol_params:
                 symbol_params['quantum_params_override'] = {}
             symbol_params['quantum_params_override']['spin_threshold'] = st
             spin_thresholds.append(st)
             optimized_symbols[symbol] = symbol_params
             total_score += symbol_params['optimization_score']
+        # Se ci sono warning, blocca la generazione e scrivi riepilogo
+        if all_warnings:
+            print("\n===== RIEPILOGO WARNING PARAMETRI TROVATI =====")
+            for w in all_warnings:
+                print(f"  - {w}")
+            try:
+                with open(summary_file, "a", encoding="utf-8") as f:
+                    f.write(f"[RIEPILOGO PARAMETRI - {mode.upper()} - {aggressiveness}] {datetime.now().isoformat()}\n")
+                    for w in all_warnings:
+                        f.write(f"  - {w}\n")
+            except Exception as e:
+                print(f"[RIEPILOGO PARAMETRI] Errore scrittura log: {e}")
+            raise ValueError(f"Parametri fuori range: {all_warnings}")
         config['symbols'] = optimized_symbols
-        # Inserisci sempre pip_size_map globale
         config['pip_size_map'] = {
             "EURUSD": 0.0001,
             "GBPUSD": 0.0001,
@@ -86,7 +172,6 @@ class AutonomousHighStakesOptimizer:
             "JP225": 1.0,
             "default": 0.0001
         }
-        # Media dei valori spin_threshold per quantum_params globale
         if spin_thresholds:
             config['quantum_params']['spin_threshold'] = round(sum(spin_thresholds) / len(spin_thresholds), 3)
         else:
