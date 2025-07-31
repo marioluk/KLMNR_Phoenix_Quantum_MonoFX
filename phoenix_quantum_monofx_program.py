@@ -2054,7 +2054,7 @@ class QuantumRiskManager:
     """
     
     def _load_symbol_data(self, symbol: str) -> bool:
-        """Calcolo preciso del pip value per tutti i tipi di strumenti, con supporto pip_value_map da config"""
+        """Calcolo preciso del pip size per tutti i tipi di strumenti, con supporto pip_size_map da config"""
         try:
             if symbol in self._symbol_data:
                 return True

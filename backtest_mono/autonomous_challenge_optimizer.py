@@ -736,19 +736,19 @@ class AutonomousHighStakesOptimizer:
             "quantum_params": quantum_params,
             "risk_parameters": risk_parameters,
             "symbols": symbols,
-            "pip_value_map": {
-                "EURUSD": 10.0,
-                "GBPUSD": 10.0,
-                "USDJPY": 10.0,
-                "USDCHF": 10.0,
-                "XAUUSD": 1.0,
-                "XAGUSD": 0.5,
+            "pip_size_map": {
+                "EURUSD": 0.0001,
+                "GBPUSD": 0.0001,
+                "USDJPY": 0.01,
+                "USDCHF": 0.0001,
+                "XAUUSD": 0.01,
+                "XAGUSD": 0.01,
                 "SP500": 1.0,
                 "NAS100": 1.0,
                 "US30": 1.0,
                 "BTCUSD": 0.01,
                 "ETHUSD": 0.01,
-                "default": 10.0
+                "default": 0.0001
             },
             "challenge_specific": get_section("challenge_specific", {
                 "step1_target": 8,
