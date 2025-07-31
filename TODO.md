@@ -30,6 +30,11 @@
 
     - Se emergono nuovi edge case, aggiorna la checklist e procedi con fix mirati.
 
+
+- [ ] **[ALTA]** non funziona il limite massimo di operazioni giornaliere max_daily_trades
+
+- [ ] **[ALTA]** il livello di sl e tp degli indici è troppo avvicinato
+
 - [ ] **[ALTA]** controllare tutti i parametri che determinano l'estensione oraria della    strategia, ossia paragonare la dimensione del buffer e degli altri parametri che incidono sul periodo e confrontarli con i timeframe da m1 a h1
 
 - [ ] **[ALTA]** controllare stop E TAKE PROFIT PERCHé SONO ANCORA STRETTI E TROPPO VICINI AL PREZZO D'INGRESSO
@@ -39,6 +44,8 @@
 - [ ] **[ALTA]** avvicinarsi alla soglia soft del 2% del drawdown tra 1% e il 2%
 
 - [ ] **[ALTA]** reintrodurre la possibilità di applicare il massimo numero di trade giornalieri al singolo simbolo o globali
+
+
 
 > Questo file è la **roadmap e checklist ufficiale** del progetto Phoenix Quantum MonoFX.
 > Contiene tutte le attività aperte, le priorità, le idee di miglioramento e le implementazioni pianificate.
