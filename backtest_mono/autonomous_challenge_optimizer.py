@@ -79,7 +79,7 @@ logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
     # =============================
-    # PARAMETRI PRINCIPALI - DESCRIZIONE
+    # PARAMETRI PRINCIPALI - DESCRIZIONE dettagliata
     # =============================
     # max_position_hours: Durata massima di una posizione aperta (in ore). Limita l’esposizione temporale del trade.
     # max_daily_trades: Numero massimo di trade che il sistema può aprire in una giornata. Controlla la frequenza operativa.
