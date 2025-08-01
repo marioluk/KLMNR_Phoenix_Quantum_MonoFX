@@ -2236,6 +2236,8 @@ class TradingMetrics:
         logger.info(f"   Profit Factor: {summary['profit_factor']:.2f}")
 
 
+# [2025-08-01] Miglioria: Tutti i limiti di drawdown (safe_limit, soft_limit, hard_limit) sono ora completamente gestiti da file di configurazione.
+# Questi parametri sono sempre presenti nel config JSON e utilizzati in modo centralizzato per la gestione del rischio e la protezione operativa.
 
 class QuantumTradingSystem:
     def get_dynamic_risk_percent(self):

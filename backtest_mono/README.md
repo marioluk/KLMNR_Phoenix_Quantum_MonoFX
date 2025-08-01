@@ -1,3 +1,7 @@
+# ## [2025-08-01] Migliorie gestione drawdown
+# - safe_limit, soft_limit e hard_limit sono ora sempre presenti nel file di configurazione generato.
+# - Tutta la logica di gestione del rischio e protezione drawdown è ora completamente config-driven.
+# - Verificato l’utilizzo corretto di tutti i limiti nel sistema di trading principale.
 # Autonomous High Stakes Optimizer
 
 Ottimizzatore autonomo per la generazione di configurazioni di trading ad alte prestazioni per Phoenix Quantum MonoFX.
