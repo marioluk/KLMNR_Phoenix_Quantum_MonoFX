@@ -1843,28 +1843,29 @@ class QuantumRiskManager:
     
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
         try:
-            # min_sl: 1) override simbolo, 2) risk_parameters, 3) fallback
-            min_sl = self._get_config(symbol, 'stop_loss_pips', None)
+            # --- LOG avanzato: mostra da dove vengono i parametri ---
+            min_sl = None
+            min_sl_source = ''
+            # 1. Prova override simbolo (risk_management)
+            symbol_config = self._get_config(symbol, 'stop_loss_pips', None)
+            if symbol_config is not None:
+                min_sl = symbol_config
+                min_sl_source = 'override symbol (stop_loss_pips)'
+            else:
+                # 2. Prova min_sl_distance_pips (mappa per simbolo)
+                min_sl_map = self._get_config(symbol, 'min_sl_distance_pips', None)
+                if min_sl_map is not None:
+                    min_sl = min_sl_map
+                    min_sl_source = 'risk_parameters (min_sl_distance_pips)'
             if min_sl is None:
-                min_sl = self._get_config(symbol, 'min_sl_distance_pips', None)
-            if min_sl is None:
-                forex = ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD']
-                indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
-                oro = ['XAUUSD', 'XAGUSD']
-                crypto = ['BTCUSD', 'ETHUSD']
-                if symbol in forex:
-                    min_sl = 250
-                elif symbol in indici:
-                    min_sl = 400
-                elif symbol in oro:
-                    min_sl = 800
-                elif symbol in crypto:
-                    min_sl = 1200
-                else:
-                    min_sl = 300
+                # 3. Fallback
+                min_sl = 30
+                min_sl_source = 'fallback (30)'
 
-            base_sl = self._get_config(symbol, 'base_sl_pips', 30)
+            base_sl = self._get_config(symbol, 'base_sl_pips', min_sl)
+            base_sl_source = 'base_sl_pips (override/symbol/global)' if base_sl != min_sl else min_sl_source
             profit_multiplier = self._get_config(symbol, 'profit_multiplier', 2.2)
+            profit_multiplier_source = 'profit_multiplier (override/symbol/global)'
 
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
@@ -1900,7 +1901,6 @@ class QuantumRiskManager:
             if activation_mode == 'percent_tp':
                 tp_percentage = trailing_stop.get('tp_percentage', 0.5)
                 activation_pips = int(round(tp_pips * tp_percentage))
-            # Ora activation_pips è coerente con la modalità scelta
             self._last_trailing_activation_pips = activation_pips  # per debug o uso esterno
 
             if position_type == mt5.ORDER_TYPE_BUY:
@@ -1914,13 +1914,17 @@ class QuantumRiskManager:
             logger.info(
                 "\n==================== [LEVELS-DEBUG] ====================\n"
                 f"Symbol: {symbol}\n"
-                f"SL: {sl_pips:.1f} pips\n"
-                f"TP: {tp_pips:.1f} pips\n"
+                f"SL: {sl_pips} pips\n"
+                f"TP: {tp_pips} pips\n"
                 f"Entry Price: {entry_price}\n"
+                f"SL Price: {sl_price}\n"
+                f"TP Price: {tp_price}\n"
+                f"Pip Size: {pip_size} (from config: {self.engine._get_pip_size(symbol)})\n"
+                f"Digits: {digits}\n"
                 f"Volatility: {volatility:.2f}\n"
-                f"Min SL: {min_sl}\n"
-                f"Base SL: {base_sl}\n"
-                f"Multiplier: {profit_multiplier}\n"
+                f"Min SL: {min_sl} [{min_sl_source}]\n"
+                f"Base SL: {base_sl} [{base_sl_source}]\n"
+                f"Multiplier: {profit_multiplier} [{profit_multiplier_source}]\n"
                 f"Trailing Activation Mode: {activation_mode}\n"
                 f"Trailing Activation Pips: {activation_pips}\n"
                 "======================================================\n"
