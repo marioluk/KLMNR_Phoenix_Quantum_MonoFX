@@ -146,6 +146,12 @@ revers signal, può avere senso con cooldawn?
 > Aggiorna questa checklist man mano che completi le attività o identifichi nuove aree di intervento. Le priorità sono indicate tra parentesi quadre: **[ALTA]**, **[MEDIA]**, **[BASSA]**.
 
 
+
+## DEBUG
+
+- [ ] Il cooldawn sembra non funzionare 
+- [ ] non scrive in backtest/logs
+
 - [ ] Mi spieghi questi parametri che si vedono all'avvio nella shel ma non vengono riportati nei log?
 🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀
 📋 Sistema con 4 simboli configurati

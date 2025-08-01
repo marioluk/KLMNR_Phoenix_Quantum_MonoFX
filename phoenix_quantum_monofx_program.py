@@ -671,7 +671,7 @@ class QuantumEngine:
         """
         if time.time() - last_signal_time < self.signal_cooldown:
             remaining = int(self.signal_cooldown - (time.time() - last_signal_time))
-            logger.debug(f"{symbol}: In cooldown segnali ({remaining}s rimanenti)")
+            logger.info(f"{symbol}: Cooldown segnale attivo ({remaining}s rimanenti)")
             return True
         return False
 
@@ -3137,9 +3137,24 @@ class QuantumTradingSystem:
             motivi_blocco = []
             # 1. Verifica se possiamo fare trading
             if not self.engine.can_trade(symbol):
+                # Diagnostica dettagliata sul tipo di cooldown
+                position_cooldown = self.engine.config.get('risk_parameters', {}).get('position_cooldown', 1800)
+                last_close = self.engine.get_position_cooldown(symbol)
+                signal_cooldown = self.engine.config.get('quantum_params', {}).get('signal_cooldown', 900)
+                last_signal = self.engine.get_last_signal_time(symbol)
+                now = time.time()
+                msg = None
+                if now - last_close < position_cooldown:
+                    remaining = int(position_cooldown - (now - last_close))
+                    msg = f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: position cooldown attivo ({remaining}s rimanenti)"
+                elif now - last_signal < signal_cooldown:
+                    remaining = int(signal_cooldown - (now - last_signal))
+                    msg = f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: signal cooldown attivo ({remaining}s rimanenti)"
+                else:
+                    msg = f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: can_trade=False (motivo generico)"
                 motivi_blocco.append('can_trade=False')
                 self.debug_trade_decision(symbol)
-                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: can_trade=False")
+                logger.info(msg)
                 return
 
             # 1.1. Controllo limite trade giornalieri (opzionale: globale o per simbolo)
