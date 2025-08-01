@@ -1,3 +1,4 @@
+
 import os
 import csv
 
@@ -655,7 +656,6 @@ class QuantumEngine:
     # get_quantum_params è già definito in fondo alla classe, quindi questa versione viene rimossa per evitare duplicazione.
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
         global logger
-        if 'logger' not in globals() or logger is None:
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
             logger = getLogger("phoenix_quantum")
@@ -3332,14 +3332,14 @@ class QuantumTradingSystem:
             logger.info(f"Esecuzione {signal} {symbol}: {size} lots @ {execution_price}")
             logger.info(f"[ORDER_REQUEST_DEBUG] Request inviato a MT5: {request}")
             result = mt5.order_send(request)
-
+            
             # Se fallisce per filling mode, prova con metodo alternativo
             if result.retcode == 10030:  # Unsupported filling mode
                 logger.warning(f"Filling mode FOK non supportato per {symbol}, provo con IOC")
                 request["type_filling"] = mt5.ORDER_FILLING_IOC
                 logger.info(f"[ORDER_REQUEST_DEBUG] Request IOC: {request}")
                 result = mt5.order_send(request)
-
+                
                 if result.retcode == 10030:  # Ancora problemi
                     logger.warning(f"Filling mode IOC non supportato per {symbol}, provo Return")
                     request["type_filling"] = mt5.ORDER_FILLING_RETURN
