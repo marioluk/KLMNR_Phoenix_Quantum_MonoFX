@@ -151,6 +151,7 @@ revers signal, può avere senso con cooldawn?
 
 - [ ] Il cooldawn sembra non funzionare 
 - [ ] non scrive in backtest/logs
+- [ ] daily_trade_limit_mode non viene inserito nel file json
 
 - [ ] Mi spieghi questi parametri che si vedono all'avvio nella shel ma non vengono riportati nei log?
 🚀 ==> AVVIO QUANTUM TRADING SYSTEM <== 🚀
