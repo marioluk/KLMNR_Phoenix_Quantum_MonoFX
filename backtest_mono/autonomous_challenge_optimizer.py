@@ -771,7 +771,9 @@ class AutonomousHighStakesOptimizer:
             "trailing_stop": config.get("risk_parameters", {}).get("trailing_stop", {"enable": True, "activation_pips": 100, "step_pips": 50, "lock_percentage": 0.5}),
             # Nuovi parametri globali per normalizzazione size e rischio globale
             "target_pip_value": 10.0,
-            "max_global_exposure": 50000.0
+            "max_global_exposure": 50000.0,
+            # Aggiunta esplicita del daily_trade_limit_mode
+            "daily_trade_limit_mode": config.get("risk_parameters", {}).get("daily_trade_limit_mode", "global")
         }
 
         # --- SYMBOLS ---
