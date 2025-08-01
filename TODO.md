@@ -32,7 +32,7 @@
 - [x] **[ALTA]** controllare stop E TAKE PROFIT PERCHé SONO ANCORA STRETTI E TROPPO VICINI AL PREZZO D'INGRESSO
 - [x] **[ALTA]** controllare tutti i parametri che determinano l'estensione oraria della strategia, ossia paragonare la dimensione del buffer e degli altri parametri che incidono sul periodo e confrontarli con i timeframe da m1 a h1
 - [x] **[ALTA]** controllare trailing stop
-- [ ] **[ALTA]** avvicinarsi alla soglia soft del 2% del drawdown tra 1% e il 2% - acceleratore/freno
+- [x] **[ALTA]** avvicinarsi alla soglia soft del 2% del drawdown tra 1% e il 2% - acceleratore/freno
 - [x] **[ALTA]** reintrodurre la possibilità di applicare il massimo numero di trade giornalieri al singolo simbolo o globali
     - [x - done 01/08/2025] Funzionalità consolidata: daily_trade_limit_mode ora sempre presente in config, logica aggiornata e log diagnostici per blocco sia globale che per simbolo.
 
