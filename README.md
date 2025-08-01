@@ -1,3 +1,51 @@
+# =============================================================
+# PARAMETRI PRINCIPALI DI CONFIGURAZIONE E LORO SIGNIFICATO
+# =============================================================
+
+## max_position_hours
+Durata massima di una posizione aperta (in ore). Limita il tempo di esposizione di ogni trade per ridurre il rischio di movimenti imprevisti.
+
+## max_daily_trades
+Numero massimo di trade che il sistema può aprire in una giornata. Utile per controllare la frequenza operativa e gestire il rischio di overtrading.
+
+## position_cooldown
+Tempo minimo (in secondi) tra la chiusura di una posizione e l’apertura della successiva. Previene aperture troppo ravvicinate.
+
+## stop_loss_pips
+Distanza dello Stop Loss dal prezzo di ingresso (in pips). Protegge il capitale da movimenti avversi e limita le perdite.
+
+## take_profit_pips
+Distanza del Take Profit dal prezzo di ingresso (in pips). Definisce l’obiettivo di profitto per il trade.
+
+## buffer_size
+Numero di tick/candele usati per analisi statistica e pattern recognition. Un buffer più grande consente analisi più approfondite.
+
+## spin_window
+Finestra (in tick/candele) per il calcolo dei segnali “spin” (direzionalità). Una finestra più ampia genera segnali più stabili.
+
+## min_spin_samples
+Numero minimo di campioni richiesti per calcolare uno spin affidabile. Evita segnali su dati insufficienti.
+
+## signal_cooldown
+Tempo minimo (in secondi) tra due segnali di ingresso. Riduce la frequenza di operatività e filtra il rumore di mercato.
+
+## risk_percent
+Percentuale del capitale rischiata per ogni trade. Determina la size della posizione e il rischio per operazione.
+
+## max_concurrent_trades
+Numero massimo di posizioni aperte contemporaneamente. Limita l’esposizione multipla su diversi strumenti.
+
+## signal_threshold
+Soglia di attivazione del segnale. Più alta = segnali più selettivi e meno frequenti.
+
+## spin_threshold
+Soglia di direzionalità per attivare il trade. Più alta = serve maggiore convinzione direzionale.
+
+## volatility_filter
+Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti, per evitare mercati troppo instabili.
+
+## trend_strength
+Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte, per evitare operatività in fasi laterali.
 # ## [2025-08-01] Migliorie gestione drawdown
 # - safe_limit, soft_limit e hard_limit sono ora sempre presenti nel file di configurazione generato.
 # - Tutta la logica di gestione del rischio e protezione drawdown è ora completamente config-driven.

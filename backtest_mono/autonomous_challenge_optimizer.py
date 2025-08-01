@@ -1,3 +1,45 @@
+    def verify_sl_tp_consistency(self, config, mode=None, log_file=None):
+        """
+        Verifica la coerenza tra stop_loss_pips e take_profit_pips tra preset, config globale e simboli ottimizzati.
+        Logga e stampa eventuali discrepanze.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        if mode is None:
+            mode = config.get('metadata', {}).get('trading_mode', 'intraday')
+        preset = self.get_trading_mode_params(mode)
+        global_sl = config.get('risk_parameters', {}).get('stop_loss_pips')
+        global_tp = config.get('risk_parameters', {}).get('take_profit_pips')
+        issues = []
+        # Verifica preset vs globale
+        if global_sl is not None and preset.get('stop_loss_pips') is not None and global_sl != preset['stop_loss_pips']:
+            issues.append(f"[GLOBAL] stop_loss_pips: preset={preset['stop_loss_pips']} vs config={global_sl}")
+        if global_tp is not None and preset.get('take_profit_pips') is not None and global_tp != preset['take_profit_pips']:
+            issues.append(f"[GLOBAL] take_profit_pips: preset={preset['take_profit_pips']} vs config={global_tp}")
+        # Verifica simboli
+        for symbol, params in config.get('symbols', {}).items():
+            sl = params.get('stop_loss_pips')
+            tp = params.get('take_profit_pips')
+            if sl is not None and (sl < 1 or sl > 10000):
+                issues.append(f"[{symbol}] stop_loss_pips fuori range: {sl}")
+            if tp is not None and (tp < 1 or tp > 20000):
+                issues.append(f"[{symbol}] take_profit_pips fuori range: {tp}")
+            if sl is not None and tp is not None and tp < sl:
+                issues.append(f"[{symbol}] take_profit_pips < stop_loss_pips: TP={tp}, SL={sl}")
+        if issues:
+            print("\n===== VERIFICA COERENZA SL/TP =====")
+            for issue in issues:
+                print("  -", issue)
+            if log_file:
+                try:
+                    with open(log_file, "a", encoding="utf-8") as f:
+                        f.write(f"[VERIFICA SL/TP] {datetime.now().isoformat()}\n")
+                        for issue in issues:
+                            f.write(f"  - {issue}\n")
+                except Exception as e:
+                    print(f"[VERIFICA SL/TP] Errore scrittura log: {e}")
+        else:
+            print("[VERIFICA SL/TP] Tutto OK.")
 import os
 import sys
 import json
@@ -36,6 +78,74 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
+    # =============================
+    # PARAMETRI PRINCIPALI - DESCRIZIONE
+    # =============================
+    # max_position_hours: Durata massima di una posizione aperta (in ore). Limita l’esposizione temporale del trade.
+    # max_daily_trades: Numero massimo di trade che il sistema può aprire in una giornata. Controlla la frequenza operativa.
+    # position_cooldown: Tempo minimo (in secondi) tra la chiusura di una posizione e l’apertura della successiva. Evita overtrading.
+    # stop_loss_pips: Distanza dello Stop Loss dal prezzo di ingresso (in pips). Protegge il capitale da movimenti avversi.
+    # take_profit_pips: Distanza del Take Profit dal prezzo di ingresso (in pips). Definisce l’obiettivo di profitto per il trade.
+    # buffer_size: Numero di tick/candele usati per analisi statistica e pattern recognition. Maggiore buffer = analisi più storica.
+    # spin_window: Finestra (in tick/candele) per il calcolo dei segnali “spin” (direzionalità). Più ampia = segnali più stabili.
+    # min_spin_samples: Numero minimo di campioni richiesti per calcolare uno spin affidabile. Evita segnali su dati insufficienti.
+    # signal_cooldown: Tempo minimo (in secondi) tra due segnali di ingresso. Riduce la frequenza di operatività e filtra il rumore.
+    # risk_percent: Percentuale del capitale rischiata per ogni trade. Determina la size della posizione.
+    # max_concurrent_trades: Numero massimo di posizioni aperte contemporaneamente. Limita l’esposizione multipla.
+    # signal_threshold: Soglia di attivazione del segnale. Più alta = segnali più selettivi.
+    # spin_threshold: Soglia di direzionalità per attivare il trade. Più alta = serve maggiore convinzione direzionale.
+    # volatility_filter: Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti.
+    # trend_strength: Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte.
+        """
+        Restituisce i range di parametri ottimali per la tipologia di trading.
+        """
+        ranges = {
+            "scalping": {
+                "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
+                "max_daily_trades": [20, 30, 40, 60, 80, 100],
+                "max_concurrent_trades": [2, 3, 4],
+                "stop_loss_pips": [6, 8, 10, 12, 15],
+                "take_profit_pips": [10, 12, 15, 18, 20, 25],
+                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.15, 0.20, 0.25, 0.35, 0.5],
+                "volatility_filter": [0.60, 0.65, 0.70, 0.75],
+                "trend_strength": [0.50, 0.55, 0.60, 0.65]
+            },
+            "intraday": {
+                "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
+                "max_daily_trades": [5, 6, 8, 10, 12, 15, 20],
+                "max_concurrent_trades": [2, 3, 4],
+                "stop_loss_pips": [15, 18, 20, 25, 30],
+                "take_profit_pips": [30, 35, 40, 50, 60],
+                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7],
+                "volatility_filter": [0.65, 0.70, 0.75, 0.80],
+                "trend_strength": [0.55, 0.60, 0.65, 0.70]
+            },
+            "swing": {
+                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
+                "max_daily_trades": [1, 2, 3, 4, 5, 6],
+                "max_concurrent_trades": [1, 2, 3],
+                "stop_loss_pips": [50, 60, 80, 100, 120, 150, 200],
+                "take_profit_pips": [100, 120, 150, 180, 200, 250, 300],
+                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
+                "volatility_filter": [0.70, 0.75, 0.80, 0.85],
+                "trend_strength": [0.60, 0.65, 0.70, 0.75]
+            },
+            "position": {
+                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
+                "max_daily_trades": [1, 2],
+                "max_concurrent_trades": [1, 2],
+                "stop_loss_pips": [150, 200, 250, 300, 400],
+                "take_profit_pips": [300, 400, 500, 600, 800],
+                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
+                "volatility_filter": [0.75, 0.80, 0.85, 0.90],
+                "trend_strength": [0.65, 0.70, 0.75, 0.80]
+            }
+        }
+        return ranges.get(mode, ranges["intraday"])
     def validate_trading_params(self, params: dict, mode: str, log_file: str = None) -> list:
         """
         Valida i parametri di trading rispetto alla tipologia selezionata.
@@ -44,37 +154,49 @@ class AutonomousHighStakesOptimizer:
         """
         warnings = []
         ranges = {
-            # Scalping: operatività ultra-veloce su timeframe M1-M5, molti trade al giorno, posizioni di breve durata
             'scalping': {
-                'max_position_hours': (0.05, 2),      # Durata posizione: da pochi minuti a max 2 ore
-                'buffer_size': (100, 300),            # Storico tick/candele: sufficiente per pattern rapidi
-                'spin_window': (10, 30),              # Finestra di calcolo segnali: breve
-                'signal_cooldown': (60, 300),         # Attesa tra segnali: da 1 a 5 minuti
-                'max_daily_trades': (20, 100)         # Trade giornalieri: molto elevato
+                'max_position_hours': (0.05, 2),
+                'max_daily_trades': (20, 100),
+                'position_cooldown': (60, 300),
+                'stop_loss_pips': (6, 12),
+                'take_profit_pips': (10, 20),
+                'buffer_size': (100, 300),
+                'spin_window': (10, 30),
+                'min_spin_samples': (3, 6),
+                'signal_cooldown': (60, 300)
             },
-            # Intraday: operatività su timeframe M15-H1, nessuna posizione overnight, sfrutta volatilità giornaliera
             'intraday': {
-                'max_position_hours': (2, 12),        # Durata posizione: da 2 a 12 ore
-                'buffer_size': (300, 800),            # Storico tick/candele: copre l'intera giornata
-                'spin_window': (20, 60),              # Finestra di calcolo segnali: media
-                'signal_cooldown': (300, 1200),       # Attesa tra segnali: da 5 a 20 minuti
-                'max_daily_trades': (5, 20)           # Trade giornalieri: moderato
+                'max_position_hours': (2, 12),
+                'max_daily_trades': (5, 20),
+                'position_cooldown': (300, 1200),
+                'stop_loss_pips': (15, 35),
+                'take_profit_pips': (30, 70),
+                'buffer_size': (300, 800),
+                'spin_window': (20, 60),
+                'min_spin_samples': (6, 12),
+                'signal_cooldown': (300, 1200)
             },
-            # Swing: operatività su timeframe H1-D1, posizioni multi-day, coglie oscillazioni ampie
             'swing': {
-                'max_position_hours': (24, 96),       # Durata posizione: da 1 a 4 giorni
-                'buffer_size': (800, 2000),           # Storico tick/candele: copre settimane
-                'spin_window': (40, 120),             # Finestra di calcolo segnali: ampia
-                'signal_cooldown': (1200, 3600),      # Attesa tra segnali: da 20 minuti a 1 ora
-                'max_daily_trades': (1, 6)            # Trade giornalieri: pochi
+                'max_position_hours': (24, 96),
+                'max_daily_trades': (1, 6),
+                'position_cooldown': (1200, 3600),
+                'stop_loss_pips': (50, 120),
+                'take_profit_pips': (100, 250),
+                'buffer_size': (800, 2000),
+                'spin_window': (40, 120),
+                'min_spin_samples': (15, 30),
+                'signal_cooldown': (1200, 3600)
             },
-            # Position: operatività su timeframe D1-W1, posizioni di lungo periodo, segue trend
             'position': {
-                'max_position_hours': (96, 336),      # Durata posizione: da 4 a 14 giorni
-                'buffer_size': (1500, 5000),          # Storico tick/candele: copre mesi
-                'spin_window': (100, 300),            # Finestra di calcolo segnali: molto ampia
-                'signal_cooldown': (3600, 14400),     # Attesa tra segnali: da 1 a 4 ore
-                'max_daily_trades': (1, 2)            # Trade giornalieri: rarissimi
+                'max_position_hours': (96, 336),
+                'max_daily_trades': (1, 2),
+                'position_cooldown': (3600, 14400),
+                'stop_loss_pips': (150, 400),
+                'take_profit_pips': (300, 800),
+                'buffer_size': (1500, 5000),
+                'spin_window': (100, 300),
+                'min_spin_samples': (30, 60),
+                'signal_cooldown': (3600, 14400)
             }
         }
         ref = ranges.get(mode, ranges['intraday'])
@@ -201,6 +323,9 @@ class AutonomousHighStakesOptimizer:
             'optimization_period': f"{self.optimization_days} days",
             'optimization_timestamp': datetime.now().isoformat()
         }
+        # Verifica coerenza SL/TP dopo generazione
+        log_file = os.path.join(self.base_dir, "logs", f"log_sl_tp_verifica_{mode}.log")
+        self.verify_sl_tp_consistency(config, mode=mode, log_file=log_file)
         return config
     # =============================
     # Tipologie di Trading per Timeframe
@@ -209,51 +334,51 @@ class AutonomousHighStakesOptimizer:
     def get_trading_mode_params(self, mode: str) -> dict:
         presets = {
             'scalping': {
-                'max_position_hours': 0.5,           # Range valido: 0.05-2
-                'max_daily_trades': 30,              # Range valido: 20-100
-                'position_cooldown': 120,            # Valore tipico
-                'stop_loss_pips': 8,                 # SL stretto
-                'take_profit_pips': 15,              # TP stretto
-                'buffer_size': 150,                  # Range valido: 100-300
-                'spin_window': 15,                   # Range valido: 10-30
-                'min_spin_samples': 4,               # Valore tipico
-                'signal_cooldown': 120,              # Range valido: 60-300
+                'max_position_hours': 1.0,
+                'max_daily_trades': 40,
+                'position_cooldown': 180,
+                'stop_loss_pips': 9,
+                'take_profit_pips': 15,
+                'buffer_size': 200,
+                'spin_window': 20,
+                'min_spin_samples': 4,
+                'signal_cooldown': 120,
                 'comment': 'Scalping: altissima velocità, molti trade al giorno, spread ridotto'
             },
             'intraday': {
-                'max_position_hours': 8,             # Range valido: 2-12
-                'max_daily_trades': 10,              # Range valido: 5-20
-                'position_cooldown': 900,            # Valore tipico
-                'stop_loss_pips': 20,                # SL medio
-                'take_profit_pips': 40,              # TP medio
-                'buffer_size': 500,                  # Range valido: 300-800
-                'spin_window': 40,                   # Range valido: 20-60
-                'min_spin_samples': 8,               # Valore tipico
-                'signal_cooldown': 600,              # Range valido: 300-1200
+                'max_position_hours': 8,
+                'max_daily_trades': 12,
+                'position_cooldown': 900,
+                'stop_loss_pips': 25,
+                'take_profit_pips': 50,
+                'buffer_size': 500,
+                'spin_window': 40,
+                'min_spin_samples': 8,
+                'signal_cooldown': 600,
                 'comment': 'Intraday: nessuna posizione overnight, sfrutta volatilità giornaliera'
             },
             'swing': {
-                'max_position_hours': 48,            # Range valido: 24-96
-                'max_daily_trades': 3,               # Range valido: 1-6
-                'position_cooldown': 7200,           # Valore tipico
-                'stop_loss_pips': 80,                # SL ampio
-                'take_profit_pips': 180,             # TP ampio
-                'buffer_size': 1200,                 # Range valido: 800-2000
-                'spin_window': 80,                   # Range valido: 40-120
-                'min_spin_samples': 20,              # Valore tipico
-                'signal_cooldown': 2400,             # Range valido: 1200-3600
+                'max_position_hours': 48,
+                'max_daily_trades': 3,
+                'position_cooldown': 2400,
+                'stop_loss_pips': 80,
+                'take_profit_pips': 180,
+                'buffer_size': 1200,
+                'spin_window': 80,
+                'min_spin_samples': 20,
+                'signal_cooldown': 2400,
                 'comment': 'Swing Trading: coglie oscillazioni di prezzo più ampie'
             },
             'position': {
-                'max_position_hours': 168,           # Range valido: 96-336
-                'max_daily_trades': 1,               # Range valido: 1-2
-                'position_cooldown': 43200,          # Valore tipico
-                'stop_loss_pips': 300,               # SL molto ampio
-                'take_profit_pips': 600,             # TP molto ampio
-                'buffer_size': 2000,                 # Range valido: 1500-5000
-                'spin_window': 150,                  # Range valido: 100-300
-                'min_spin_samples': 40,              # Valore tipico
-                'signal_cooldown': 7200,             # Range valido: 3600-14400
+                'max_position_hours': 168,
+                'max_daily_trades': 1,
+                'position_cooldown': 7200,
+                'stop_loss_pips': 300,
+                'take_profit_pips': 600,
+                'buffer_size': 2000,
+                'spin_window': 150,
+                'min_spin_samples': 40,
+                'signal_cooldown': 7200,
                 'comment': 'Position Trading: segue trend di lungo periodo, operatività tranquilla'
             }
         }
@@ -304,7 +429,7 @@ class AutonomousHighStakesOptimizer:
         raw_spin = (positive - negative) / total
         return raw_spin
 
-    def __init__(self, optimization_days=60, output_dir=None):
+    def __init__(self, optimization_days=60, output_dir=None, mode="intraday"):
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.output_dir = output_dir or self.base_dir
         self.optimization_days = optimization_days
@@ -320,17 +445,7 @@ class AutonomousHighStakesOptimizer:
             'EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'SP500', 'NAS100', 'US30',
             'BTCUSD', 'ETHUSD', 'XAUUSD'
         ]
-        self.param_ranges = {
-            'risk_percent': [0.003, 0.005, 0.007, 0.008, 0.010, 0.012],
-            'max_daily_trades': [3, 4, 5, 6, 7, 8],
-            'max_concurrent_trades': [2, 3, 4],
-            'stop_loss_pips': [10, 12, 15, 18, 20, 25],
-            'take_profit_pips': [15, 20, 25, 30, 35, 40],
-            'signal_threshold': [0.55, 0.60, 0.65, 0.70, 0.75],
-            'spin_threshold': [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
-            'volatility_filter': [0.60, 0.65, 0.70, 0.75, 0.80],
-            'trend_strength': [0.50, 0.55, 0.60, 0.65, 0.70]
-        }
+        self.param_ranges = self.get_param_ranges_for_mode(mode)
         self.optimized_configs = {}
 
     def generate_all_configs(self) -> Dict[str, dict]:
