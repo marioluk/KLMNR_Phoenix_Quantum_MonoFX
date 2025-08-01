@@ -3071,6 +3071,8 @@ class QuantumTradingSystem:
 
             print(f"📋 Sistema con {len(symbols)} simboli configurati")
             print(f"🎯 Simboli: {symbols}")  # Mostra la lista direttamente
+            logger.info(f"Sistema con {len(symbols)} simboli configurati")
+            logger.info(f"Simboli configurati: {symbols}")
             logger.info(f"Avvio sistema con {len(symbols)} simboli")
 
             if not hasattr(self, 'engine') or not hasattr(self, 'risk_manager'):
