@@ -1,3 +1,10 @@
+from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional, Any
+
+# ...existing code...
+
+class AutonomousHighStakesOptimizer:
+    # ...existing code...
     def verify_sl_tp_consistency(self, config, mode=None, log_file=None):
         """
         Verifica la coerenza tra stop_loss_pips e take_profit_pips tra preset, config globale e simboli ottimizzati.
