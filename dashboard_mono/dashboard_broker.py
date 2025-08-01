@@ -1006,7 +1006,7 @@ class The5ersGraphicalDashboard:
         return status
 
     def create_pnl_chart(self) -> Dict:
-        """Crea grafico P&L nel tempo"""
+        """Crea grafico P&L nel tempo con annotazioni su picchi e minimi"""
         if not self.pnl_history:
             trace = go.Scatter(
                 x=[datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
@@ -1021,6 +1021,7 @@ class The5ersGraphicalDashboard:
                 xaxis=dict(title='Time'),
                 yaxis=dict(title='P&L ($)'),
                 hovermode='x unified',
+                plot_bgcolor='#f9f9f9',
                 annotations=[
                     dict(
                         x=0.5,
@@ -1039,6 +1040,37 @@ class The5ersGraphicalDashboard:
             }
         timestamps = [item['timestamp'] for item in self.pnl_history]
         cumulative_pnl = [item['cumulative_pnl'] for item in self.pnl_history]
+        # Annotazioni su massimo e minimo P&L
+        max_pnl = max(cumulative_pnl)
+        min_pnl = min(cumulative_pnl)
+        max_idx = cumulative_pnl.index(max_pnl)
+        min_idx = cumulative_pnl.index(min_pnl)
+        annotations = [
+            dict(
+                x=timestamps[max_idx],
+                y=max_pnl,
+                xref='x',
+                yref='y',
+                text=f'Picco P&L: {max_pnl:.2f}',
+                showarrow=True,
+                arrowhead=2,
+                ax=0,
+                ay=-40,
+                font=dict(color='green', size=12)
+            ),
+            dict(
+                x=timestamps[min_idx],
+                y=min_pnl,
+                xref='x',
+                yref='y',
+                text=f'Min P&L: {min_pnl:.2f}',
+                showarrow=True,
+                arrowhead=2,
+                ax=0,
+                ay=40,
+                font=dict(color='red', size=12)
+            )
+        ]
         trace = go.Scatter(
             x=timestamps,
             y=cumulative_pnl,
@@ -1051,7 +1083,9 @@ class The5ersGraphicalDashboard:
             title='Cumulative P&L Over Time',
             xaxis=dict(title='Time'),
             yaxis=dict(title='P&L ($)'),
-            hovermode='x unified'
+            hovermode='x unified',
+            plot_bgcolor='#f9f9f9',
+            annotations=annotations
         )
         return {
             'data': [trace.to_plotly_json()],
@@ -1059,7 +1093,7 @@ class The5ersGraphicalDashboard:
         }
 
     def create_drawdown_chart(self) -> Dict:
-        """Crea grafico drawdown"""
+        """Crea grafico drawdown con annotazioni su superamento limiti"""
         if not self.drawdown_history:
             trace = go.Scatter(
                 x=[datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
@@ -1075,6 +1109,7 @@ class The5ersGraphicalDashboard:
                 xaxis=dict(title='Time'),
                 yaxis=dict(title='Drawdown (%)'),
                 hovermode='x unified',
+                plot_bgcolor='#f9f9f9',
                 annotations=[
                     dict(
                         x=0.5,
@@ -1093,6 +1128,35 @@ class The5ersGraphicalDashboard:
             }
         timestamps = [item['timestamp'] for item in self.drawdown_history]
         drawdowns = [item['drawdown'] for item in self.drawdown_history]
+        # Annotazioni su superamento limiti
+        annotations = []
+        for i, dd in enumerate(drawdowns):
+            if dd >= self.drawdown_hard:
+                annotations.append(dict(
+                    x=timestamps[i],
+                    y=dd,
+                    xref='x',
+                    yref='y',
+                    text=f'🚨 Hard Limit: {dd:.2f}%',
+                    showarrow=True,
+                    arrowhead=2,
+                    ax=0,
+                    ay=-30,
+                    font=dict(color='red', size=12)
+                ))
+            elif dd >= self.drawdown_soft:
+                annotations.append(dict(
+                    x=timestamps[i],
+                    y=dd,
+                    xref='x',
+                    yref='y',
+                    text=f'⚠️ Soft Limit: {dd:.2f}%',
+                    showarrow=True,
+                    arrowhead=2,
+                    ax=0,
+                    ay=-30,
+                    font=dict(color='orange', size=12)
+                ))
         trace = go.Scatter(
             x=timestamps,
             y=drawdowns,
@@ -1120,7 +1184,9 @@ class The5ersGraphicalDashboard:
             title='Drawdown Over Time',
             xaxis=dict(title='Time'),
             yaxis=dict(title='Drawdown (%)'),
-            hovermode='x unified'
+            hovermode='x unified',
+            plot_bgcolor='#f9f9f9',
+            annotations=annotations
         )
         return {
             'data': [trace.to_plotly_json(), soft_limit_line.to_plotly_json(), hard_limit_line.to_plotly_json()],
