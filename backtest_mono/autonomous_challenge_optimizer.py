@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
-
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any
+import logging
 import logging
 
 # =============================================================
@@ -30,7 +28,6 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-class AutonomousHighStakesOptimizer:
     # =============================
     # PARAMETRI PRINCIPALI - DESCRIZIONE dettagliata
     # =============================
@@ -49,12 +46,8 @@ class AutonomousHighStakesOptimizer:
     # spin_threshold: Soglia di direzionalità per attivare il trade. Più alta = serve maggiore convinzione direzionale.
     # volatility_filter: Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti.
     # trend_strength: Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte.
-    # risk_percent: Percentuale del capitale rischiata per ogni trade. Determina la size della posizione.
-    # max_concurrent_trades: Numero massimo di posizioni aperte contemporaneamente. Limita l’esposizione multipla.
-    # signal_threshold: Soglia di attivazione del segnale. Più alta = segnali più selettivi.
-    # spin_threshold: Soglia di direzionalità per attivare il trade. Più alta = serve maggiore convinzione direzionale.
-    # volatility_filter: Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti.
-    # trend_strength: Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte.
+
+    def get_param_ranges_for_mode(self, mode):
         """
         Restituisce i range di parametri ottimali per la tipologia di trading.
         """
