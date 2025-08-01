@@ -3069,8 +3069,7 @@ class QuantumTradingSystem:
             if not symbols or not isinstance(symbols, (dict, list)) or len(symbols) == 0:
                 raise RuntimeError("Configurazione non valida - simboli mancanti")
 
-            print(f"📋 Sistema con {len(symbols)} simboli configurati")
-            print(f"🎯 Simboli: {symbols}")  # Mostra la lista direttamente
+            print(f"📋 Sistema con {len(symbols)} simboli configurati: {symbols}")
             logger.info(f"Sistema con {len(symbols)} simboli configurati")
             logger.info(f"Simboli configurati: {symbols}")
             logger.info(f"Avvio sistema con {len(symbols)} simboli")
