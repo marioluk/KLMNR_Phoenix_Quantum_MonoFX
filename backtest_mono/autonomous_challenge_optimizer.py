@@ -1,63 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
 
-# ...existing code...
-
-class AutonomousHighStakesOptimizer:
-    # ...existing code...
-    def verify_sl_tp_consistency(self, config, mode=None, log_file=None):
-        """
-        Verifica la coerenza tra stop_loss_pips e take_profit_pips tra preset, config globale e simboli ottimizzati.
-        Logga e stampa eventuali discrepanze.
-        """
-        import logging
-        logger = logging.getLogger(__name__)
-        if mode is None:
-            mode = config.get('metadata', {}).get('trading_mode', 'intraday')
-        preset = self.get_trading_mode_params(mode)
-        global_sl = config.get('risk_parameters', {}).get('stop_loss_pips')
-        global_tp = config.get('risk_parameters', {}).get('take_profit_pips')
-        issues = []
-        # Verifica preset vs globale
-        if global_sl is not None and preset.get('stop_loss_pips') is not None and global_sl != preset['stop_loss_pips']:
-            issues.append(f"[GLOBAL] stop_loss_pips: preset={preset['stop_loss_pips']} vs config={global_sl}")
-        if global_tp is not None and preset.get('take_profit_pips') is not None and global_tp != preset['take_profit_pips']:
-            issues.append(f"[GLOBAL] take_profit_pips: preset={preset['take_profit_pips']} vs config={global_tp}")
-        # Verifica simboli
-        for symbol, params in config.get('symbols', {}).items():
-            sl = params.get('stop_loss_pips')
-            tp = params.get('take_profit_pips')
-            if sl is not None and (sl < 1 or sl > 10000):
-                issues.append(f"[{symbol}] stop_loss_pips fuori range: {sl}")
-            if tp is not None and (tp < 1 or tp > 20000):
-                issues.append(f"[{symbol}] take_profit_pips fuori range: {tp}")
-            if sl is not None and tp is not None and tp < sl:
-                issues.append(f"[{symbol}] take_profit_pips < stop_loss_pips: TP={tp}, SL={sl}")
-        if issues:
-            print("\n===== VERIFICA COERENZA SL/TP =====")
-            for issue in issues:
-                print("  -", issue)
-            if log_file:
-                try:
-                    with open(log_file, "a", encoding="utf-8") as f:
-                        f.write(f"[VERIFICA SL/TP] {datetime.now().isoformat()}\n")
-                        for issue in issues:
-                            f.write(f"  - {issue}\n")
-                except Exception as e:
-                    print(f"[VERIFICA SL/TP] Errore scrittura log: {e}")
-        else:
-            print("[VERIFICA SL/TP] Tutto OK.")
-import os
-import sys
-import json
-import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
-import logging
 from typing import Dict, List, Tuple, Optional, Any
-import itertools
-import time
-
+import logging
 
 # =============================================================
 # CORRELAZIONE TRA TIPOLOGIA DI TRADING E PARAMETRI SL/TP/TS
@@ -97,6 +43,12 @@ class AutonomousHighStakesOptimizer:
     # spin_window: Finestra (in tick/candele) per il calcolo dei segnali “spin” (direzionalità). Più ampia = segnali più stabili.
     # min_spin_samples: Numero minimo di campioni richiesti per calcolare uno spin affidabile. Evita segnali su dati insufficienti.
     # signal_cooldown: Tempo minimo (in secondi) tra due segnali di ingresso. Riduce la frequenza di operatività e filtra il rumore.
+    # risk_percent: Percentuale del capitale rischiata per ogni trade. Determina la size della posizione.
+    # max_concurrent_trades: Numero massimo di posizioni aperte contemporaneamente. Limita l’esposizione multipla.
+    # signal_threshold: Soglia di attivazione del segnale. Più alta = segnali più selettivi.
+    # spin_threshold: Soglia di direzionalità per attivare il trade. Più alta = serve maggiore convinzione direzionale.
+    # volatility_filter: Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti.
+    # trend_strength: Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte.
     # risk_percent: Percentuale del capitale rischiata per ogni trade. Determina la size della posizione.
     # max_concurrent_trades: Numero massimo di posizioni aperte contemporaneamente. Limita l’esposizione multipla.
     # signal_threshold: Soglia di attivazione del segnale. Più alta = segnali più selettivi.
