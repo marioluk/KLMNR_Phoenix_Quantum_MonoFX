@@ -3330,17 +3330,20 @@ class QuantumTradingSystem:
             
             # 5. Esegui ordine con fallback per filling mode
             logger.info(f"Esecuzione {signal} {symbol}: {size} lots @ {execution_price}")
+            logger.info(f"[ORDER_REQUEST_DEBUG] Request inviato a MT5: {request}")
             result = mt5.order_send(request)
-            
+
             # Se fallisce per filling mode, prova con metodo alternativo
             if result.retcode == 10030:  # Unsupported filling mode
                 logger.warning(f"Filling mode FOK non supportato per {symbol}, provo con IOC")
                 request["type_filling"] = mt5.ORDER_FILLING_IOC
+                logger.info(f"[ORDER_REQUEST_DEBUG] Request IOC: {request}")
                 result = mt5.order_send(request)
-                
+
                 if result.retcode == 10030:  # Ancora problemi
                     logger.warning(f"Filling mode IOC non supportato per {symbol}, provo Return")
                     request["type_filling"] = mt5.ORDER_FILLING_RETURN
+                    logger.info(f"[ORDER_REQUEST_DEBUG] Request RETURN: {request}")
                     result = mt5.order_send(request)
             
             # 6. Verifica risultato
