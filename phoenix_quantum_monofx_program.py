@@ -1682,7 +1682,7 @@ class QuantumRiskManager:
     """
     2. Calcolo Dimensioni Posizione
     """
-    def calculate_position_size(self, symbol: str, price: float, signal: str) -> float:
+    def calculate_position_size(self, symbol: str, price: float, signal: str, risk_percent: float = None) -> float:
         """Calcola dimensione posizione normalizzata per rischio e pip value, con limiti di esposizione globale e log dettagliato"""
         try:
             if not self._load_symbol_data(symbol):
@@ -1698,7 +1698,8 @@ class QuantumRiskManager:
                 return 0.0
 
             # Parametri base
-            risk_percent = risk_config.get('risk_percent', 0.02)
+            if risk_percent is None:
+                risk_percent = risk_config.get('risk_percent', 0.02)
             risk_amount = account.equity * risk_percent
             sl_pips = self._calculate_sl_pips(symbol)
             symbol_data = self._symbol_data[symbol]
@@ -2237,6 +2238,30 @@ class TradingMetrics:
 
 
 class QuantumTradingSystem:
+    def get_dynamic_risk_percent(self):
+        """
+        Restituisce il risk_percent dinamico in base al drawdown attuale.
+        I limiti safe/soft sono ora presi dal file di configurazione (challenge_specific.drawdown_protection).
+        """
+        dd = None
+        if hasattr(self, 'drawdown_tracker') and hasattr(self.drawdown_tracker, 'get_drawdown'):
+            dd = self.drawdown_tracker.get_drawdown()
+        if dd is None:
+            dd = 0.0
+        base_risk = self._config.config.get('risk_parameters', {}).get('risk_percent', 0.007)
+        # Leggi limiti dal config
+        challenge = self._config.config.get('challenge_specific', {})
+        dd_prot = challenge.get('drawdown_protection', {})
+        # safe_limit: soglia inferiore (default 1.0), soft_limit: soglia superiore (default 2.0)
+        safe = float(dd_prot.get('safe_limit', 1.0))
+        soft = float(dd_prot.get('soft_limit', 2.0))
+        if dd < safe:
+            return base_risk * 1.1  # acceleratore
+        elif safe <= dd < soft:
+            factor = 1 - 0.5 * ((dd - safe) / (soft - safe))
+            return base_risk * factor
+        else:
+            return base_risk * 0.2  # freno massimo
 # =============================================================
 # CORRELAZIONE TRA TIPOLOGIA DI TRADING E CALCOLO SL/TP/TS
 # =============================================================
@@ -3228,7 +3253,8 @@ class QuantumTradingSystem:
                     logger.info(f"✅ Segnale confermato per trading: {trading_signal}")
 
                     # 6. Calcola dimensione posizione
-                    size = self.risk_manager.calculate_position_size(symbol, trading_price, trading_signal)
+                    dynamic_risk = self.get_dynamic_risk_percent()
+                    size = self.risk_manager.calculate_position_size(symbol, trading_price, trading_signal, risk_percent=dynamic_risk)
 
                     logger.info(f"💰 Size calcolata per {symbol}: {size} lots")
 

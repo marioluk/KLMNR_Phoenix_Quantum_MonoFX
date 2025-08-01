@@ -866,6 +866,37 @@ class AutonomousHighStakesOptimizer:
             "JP225": 1.0,
             "default": 0.0001
         })
+
+        # --- CHALLENGE SPECIFIC ---
+        # Forza la presenza di soft_limit e hard_limit nel JSON generato
+        default_challenge_specific = {
+            "step1_target": 8,
+            "max_daily_loss_percent": 5,
+            "max_total_loss_percent": 10,
+            "drawdown_protection": {
+                "soft_limit": 0.02,
+                "hard_limit": 0.05,
+                "safe_limit": 0.01
+            }
+        }
+        # Prendi challenge_specific dal config se presente, altrimenti usa default
+        challenge_specific = get_section("challenge_specific", default_challenge_specific)
+        # Merge con eventuali override da config['challenge_specific']
+        if "challenge_specific" in config:
+            for k, v in config["challenge_specific"].items():
+                if k == "drawdown_protection" and isinstance(v, dict):
+                    challenge_specific.setdefault("drawdown_protection", {}).update(v)
+                else:
+                    challenge_specific[k] = v
+
+        # Forza la presenza di soft_limit, hard_limit e safe_limit (prende da config se presenti, altrimenti default)
+        dd_prot = challenge_specific.setdefault("drawdown_protection", {})
+        # Cerca override in config['challenge_specific']['drawdown_protection']
+        config_dd_prot = config.get("challenge_specific", {}).get("drawdown_protection", {})
+        dd_prot["soft_limit"] = config_dd_prot.get("soft_limit", dd_prot.get("soft_limit", 0.02))
+        dd_prot["hard_limit"] = config_dd_prot.get("hard_limit", dd_prot.get("hard_limit", 0.05))
+        dd_prot["safe_limit"] = config_dd_prot.get("safe_limit", dd_prot.get("safe_limit", 0.01))
+
         production_config = {
             "logging": {
                 "log_file": f"logs/log_autonomous_challenge_{aggressiveness}_production_ready_{timestamp_str}.log",
@@ -900,15 +931,7 @@ class AutonomousHighStakesOptimizer:
                 "ETHUSD": 0.01,
                 "default": 0.0001
             },
-            "challenge_specific": get_section("challenge_specific", {
-                "step1_target": 8,
-                "max_daily_loss_percent": 5,
-                "max_total_loss_percent": 10,
-                "drawdown_protection": {
-                    "soft_limit": 0.02,
-                    "hard_limit": 0.05
-                }
-            }),
+            "challenge_specific": challenge_specific,
             "conversion_metadata": {
                 "created_by": "AutonomousHighStakesOptimizer",
                 "creation_date": datetime.now().isoformat(),
