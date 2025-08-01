@@ -1,4 +1,3 @@
-
 import os
 import csv
 
@@ -656,6 +655,7 @@ class QuantumEngine:
     # get_quantum_params è già definito in fondo alla classe, quindi questa versione viene rimossa per evitare duplicazione.
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
         global logger
+        if 'logger' not in globals() or logger is None:
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
             logger = getLogger("phoenix_quantum")
