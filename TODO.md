@@ -8,7 +8,7 @@
 - [ ] **[MEDIA] Visualizzazione parametri attivi di filtro** (entropy, spin, confidence, cooldown, orari, spread, ecc.)
 - [ ] **[MEDIA] Evidenziare parametri troppo restrittivi rispetto ai dati storici**
 - [ ] **[MEDIA] Modifica rapida dei parametri di filtro dalla dashboard**
-- [ ] **[ALTA] Notifiche real-time** (disconnessione MT5, drawdown critico, target raggiunto)
+- [x] **[ALTA] Notifiche real-time** (disconnessione MT5, drawdown critico, target raggiunto)
 - [ ] **[ALTA] Storico errori/warning** e miglioramento UI/UX (responsive, dark/light, icone)
 - [ ] **[MEDIA] Togliere tutti i riferimenti a legacy e sostituire con mono**
 - [ ] **[MEDIA] Test e confronto di tutti i tipi di trading dalla dashboard**
@@ -104,7 +104,7 @@ Obiettivo: automatizzare il monitoraggio della strategia, facilitare l’analisi
 - [ ] **[MEDIA] Visualizzazione parametri attivi di filtro** (entropy, spin, confidence, cooldown, orari, spread, ecc.)
 - [ ] **[MEDIA] Evidenziare parametri troppo restrittivi rispetto ai dati storici**
 - [ ] **[MEDIA] Consentire modifica rapida dei parametri di filtro dalla dashboard**
-- [ ] **[ALTA] Notifiche real-time** (es. disconnessione MT5, drawdown critico, target raggiunto)
+- [x] **[ALTA] Notifiche real-time** (es. disconnessione MT5, drawdown critico, target raggiunto)
 - [ ] **[ALTA] Storico errori/warning** e miglioramento UI/UX (responsive, dark/light, icone)
 + [x] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
 +     - [done 30/07/2025] Implementato bottone, API Flask e logica JS per generazione e download CSV direttamente dalla dashboard.

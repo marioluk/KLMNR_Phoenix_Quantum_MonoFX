@@ -211,24 +211,13 @@ class The5ersGraphicalDashboard:
 
     @staticmethod
     def get_default_log_path(config: dict = None):
-        """Restituisce il path del file di log più recente che corrisponde al pattern log_autonomous_challenge_*.log nella cartella logs/ della root del progetto."""
-        import glob
-        # Determina la root del progetto (un livello sopra la cartella corrente)
+        """Restituisce il path assoluto del file di log con data, es: logs/log_autonomous_challenge_YYYYMMDD.log"""
+        from datetime import datetime
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         logs_dir = os.path.join(project_root, 'logs')
-        pattern = os.path.join(logs_dir, 'log_autonomous_*.log')
-        log_files = glob.glob(pattern)
-        if log_files:
-            # Seleziona il file più recente
-            log_files.sort(key=os.path.getmtime, reverse=True)
-            return log_files[0]
-        # Fallback: usa il log file dal config se esiste
-        if config:
-            log_path = config.get('logging', {}).get('log_file')
-            if log_path:
-                return log_path
-        # Fallback finale: trading.log
-        return os.path.join(logs_dir, 'trading.log')
+        today_str = datetime.now().strftime('%Y%m%d')
+        log_file = os.path.join(logs_dir, f'log_autonomous_challenge_{today_str}.log')
+        return log_file
 
     def __init__(self, config_file: str = None, log_file: str = None, use_mt5: bool = True):
         """
@@ -239,11 +228,6 @@ class The5ersGraphicalDashboard:
             log_file: Path al file di log (opzionale, auto-detect da config)
             use_mt5: Se True, usa dati MT5 per analisi completa
         """
-        # Auto-detect config file se non specificato (per sistema legacy)
-        if config_file is None:
-            config_file = self.get_default_config_path()
-
-        self.config_file = config_file
         # Inizializza attributi fondamentali PRIMA di qualsiasi metodo che li usa
         self.mt5_connected = False
         self.challenge_start = datetime(2025, 7, 7, 0, 0, 0)
@@ -280,6 +264,38 @@ class The5ersGraphicalDashboard:
         self.is_monitoring = False
         self.last_log_position = 0
         self.last_update = datetime.now()
+        self.realtime_notifications = deque(maxlen=50)
+        # Storico errori/warning (max 100)
+        self.errors_warnings = deque(maxlen=100)
+        # Inizializza sempre use_mt5 con il valore passato
+        self.use_mt5 = use_mt5
+        # Inizializza sempre drawdown_hard e drawdown_soft con valori di default
+        self.drawdown_hard = 5
+        self.drawdown_soft = 2
+        # Inizializza sempre step1_target con valore di default
+        self.step1_target = 8
+        # Flask app: inizializza subito per evitare errori
+        import os
+        template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+        static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+        self.app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+        # Auto-detect config file se non specificato (per sistema legacy)
+        if config_file is None:
+            config_file = self.get_default_config_path()
+
+        self.config_file = config_file
+        # Inizializza sempre log_file con il path di default
+        self.log_file = self.get_default_log_path()
+    def log_error_warning(self, msg: str, details: dict = None, level: str = "ERROR"):
+        """Salva un errore/warning nello storico dedicato."""
+        entry = {
+            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "level": level,
+            "message": msg,
+            "details": details or {}
+        }
+        print(f"[{level}] {entry['timestamp']}: {msg}")
+        self.errors_warnings.appendleft(entry)
 
         # Se il drawdown è > 0 ma la drawdown_history è vuota, aggiungi un punto per il grafico
         if self.current_metrics['current_drawdown'] > 0 and not self.drawdown_history:
@@ -304,11 +320,11 @@ class The5ersGraphicalDashboard:
             print("[DEBUG] Configurazione: uso raw_config diretto")
         self.use_mt5 = use_mt5 and MT5_AVAILABLE and bool(self.config)
 
-        # Auto-detect log file se non specificato
-        if log_file is None:
-            self.log_file = self.get_default_log_path(self.config)
-        else:
+        # Aggiorna log_file se specificato o se la config lo richiede
+        if log_file is not None:
             self.log_file = log_file
+        elif hasattr(self, 'config'):
+            self.log_file = self.get_default_log_path(self.config)
 
         # Parametri The5ers
         self.the5ers_params = self.config.get('THE5ERS_specific', {})
@@ -325,12 +341,29 @@ class The5ersGraphicalDashboard:
         self.load_signals_from_csv()
 
         # Flask app e route (SOLO ORA che tutto è pronto)
-        self.app = Flask(__name__)
         self.setup_routes()
 
 
+    def send_realtime_notification(self, event_type: str, message: str, details: dict = None):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        notif = {
+            'event_type': event_type,
+            'message': message,
+            'timestamp': timestamp,
+            'details': details or {}
+        }
+        print(f"[NOTIFICA][{event_type}] {timestamp}: {message}")
+        self.realtime_notifications.appendleft(notif)
+
     def setup_routes(self):
         app = self.app
+        @app.route('/api/errors_warnings', methods=['GET'])
+        def api_errors_warnings():
+            """Restituisce lo storico errori/warning (max 100)"""
+            return jsonify({
+                'success': True,
+                'errors_warnings': list(self.errors_warnings)
+            })
         @app.route('/api/unexecuted_signals', methods=['GET'])
         def api_unexecuted_signals():
             """Restituisce segnali BUY/SELL non eseguiti, filtrabili per simbolo e numero righe."""
@@ -532,7 +565,8 @@ class The5ersGraphicalDashboard:
                 metrics=metrics,
                 compliance=compliance,
                 mt5_warning=mt5_warning,
-                unexecuted_signals=unexecuted_signals
+                unexecuted_signals=unexecuted_signals,
+                realtime_notifications=list(self.realtime_notifications)
             )
 
         @app.route('/diagnostics')
@@ -819,7 +853,6 @@ class The5ersGraphicalDashboard:
             symbol = match.group(1)
             entropy = float(match.group(2))
             spin = float(match.group(3))
-            # ...existing code...
             if entropy > 0 or abs(spin) > 0:
                 self.current_metrics['quantum_signals']['total'] += 1
                 if spin > 0:
@@ -840,7 +873,7 @@ class The5ersGraphicalDashboard:
                     'entropy': entropy,
                     'spin': spin
                 })
-            return {'type': 'heartbeat', 'data': match.groups()}
+                return {'type': 'heartbeat', 'data': match.groups()}
 
         # Heartbeat con formato a blocchi (Symbol: ... Entropy (E): ... Spin (S): ...)
         # Estrae il simbolo
@@ -1434,6 +1467,23 @@ class The5ersGraphicalDashboard:
             'layout': layout.to_plotly_json()
         }
 
+    def send_realtime_notification(self, event_type: str, message: str, details: dict = None):
+        """
+        Invia una notifica real-time (log, print, estendibile per email/webhook).
+        event_type: 'mt5_disconnect', 'drawdown_critical', 'target_reached', ecc.
+        message: testo della notifica.
+        details: dict opzionale con info aggiuntive.
+        """
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        notif = {
+            'event_type': event_type,
+            'message': message,
+            'timestamp': timestamp,
+            'details': details or {}
+        }
+        print(f"[NOTIFICA][{event_type}] {timestamp}: {message}")
+        self.realtime_notifications.appendleft(notif)
+
     def monitoring_loop(self):
         """Loop di monitoraggio in background"""
         self.is_monitoring = True
@@ -1475,9 +1525,32 @@ class The5ersGraphicalDashboard:
                 # Aggiorna timestamp
                 self.last_update = datetime.now()
 
+                # Notifica disconnessione MT5
+                if self.use_mt5 and not self.mt5_connected:
+                    self.send_realtime_notification(
+                        event_type='mt5_disconnect',
+                        message='❌ Disconnessione da MT5 rilevata!',
+                        details={'mt5_connected': self.mt5_connected}
+                    )
+
+                # Notifica drawdown critico
+                if self.current_metrics['current_drawdown'] >= self.drawdown_hard:
+                    self.send_realtime_notification(
+                        event_type='drawdown_critical',
+                        message=f'🚨 Drawdown critico: {self.current_metrics["current_drawdown"]:.2f}',
+                        details={'drawdown': self.current_metrics['current_drawdown']}
+                    )
+
+                # Notifica target raggiunto
+                if self.current_metrics['profit_percentage'] >= self.step1_target:
+                    self.send_realtime_notification(
+                        event_type='target_reached',
+                        message=f'✅ Target raggiunto: {self.current_metrics["profit_percentage"]:.2f}%',
+                        details={'profit_percentage': self.current_metrics['profit_percentage']}
+                    )
+
                 # Attendi prima del prossimo update
                 time.sleep(1)  # Update ogni secondo per real-time
-
             except Exception as e:
                 print(f"❌ Errore nel monitoring loop: {e}")
                 time.sleep(5)
@@ -1515,9 +1588,10 @@ def main():
     # Crea dashboard (auto-detect config se None)
     dashboard = The5ersGraphicalDashboard(config_file, log_file)
 
+
     try:
-        # Avvia dashboard con accesso remoto
-        dashboard.start_dashboard(host='0.0.0.0', port=5000, debug=False)
+        # Avvia dashboard Flask su porta alternativa per debug
+        dashboard.start_dashboard(host='127.0.0.1', port=5050, debug=True)
     except KeyboardInterrupt:
         print("\n\n🛑 Dashboard interrotta dall'utente")
         dashboard.is_monitoring = False
