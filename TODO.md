@@ -73,6 +73,18 @@ Obiettivo: automatizzare il monitoraggio della strategia, facilitare l’analisi
 - [x] **[ALTA] Notifiche real-time** (es. disconnessione MT5, drawdown critico, target raggiunto)
 - [X] **[ALTA] Storico errori/warning** 
 - [ ] **[ALTA] miglioramento UI/UX (responsive, dark/light, icone)**
+
+### [SUGGERITE] Nuove metriche da integrare in dashboard
+- [ ] [MEDIA] Sharpe Ratio (rischio/rendimento)
+- [ ] [MEDIA] Sortino Ratio (rischio downside)
+- [ ] [MEDIA] Trade Duration Media
+- [ ] [MEDIA] Max Consecutive Losses/Wins
+- [ ] [MEDIA] Breakdown rendimento giornaliero/settimanale
+- [ ] [MEDIA] Commissioni e costi totali
+- [ ] [MEDIA] Risk/Reward Ratio medio
+- [ ] [MEDIA] Drawdown Recovery Time
+- [ ] [MEDIA] Volatilità portafoglio
+- [ ] [MEDIA] Percentuale segnali quantum eseguiti
 + [x] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
 +     - [done 30/07/2025] Implementato bottone, API Flask e logica JS per generazione e download CSV direttamente dalla dashboard.
 - [X] **[MEDIA]** Togliere tutti i riferimenti a legacy e sostituire con mono
