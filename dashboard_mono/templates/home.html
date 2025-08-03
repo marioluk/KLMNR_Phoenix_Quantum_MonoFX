@@ -9,12 +9,27 @@
     </style>
 </head>
 <body>
+    <nav style="margin-bottom: 24px;">
+        <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
+        <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
+        <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
+        <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
+    </nav>
     <h2>Benvenuto nella Dashboard The5ers</h2>
-    <ul>
-        <li><a href="/dashboard">Dashboard completa</a></li>
-        <li><a href="/diagnostics">Diagnostica (Motivi Blocco &amp; Segnali)</a></li>
-        <li><a href="/mt5_status">Stato MT5</a></li>
-    </ul>
+    <div style="background:#23272f; border-radius:16px; padding:18px; margin-bottom:24px; color:#e0e0e0; box-shadow:0 2px 12px #00ffe744;">
+        <h4 style="color:#00ffe7;">Metriche Principali</h4>
+        <ul style="list-style:none; padding-left:0;">
+            <li><b>P&L Totale:</b> ${{ metrics.total_pnl|round(2) }}</li>
+            <li><b>Win Rate:</b> {{ metrics.win_rate|round(1) }}%</li>
+            <li><b>Max Drawdown:</b> {{ metrics.max_drawdown|round(2) }}%</li>
+            <li><b>Segnali Quantum Eseguiti:</b> {{ percent_signals_executed|round(2) }}%</li>
+            <li><b>Stato MT5:</b> {% if 'Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning %}<span style="color:#ffb700;">OFFLINE</span>{% else %}<span style="color:#00ffe7;">ONLINE</span>{% endif %}</li>
+        </ul>
+        <div style="margin-top:10px;">
+            <a href="/dashboard" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Vai alla Dashboard completa</a>
+            <a href="/diagnostics" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Diagnostica</a>
+        </div>
+    </div>
     <p style="color:gray;">Altre funzionalità in sviluppo...</p>
 </body>
 </html>

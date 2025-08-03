@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quantum Metrics - Phoenix Quantum MonoFX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dark.css') }}">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; max-width: 900px; margin: 40px auto; color: #e0e0e0; }
+        .metric-card { background: #23272f; border-radius: 16px; padding: 18px; margin-bottom: 24px; box-shadow: 0 2px 12px #00ffe744; }
+        .metric-value { font-size: 2.1rem; font-weight: bold; color: #00ffe7; }
+        .metric-label { font-size: 1.1rem; color: #b0b0b0; margin-bottom: 5px; font-weight: 500; }
+        .optimal { color: #00bfff; font-size: 1rem; font-weight: 600; }
+        .desc { font-size: 0.98rem; color: #b0b0b0; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <nav style="margin-bottom: 24px;">
+        <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
+        <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
+        <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
+        <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
+    </nav>
+    <h2 style="color:#00ffe7;">Quantum Metrics</h2>
+    <div class="metric-card">
+        <div class="metric-label" title="Percentuale di segnali quantum effettivamente eseguiti. Valori alti indicano efficienza operativa.">Segnali Quantum Eseguiti</div>
+        <div class="metric-value">{{ percent_signals_executed|round(2) }}%</div>
+        <div class="optimal">Ottimale: > 70%</div>
+        <div class="desc">Percentuale di segnali quantum effettivamente eseguiti. Valori alti indicano efficienza operativa.</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label" title="Numero totale di segnali quantum generati dal sistema. Più segnali, più opportunità di trading.">Segnali Quantum Totali</div>
+        <div class="metric-value">{{ metrics.quantum_signals.total }}</div>
+        <div class="optimal">Ottimale: > 50/giorno</div>
+        <div class="desc">Numero totale di segnali quantum generati dal sistema. Più segnali, più opportunità di trading.</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label" title="Media dell'entropia dei segnali. Valori intermedi indicano segnali informativi e non casuali.">Avg Entropy</div>
+        <div class="metric-value">{{ metrics.quantum_signals.avg_entropy|round(3) }}</div>
+        <div class="optimal">Ottimale: 0.5 - 0.8</div>
+        <div class="desc">Media dell'entropia dei segnali. Valori intermedi indicano segnali informativi e non casuali.</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label" title="Media dello spin dei segnali. Valori intermedi indicano buona variabilità e robustezza.">Avg Spin</div>
+        <div class="metric-value">{{ metrics.quantum_signals.avg_spin|round(3) }}</div>
+        <div class="optimal">Ottimale: 0.2 - 0.6</div>
+        <div class="desc">Media dello spin dei segnali. Valori intermedi indicano buona variabilità e robustezza.</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Avg Confidence</div>
+        <div class="metric-value">{{ metrics.quantum_signals.avg_confidence|round(3) }}</div>
+        <div class="optimal">Ottimale: > 0.6</div>
+        <div class="desc">Media della confidenza dei segnali. Valori alti indicano segnali affidabili.</div>
+    </div>
+    <div style="margin-top:18px;">
+        <a href="/" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
+        <a href="/dashboard" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard completa</a>
+    </div>
+
+    <hr style="margin:32px 0; border-color:#00ffe7;">
+    <h3 style="color:#00ffe7;">Grafici Quantum Metrics</h3>
+    <div class="chart-container" style="margin-bottom:32px;">
+        <h4 style="color:#00ffe7;">Andamento Quantum Execution %</h4>
+        <div id="quantum_metrics_chart"></div>
+        <div class="desc" style="margin-bottom:18px;">Il grafico mostra la percentuale di segnali quantum effettivamente eseguiti nel tempo. Valori elevati indicano efficienza operativa del sistema.</div>
+        <h4 style="color:#00bfff; margin-top:32px;">Breakdown Giornaliero Segnali Quantum Eseguiti (%)</h4>
+        <div id="daily_quantum_breakdown_chart"></div>
+        <div class="desc" style="margin-bottom:18px;">Percentuale di segnali quantum eseguiti per ciascun giorno. Utile per analizzare la costanza operativa su base giornaliera.</div>
+        <h4 style="color:#00bfff; margin-top:32px;">Breakdown Settimanale Segnali Quantum Eseguiti (%)</h4>
+        <div id="weekly_quantum_breakdown_chart"></div>
+        <div class="desc" style="margin-bottom:18px;">Percentuale di segnali quantum eseguiti per ciascuna settimana. Utile per analizzare la costanza operativa su base settimanale.</div>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+        var trace1 = {
+            x: {{ metrics.quantum_chart.dates|tojson }},
+            y: {{ metrics.quantum_chart.executed|tojson }},
+            type: 'scatter',
+            name: 'Quantum Executed %'
+        };
+        var layout1 = {
+            title: 'Andamento Quantum Execution %',
+            paper_bgcolor: '#23272f',
+            plot_bgcolor: '#23272f',
+            font: {color: '#e0e0e0'},
+        };
+        Plotly.newPlot('quantum_metrics_chart', [trace1], layout1);
+
+        // Breakdown giornaliero
+        var daily_labels = {{ daily_percent_signals_executed.keys()|list|tojson|safe }};
+        var daily_values = {{ daily_percent_signals_executed.values()|list|tojson|safe }};
+        var trace_daily = {
+            x: daily_labels,
+            y: daily_values,
+            type: 'bar',
+            name: 'Quantum Executed % Giornaliero',
+            marker: {color: '#00ffe7'}
+        };
+        var layout_daily = {
+            title: 'Breakdown Giornaliero Segnali Quantum Eseguiti (%)',
+            paper_bgcolor: '#23272f',
+            plot_bgcolor: '#23272f',
+            font: {color: '#e0e0e0'},
+            xaxis: {title: 'Data'},
+            yaxis: {title: '% Eseguiti'}
+        };
+        Plotly.newPlot('daily_quantum_breakdown_chart', [trace_daily], layout_daily);
+
+        // Breakdown settimanale
+        var weekly_labels = {{ weekly_percent_signals_executed.keys()|list|tojson|safe }};
+        var weekly_values = {{ weekly_percent_signals_executed.values()|list|tojson|safe }};
+        var trace_weekly = {
+            x: weekly_labels,
+            y: weekly_values,
+            type: 'bar',
+            name: 'Quantum Executed % Settimanale',
+            marker: {color: '#00bfff'}
+        };
+        var layout_weekly = {
+            title: 'Breakdown Settimanale Segnali Quantum Eseguiti (%)',
+            paper_bgcolor: '#23272f',
+            plot_bgcolor: '#23272f',
+            font: {color: '#e0e0e0'},
+            xaxis: {title: 'Settimana'},
+            yaxis: {title: '% Eseguiti'}
+        };
+        Plotly.newPlot('weekly_quantum_breakdown_chart', [trace_weekly], layout_weekly);
+    </script>
+</body>
+</html>

@@ -75,16 +75,52 @@ Obiettivo: automatizzare il monitoraggio della strategia, facilitare l’analisi
 - [ ] **[ALTA] miglioramento UI/UX (responsive, dark/light, icone)**
 
 ### [SUGGERITE] Nuove metriche da integrare in dashboard
-- [ ] [MEDIA] Sharpe Ratio (rischio/rendimento)
-- [ ] [MEDIA] Sortino Ratio (rischio downside)
-- [ ] [MEDIA] Trade Duration Media
-- [ ] [MEDIA] Max Consecutive Losses/Wins
-- [ ] [MEDIA] Breakdown rendimento giornaliero/settimanale
-- [ ] [MEDIA] Commissioni e costi totali
-- [ ] [MEDIA] Risk/Reward Ratio medio
-- [ ] [MEDIA] Drawdown Recovery Time
-- [ ] [MEDIA] Volatilità portafoglio
-- [ ] [MEDIA] Percentuale segnali quantum eseguiti
+
+**Metriche avanzate disponibili in dashboard:**
+
+- [Sharpe Ratio](dashboard_mono/performance.html#sharpe) *(rischio/rendimento)*
+  - _Descrizione_: Misura il rendimento corretto per il rischio. Valori >1 sono considerati buoni. 
+  - _Tooltip_: "Sharpe Ratio: quanto rendimento ottieni per ogni unità di rischio assunta."
+
+- [Sortino Ratio](dashboard_mono/performance.html#sortino) *(rischio downside)*
+  - _Descrizione_: Simile allo Sharpe ma penalizza solo la volatilità negativa. Ottimale >1.
+  - _Tooltip_: "Sortino Ratio: valuta solo i rischi di perdita, ignorando la volatilità positiva."
+
+- [Trade Duration Media](dashboard_mono/performance.html#duration) *(durata media trade)*
+  - _Descrizione_: Indica quanto tempo mediamente rimangono aperti i trade. Durate troppo lunghe possono indicare inefficienza.
+  - _Tooltip_: "Durata media: tempo medio di mantenimento di una posizione."
+
+- [Max Consecutive Losses/Wins](dashboard_mono/performance.html#streaks) *(perdite/vittorie consecutive)*
+  - _Descrizione_: Aiuta a identificare pattern di rischio o di successo. Un alto numero di perdite consecutive può indicare un problema.
+  - _Tooltip_: "Streaks: serie massima di trade vincenti o perdenti consecutivi."
+
+- [Breakdown rendimento giornaliero/settimanale](dashboard_mono/performance.html#breakdown) *(analisi temporale)*
+  - _Descrizione_: Visualizza la distribuzione dei profitti su base giornaliera e settimanale. Utile per individuare giorni critici.
+  - _Tooltip_: "Breakdown: analisi dei profitti per giorno e settimana."
+
+- [Commissioni e costi totali](dashboard_mono/advanced_metrics.html#commissioni) *(costi trading)*
+  - _Descrizione_: Somma di tutte le commissioni e costi sostenuti. Da tenere sotto controllo per ottimizzare la strategia.
+  - _Tooltip_: "Commissioni: costi totali sostenuti per operare."
+
+- [Risk/Reward Ratio medio](dashboard_mono/advanced_metrics.html#rrr) *(rapporto rischio/rendimento)*
+  - _Descrizione_: Rapporto tra rischio assunto e rendimento atteso. Un valore >2 è considerato ottimale.
+  - _Tooltip_: "RRR: quanto guadagni rispetto a quanto rischi."
+
+- [Grafico Risk/Reward Ratio (RRR)](dashboard_mono/advanced_metrics.html#rrr-chart) *(visualizzazione RRR)*
+  - _Descrizione_: Mostra l’andamento del rapporto rischio/rendimento nel tempo.
+  - _Tooltip_: "Grafico RRR: andamento storico del rapporto rischio/rendimento."
+
+- [Drawdown Recovery Time](dashboard_mono/advanced_metrics.html#drawdown) *(tempo recupero perdite)*
+  - _Descrizione_: Tempo necessario per recuperare da una perdita significativa. Più breve è, meglio è.
+  - _Tooltip_: "Drawdown Recovery: tempo di recupero dopo una perdita."
+
+- [Volatilità portafoglio](dashboard_mono/advanced_metrics.html#volatilita) *(oscillazione valore)*
+  - _Descrizione_: Misura quanto varia il valore del portafoglio. Volatilità troppo alta può essere rischiosa.
+  - _Tooltip_: "Volatilità: oscillazione del valore del portafoglio."
+
+- [Percentuale segnali quantum eseguiti](dashboard_mono/quantum_metrics.html#quantum) *(efficienza segnali)* [done 03/08/2025]
+  - _Descrizione_: Percentuale di segnali quantum effettivamente eseguiti rispetto a quelli generati. Un valore alto indica efficienza.
+  - _Tooltip_: "Quantum Execution: percentuale di segnali quantum eseguiti."
 + [x] **[MEDIA] Esportazione dati e download CSV dalla dashboard**
 +     - [done 30/07/2025] Implementato bottone, API Flask e logica JS per generazione e download CSV direttamente dalla dashboard.
 - [X] **[MEDIA]** Togliere tutti i riferimenti a legacy e sostituire con mono

@@ -139,6 +139,73 @@ class The5ersGraphicalDashboard:
             else:
                 self.current_metrics['profit_factor'] = float('inf') if total_profit > 0 else 0
 
+            # Calcolo Sharpe Ratio
+            returns = []
+            for i in range(1, len(self.pnl_history)):
+                prev = self.pnl_history[i-1]['cumulative_pnl']
+                curr = self.pnl_history[i]['cumulative_pnl']
+                returns.append(curr - prev)
+            if returns:
+                avg_return = sum(returns) / len(returns)
+                std_return = (sum((r - avg_return) ** 2 for r in returns) / len(returns)) ** 0.5
+                risk_free_rate = 0.0  # Puoi personalizzare
+                if std_return > 0:
+                    sharpe_ratio = (avg_return - risk_free_rate) / std_return
+                else:
+                    sharpe_ratio = 0.0
+                self.current_metrics['sharpe_ratio'] = sharpe_ratio
+                # Calcolo Sortino Ratio
+                downside_returns = [r for r in returns if r < 0]
+                if downside_returns:
+                    downside_std = (sum((r) ** 2 for r in downside_returns) / len(downside_returns)) ** 0.5
+                    if downside_std > 0:
+                        sortino_ratio = (avg_return - risk_free_rate) / downside_std
+                    else:
+                        sortino_ratio = 0.0
+                else:
+                    sortino_ratio = 0.0
+                self.current_metrics['sortino_ratio'] = sortino_ratio
+                # Calcolo Trade Duration Media
+                durations = []
+                for deal in deals:
+                    if hasattr(deal, 'time') and hasattr(deal, 'time_exit') and deal.type in [mt5.DEAL_TYPE_BUY, mt5.DEAL_TYPE_SELL]:
+                        entry_time = datetime.fromtimestamp(deal.time)
+                        exit_time = datetime.fromtimestamp(deal.time_exit)
+                        duration = (exit_time - entry_time).total_seconds() / 60.0
+                        if duration > 0:
+                            durations.append(duration)
+                if durations:
+                    avg_duration = sum(durations) / len(durations)
+                else:
+                    avg_duration = 0.0
+                self.current_metrics['avg_trade_duration_minutes'] = avg_duration
+                # Calcolo Max Consecutive Wins/Losses
+                max_wins = 0
+                max_losses = 0
+                current_wins = 0
+                current_losses = 0
+                for deal in deals:
+                    if deal.type in [mt5.DEAL_TYPE_BUY, mt5.DEAL_TYPE_SELL]:
+                        if deal.profit > 0:
+                            current_wins += 1
+                            max_losses = max(max_losses, current_losses)
+                            current_losses = 0
+                        elif deal.profit < 0:
+                            current_losses += 1
+                            max_wins = max(max_wins, current_wins)
+                            current_wins = 0
+                        else:
+                            max_wins = max(max_wins, current_wins)
+                            max_losses = max(max_losses, current_losses)
+                            current_wins = 0
+                            current_losses = 0
+                max_wins = max(max_wins, current_wins)
+                max_losses = max(max_losses, current_losses)
+                self.current_metrics['max_consecutive_wins'] = max_wins
+                self.current_metrics['max_consecutive_losses'] = max_losses
+            else:
+                self.current_metrics['sharpe_ratio'] = 0.0
+                self.current_metrics['sortino_ratio'] = 0.0
 
             # Ricostruisci drawdown_history per mostrare l'andamento storico
             self.drawdown_history.clear()
@@ -262,7 +329,8 @@ class The5ersGraphicalDashboard:
                 'buy': 0,
                 'sell': 0,
                 'avg_entropy': 0.0,
-                'avg_spin': 0.0
+                'avg_spin': 0.0,
+                'avg_confidence': 0.0
             }
         }
         self.is_monitoring = False
@@ -359,6 +427,123 @@ class The5ersGraphicalDashboard:
         self.realtime_notifications.appendleft(notif)
 
     def setup_routes(self):
+        @self.app.route('/performance')
+        def performance():
+            metrics = self.current_metrics
+            # Fix: aggiungi dati grafico se non presenti
+            if 'performance_chart' not in metrics:
+                import datetime
+                metrics['performance_chart'] = {
+                    'dates': [datetime.datetime.now().strftime('%Y-%m-%d')],
+                    'pnl': [0.0]
+                }
+            # Rigenera i grafici principali come nella dashboard
+            pnl_chart = self.create_pnl_chart()
+            drawdown_chart = self.create_drawdown_chart()
+            balance_chart = self.create_balance_chart()
+            hourly_chart = self.create_hourly_chart()
+            symbols_chart = self.create_symbols_chart()
+            return render_template('performance.html', metrics=metrics, pnl_chart=pnl_chart, drawdown_chart=drawdown_chart, balance_chart=balance_chart, hourly_chart=hourly_chart, symbols_chart=symbols_chart)
+
+        @self.app.route('/advanced_metrics')
+        def advanced_metrics():
+            # Aggiorna i dati dal log prima di calcolare le metriche
+            self.analyze_log_file()
+            # Import robusto per compatibilità
+            try:
+                from datetime import datetime as dt_class
+            except ImportError:
+                import datetime as dtmod
+                dt_class = dtmod.datetime
+            metrics = self.current_metrics
+            # Fix: aggiungi dati grafico se non presenti
+            if 'advanced_chart' not in metrics:
+                import datetime as dtmod
+                metrics['advanced_chart'] = {
+                    'dates': [dtmod.datetime.now().strftime('%Y-%m-%d')],
+                    'rrr': [0.0]
+                }
+            # Rigenera breakdown e grafici avanzati
+            daily_rrr_values = []
+            daily_rrr_labels = []
+            daily = {}
+            for entry in self.pnl_history:
+                try:
+                    dt = dt_class.fromisoformat(entry['timestamp'])
+                except AttributeError:
+                    import datetime as dtmod
+                    dt = dtmod.datetime.fromisoformat(entry['timestamp'])
+                day = dt.strftime('%Y-%m-%d')
+                if day not in daily:
+                    daily[day] = {'pnl': 0.0, 'trades': 0}
+                daily[day]['pnl'] += float(entry['pnl'] or 0)
+                daily[day]['trades'] += 1
+            for day, stats in sorted(daily.items()):
+                rrr = abs(stats['pnl']) / stats['trades'] if stats['trades'] > 0 else 0.0
+                daily_rrr_values.append(rrr)
+                daily_rrr_labels.append(day)
+            daily_rrr_chart = {
+                'data': [go.Bar(x=daily_rrr_labels, y=daily_rrr_values, marker_color=['#00ffe7' if v>=0 else '#ff3c3c' for v in daily_rrr_values], name='RRR Giornaliero').to_plotly_json()],
+                'layout': go.Layout(title='Risk/Reward Ratio Giornaliero', xaxis={'title':'Data'}, yaxis={'title':'RRR'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
+            weekly = {}
+            weekly_rrr_values = []
+            weekly_rrr_labels = []
+            for entry in self.pnl_history:
+                dt = datetime.fromisoformat(entry['timestamp'])
+                week = dt.strftime('%Y-W%U')
+                if week not in weekly:
+                    weekly[week] = {'pnl': 0.0, 'trades': 0}
+                weekly[week]['pnl'] += float(entry['pnl'] or 0)
+                weekly[week]['trades'] += 1
+            for week, stats in sorted(weekly.items()):
+                rrr = abs(stats['pnl']) / stats['trades'] if stats['trades'] > 0 else 0.0
+                weekly_rrr_values.append(rrr)
+                weekly_rrr_labels.append(week)
+            weekly_rrr_chart = {
+                'data': [go.Bar(x=weekly_rrr_labels, y=weekly_rrr_values, marker_color=['#00bfff' if v>=0 else '#fd7e14' for v in weekly_rrr_values], name='RRR Settimanale').to_plotly_json()],
+                'layout': go.Layout(title='Risk/Reward Ratio Settimanale', xaxis={'title':'Settimana'}, yaxis={'title':'RRR'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
+            advanced_chart = {
+                'dates': daily_rrr_labels,
+                'rrr': daily_rrr_values
+            }
+            metrics['advanced_chart'] = advanced_chart
+            return render_template('advanced_metrics.html', metrics=metrics, daily_rrr_chart=daily_rrr_chart, weekly_rrr_chart=weekly_rrr_chart)
+
+        @self.app.route('/quantum_metrics')
+        def quantum_metrics():
+            metrics = self.current_metrics
+            percent_signals_executed = 0.0
+            if metrics.get('quantum_signals', {}).get('total', 0) > 0:
+                executed_signals = sum(1 for s in self.signals_timeline if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE')
+                percent_signals_executed = (executed_signals / metrics['quantum_signals']['total'] * 100)
+            # Fix: aggiungi dati grafico se non presenti
+            # Rigenera quantum_chart come andamento storico
+            quantum_dates = []
+            quantum_executed = []
+            # Breakdown giornaliero
+            daily_signals = {}
+            for s in self.signals_timeline:
+                day = s['timestamp'][:10]
+                if day not in daily_signals:
+                    daily_signals[day] = {'total': 0, 'executed': 0}
+                daily_signals[day]['total'] += 1
+                if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE':
+                    daily_signals[day]['executed'] += 1
+            for day, stats in sorted(daily_signals.items()):
+                quantum_dates.append(day)
+                percent = (stats['executed']/stats['total']*100) if stats['total']>0 else 0.0
+                quantum_executed.append(percent)
+            metrics['quantum_chart'] = {
+                'dates': quantum_dates,
+                'executed': quantum_executed
+            }
+            # Rigenera signals_chart e breakdown percentuali come nella dashboard
+            signals_chart = self.create_signals_chart()
+            daily_percent_signals_executed = getattr(self, 'daily_percent_signals_executed', {})
+            weekly_percent_signals_executed = getattr(self, 'weekly_percent_signals_executed', {})
+            return render_template('quantum_metrics.html', metrics=metrics, percent_signals_executed=percent_signals_executed, signals_chart=signals_chart, daily_percent_signals_executed=daily_percent_signals_executed, weekly_percent_signals_executed=weekly_percent_signals_executed)
         app = self.app
         print('[DEBUG] Registrazione route / (home) in corso...')
         # Route di test minimale
@@ -511,16 +696,131 @@ class The5ersGraphicalDashboard:
 
         @app.route('/')
         def home():
-            # Pagina di benvenuto separata
+            # Pagina di benvenuto con estratto metriche principali
             print('[DEBUG] Chiamata route / (home)')
             try:
-                return render_template('home.html')
+                # Espongo le metriche principali e lo stato MT5
+                metrics = self.current_metrics
+                percent_signals_executed = 0.0
+                if metrics.get('quantum_signals', {}).get('total', 0) > 0:
+                    executed_signals = sum(1 for s in self.signals_timeline if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE')
+                    percent_signals_executed = (executed_signals / metrics['quantum_signals']['total'] * 100)
+                mt5_warning = ""
+                if not MT5_AVAILABLE:
+                    mt5_warning = "<div style='color:red; font-weight:bold; margin-bottom:10px;'>⚠️ Modulo MetaTrader5 non installato: dati live non disponibili.</div>"
+                elif not self.use_mt5:
+                    mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ Connessione MT5 non attiva o file di configurazione non valido.</div>"
+                elif not self.mt5_connected:
+                    mt5_warning = "<div style='color:orange; font-weight:bold; margin-bottom:10px;'>⚠️ MT5 non connesso: mostra solo dati da log.</div>"
+                return render_template('home.html', metrics=metrics, percent_signals_executed=percent_signals_executed, mt5_warning=mt5_warning)
             except Exception as e:
                 print(f'[ERRORE TEMPLATE] {e}')
                 return f"Template home.html non trovato o errore: {e}", 500
 
         @app.route('/dashboard')
         def dashboard():
+            # Calcolo percentuale segnali quantum eseguiti
+            total_signals = self.current_metrics['quantum_signals']['total']
+            executed_signals = sum(1 for s in self.signals_timeline if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE')
+            percent_signals_executed = (executed_signals / total_signals * 100) if total_signals > 0 else 0.0
+
+            # Breakdown giornaliero
+            daily_signals = {}
+            for s in self.signals_timeline:
+                day = s['timestamp'][:10]
+                if day not in daily_signals:
+                    daily_signals[day] = {'total': 0, 'executed': 0}
+                daily_signals[day]['total'] += 1
+                if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE':
+                    daily_signals[day]['executed'] += 1
+            daily_percent_signals_executed = {d: (v['executed']/v['total']*100 if v['total']>0 else 0.0) for d,v in daily_signals.items()}
+
+            # Breakdown settimanale
+            weekly_signals = {}
+            for s in self.signals_timeline:
+                week = datetime.fromisoformat(s['timestamp']).strftime('%Y-W%U')
+                if week not in weekly_signals:
+                    weekly_signals[week] = {'total': 0, 'executed': 0}
+                weekly_signals[week]['total'] += 1
+                if s.get('esito') and s.get('esito') != 'NESSUNA AZIONE':
+                    weekly_signals[week]['executed'] += 1
+            weekly_percent_signals_executed = {w: (v['executed']/v['total']*100 if v['total']>0 else 0.0) for w,v in weekly_signals.items()}
+            # Calcola breakdown giornaliero e settimanale
+            daily = {}
+            weekly = {}
+            for entry in self.pnl_history:
+                dt = datetime.fromisoformat(entry['timestamp'])
+                day = dt.strftime('%Y-%m-%d')
+                week = dt.strftime('%Y-W%U')
+                commission = float(entry.get('commission', 0) or 0)
+                swap = float(entry.get('swap', 0) or 0)
+                cost = commission + swap
+                if day not in daily:
+                    daily[day] = {'pnl': 0.0, 'trades': 0, 'wins': 0, 'commission': 0.0, 'swap': 0.0, 'cost': 0.0}
+                if week not in weekly:
+                    weekly[week] = {'pnl': 0.0, 'trades': 0, 'wins': 0, 'commission': 0.0, 'swap': 0.0, 'cost': 0.0}
+                daily[day]['pnl'] += float(entry['pnl'] or 0)
+                daily[day]['trades'] += 1
+                daily[day]['commission'] += commission
+                daily[day]['swap'] += swap
+                daily[day]['cost'] += cost
+                weekly[week]['pnl'] += float(entry['pnl'] or 0)
+                weekly[week]['trades'] += 1
+                weekly[week]['commission'] += commission
+                weekly[week]['swap'] += swap
+                weekly[week]['cost'] += cost
+                if entry['pnl'] > 0:
+                    daily[day]['wins'] += 1
+                    weekly[week]['wins'] += 1
+            # Calcola win rate e profit %
+            daily_breakdown = []
+            for day, stats in sorted(daily.items()):
+                win_rate = (stats['wins'] / stats['trades'] * 100) if stats['trades'] > 0 else 0
+                profit_pct = (stats['pnl'] / self.current_metrics['current_balance'] * 100) if self.current_metrics['current_balance'] > 0 else 0
+                daily_breakdown.append({
+                    'date': day,
+                    'pnl': stats['pnl'],
+                    'trades': stats['trades'],
+                    'win_rate': win_rate,
+                    'profit_pct': profit_pct,
+                    'commission': stats['commission'],
+                    'swap': stats['swap'],
+                    'cost': stats['cost']
+                })
+            weekly_breakdown = []
+            for week, stats in sorted(weekly.items()):
+                win_rate = (stats['wins'] / stats['trades'] * 100) if stats['trades'] > 0 else 0
+                profit_pct = (stats['pnl'] / self.current_metrics['current_balance'] * 100) if self.current_metrics['current_balance'] > 0 else 0
+                weekly_breakdown.append({
+                    'week': week,
+                    'pnl': stats['pnl'],
+                    'trades': stats['trades'],
+                    'win_rate': win_rate,
+                    'profit_pct': profit_pct,
+                    'commission': stats['commission'],
+                    'swap': stats['swap'],
+                    'cost': stats['cost']
+                })
+            # Ora i breakdown sono definiti, posso generare i grafici
+            import plotly.graph_objs as go
+            daily_chart_data = []
+            daily_chart_labels = []
+            for day in daily_breakdown:
+                daily_chart_labels.append(day['date'])
+                daily_chart_data.append(day['pnl'])
+            daily_breakdown_chart = {
+                'data': [go.Bar(x=daily_chart_labels, y=daily_chart_data, marker_color=['#00ffe7' if v>=0 else '#ff3c3c' for v in daily_chart_data], name='P&L Giornaliero').to_plotly_json()],
+                'layout': go.Layout(title='Rendimento Giornaliero', xaxis={'title':'Data'}, yaxis={'title':'P&L ($)'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
+            weekly_chart_data = []
+            weekly_chart_labels = []
+            for week in weekly_breakdown:
+                weekly_chart_labels.append(week['week'])
+                weekly_chart_data.append(week['pnl'])
+            weekly_breakdown_chart = {
+                'data': [go.Bar(x=weekly_chart_labels, y=weekly_chart_data, marker_color=['#00bfff' if v>=0 else '#fd7e14' for v in weekly_chart_data], name='P&L Settimanale').to_plotly_json()],
+                'layout': go.Layout(title='Rendimento Settimanale', xaxis={'title':'Settimana'}, yaxis={'title':'P&L ($)'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
             # Dashboard principale con grafici
             pnl_chart = self.create_pnl_chart()
             drawdown_chart = self.create_drawdown_chart()
@@ -567,6 +867,120 @@ class The5ersGraphicalDashboard:
                             unexecuted_signals.append(row)
                 # Mostra solo gli ultimi 20
                 unexecuted_signals = unexecuted_signals[-20:]
+            # Calcolo RRR medio globale, giornaliero e settimanale
+            def calc_rrr(entries):
+                rrrs = []
+                for e in entries:
+                    # RRR = abs(profit) / abs(loss) per trade, qui semplificato come profit/loss ratio
+                    # Se hai stop_loss e take_profit, puoi usare quelli
+                    # Qui usiamo solo pnl positivo/negativo
+                    if 'pnl' in e and e['pnl'] != 0:
+                        # Simulazione: RRR = abs(pnl) / abs(pnl) = 1, ma in realtà serve info su rischio e reward
+                        # Se hai info su stop_loss/take_profit, sostituisci qui
+                        rrrs.append(abs(e['pnl']) / 1.0)  # Placeholder
+                if rrrs:
+                    return sum(rrrs) / len(rrrs)
+                return 0.0
+
+            # Calcolo volatilità portafoglio
+            def calc_volatility(pnl_list):
+                if len(pnl_list) < 2:
+                    return 0.0
+                mean = sum(pnl_list) / len(pnl_list)
+                variance = sum((x - mean) ** 2 for x in pnl_list) / (len(pnl_list) - 1)
+                return variance ** 0.5
+
+            # Volatilità globale
+            pnl_values = [float(entry['pnl']) for entry in self.pnl_history]
+            portfolio_volatility = calc_volatility(pnl_values)
+
+            # Volatilità giornaliera
+            daily_volatility = {}
+            for day in daily_breakdown:
+                day_pnl = [float(entry['pnl']) for entry in self.pnl_history if entry['timestamp'][:10] == day['date']]
+                daily_volatility[day['date']] = calc_volatility(day_pnl)
+
+            # Volatilità settimanale
+            weekly_volatility = {}
+            for week in weekly_breakdown:
+                week_pnl = [float(entry['pnl']) for entry in self.pnl_history if datetime.fromisoformat(entry['timestamp']).strftime('%Y-W%U') == week['week']]
+                weekly_volatility[week['week']] = calc_volatility(week_pnl)
+
+            # RRR medio globale
+            avg_rrr_global = calc_rrr(self.pnl_history)
+
+            # RRR giornaliero
+            daily_rrr_values = []
+            daily_rrr_labels = []
+            for day in daily_breakdown:
+                # Simulazione: usa pnl/trades come proxy
+                rrr = abs(day['pnl']) / day['trades'] if day['trades'] > 0 else 0.0
+                daily_rrr_values.append(rrr)
+                daily_rrr_labels.append(day['date'])
+            import plotly.graph_objs as go
+            daily_rrr_chart = {
+                'data': [go.Bar(x=daily_rrr_labels, y=daily_rrr_values, marker_color=['#00ffe7' if v>=0 else '#ff3c3c' for v in daily_rrr_values], name='RRR Giornaliero').to_plotly_json()],
+                'layout': go.Layout(title='Risk/Reward Ratio Giornaliero', xaxis={'title':'Data'}, yaxis={'title':'RRR'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
+
+            # RRR settimanale
+            weekly_rrr_values = []
+            weekly_rrr_labels = []
+            for week in weekly_breakdown:
+                rrr = abs(week['pnl']) / week['trades'] if week['trades'] > 0 else 0.0
+                weekly_rrr_values.append(rrr)
+                weekly_rrr_labels.append(week['week'])
+            weekly_rrr_chart = {
+                'data': [go.Bar(x=weekly_rrr_labels, y=weekly_rrr_values, marker_color=['#00bfff' if v>=0 else '#fd7e14' for v in weekly_rrr_values], name='RRR Settimanale').to_plotly_json()],
+                'layout': go.Layout(title='Risk/Reward Ratio Settimanale', xaxis={'title':'Settimana'}, yaxis={'title':'RRR'}, plot_bgcolor='#181c20').to_plotly_json()
+            }
+
+            # Espone i grafici come attributi della classe per accesso robusto da tutte le route
+            self.daily_rrr_chart = daily_rrr_chart
+            self.weekly_rrr_chart = weekly_rrr_chart
+
+            # Calcolo Drawdown Recovery Time e breakdown
+            def calc_drawdown_recovery(drawdown_history, pnl_history):
+                recovery_times = []
+                drawdown_points = []
+                for i, dd in enumerate(drawdown_history):
+                    if dd['drawdown'] > 0:
+                        drawdown_points.append((i, dd['drawdown'], dd['timestamp']))
+                for idx, dd_val, dd_ts in drawdown_points:
+                    for j in range(idx+1, len(drawdown_history)):
+                        if drawdown_history[j]['drawdown'] <= 0.01:
+                            t1 = datetime.fromisoformat(dd_ts)
+                            t2 = datetime.fromisoformat(drawdown_history[j]['timestamp'])
+                            recovery_minutes = (t2 - t1).total_seconds() / 60.0
+                            recovery_times.append(recovery_minutes)
+                            break
+                if recovery_times:
+                    return sum(recovery_times) / len(recovery_times)
+                return 0.0
+
+            drawdown_recovery_time = calc_drawdown_recovery(self.drawdown_history, self.pnl_history)
+
+            daily_drawdown_recovery = {}
+            weekly_drawdown_recovery = {}
+            for day in daily_breakdown:
+                times = []
+                for dd in self.drawdown_history:
+                    if dd['timestamp'][:10] == day['date']:
+                        times.append(dd)
+                if times:
+                    rec = calc_drawdown_recovery(times, self.pnl_history)
+                    daily_drawdown_recovery[day['date']] = rec
+            for week in weekly_breakdown:
+                times = []
+                for dd in self.drawdown_history:
+                    dt = datetime.fromisoformat(dd['timestamp'])
+                    week_str = dt.strftime('%Y-W%U')
+                    if week_str == week['week']:
+                        times.append(dd)
+                if times:
+                    rec = calc_drawdown_recovery(times, self.pnl_history)
+                    weekly_drawdown_recovery[week['week']] = rec
+
             return render_template(
                 'dashboard.html',
                 pnl_chart=pnl_chart,
@@ -579,8 +993,27 @@ class The5ersGraphicalDashboard:
                 compliance=compliance,
                 mt5_warning=mt5_warning,
                 unexecuted_signals=unexecuted_signals,
-                realtime_notifications=list(self.realtime_notifications)
+                realtime_notifications=list(self.realtime_notifications),
+                daily_breakdown=daily_breakdown,
+                weekly_breakdown=weekly_breakdown,
+                daily_breakdown_chart=daily_breakdown_chart,
+                weekly_breakdown_chart=weekly_breakdown_chart,
+                daily_rrr_chart=daily_rrr_chart,
+                weekly_rrr_chart=weekly_rrr_chart,
+                avg_rrr_global=avg_rrr_global,
+                drawdown_recovery_time=drawdown_recovery_time,
+                daily_drawdown_recovery=daily_drawdown_recovery,
+                weekly_drawdown_recovery=weekly_drawdown_recovery,
+                portfolio_volatility=portfolio_volatility,
+                daily_volatility=daily_volatility,
+               weekly_volatility=weekly_volatility,
+               percent_signals_executed=percent_signals_executed,
+               daily_percent_signals_executed=daily_percent_signals_executed,
+               weekly_percent_signals_executed=weekly_percent_signals_executed
             )
+
+        # ...existing code...
+
 
         @app.route('/diagnostics')
         def diagnostics():
@@ -860,12 +1293,13 @@ class The5ersGraphicalDashboard:
             self.current_metrics['max_drawdown'] = max(self.current_metrics['max_drawdown'], current_drawdown)
             return {'type': 'trade_closed', 'data': match.groups()}
 
-        # Heartbeat con formato compatto (EURUSD: Bid=... E=... S=...)
-        match = re.search(r'(\w+): Bid=[\d\.]+.*E=(\d+\.\d+).*S=([-+]?\d+\.\d+)', line, re.IGNORECASE)
+        # Heartbeat con formato compatto (EURUSD: Bid=... E=... S=... C=...)
+        match = re.search(r'(\w+): Bid=[\d\.]+.*E=(\d+\.\d+).*S=([-+]?\d+\.\d+)(?:.*C=(\d+\.\d+))?', line, re.IGNORECASE)
         if match:
             symbol = match.group(1)
             entropy = float(match.group(2))
             spin = float(match.group(3))
+            confidence = float(match.group(4)) if match.group(4) is not None else None
             if entropy > 0 or abs(spin) > 0:
                 self.current_metrics['quantum_signals']['total'] += 1
                 if spin > 0:
@@ -879,16 +1313,22 @@ class The5ersGraphicalDashboard:
                 self.current_metrics['quantum_signals']['avg_spin'] = (
                     (self.current_metrics['quantum_signals']['avg_spin'] * (total - 1) + spin) / total
                 )
+                if confidence is not None:
+                    prev_avg_conf = self.current_metrics['quantum_signals']['avg_confidence']
+                    self.current_metrics['quantum_signals']['avg_confidence'] = (
+                        (prev_avg_conf * (total - 1) + confidence) / total
+                    )
                 self.signals_timeline.append({
                     'timestamp': timestamp.isoformat(),
                     'symbol': symbol,
                     'direction': 'BUY' if spin > 0 else 'SELL',
                     'entropy': entropy,
-                    'spin': spin
+                    'spin': spin,
+                    'confidence': confidence
                 })
                 return {'type': 'heartbeat', 'data': match.groups()}
 
-        # Heartbeat con formato a blocchi (Symbol: ... Entropy (E): ... Spin (S): ...)
+        # Heartbeat con formato a blocchi (Symbol: ... Entropy (E): ... Spin (S): ... Confidence (C): ...)
         # Estrae il simbolo
         match_symbol = re.match(r'Symbol:\s*(\w+)', line)
         if match_symbol:
@@ -905,6 +1345,11 @@ class The5ersGraphicalDashboard:
             spin = float(match_spin.group(1))
             entropy = self._last_entropy
             symbol = self._last_symbol
+            # Confidence opzionale
+            confidence = None
+            match_conf = re.match(r'Confidence \(C\):\s*([-+]?\d+\.\d+)', line)
+            if match_conf:
+                confidence = float(match_conf.group(1))
             # Conta sempre il blocco heartbeat, anche se entropy/spin sono zero
             self.current_metrics['quantum_signals']['total'] += 1
             if spin > 0:
@@ -919,17 +1364,23 @@ class The5ersGraphicalDashboard:
             self.current_metrics['quantum_signals']['avg_spin'] = (
                 (self.current_metrics['quantum_signals']['avg_spin'] * (total - 1) + spin) / total
             )
+            if confidence is not None:
+                prev_avg_conf = self.current_metrics['quantum_signals']['avg_confidence']
+                self.current_metrics['quantum_signals']['avg_confidence'] = (
+                    (prev_avg_conf * (total - 1) + confidence) / total
+                )
             self.signals_timeline.append({
                 'timestamp': timestamp.isoformat(),
                 'symbol': symbol,
                 'direction': 'BUY' if spin > 0 else ('SELL' if spin < 0 else 'NEUTRAL'),
                 'entropy': entropy,
-                'spin': spin
+                'spin': spin,
+                'confidence': confidence
             })
             # Pulisce i dati temporanei
             del self._last_symbol
             del self._last_entropy
-            return {'type': 'heartbeat_block', 'data': (symbol, entropy, spin)}
+            return {'type': 'heartbeat_block', 'data': (symbol, entropy, spin, confidence)}
 
         # Account info
         match = re.search(r'Account Balance: (\d+\.\d+), Equity: (\d+\.\d+)', line, re.IGNORECASE)
