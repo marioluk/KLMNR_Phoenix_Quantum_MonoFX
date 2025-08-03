@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test di avvio dashboard con debug - LEGACY SYSTEM
+Test di avvio dashboard con debug - MONO SYSTEM
 """
 
 import sys

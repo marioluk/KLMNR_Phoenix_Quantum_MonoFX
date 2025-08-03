@@ -27,6 +27,10 @@ except ImportError:
     print("⚠️  MetaTrader5 non disponibile - usando solo dati log")
 
 class The5ersGraphicalDashboard:
+    def add_test_route(self):
+        @self.app.route('/test')
+        def test():
+            return 'Flask funziona!'
     def load_signals_from_csv(self, csv_path=None, max_rows=1000):
         """Carica i segnali dal file CSV strutturato e popola signals_timeline."""
         import csv
@@ -279,7 +283,7 @@ class The5ersGraphicalDashboard:
         template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
         static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
         self.app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
-        # Auto-detect config file se non specificato (per sistema legacy)
+        # Auto-detect config file se non specificato (per sistema mono)
         if config_file is None:
             config_file = self.get_default_config_path()
 
@@ -340,8 +344,7 @@ class The5ersGraphicalDashboard:
         # Carica segnali dal CSV all'avvio
         self.load_signals_from_csv()
 
-        # Flask app e route (SOLO ORA che tutto è pronto)
-        self.setup_routes()
+
 
 
     def send_realtime_notification(self, event_type: str, message: str, details: dict = None):
@@ -357,6 +360,9 @@ class The5ersGraphicalDashboard:
 
     def setup_routes(self):
         app = self.app
+        print('[DEBUG] Registrazione route / (home) in corso...')
+        # Route di test minimale
+        self.add_test_route()
         @app.route('/api/errors_warnings', methods=['GET'])
         def api_errors_warnings():
             """Restituisce lo storico errori/warning (max 100)"""
@@ -377,14 +383,16 @@ class The5ersGraphicalDashboard:
             logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
             json_path = os.path.join(logs_dir, 'signals_vs_trades_report.json')
             if not os.path.isfile(json_path):
-                return jsonify({'success': False, 'error': 'Report non trovato, genera prima il report incrociato.'}), 404
-            import json
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            filtered = [row for row in data if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL')]
-            if symbol:
-                filtered = [row for row in filtered if row.get('symbol', '').upper() == symbol]
-            filtered = filtered[-max_rows:]
+                # Se il file non esiste, restituisci lista vuota
+                filtered = []
+            else:
+                import json
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                filtered = [row for row in data if not row.get('trade_aperto') and row.get('segnale') in ('BUY', 'SELL')]
+                if symbol:
+                    filtered = [row for row in filtered if row.get('symbol', '').upper() == symbol]
+                filtered = filtered[-max_rows:]
             return jsonify({'success': True, 'rows': filtered})
         app = self.app
         from flask import render_template
@@ -504,7 +512,12 @@ class The5ersGraphicalDashboard:
         @app.route('/')
         def home():
             # Pagina di benvenuto separata
-            return render_template('home.html')
+            print('[DEBUG] Chiamata route / (home)')
+            try:
+                return render_template('home.html')
+            except Exception as e:
+                print(f'[ERRORE TEMPLATE] {e}')
+                return f"Template home.html non trovato o errore: {e}", 500
 
         @app.route('/dashboard')
         def dashboard():
@@ -1558,21 +1571,30 @@ class The5ersGraphicalDashboard:
     def start_dashboard(self, host='127.0.0.1', port=5000, debug=False):
         """Avvia la dashboard web"""
         
+
+        # Registra tutte le route prima di avviare il monitoring e il server Flask
+        self.setup_routes()
+
         # Avvia monitoring in background
         monitoring_thread = threading.Thread(target=self.monitoring_loop)
         monitoring_thread.daemon = True
         monitoring_thread.start()
-        
+
+        # Debug: stampa tutte le route registrate
+        print('[DEBUG] Route Flask registrate (start_dashboard):')
+        for rule in self.app.url_map.iter_rules():
+            print(f"  {rule}")
+
         print(f"🚀 Avvio dashboard web su http://{host}:{port}")
         print("📊 Dashboard disponibile nel browser")
         print("🔄 Monitoraggio real-time attivo")
         print("-" * 60)
-        
+
         # Avvia Flask app
         self.app.run(host=host, port=port, debug=debug, threaded=True)
 
 def main():
-    """Funzione principale con auto-detect config per sistema legacy"""
+    """Funzione principale con auto-detect config per sistema mono"""
     config_file = None
     log_file = None
     
@@ -1591,7 +1613,7 @@ def main():
 
     try:
         # Avvia dashboard Flask su porta alternativa per debug
-        dashboard.start_dashboard(host='127.0.0.1', port=5050, debug=True)
+        dashboard.start_dashboard(host='127.0.0.1', port=5000, debug=True)
     except KeyboardInterrupt:
         print("\n\n🛑 Dashboard interrotta dall'utente")
         dashboard.is_monitoring = False

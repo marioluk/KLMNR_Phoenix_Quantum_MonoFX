@@ -1,11 +1,11 @@
 @echo off
 echo ================================================================================
-echo 🚀 THE5ERS DASHBOARD - ACCESSO REMOTO (LEGACY SYSTEM)
+echo 🚀 THE5ERS DASHBOARD - ACCESSO REMOTO (Mono SYSTEM)
 echo ================================================================================
 echo 🌐 Dashboard accessibile da altri computer
 echo 📱 Usa: http://[TUO_IP]:5000 (es: http://192.168.1.21:5000)
 echo 🔒 Assicurati che il firewall Windows permetta la porta 5000
-echo 📁 Configurazione auto-detect dal sistema legacy
+echo 📁 Configurazione auto-detect dal sistema Mono
 echo ================================================================================
 echo.
 

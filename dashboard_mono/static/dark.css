@@ -1,0 +1,87 @@
+/* Minimal Dark Theme - unix/linux style */
+
+/* ====== BASE ====== */
+body {
+  background: #1a1a1a;
+  color: #e0e0e0;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  margin: 0;
+  padding: 0;
+}
+
+header, nav, footer {
+  background: #222;
+  color: #e0e0e0;
+  border-bottom: 1px solid #333;
+}
+
+a {
+  color: #7abaff;
+  text-decoration: none;
+}
+a:hover {
+  color: #b3e0ff;
+}
+
+/* ====== TABELLE ====== */
+.table, table {
+  background: #222;
+  color: #e0e0e0;
+  border-collapse: collapse;
+  width: 100%;
+}
+.table th, .table td, th, td {
+  border: 1px solid #333;
+  padding: 6px 10px;
+}
+.table th, th {
+  background: #181818;
+  color: #b3e0ff;
+}
+
+/* ====== PULSANTI ====== */
+button, .btn {
+  background: #222;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  padding: 6px 16px;
+  font-family: inherit;
+  cursor: pointer;
+}
+button:hover, .btn:hover {
+  background: #333;
+  color: #7abaff;
+}
+
+input, select, textarea {
+  background: #222;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  padding: 4px 8px;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 800px) {
+  .container, .main {
+    padding: 8px;
+  }
+  table, .table {
+    font-size: 0.95em;
+  }
+}
+
+/* ====== ICONE ====== */
+.fa {
+  color: #b3e0ff;
+  margin-right: 4px;
+}
+
+/* ====== SEZIONI ====== */
+section {
+  margin-bottom: 24px;
+}
+
+/* ====== CLEANUP ====== */
+* {
+  box-shadow: none !important;
+}

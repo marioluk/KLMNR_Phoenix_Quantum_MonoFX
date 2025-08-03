@@ -1,9 +1,9 @@
 @echo off
-REM THE5ERS GRAPHICAL DASHBOARD LAUNCHER (LEGACY SYSTEM)
-REM Avvia la dashboard web interattiva per il sistema legacy
+REM THE5ERS GRAPHICAL DASHBOARD LAUNCHER (Mono SYSTEM)
+REM Avvia la dashboard web interattiva per il sistema Mono
 
 echo ==========================================
-echo THE5ERS GRAPHICAL DASHBOARD - LEGACY
+echo THE5ERS GRAPHICAL DASHBOARD - Mono
 echo ==========================================
 
 REM Controlla se esiste il file di config nella cartella corretta (root progetto)
@@ -31,12 +31,12 @@ if not exist "templates" (
 echo Installing required Python packages...
 pip install flask plotly pandas MetaTrader5 > nul 2>&1
 
-echo Starting THE5ERS Graphical Dashboard - LEGACY SYSTEM...
+echo Starting THE5ERS Graphical Dashboard - Mono SYSTEM...
 echo Web interface will be available at: http://127.0.0.1:5000
 echo Features:
 echo - Real-time data from log files
 echo - Complete challenge data from MT5
-echo - Auto-detect configuration from legacy system
+echo - Auto-detect configuration from Mono system
 echo - Click "Refresh MT5" button to update with latest data
 echo ==========================================
 

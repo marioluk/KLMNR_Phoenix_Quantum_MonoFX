@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test auto-detect configurazione per dashboard legacy
+Test auto-detect configurazione per dashboard Mono
 """
 
 import os
@@ -9,7 +9,7 @@ import sys
 # Simula il working directory della dashboard
 os.chdir(r"c:\KLMNR_Projects\KLMNR_Phoenix_Quantum_MonoFX\dashboard_mono")
 
-print("🧪 TEST AUTO-DETECT CONFIGURAZIONE DASHBOARD LEGACY")
+print("🧪 TEST AUTO-DETECT CONFIGURAZIONE DASHBOARD Mono")
 print("=" * 60)
 
 # Test del path
