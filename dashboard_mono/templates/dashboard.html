@@ -235,7 +235,8 @@
         <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
         <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
         <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
-        <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
+        <a href="/quantum_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Quantum Metrics</a>
+        <a href="/mt5_status" style="color:#ff3c3c; text-decoration:none; font-weight:600;">Stato MT5</a>
     </nav>
     <div class="container-fluid">
         <!-- NOTIFICHE REAL-TIME STICKY SEMPRE VISIBILE -->
@@ -283,7 +284,12 @@
             <div class="text-end">
                 <div style="margin-bottom:8px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
                     <span class="badge bg-{{ 'success' if compliance and compliance.target.status == 'achieved' else 'warning' }}" style="font-size:1rem; padding:8px 16px; border-radius:18px;">
-                        <i class="fas fa-server"></i> MT5: {% if 'Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning %} <span style="color:#ffb700;">OFFLINE</span> {% else %} <span style="color:#00ffe7;">ONLINE</span> {% endif %}
+                        <i class="fas fa-server"></i> MT5:
+                        {% if mt5_warning is defined and mt5_warning and ('Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning) %}
+                            <span style="color:#ffb700;">OFFLINE</span>
+                        {% else %}
+                            <span style="color:#00ffe7;">ONLINE</span>
+                        {% endif %}
                     </span>
                     <a href="/" class="btn btn-success" style="font-size:1rem; padding:8px 18px;">
                         <i class="fas fa-home"></i> Torna alla Home
@@ -296,10 +302,15 @@
                 </form>
             </div>
         </div>
-        {{ mt5_warning|safe }}
+        {% if mt5_warning %}
+            <div style="color:#ff4444; font-weight:bold; margin-bottom:18px;">{{ mt5_warning }}</div>
+        {% endif %}
        
             
         <!-- Pulsante analisi incrociata segnali/trade/blocchi e tabella segnali non eseguiti -->
+        {# Dropdown filtro data: inserito qui sopra i grafici principali #}
+        {% include 'dashboard_date_filter_snippet.html' %}
+
         <div class="row">
             <div class="col-12 text-center mb-4">
                 <button id="runSignalsVsTradesReport" class="btn btn-warning btn-lg" style="font-weight:bold;">
@@ -313,7 +324,7 @@
             <div class="col-md-4 mb-4">
                 <div class="metric-card text-center" style="background:#23272f;box-shadow:0 2px 12px #00ffe744;">
                     <h5 class="mb-2" style="color:#00ffe7;">Risk/Reward Ratio Medio</h5>
-                    <div style="font-size:2.2rem;font-weight:700;color:#00ffe7;">{{ avg_rrr_global|round(2) }}</div>
+                    <div style="font-size:2.2rem;font-weight:700;color:#00ffe7;">{{ avg_rrr_global|default(0)|round(2) }}</div>
                     <div class="dashboard-subtitle mt-2">Media globale RRR su tutti i trade</div>
                 </div>
             </div>
@@ -359,8 +370,16 @@
             <div class="col-12">
                 <div class="metric-card">
                     <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
-                    <div class="compliance-badge badge-{{ compliance.target.status }}">{{ compliance.target.message }}</div>
-                    <div class="compliance-badge badge-{{ compliance.drawdown.status }}">{{ compliance.drawdown.message }}</div>
+                    {% if compliance is defined and compliance.target is defined and compliance.target.status is defined and compliance.target.message is defined %}
+                        <div class="compliance-badge badge-{{ compliance.target.status }}">{{ compliance.target.message }}</div>
+                    {% else %}
+                        <div class="compliance-badge badge-warning">Compliance target non disponibile</div>
+                    {% endif %}
+                    {% if compliance is defined and compliance.drawdown is defined and compliance.drawdown.status is defined and compliance.drawdown.message is defined %}
+                        <div class="compliance-badge badge-{{ compliance.drawdown.status }}">{{ compliance.drawdown.message }}</div>
+                    {% else %}
+                        <div class="compliance-badge badge-warning">Compliance drawdown non disponibile</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -375,15 +394,17 @@
                 <div class="metric-card" style="min-width:220px; min-height:100px;">
                     <h5 class="mb-2" style="color:#ffb700;">Performance</h5>
                     <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-target"></i> Profit %</div><div class="metric-value">{{ metrics.profit_percentage|round(2) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-chart-line"></i> Total P&L</div><div class="metric-value">${{ metrics.total_pnl|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-percentage"></i> Win Rate</div><div class="metric-value">{{ metrics.win_rate|round(1) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Max Drawdown</div><div class="metric-value">{{ metrics.max_drawdown|round(2) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-exchange-alt"></i> Total Trades</div><div class="metric-value">{{ metrics.total_trades }}</div><div class="metric-change">{{ metrics.daily_trades }} today</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-calculator"></i> Profit Factor</div><div class="metric-value">{{ metrics.profit_factor|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-layer-group"></i> Open Positions</div><div class="metric-value">{{ metrics.positions_open }}</div></div>
-                       <div class="col"><div class="metric-label"><i class="bi bi-arrow-repeat"></i> Drawdown Recovery Time <span data-bs-toggle="tooltip" title="Tempo medio (minuti) per recuperare un drawdown significativo."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ drawdown_recovery_time|round(2) }} min</div></div>
-                       <div class="col"><div class="metric-label"><i class="bi bi-bar-chart-line"></i> Volatilità Portafoglio <span data-bs-toggle="tooltip" title="Deviazione standard dei rendimenti P&L."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ portfolio_volatility|round(2) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-target"></i> Profit %</div><div class="metric-value">{{ metrics.profit_percentage|default(0)|round(2) }}%</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-chart-line"></i> Total P&L</div><div class="metric-value">${{ metrics.total_pnl|default(0)|round(2) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-percentage"></i> Win Rate</div><div class="metric-value">{{ metrics.win_rate|default(0)|round(1) }}%</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Max Drawdown</div><div class="metric-value">{{ metrics.max_drawdown|default(0)|round(2) }}%</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-exchange-alt"></i> Total Trades</div><div class="metric-value">{{ metrics.total_trades|default(0) }}</div><div class="metric-change">{{ metrics.daily_trades|default(0) }} today</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-calculator"></i> Profit Factor</div><div class="metric-value">{{ metrics.profit_factor|default(0)|round(2) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-layer-group"></i> Open Positions</div><div class="metric-value">{{ metrics.positions_open|default(0) }}</div></div>
+                        <!-- Drawdown Recovery Time: gestito solo con default(0) per evitare errori Jinja -->
+                        <div class="col"><div class="metric-label"><i class="bi bi-arrow-repeat"></i> Drawdown Recovery Time <span data-bs-toggle="tooltip" title="Tempo medio (minuti) per recuperare un drawdown significativo."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ drawdown_recovery_time|default(0)|round(2) }} min</div></div>
+                        <div class="col"><div class="metric-label"><i class="bi bi-arrow-repeat"></i> Drawdown Recovery Time <span data-bs-toggle="tooltip" title="Tempo medio (minuti) per recuperare un drawdown significativo."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ drawdown_recovery_time|default(0)|round(2) }} min</div></div>
+                       <div class="col"><div class="metric-label"><i class="bi bi-bar-chart-line"></i> Volatilità Portafoglio <span data-bs-toggle="tooltip" title="Deviazione standard dei rendimenti P&L."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ portfolio_volatility|default(0)|round(2) }}</div></div>
                     </div>
                 </div>
             </div>
@@ -391,11 +412,11 @@
                 <div class="metric-card" style="min-width:220px; min-height:100px;">
                     <h5 class="mb-2" style="color:#00bfff;">Metriche Avanzate</h5>
                     <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-balance-scale"></i> Sharpe Ratio</div><div class="metric-value">{{ metrics.sharpe_ratio|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-circle-down"></i> Sortino Ratio</div><div class="metric-value">{{ metrics.sortino_ratio|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-clock"></i> Trade Duration Media</div><div class="metric-value">{{ metrics.avg_trade_duration_minutes|round(1) }} min</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-medal"></i> Max Consecutive Wins</div><div class="metric-value">{{ metrics.max_consecutive_wins }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-skull-crossbones"></i> Max Consecutive Losses</div><div class="metric-value">{{ metrics.max_consecutive_losses }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-balance-scale"></i> Sharpe Ratio</div><div class="metric-value">{{ metrics.sharpe_ratio|default(0)|round(3) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-circle-down"></i> Sortino Ratio</div><div class="metric-value">{{ metrics.sortino_ratio|default(0)|round(3) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-clock"></i> Trade Duration Media</div><div class="metric-value">{{ metrics.avg_trade_duration_minutes|default(0)|round(1) }} min</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-medal"></i> Max Consecutive Wins</div><div class="metric-value">{{ metrics.max_consecutive_wins|default(0) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-skull-crossbones"></i> Max Consecutive Losses</div><div class="metric-value">{{ metrics.max_consecutive_losses|default(0) }}</div></div>
                     </div>
                 </div>
             </div>
@@ -403,22 +424,30 @@
                 <div class="metric-card" style="min-width:220px; min-height:100px;">
                     <h5 class="mb-2" style="color:#fd7e14;">Quantum Metrics</h5>
                     <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-up"></i> Sell Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{ metrics.quantum_signals.sell }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Buy Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{ metrics.quantum_signals.buy }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-braille"></i> Avg Entropy</div><div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;">{{ metrics.quantum_signals.avg_entropy|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-atom"></i> Avg Spin</div><div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;">{{ metrics.quantum_signals.avg_spin|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-check-circle"></i> Avg Confidence</div><div class="metric-value" style="font-size: 1.5rem; color: #00bfff;">{{ metrics.quantum_signals.avg_confidence|round(3) }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-up"></i> Sell Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{ metrics.quantum_signals.sell if metrics.quantum_signals is defined and metrics.quantum_signals.sell is defined else 0 }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Buy Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{ metrics.quantum_signals.buy if metrics.quantum_signals is defined and metrics.quantum_signals.buy is defined else 0 }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-braille"></i> Avg Entropy</div><div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;">{{ metrics.quantum_signals.avg_entropy|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_entropy is defined else 0 }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-atom"></i> Avg Spin</div><div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;">{{ metrics.quantum_signals.avg_spin|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_spin is defined else 0 }}</div></div>
+                        <div class="col"><div class="metric-label"><i class="fas fa-check-circle"></i> Avg Confidence</div><div class="metric-value" style="font-size: 1.5rem; color: #00bfff;">{{ metrics.quantum_signals.avg_confidence|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_confidence is defined else 0 }}</div></div>
                         <div class="col"><div class="metric-label"><i class="fas fa-percentage"></i> % Segnali Quantum Eseguiti</div><div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{ percent_signals_executed|round(2) }}%</div></div>
                     </div>
                     <div class="dashboard-subtitle mt-2">
                         <span style="color:#00ffe7;">Giornaliero:</span>
-                        {% for day, pct in daily_percent_signals_executed.items() %}
-                            <span style="margin-right:8px;">{{ day }}: <b>{{ pct|round(2) }}%</b></span>
-                        {% endfor %}<br>
+                        {% if daily_percent_signals_executed is defined %}
+                            {% for day, pct in daily_percent_signals_executed.items() %}
+                                <span style="margin-right:8px;">{{ day }}: <b>{{ pct|round(2) }}%</b></span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Nessun dato disponibile</span>
+                        {% endif %}<br>
                         <span style="color:#00bfff;">Settimanale:</span>
-                        {% for week, pct in weekly_percent_signals_executed.items() %}
-                            <span style="margin-right:8px;">{{ week }}: <b>{{ pct|round(2) }}%</b></span>
-                        {% endfor %}
+                        {% if weekly_percent_signals_executed is defined %}
+                            {% for week, pct in weekly_percent_signals_executed.items() %}
+                                <span style="margin-right:8px;">{{ week }}: <b>{{ pct|round(2) }}%</b></span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Nessun dato disponibile</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -704,19 +733,21 @@
             }
         }
 
-        var pnlLayout = applyDarkTheme(JSON.parse(`{{ pnl_chart.layout|default({})|tojson|safe }}`));
-        var drawdownLayout = applyDarkTheme(JSON.parse(`{{ drawdown_chart.layout|default({})|tojson|safe }}`));
-        var balanceLayout = applyDarkTheme(JSON.parse(`{{ balance_chart.layout|default({})|tojson|safe }}`));
-        var hourlyLayout = applyDarkTheme(JSON.parse(`{{ hourly_chart.layout|default({})|tojson|safe }}`));
-        var symbolsLayout = applyDarkTheme(JSON.parse(`{{ symbols_chart.layout|default({})|tojson|safe }}`));
-        var signalsLayout = applyDarkTheme(JSON.parse(`{{ signals_chart.layout|default({})|tojson|safe }}`));
 
-        var pnlData = JSON.parse(`{{ pnl_chart.data|tojson|safe }}`);
-        var drawdownData = JSON.parse(`{{ drawdown_chart.data|tojson|safe }}`);
-        var balanceData = JSON.parse(`{{ balance_chart.data|tojson|safe }}`);
-        var hourlyData = JSON.parse(`{{ hourly_chart.data|tojson|safe }}`);
-        var symbolsData = JSON.parse(`{{ symbols_chart.data|tojson|safe }}`);
-        var signalsData = JSON.parse(`{{ signals_chart.data|tojson|safe }}`);
+
+        var pnlLayout = applyDarkTheme(JSON.parse(`{% if pnl_chart is defined %}{{ pnl_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var drawdownLayout = applyDarkTheme(JSON.parse(`{% if drawdown_chart is defined %}{{ drawdown_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var balanceLayout = applyDarkTheme(JSON.parse(`{% if balance_chart is defined %}{{ balance_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var hourlyLayout = applyDarkTheme(JSON.parse(`{% if hourly_chart is defined %}{{ hourly_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var symbolsLayout = applyDarkTheme(JSON.parse(`{% if symbols_chart is defined %}{{ symbols_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var signalsLayout = applyDarkTheme(JSON.parse(`{% if signals_chart is defined %}{{ signals_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+
+        var pnlData = JSON.parse(`{% if pnl_chart is defined %}{{ pnl_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
+        var drawdownData = JSON.parse(`{% if drawdown_chart is defined %}{{ drawdown_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
+        var balanceData = JSON.parse(`{% if balance_chart is defined %}{{ balance_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
+        var hourlyData = JSON.parse(`{% if hourly_chart is defined %}{{ hourly_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
+        var symbolsData = JSON.parse(`{% if symbols_chart is defined %}{{ symbols_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
+        var signalsData = JSON.parse(`{% if signals_chart is defined %}{{ signals_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
 
         renderPlotlyChart('pnl_chart', pnlData, pnlLayout);
         renderPlotlyChart('drawdown_chart', drawdownData, drawdownLayout);
@@ -726,23 +757,23 @@
         renderPlotlyChart('signals_chart', signalsData, signalsLayout);
 
         // Breakdown giornaliero
-        var dailyBreakdownLayout = applyDarkTheme(JSON.parse(`{{ daily_breakdown_chart.layout|tojson|safe }}`));
-        var dailyBreakdownData = JSON.parse(`{{ daily_breakdown_chart.data|tojson|safe }}`);
+        var dailyBreakdownLayout = applyDarkTheme(JSON.parse(`{% if daily_breakdown_chart is defined %}{{ daily_breakdown_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var dailyBreakdownData = JSON.parse(`{% if daily_breakdown_chart is defined %}{{ daily_breakdown_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('daily_breakdown_chart', dailyBreakdownData, dailyBreakdownLayout);
         
         // Grafico RRR giornaliero
-        var dailyRRRLayout = applyDarkTheme(JSON.parse(`{{ daily_rrr_chart.layout|tojson|safe }}`));
-        var dailyRRRData = JSON.parse(`{{ daily_rrr_chart.data|tojson|safe }}`);
+        var dailyRRRLayout = applyDarkTheme(JSON.parse(`{% if daily_rrr_chart is defined %}{{ daily_rrr_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var dailyRRRData = JSON.parse(`{% if daily_rrr_chart is defined %}{{ daily_rrr_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('daily_rrr_chart', dailyRRRData, dailyRRRLayout);
 
         // Breakdown settimanale
-        var weeklyBreakdownLayout = applyDarkTheme(JSON.parse(`{{ weekly_breakdown_chart.layout|tojson|safe }}`));
-        var weeklyBreakdownData = JSON.parse(`{{ weekly_breakdown_chart.data|tojson|safe }}`);
+        var weeklyBreakdownLayout = applyDarkTheme(JSON.parse(`{% if weekly_breakdown_chart is defined %}{{ weekly_breakdown_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var weeklyBreakdownData = JSON.parse(`{% if weekly_breakdown_chart is defined %}{{ weekly_breakdown_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('weekly_breakdown_chart', weeklyBreakdownData, weeklyBreakdownLayout);
         
         // Grafico RRR settimanale
-        var weeklyRRRLayout = applyDarkTheme(JSON.parse(`{{ weekly_rrr_chart.layout|tojson|safe }}`));
-        var weeklyRRRData = JSON.parse(`{{ weekly_rrr_chart.data|tojson|safe }}`);
+        var weeklyRRRLayout = applyDarkTheme(JSON.parse(`{% if weekly_rrr_chart is defined %}{{ weekly_rrr_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
+        var weeklyRRRData = JSON.parse(`{% if weekly_rrr_chart is defined %}{{ weekly_rrr_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('weekly_rrr_chart', weeklyRRRData, weeklyRRRLayout);
     </script>
 </body>

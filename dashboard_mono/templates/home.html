@@ -23,8 +23,18 @@
             <li><b>Win Rate:</b> {{ metrics.win_rate|round(1) }}%</li>
             <li><b>Max Drawdown:</b> {{ metrics.max_drawdown|round(2) }}%</li>
             <li><b>Segnali Quantum Eseguiti:</b> {{ percent_signals_executed|round(2) }}%</li>
-            <li><b>Stato MT5:</b> {% if 'Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning %}<span style="color:#ffb700;">OFFLINE</span>{% else %}<span style="color:#00ffe7;">ONLINE</span>{% endif %}</li>
+            <li><b>Stato MT5:</b>
+                {% if mt5_warning is defined and mt5_warning and ('Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning) %}
+                    <span style="color:#ffb700;">OFFLINE</span>
+                {% else %}
+                    <span style="color:#00ffe7;">ONLINE</span>
+                {% endif %}
+                <a href="/mt5_status" style="color:#ff3c3c; font-weight:600; margin-left:8px;">Dettagli</a>
+            </li>
         </ul>
+        {% if mt5_warning %}
+            <div style="color:#ff4444; font-weight:bold; margin-bottom:18px;">{{ mt5_warning }}</div>
+        {% endif %}
         <div style="margin-top:10px;">
             <a href="/dashboard" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Vai alla Dashboard completa</a>
             <a href="/diagnostics" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Diagnostica</a>

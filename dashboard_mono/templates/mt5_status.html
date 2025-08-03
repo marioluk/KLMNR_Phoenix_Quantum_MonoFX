@@ -18,6 +18,11 @@
         <li><b>Equity:</b> {{ mt5_info.equity }}</li>
         <li><b>Posizioni aperte:</b> {{ mt5_info.posizioni_aperte }}</li>
     </ul>
+    {% if mt5_info.errore %}
+    <div style="color: #ff4444; margin-top: 20px; font-weight: bold;">
+        <b>Errore connessione MT5:</b> {{ mt5_info.errore }}
+    </div>
+    {% endif %}
     <a href="/">&#8592; Torna alla dashboard</a>
 </body>
 </html>

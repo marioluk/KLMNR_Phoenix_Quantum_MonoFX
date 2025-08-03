@@ -13,46 +13,56 @@
     </style>
 </head>
 <body>
+    {% set quantum_dates = metrics.quantum_chart.dates if metrics.quantum_chart is defined and metrics.quantum_chart and metrics.quantum_chart.dates is defined else [] %}
+    {% set quantum_executed = metrics.quantum_chart.executed if metrics.quantum_chart is defined and metrics.quantum_chart and metrics.quantum_chart.executed is defined else [] %}
+    {% set daily_labels = daily_percent_signals_executed.keys()|list if daily_percent_signals_executed is defined else [] %}
+    {% set daily_values = daily_percent_signals_executed.values()|list if daily_percent_signals_executed is defined else [] %}
+    {% set weekly_labels = weekly_percent_signals_executed.keys()|list if weekly_percent_signals_executed is defined else [] %}
+    {% set weekly_values = weekly_percent_signals_executed.values()|list if weekly_percent_signals_executed is defined else [] %}
     <nav style="margin-bottom: 24px;">
         <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
         <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
         <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
         <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
     </nav>
+    {% include 'quantum_metrics_date_filter_snippet.html' %}
     <h2 style="color:#00ffe7;">Quantum Metrics</h2>
     <div class="metric-card">
         <div class="metric-label" title="Percentuale di segnali quantum effettivamente eseguiti. Valori alti indicano efficienza operativa.">Segnali Quantum Eseguiti</div>
-        <div class="metric-value">{{ percent_signals_executed|round(2) }}%</div>
+        <div class="metric-value">{{ percent_signals_executed|default(0)|round(2) }}%</div>
         <div class="optimal">Ottimale: > 70%</div>
         <div class="desc">Percentuale di segnali quantum effettivamente eseguiti. Valori alti indicano efficienza operativa.</div>
     </div>
     <div class="metric-card">
         <div class="metric-label" title="Numero totale di segnali quantum generati dal sistema. Più segnali, più opportunità di trading.">Segnali Quantum Totali</div>
-        <div class="metric-value">{{ metrics.quantum_signals.total }}</div>
+        <div class="metric-value">{{ metrics['quantum_signals']['total'] if metrics['quantum_signals'] is defined and metrics['quantum_signals']['total'] is defined else 0 }}</div>
         <div class="optimal">Ottimale: > 50/giorno</div>
         <div class="desc">Numero totale di segnali quantum generati dal sistema. Più segnali, più opportunità di trading.</div>
     </div>
     <div class="metric-card">
         <div class="metric-label" title="Media dell'entropia dei segnali. Valori intermedi indicano segnali informativi e non casuali.">Avg Entropy</div>
-        <div class="metric-value">{{ metrics.quantum_signals.avg_entropy|round(3) }}</div>
+        <div class="metric-value">{{ metrics['quantum_signals']['avg_entropy'] if metrics['quantum_signals'] is defined and metrics['quantum_signals']['avg_entropy'] is defined else 0 | round(3) }}</div>
         <div class="optimal">Ottimale: 0.5 - 0.8</div>
         <div class="desc">Media dell'entropia dei segnali. Valori intermedi indicano segnali informativi e non casuali.</div>
     </div>
     <div class="metric-card">
         <div class="metric-label" title="Media dello spin dei segnali. Valori intermedi indicano buona variabilità e robustezza.">Avg Spin</div>
-        <div class="metric-value">{{ metrics.quantum_signals.avg_spin|round(3) }}</div>
+        <div class="metric-value">{{ metrics['quantum_signals']['avg_spin'] if metrics['quantum_signals'] is defined and metrics['quantum_signals']['avg_spin'] is defined else 0 | round(3) }}</div>
         <div class="optimal">Ottimale: 0.2 - 0.6</div>
         <div class="desc">Media dello spin dei segnali. Valori intermedi indicano buona variabilità e robustezza.</div>
     </div>
     <div class="metric-card">
         <div class="metric-label">Avg Confidence</div>
-        <div class="metric-value">{{ metrics.quantum_signals.avg_confidence|round(3) }}</div>
+        <div class="metric-value">{{ metrics['quantum_signals']['avg_confidence'] if metrics['quantum_signals'] is defined and metrics['quantum_signals']['avg_confidence'] is defined else 0 | round(3) }}</div>
         <div class="optimal">Ottimale: > 0.6</div>
         <div class="desc">Media della confidenza dei segnali. Valori alti indicano segnali affidabili.</div>
     </div>
     <div style="margin-top:18px;">
         <a href="/" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
         <a href="/dashboard" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard completa</a>
+        <form action="/export_mt5_trades" method="post" style="display:inline; margin-left:8px;">
+            <button type="submit" class="btn btn-warning" style="background:#ffd700; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; border:none;">Aggiorna metriche da MT5</button>
+        </form>
     </div>
 
     <hr style="margin:32px 0; border-color:#00ffe7;">
@@ -70,9 +80,22 @@
     </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript">
+        // DEBUG: stampa i dati dei grafici in console
+        var quantumDates = {{ quantum_dates|tojson|safe }};
+        var quantumExecuted = {{ quantum_executed|tojson|safe }};
+        var daily_labels = {{ daily_labels|tojson|safe }};
+        var daily_values = {{ daily_values|tojson|safe }};
+        var weekly_labels = {{ weekly_labels|tojson|safe }};
+        var weekly_values = {{ weekly_values|tojson|safe }};
+        console.log('Quantum Dates:', quantumDates);
+        console.log('Quantum Executed:', quantumExecuted);
+        console.log('Daily Labels:', daily_labels);
+        console.log('Daily Values:', daily_values);
+        console.log('Weekly Labels:', weekly_labels);
+        console.log('Weekly Values:', weekly_values);
         var trace1 = {
-            x: {{ metrics.quantum_chart.dates|tojson }},
-            y: {{ metrics.quantum_chart.executed|tojson }},
+            x: quantumDates,
+            y: quantumExecuted,
             type: 'scatter',
             name: 'Quantum Executed %'
         };
@@ -80,13 +103,11 @@
             title: 'Andamento Quantum Execution %',
             paper_bgcolor: '#23272f',
             plot_bgcolor: '#23272f',
-            font: {color: '#e0e0e0'},
+            font: {color: '#e0e0e0'}
         };
         Plotly.newPlot('quantum_metrics_chart', [trace1], layout1);
 
         // Breakdown giornaliero
-        var daily_labels = {{ daily_percent_signals_executed.keys()|list|tojson|safe }};
-        var daily_values = {{ daily_percent_signals_executed.values()|list|tojson|safe }};
         var trace_daily = {
             x: daily_labels,
             y: daily_values,
@@ -105,8 +126,6 @@
         Plotly.newPlot('daily_quantum_breakdown_chart', [trace_daily], layout_daily);
 
         // Breakdown settimanale
-        var weekly_labels = {{ weekly_percent_signals_executed.keys()|list|tojson|safe }};
-        var weekly_values = {{ weekly_percent_signals_executed.values()|list|tojson|safe }};
         var trace_weekly = {
             x: weekly_labels,
             y: weekly_values,
@@ -123,6 +142,7 @@
             yaxis: {title: '% Eseguiti'}
         };
         Plotly.newPlot('weekly_quantum_breakdown_chart', [trace_weekly], layout_weekly);
+    </script>
     </script>
 </body>
 </html>

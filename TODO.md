@@ -1,5 +1,28 @@
 # ROADMAP Phoenix Quantum MonoFX
 
+## Checklist di revisione funzionale dashboard (versione 2025-08-04)
+
+- [ ] Tabella cronologia/sequenza segnali: testare refresh, motivazione e dati reali
+- [ ] Notifiche real-time: simulare disconnessione MT5, drawdown, target raggiunto
+- [ ] Storico errori/warning: generare errori e verificare visualizzazione
+- [ ] Esportazione dati CSV: testare download con dati reali e file generati
+- [ ] Percentuale segnali quantum eseguiti: validare calcolo con storico reale
+- [ ] Rimozione legacy: controllare che non ci siano riferimenti residui
+- [ ] Statistiche e grafici aggregati: verificare ratio BUY/SELL, motivi di scarto, distribuzione segnali
+- [ ] Visualizzazione parametri attivi di filtro: entropy, spin, confidence, cooldown, orari, spread
+- [ ] Evidenziare parametri troppo restrittivi: confrontare con dati storici
+- [ ] Modifica rapida parametri da dashboard: testare interfaccia e salvataggio
+- [ ] Miglioramento UI/UX: testare responsive, dark/light, icone
+- [ ] Breakdown rendimento giornaliero/settimanale: validare analisi temporale
+- [ ] Commissioni e costi totali: verificare somma e visualizzazione
+- [ ] Risk/Reward Ratio medio e grafico: testare calcolo e grafico
+- [ ] Drawdown Recovery Time: simulare perdita e recupero
+- [ ] Volatilità portafoglio: verificare oscillazione valore
+- [ ] Test e confronto di tutti i tipi di trading dalla dashboard
+- [ ] Configurazione avanzata: selezione file config/log, modifica parametri da dashboard
+- [ ] Formato dati condiviso/documentazione motivi di blocco
+
+---
 
 ---
 **Legenda Priorità:**

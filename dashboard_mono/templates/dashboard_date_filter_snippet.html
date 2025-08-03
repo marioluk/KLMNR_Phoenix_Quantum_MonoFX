@@ -1,0 +1,12 @@
+{# Inserisci questo blocco all'inizio del body, sopra i grafici principali #}
+<form id="date-filter-form" method="get" action="{{ url_for('dashboard.dashboard') }}" style="margin-bottom: 20px;">
+  <label for="date-select"><strong>Seleziona data:</strong></label>
+  <select id="date-select" name="date" onchange="document.getElementById('date-filter-form').submit();">
+    <option value="">Tutte</option>
+    {% for d in available_dates %}
+      <option value="{{ d }}" {% if request.args.get('date') == d %}selected{% endif %}>{{ d }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{# ...existing dashboard content... #}

@@ -15,10 +15,10 @@ if not exist "..\config\config_autonomous_challenge_production_ready.json" (
 )
 
 REM Controlla se esiste la directory logs
-    if not exist "..\..\logs" (
-        echo Creating logs directory...
-        mkdir "..\..\logs"
-    )
+if not exist "..\..\logs" (
+    echo Creating logs directory...
+    mkdir "..\..\logs"
+)
 
 REM Controlla se esiste la directory templates
 if not exist "templates" (
@@ -37,12 +37,15 @@ echo Features:
 echo - Real-time data from log files
 echo - Complete challenge data from MT5
 echo - Auto-detect configuration from Mono system
-echo - Click "Refresh MT5" button to update with latest data
+echo - Click \"Refresh MT5\" button to update with latest data
 echo ==========================================
 
+REM Imposta PYTHONPATH alla root del progetto
+set PYTHONPATH=%CD%\..
+
 REM Avvia la dashboard e apri il browser
-    start http://127.0.0.1:5000
-    python dashboard_broker.py
+start http://127.0.0.1:5000
+python dashboard_broker.py
 
 echo ==========================================
 echo Dashboard stopped
