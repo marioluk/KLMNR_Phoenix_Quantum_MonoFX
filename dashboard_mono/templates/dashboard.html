@@ -19,29 +19,33 @@
             max-height: 420px;
             overflow-y: auto;
             z-index: 2000;
-            background: rgba(32,36,40,0.98);
+            background: rgba(32, 36, 40, 0.98);
             border-left: 6px solid #00ffe7;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,255,231,0.18);
+            box-shadow: 0 8px 32px rgba(0, 255, 231, 0.18);
             padding: 18px 16px 12px 16px;
         }
+
         .realtime-notifications-sticky h5 {
             margin-bottom: 12px;
             color: #00ffe7;
             font-size: 1.15rem;
         }
+
         .realtime-notifications-sticky ul {
             margin-bottom: 0;
         }
+
         .realtime-notifications-sticky li {
             margin-bottom: 10px;
             padding: 8px 12px;
             border-radius: 8px;
-            background: rgba(24,28,32,0.92);
+            background: rgba(24, 28, 32, 0.92);
             box-shadow: 0 2px 8px #00ffe744;
             color: #e0e0e0;
             font-size: 1rem;
         }
+
         @media (max-width: 600px) {
             .realtime-notifications-sticky {
                 position: static;
@@ -53,12 +57,14 @@
                 box-shadow: none;
             }
         }
+
         body {
             background: #181c20;
             font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             color: #e0e0e0;
         }
+
         .dashboard-header {
             background: linear-gradient(90deg, #23272f 60%, #1a1d22 100%);
             border-radius: 18px;
@@ -66,8 +72,9 @@
             padding: 28px 20px 20px 20px;
             color: #fff;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
         }
+
         .dashboard-title {
             font-size: 2.7rem;
             font-weight: 700;
@@ -75,11 +82,13 @@
             margin-bottom: 8px;
             letter-spacing: 1px;
         }
+
         .dashboard-subtitle {
             font-size: 1.15rem;
             opacity: 0.85;
             color: #b0b0b0;
         }
+
         .Mono-badge {
             background: linear-gradient(90deg, #ffb700 60%, #ff6f00 100%);
             color: #23272f;
@@ -90,19 +99,22 @@
             font-weight: 600;
             box-shadow: 0 2px 8px #ffb70044;
         }
+
         .metric-card {
             background: rgba(32, 36, 40, 0.95);
             border-radius: 16px;
             padding: 22px 18px;
             margin-bottom: 22px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
             border: 1px solid #23272f;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .metric-card:hover {
             transform: translateY(-4px) scale(1.01);
             box-shadow: 0 12px 40px #00ffe733;
         }
+
         .metric-value {
             font-size: 2.3rem;
             font-weight: bold;
@@ -110,30 +122,49 @@
             color: #00ffe7;
             text-shadow: 0 2px 8px #00ffe7aa;
         }
+
         .metric-label {
             font-size: 1.05rem;
             color: #b0b0b0;
             margin-bottom: 5px;
             font-weight: 500;
         }
+
         .metric-change {
             font-size: 0.95rem;
             margin-top: 5px;
             color: #888;
         }
-        .status-achieved { color: #00ffe7; }
-        .status-pending { color: #ffb700; }
-        .status-ok { color: #00ffe7; }
-        .status-warning { color: #ffb700; }
-        .status-critical { color: #ff3c3c; }
+
+        .status-achieved {
+            color: #00ffe7;
+        }
+
+        .status-pending {
+            color: #ffb700;
+        }
+
+        .status-ok {
+            color: #00ffe7;
+        }
+
+        .status-warning {
+            color: #ffb700;
+        }
+
+        .status-critical {
+            color: #ff3c3c;
+        }
+
         .chart-container {
             background: rgba(32, 36, 40, 0.98);
             border-radius: 16px;
             padding: 20px 12px;
             margin-bottom: 22px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
             border: 1px solid #23272f;
         }
+
         .compliance-badge {
             display: inline-block;
             padding: 8px 16px;
@@ -145,16 +176,43 @@
             border: 1px solid #00ffe7;
             box-shadow: 0 2px 8px #00ffe744;
         }
-        .badge-achieved { background: #23272f; color: #00ffe7; border-color: #00ffe7; }
-        .badge-pending { background: #23272f; color: #ffb700; border-color: #ffb700; }
-        .badge-ok { background: #23272f; color: #00ffe7; border-color: #00ffe7; }
-        .badge-warning { background: #23272f; color: #ffb700; border-color: #ffb700; }
-        .badge-critical { background: #23272f; color: #ff3c3c; border-color: #ff3c3c; }
+
+        .badge-achieved {
+            background: #23272f;
+            color: #00ffe7;
+            border-color: #00ffe7;
+        }
+
+        .badge-pending {
+            background: #23272f;
+            color: #ffb700;
+            border-color: #ffb700;
+        }
+
+        .badge-ok {
+            background: #23272f;
+            color: #00ffe7;
+            border-color: #00ffe7;
+        }
+
+        .badge-warning {
+            background: #23272f;
+            color: #ffb700;
+            border-color: #ffb700;
+        }
+
+        .badge-critical {
+            background: #23272f;
+            color: #ff3c3c;
+            border-color: #ff3c3c;
+        }
+
         .quantum-indicators {
             display: flex;
             justify-content: space-around;
             margin-top: 15px;
         }
+
         .quantum-indicator {
             text-align: center;
             padding: 10px;
@@ -165,20 +223,32 @@
             color: #fff;
             box-shadow: 0 2px 8px #00ffe744;
         }
+
         .last-update {
             font-size: 0.85rem;
             color: #b0b0b0;
             text-align: center;
             margin-top: 10px;
         }
+
         .loading-spinner {
             text-align: center;
             padding: 20px;
             color: #00ffe7;
         }
-        .profit-positive { color: #00ffe7; }
-        .profit-negative { color: #ff3c3c; }
-        .profit-neutral { color: #b0b0b0; }
+
+        .profit-positive {
+            color: #00ffe7;
+        }
+
+        .profit-negative {
+            color: #ff3c3c;
+        }
+
+        .profit-neutral {
+            color: #b0b0b0;
+        }
+
         .refresh-indicator {
             position: fixed;
             top: 20px;
@@ -190,13 +260,21 @@
             z-index: 1000;
             color: #00ffe7;
         }
+
         .refresh-indicator.active {
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
         /* Neon button */
         .btn-primary {
             background: linear-gradient(90deg, #00ffe7 60%, #00bfff 100%);
@@ -206,22 +284,26 @@
             box-shadow: 0 2px 8px #00ffe744;
             transition: background 0.2s, color 0.2s;
         }
+
         .btn-primary:hover {
             background: linear-gradient(90deg, #00bfff 60%, #00ffe7 100%);
             color: #181c20;
         }
+
         .btn-success {
             background: linear-gradient(90deg, #00ffe7 60%, #00bfff 100%);
             color: #23272f;
             border: none;
             font-weight: 600;
         }
+
         .btn-danger {
             background: linear-gradient(90deg, #ff3c3c 60%, #ffb700 100%);
             color: #23272f;
             border: none;
             font-weight: 600;
         }
+
         .btn {
             border-radius: 12px;
             font-size: 1rem;
@@ -233,41 +315,40 @@
 <body>
     <nav style="margin-bottom: 24px;">
         <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
-        <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
-        <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
-        <a href="/quantum_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Quantum Metrics</a>
+        <a href="/performance"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
+        <a href="/advanced_metrics"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
+        <a href="/quantum_metrics"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Quantum Metrics</a>
         <a href="/mt5_status" style="color:#ff3c3c; text-decoration:none; font-weight:600;">Stato MT5</a>
     </nav>
+    <form action="/update_mt5_orders" method="post" style="margin-bottom:18px;">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Aggiorna ordini MT5</button>
+    </form>
     <div class="container-fluid">
         <!-- NOTIFICHE REAL-TIME STICKY SEMPRE VISIBILE -->
         <div class="realtime-notifications-sticky">
             <h5><i class="fas fa-bell"></i> Notifiche Real-Time</h5>
             <ul class="list-unstyled mb-0">
                 {% if realtime_notifications and realtime_notifications|length > 0 %}
-                    {% for notif in realtime_notifications %}
-                    <li
-                        {% if notif.event_type == 'MT5_DISCONNECT' %}
-                            style="color:#ff3c3c;"
-                        {% elif notif.event_type == 'DRAWDOWN_CRITICAL' %}
-                            style="color:#ffb700;"
-                        {% elif notif.event_type == 'TARGET_REACHED' %}
-                            style="color:#00ffe7;"
-                        {% else %}
-                            style="color:#00ffe7;"
-                        {% endif %}
-                    >
-                        <span style="font-weight:bold;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            [{{ notif.timestamp }}]
-                            {{ notif.message }}
-                        </span>
-                        {% if notif.details and notif.details|length > 0 %}
-                            <span style="color:#b0b0b0; font-size:0.95rem; margin-left:8px;">{{ notif.details|tojson }}</span>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
+                {% for notif in realtime_notifications %}
+                <li {% if notif.event_type=='MT5_DISCONNECT' %} style="color:#ff3c3c;" {% elif
+                    notif.event_type=='DRAWDOWN_CRITICAL' %} style="color:#ffb700;" {% elif
+                    notif.event_type=='TARGET_REACHED' %} style="color:#00ffe7;" {% else %} style="color:#00ffe7;" {%
+                    endif %}>
+                    <span style="font-weight:bold;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        [{{ notif.timestamp }}]
+                        {{ notif.message }}
+                    </span>
+                    {% if notif.details and notif.details|length > 0 %}
+                    <span style="color:#b0b0b0; font-size:0.95rem; margin-left:8px;">{{ notif.details|tojson }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
                 {% else %}
-                    <li style="color:#b0b0b0; text-align:center; font-size:1.05rem;">Nessuna notifica</li>
+                <li style="color:#b0b0b0; text-align:center; font-size:1.05rem;">Nessuna notifica</li>
                 {% endif %}
             </ul>
         </div>
@@ -282,13 +363,17 @@
                 </div>
             </div>
             <div class="text-end">
-                <div style="margin-bottom:8px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
-                    <span class="badge bg-{{ 'success' if compliance and compliance.target.status == 'achieved' else 'warning' }}" style="font-size:1rem; padding:8px 16px; border-radius:18px;">
+                <div
+                    style="margin-bottom:8px; display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+                    <span
+                        class="badge bg-{{ 'success' if compliance and compliance.target.status == 'achieved' else 'warning' }}"
+                        style="font-size:1rem; padding:8px 16px; border-radius:18px;">
                         <i class="fas fa-server"></i> MT5:
-                        {% if mt5_warning is defined and mt5_warning and ('Connesso' in mt5_warning or 'non attiva' in mt5_warning or 'non connesso' in mt5_warning) %}
-                            <span style="color:#ffb700;">OFFLINE</span>
+                        {% if mt5_warning is defined and mt5_warning and ('Connesso' in mt5_warning or 'non attiva' in
+                        mt5_warning or 'non connesso' in mt5_warning) %}
+                        <span style="color:#ffb700;">OFFLINE</span>
                         {% else %}
-                            <span style="color:#00ffe7;">ONLINE</span>
+                        <span style="color:#00ffe7;">ONLINE</span>
                         {% endif %}
                     </span>
                     <a href="/" class="btn btn-success" style="font-size:1rem; padding:8px 18px;">
@@ -303,10 +388,10 @@
             </div>
         </div>
         {% if mt5_warning %}
-            <div style="color:#ff4444; font-weight:bold; margin-bottom:18px;">{{ mt5_warning }}</div>
+        <div style="color:#ff4444; font-weight:bold; margin-bottom:18px;">{{ mt5_warning }}</div>
         {% endif %}
-       
-            
+
+
         <!-- Pulsante analisi incrociata segnali/trade/blocchi e tabella segnali non eseguiti -->
         {# Dropdown filtro data: inserito qui sopra i grafici principali #}
         {% include 'dashboard_date_filter_snippet.html' %}
@@ -324,7 +409,8 @@
             <div class="col-md-4 mb-4">
                 <div class="metric-card text-center" style="background:#23272f;box-shadow:0 2px 12px #00ffe744;">
                     <h5 class="mb-2" style="color:#00ffe7;">Risk/Reward Ratio Medio</h5>
-                    <div style="font-size:2.2rem;font-weight:700;color:#00ffe7;">{{ avg_rrr_global|default(0)|round(2) }}</div>
+                    <div style="font-size:2.2rem;font-weight:700;color:#00ffe7;">{{ avg_rrr_global|default(0)|round(2)
+                        }}</div>
                     <div class="dashboard-subtitle mt-2">Media globale RRR su tutti i trade</div>
                 </div>
             </div>
@@ -333,7 +419,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 style="margin:0;"><i class="fas fa-ban"></i> Segnali BUY/SELL non eseguiti</h5>
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <input id="unexecSymbol" type="text" placeholder="Simbolo (es. EURUSD)" style="width:110px;">
+                            <input id="unexecSymbol" type="text" placeholder="Simbolo (es. EURUSD)"
+                                style="width:110px;">
                             <input id="unexecRows" type="number" min="1" max="100" value="10" style="width:60px;">
                             <select id="unexecBlockFilter" class="form-select form-select-sm" style="width:170px;">
                                 <option value="all">Tutti i segnali</option>
@@ -359,333 +446,433 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="text-end"><a href="/diagnostics" class="btn btn-link">Vedi tutti i dettagli &rarr;</a></div>
-                    <button id="generateSignalsTickLog" class="btn btn-info" style="font-size:1rem; padding:8px 18px; font-weight:600; margin-top:10px;">
+                    <div class="text-end"><a href="/diagnostics" class="btn btn-link">Vedi tutti i dettagli &rarr;</a>
+                    </div>
+                    <button id="generateSignalsTickLog" class="btn btn-info"
+                        style="font-size:1rem; padding:8px 18px; font-weight:600; margin-top:10px;">
                         <i class="fas fa-file-csv"></i> Genera signals_tick_log.csv
                     </button>
                     <div id="signalsTickLogStatus" style="margin-bottom:8px;"></div>
                 </div>
             </div>
         </div>
-            <div class="col-12">
-                <div class="metric-card">
-                    <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
-                    {% if compliance is defined and compliance.target is defined and compliance.target.status is defined and compliance.target.message is defined %}
-                        <div class="compliance-badge badge-{{ compliance.target.status }}">{{ compliance.target.message }}</div>
+        <div class="col-12">
+            <div class="metric-card">
+                <h5><i class="fas fa-shield-alt"></i> THE5ERS Compliance Status</h5>
+                {% if compliance is defined and compliance.target is defined and compliance.target.status is defined and
+                compliance.target.message is defined %}
+                <div class="compliance-badge badge-{{ compliance.target.status }}">{{ compliance.target.message }}</div>
+                {% else %}
+                <div class="compliance-badge badge-warning">Compliance target non disponibile</div>
+                {% endif %}
+                {% if compliance is defined and compliance.drawdown is defined and compliance.drawdown.status is defined
+                and compliance.drawdown.message is defined %}
+                <div class="compliance-badge badge-{{ compliance.drawdown.status }}">{{ compliance.drawdown.message }}
+                </div>
+                {% else %}
+                <div class="compliance-badge badge-warning">Compliance drawdown non disponibile</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <hr style="border-top:2px solid #00ffe7; margin: 18px 0 24px 0; opacity:0.25;">
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-3" style="color:#00ffe7; font-weight:700; text-shadow:0 2px 8px #00ffe7aa;">Metriche Trading -
+                Phoenix Quantum MonoFX</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="metric-card" style="min-width:220px; min-height:100px;">
+                <h5 class="mb-2" style="color:#ffb700;">Performance</h5>
+                <div class="row row-cols-2 g-2">
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-target"></i> Profit %</div>
+                        <div class="metric-value">{{ metrics.profit_percentage|default(0)|round(2) }}%</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-chart-line"></i> Total P&L</div>
+                        <div class="metric-value">${{ metrics.total_pnl|default(0)|round(2) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-plus-circle"></i> Profitti Totali</div>
+                        <div class="metric-value profit-positive">${{ metrics.total_profit|default(0)|round(2) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-minus-circle"></i> Perdite Totali</div>
+                        <div class="metric-value profit-negative">${{ metrics.total_loss|default(0)|round(2) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-percentage"></i> Win Rate</div>
+                        <div class="metric-value">{{ metrics.win_rate|default(0)|round(1) }}%</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-arrow-down"></i> Max Drawdown</div>
+                        <div class="metric-value">{{ metrics.max_drawdown|default(0)|round(2) }}%</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-exchange-alt"></i> Total Trades</div>
+                        <div class="metric-value">{{ metrics.total_trades|default(0) }}</div>
+                        <div class="metric-change">{{ metrics.daily_trades|default(0) }} today</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-calculator"></i> Profit Factor</div>
+                        <div class="metric-value">{{ metrics.profit_factor|default(0)|round(2) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-layer-group"></i> Open Positions</div>
+                        <div class="metric-value">{{ metrics.positions_open|default(0) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="bi bi-arrow-repeat"></i> Drawdown Recovery Time <span
+                                data-bs-toggle="tooltip"
+                                title="Tempo medio (minuti) per recuperare un drawdown significativo."><i
+                                    class="bi bi-info-circle"></i></span></div>
+                        <div class="metric-value">{{ metrics.drawdown_recovery_time if metrics.drawdown_recovery_time !=
+                            '-' else '-' }} min</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="bi bi-bar-chart-line"></i> Volatilità Portafoglio <span
+                                data-bs-toggle="tooltip" title="Deviazione standard dei rendimenti P&L."><i
+                                    class="bi bi-info-circle"></i></span></div>
+                        <div class="metric-value">{{ metrics.volatility|default(0)|round(2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="metric-card" style="min-width:220px; min-height:100px;">
+                <h5 class="mb-2" style="color:#00bfff;">Metriche Avanzate</h5>
+                <div class="row row-cols-2 g-2">
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-balance-scale"></i> Sharpe Ratio</div>
+                        <div class="metric-value">{{ metrics.sharpe_ratio|default(0)|round(3) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-arrow-circle-down"></i> Sortino Ratio</div>
+                        <div class="metric-value">{{ metrics.sortino_ratio|default(0)|round(3) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-clock"></i> Trade Duration Media</div>
+                        <div class="metric-value">{{ metrics.avg_trade_duration_minutes|default(0)|round(1) }} min</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-medal"></i> Max Consecutive Wins</div>
+                        <div class="metric-value">{{ metrics.max_consecutive_wins|default(0) }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-skull-crossbones"></i> Max Consecutive Losses</div>
+                        <div class="metric-value">{{ metrics.max_consecutive_losses|default(0) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="metric-card" style="min-width:220px; min-height:100px;">
+                <h5 class="mb-2" style="color:#fd7e14;">Quantum Metrics</h5>
+                <div class="row row-cols-2 g-2">
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-arrow-up"></i> Sell Signals</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{
+                            metrics.quantum_signals.sell if metrics.quantum_signals is defined and
+                            metrics.quantum_signals.sell is defined else 0 }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-arrow-down"></i> Buy Signals</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{
+                            metrics.quantum_signals.buy if metrics.quantum_signals is defined and
+                            metrics.quantum_signals.buy is defined else 0 }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-braille"></i> Avg Entropy</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;">{{
+                            metrics.quantum_signals.avg_entropy|round(3) if metrics.quantum_signals is defined and
+                            metrics.quantum_signals.avg_entropy is defined else 0 }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-atom"></i> Avg Spin</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;">{{
+                            metrics.quantum_signals.avg_spin|round(3) if metrics.quantum_signals is defined and
+                            metrics.quantum_signals.avg_spin is defined else 0 }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-check-circle"></i> Avg Confidence</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #00bfff;">{{
+                            metrics.quantum_signals.avg_confidence|round(3) if metrics.quantum_signals is defined and
+                            metrics.quantum_signals.avg_confidence is defined else 0 }}</div>
+                    </div>
+                    <div class="col">
+                        <div class="metric-label"><i class="fas fa-percentage"></i> % Segnali Quantum Eseguiti</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{
+                            percent_signals_executed|round(2) }}%</div>
+                    </div>
+                </div>
+                <div class="dashboard-subtitle mt-2">
+                    <span style="color:#00ffe7;">Giornaliero:</span>
+                    {% if daily_percent_signals_executed is defined %}
+                    {% for day, pct in daily_percent_signals_executed.items() %}
+                    <span style="margin-right:8px;">{{ day }}: <b>{{ pct|round(2) }}%</b></span>
+                    {% endfor %}
                     {% else %}
-                        <div class="compliance-badge badge-warning">Compliance target non disponibile</div>
-                    {% endif %}
-                    {% if compliance is defined and compliance.drawdown is defined and compliance.drawdown.status is defined and compliance.drawdown.message is defined %}
-                        <div class="compliance-badge badge-{{ compliance.drawdown.status }}">{{ compliance.drawdown.message }}</div>
+                    <span class="text-muted">Nessun dato disponibile</span>
+                    {% endif %}<br>
+                    <span style="color:#00bfff;">Settimanale:</span>
+                    {% if weekly_percent_signals_executed is defined %}
+                    {% for week, pct in weekly_percent_signals_executed.items() %}
+                    <span style="margin-right:8px;">{{ week }}: <b>{{ pct|round(2) }}%</b></span>
+                    {% endfor %}
                     {% else %}
-                        <div class="compliance-badge badge-warning">Compliance drawdown non disponibile</div>
+                    <span class="text-muted">Nessun dato disponibile</span>
                     {% endif %}
                 </div>
             </div>
         </div>
-        <hr style="border-top:2px solid #00ffe7; margin: 18px 0 24px 0; opacity:0.25;">
-        <div class="row">
-            <div class="col-12">
-                <h3 class="mb-3" style="color:#00ffe7; font-weight:700; text-shadow:0 2px 8px #00ffe7aa;">Metriche Trading - Phoenix Quantum MonoFX</h3>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 col-lg-4 mb-4">
-                <div class="metric-card" style="min-width:220px; min-height:100px;">
-                    <h5 class="mb-2" style="color:#ffb700;">Performance</h5>
-                    <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-target"></i> Profit %</div><div class="metric-value">{{ metrics.profit_percentage|default(0)|round(2) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-chart-line"></i> Total P&L</div><div class="metric-value">${{ metrics.total_pnl|default(0)|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-plus-circle"></i> Profitti Totali</div><div class="metric-value profit-positive">${{ metrics.total_profit|default(0)|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-minus-circle"></i> Perdite Totali</div><div class="metric-value profit-negative">${{ metrics.total_loss|default(0)|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-percentage"></i> Win Rate</div><div class="metric-value">{{ metrics.win_rate|default(0)|round(1) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Max Drawdown</div><div class="metric-value">{{ metrics.max_drawdown|default(0)|round(2) }}%</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-exchange-alt"></i> Total Trades</div><div class="metric-value">{{ metrics.total_trades|default(0) }}</div><div class="metric-change">{{ metrics.daily_trades|default(0) }} today</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-calculator"></i> Profit Factor</div><div class="metric-value">{{ metrics.profit_factor|default(0)|round(2) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-layer-group"></i> Open Positions</div><div class="metric-value">{{ metrics.positions_open|default(0) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="bi bi-arrow-repeat"></i> Drawdown Recovery Time <span data-bs-toggle="tooltip" title="Tempo medio (minuti) per recuperare un drawdown significativo."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ metrics.drawdown_recovery_time if metrics.drawdown_recovery_time != '-' else '-' }} min</div></div>
-                        <div class="col"><div class="metric-label"><i class="bi bi-bar-chart-line"></i> Volatilità Portafoglio <span data-bs-toggle="tooltip" title="Deviazione standard dei rendimenti P&L."><i class="bi bi-info-circle"></i></span></div><div class="metric-value">{{ metrics.volatility|default(0)|round(2) }}</div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 mb-4">
-                <div class="metric-card" style="min-width:220px; min-height:100px;">
-                    <h5 class="mb-2" style="color:#00bfff;">Metriche Avanzate</h5>
-                    <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-balance-scale"></i> Sharpe Ratio</div><div class="metric-value">{{ metrics.sharpe_ratio|default(0)|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-circle-down"></i> Sortino Ratio</div><div class="metric-value">{{ metrics.sortino_ratio|default(0)|round(3) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-clock"></i> Trade Duration Media</div><div class="metric-value">{{ metrics.avg_trade_duration_minutes|default(0)|round(1) }} min</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-medal"></i> Max Consecutive Wins</div><div class="metric-value">{{ metrics.max_consecutive_wins|default(0) }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-skull-crossbones"></i> Max Consecutive Losses</div><div class="metric-value">{{ metrics.max_consecutive_losses|default(0) }}</div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 mb-4">
-                <div class="metric-card" style="min-width:220px; min-height:100px;">
-                    <h5 class="mb-2" style="color:#fd7e14;">Quantum Metrics</h5>
-                    <div class="row row-cols-2 g-2">
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-up"></i> Sell Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #dc3545;">{{ metrics.quantum_signals.sell if metrics.quantum_signals is defined and metrics.quantum_signals.sell is defined else 0 }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-arrow-down"></i> Buy Signals</div><div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{ metrics.quantum_signals.buy if metrics.quantum_signals is defined and metrics.quantum_signals.buy is defined else 0 }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-braille"></i> Avg Entropy</div><div class="metric-value" style="font-size: 1.5rem; color: #6f42c1;">{{ metrics.quantum_signals.avg_entropy|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_entropy is defined else 0 }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-atom"></i> Avg Spin</div><div class="metric-value" style="font-size: 1.5rem; color: #fd7e14;">{{ metrics.quantum_signals.avg_spin|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_spin is defined else 0 }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-check-circle"></i> Avg Confidence</div><div class="metric-value" style="font-size: 1.5rem; color: #00bfff;">{{ metrics.quantum_signals.avg_confidence|round(3) if metrics.quantum_signals is defined and metrics.quantum_signals.avg_confidence is defined else 0 }}</div></div>
-                        <div class="col"><div class="metric-label"><i class="fas fa-percentage"></i> % Segnali Quantum Eseguiti</div><div class="metric-value" style="font-size: 1.5rem; color: #00ffe7;">{{ percent_signals_executed|round(2) }}%</div></div>
-                    </div>
-                    <div class="dashboard-subtitle mt-2">
-                        <span style="color:#00ffe7;">Giornaliero:</span>
-                        {% if daily_percent_signals_executed is defined %}
-                            {% for day, pct in daily_percent_signals_executed.items() %}
-                                <span style="margin-right:8px;">{{ day }}: <b>{{ pct|round(2) }}%</b></span>
-                            {% endfor %}
-                        {% else %}
-                            <span class="text-muted">Nessun dato disponibile</span>
-                        {% endif %}<br>
-                        <span style="color:#00bfff;">Settimanale:</span>
-                        {% if weekly_percent_signals_executed is defined %}
-                            {% for week, pct in weekly_percent_signals_executed.items() %}
-                                <span style="margin-right:8px;">{{ week }}: <b>{{ pct|round(2) }}%</b></span>
-                            {% endfor %}
-                        {% else %}
-                            <span class="text-muted">Nessun dato disponibile</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
 
-        <!-- Link diagnostica -->
-        <div class="row">
-            <div class="col-12 text-center mb-4">
-                <a href="/diagnostics" class="btn btn-primary btn-lg"><i class="fas fa-tools"></i> Vai alla Diagnostica (Motivi Blocco &amp; Segnali)</a>
-            </div>
+    <!-- Link diagnostica -->
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <a href="/diagnostics" class="btn btn-primary btn-lg"><i class="fas fa-tools"></i> Vai alla Diagnostica
+                (Motivi Blocco &amp; Segnali)</a>
         </div>
-        <!-- Breakdown rendimento giornaliero/settimanale -->
-        <div class="row">
-            <div class="col-12 mb-4">
-                <div class="metric-card">
-                    <h5 class="mb-2" style="color:#00ffe7;">Breakdown Rendimento Giornaliero</h5>
-                    <div class="dashboard-subtitle mb-3">Performance, P&L e Win Rate per ogni giorno</div>
-                    <div style="overflow-x:auto;">
-                        <table class="table table-dark table-striped table-sm">
-                            <thead>
-                                 <tr>
-                                     <th>Data</th>
-                                     <th>P&L</th>
-                                     <th>Profitto %</th>
-                                     <th>Trade</th>
-                                     <th>Win Rate</th>
-                                     <th>Commissioni</th>
-                                     <th>Swap</th>
-                                     <th>Costi Totali</th>
-                                     <th>RRR Medio</th>
-                                     <th>Drawdown Recovery Time</th>
-                                     <th>Volatilità</th>
-                                     <th>% Segnali Quantum Eseguiti</th>
-                                 </tr>
-                            </thead>
-                             <tbody>
-                                 {% for day in daily_breakdown %}
-                                 <tr>
-                                     <td>{{ day.date }}</td>
-                                     <td class="{{ 'profit-positive' if day.pnl > 0 else ('profit-negative' if day.pnl < 0 else 'profit-neutral') }}">${{ day.pnl|round(2) }}</td>
-                                     <td>{{ day.profit_pct|round(2) }}%</td>
-                                     <td>{{ day.trades }}</td>
-                                     <td>{{ day.win_rate|round(1) }}%</td>
-                                     <td>${{ day.commission|default(0.0)|round(2) }}</td>
-                                     <td>${{ day.swap|default(0.0)|round(2) }}</td>
-                                     <td>${{ day.cost|default(0.0)|round(2) }}</td>
-                                     <td>{{ day.avg_rrr|default(0.0)|round(2) }}</td>
-                                     <td>{{ daily_drawdown_recovery[day.date]|round(2) if daily_drawdown_recovery[day.date] is defined else '-' }} min</td>
-                                     <td>{{ daily_volatility[day.date]|round(2) if daily_volatility[day.date] is defined else '-' }}</td>
-                                     <td>{{ daily_percent_signals_executed[day.date]|round(2) if daily_percent_signals_executed[day.date] is defined else '-' }}%</td>
-                                 </tr>
-                                 {% endfor %}
-                             </tbody>
-                        </table>
-                    </div>
-                    <div class="chart-container mt-3">
-                        <div id="daily_breakdown_chart"></div>
-                    </div>
-                    <div class="chart-container mt-3">
-                        <h6 style="color:#ffb300;">Risk/Reward Ratio Medio Giornaliero</h6>
-                        <div id="daily_rrr_chart"></div>
-                    </div>
+    </div>
+    <!-- Breakdown rendimento giornaliero/settimanale -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="metric-card">
+                <h5 class="mb-2" style="color:#00ffe7;">Breakdown Rendimento Giornaliero</h5>
+                <div class="dashboard-subtitle mb-3">Performance, P&L e Win Rate per ogni giorno</div>
+                <div style="overflow-x:auto;">
+                    <table class="table table-dark table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>P&L</th>
+                                <th>Profitto %</th>
+                                <th>Trade</th>
+                                <th>Win Rate</th>
+                                <th>Commissioni</th>
+                                <th>Swap</th>
+                                <th>Costi Totali</th>
+                                <th>RRR Medio</th>
+                                <th>Drawdown Recovery Time</th>
+                                <th>Volatilità</th>
+                                <th>% Segnali Quantum Eseguiti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in daily_breakdown %}
+                            <tr>
+                                <td>{{ day.date }}</td>
+                                <td
+                                    class="{{ 'profit-positive' if day.pnl > 0 else ('profit-negative' if day.pnl < 0 else 'profit-neutral') }}">
+                                    ${{ day.pnl|round(2) }}</td>
+                                <td>{{ day.profit_pct|round(2) }}%</td>
+                                <td>{{ day.trades }}</td>
+                                <td>{{ day.win_rate|round(1) }}%</td>
+                                <td>${{ day.commission|default(0.0)|round(2) }}</td>
+                                <td>${{ day.swap|default(0.0)|round(2) }}</td>
+                                <td>${{ day.cost|default(0.0)|round(2) }}</td>
+                                <td>{{ day.avg_rrr|default(0.0)|round(2) }}</td>
+                                <td>{{ daily_drawdown_recovery[day.date]|round(2) if daily_drawdown_recovery[day.date]
+                                    is defined else '-' }} min</td>
+                                <td>{{ daily_volatility[day.date]|round(2) if daily_volatility[day.date] is defined else
+                                    '-' }}</td>
+                                <td>{{ daily_percent_signals_executed[day.date]|round(2) if
+                                    daily_percent_signals_executed[day.date] is defined else '-' }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="col-12 mb-4">
-                <div class="metric-card">
-                    <h5 class="mb-2" style="color:#00bfff;">Breakdown Rendimento Settimanale</h5>
-                    <div class="dashboard-subtitle mb-3">Aggregato per settimana: P&L, % profitto, trade, win rate</div>
-                    <div style="overflow-x:auto;">
-                        <table class="table table-dark table-striped table-sm">
-                            <thead>
-                                 <tr>
-                                     <th>Settimana</th>
-                                     <th>P&L</th>
-                                     <th>Profitto %</th>
-                                     <th>Trade</th>
-                                     <th>Win Rate</th>
-                                     <th>Commissioni</th>
-                                     <th>Swap</th>
-                                     <th>Costi Totali</th>
-                                     <th>RRR Medio</th>
-                                     <th>Drawdown Recovery Time</th>
-                                     <th>Volatilità</th>
-                                     <th>% Segnali Quantum Eseguiti</th>
-                                 </tr>
-                            </thead>
-                             <tbody>
-                                 {% for week in weekly_breakdown %}
-                                 <tr>
-                                     <td>{{ week.week }}</td>
-                                     <td class="{{ 'profit-positive' if week.pnl > 0 else ('profit-negative' if week.pnl < 0 else 'profit-neutral') }}">${{ week.pnl|round(2) }}</td>
-                                     <td>{{ week.profit_pct|round(2) }}%</td>
-                                     <td>{{ week.trades }}</td>
-                                     <td>{{ week.win_rate|round(1) }}%</td>
-                                     <td>${{ week.commission|default(0.0)|round(2) }}</td>
-                                     <td>${{ week.swap|default(0.0)|round(2) }}</td>
-                                     <td>${{ week.cost|default(0.0)|round(2) }}</td>
-                                     <td>{{ week.avg_rrr|default(0.0)|round(2) }}</td>
-                                     <td>{{ weekly_drawdown_recovery[week.week]|round(2) if weekly_drawdown_recovery[week.week] is defined else '-' }} min</td>
-                                     <td>{{ weekly_volatility[week.week]|round(2) if weekly_volatility[week.week] is defined else '-' }}</td>
-                                     <td>{{ weekly_percent_signals_executed[week.week]|round(2) if weekly_percent_signals_executed[week.week] is defined else '-' }}%</td>
-                                 </tr>
-                                 {% endfor %}
-                             </tbody>
-                        </table>
-                    </div>
-                    <div class="chart-container mt-3">
-                        <div id="weekly_breakdown_chart"></div>
-                    </div>
-                    <div class="chart-container mt-3">
-                        <h6 style="color:#00bfff;">Risk/Reward Ratio Medio Settimanale</h6>
-                        <div id="weekly_rrr_chart"></div>
-                    </div>
+                <div class="chart-container mt-3">
+                    <div id="daily_breakdown_chart"></div>
+                </div>
+                <div class="chart-container mt-3">
+                    <h6 style="color:#ffb300;">Risk/Reward Ratio Medio Giornaliero</h6>
+                    <div id="daily_rrr_chart"></div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="pnl_chart"></div>
+        <div class="col-12 mb-4">
+            <div class="metric-card">
+                <h5 class="mb-2" style="color:#00bfff;">Breakdown Rendimento Settimanale</h5>
+                <div class="dashboard-subtitle mb-3">Aggregato per settimana: P&L, % profitto, trade, win rate</div>
+                <div style="overflow-x:auto;">
+                    <table class="table table-dark table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Settimana</th>
+                                <th>P&L</th>
+                                <th>Profitto %</th>
+                                <th>Trade</th>
+                                <th>Win Rate</th>
+                                <th>Commissioni</th>
+                                <th>Swap</th>
+                                <th>Costi Totali</th>
+                                <th>RRR Medio</th>
+                                <th>Drawdown Recovery Time</th>
+                                <th>Volatilità</th>
+                                <th>% Segnali Quantum Eseguiti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in weekly_breakdown %}
+                            <tr>
+                                <td>{{ week.week }}</td>
+                                <td
+                                    class="{{ 'profit-positive' if week.pnl > 0 else ('profit-negative' if week.pnl < 0 else 'profit-neutral') }}">
+                                    ${{ week.pnl|round(2) }}</td>
+                                <td>{{ week.profit_pct|round(2) }}%</td>
+                                <td>{{ week.trades }}</td>
+                                <td>{{ week.win_rate|round(1) }}%</td>
+                                <td>${{ week.commission|default(0.0)|round(2) }}</td>
+                                <td>${{ week.swap|default(0.0)|round(2) }}</td>
+                                <td>${{ week.cost|default(0.0)|round(2) }}</td>
+                                <td>{{ week.avg_rrr|default(0.0)|round(2) }}</td>
+                                <td>{{ weekly_drawdown_recovery[week.week]|round(2) if
+                                    weekly_drawdown_recovery[week.week] is defined else '-' }} min</td>
+                                <td>{{ weekly_volatility[week.week]|round(2) if weekly_volatility[week.week] is defined
+                                    else '-' }}</td>
+                                <td>{{ weekly_percent_signals_executed[week.week]|round(2) if
+                                    weekly_percent_signals_executed[week.week] is defined else '-' }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="drawdown_chart"></div>
+                <div class="chart-container mt-3">
+                    <div id="weekly_breakdown_chart"></div>
+                </div>
+                <div class="chart-container mt-3">
+                    <h6 style="color:#00bfff;">Risk/Reward Ratio Medio Settimanale</h6>
+                    <div id="weekly_rrr_chart"></div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="balance_chart"></div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="hourly_chart"></div>
-                </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="pnl_chart"></div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="symbols_chart"></div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <div id="signals_chart"></div>
-                </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="drawdown_chart"></div>
             </div>
         </div>
-        <div class="last-update">
-            <i class="fas fa-clock"></i> Last updated: {{ last_update }}
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="balance_chart"></div>
+            </div>
         </div>
-        <footer class="text-center mt-4 mb-2" style="color:#888; font-size:0.95rem;">
-            THE5ERS Dashboard Mono &bull; v2.0 &bull; Powered by Phoenix Quantum MonoFX
-        </footer>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="hourly_chart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="symbols_chart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div id="signals_chart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="last-update">
+        <i class="fas fa-clock"></i> Last updated: {{ last_update }}
+    </div>
+    <footer class="text-center mt-4 mb-2" style="color:#888; font-size:0.95rem;">
+        THE5ERS Dashboard Mono &bull; v2.0 &bull; Powered by Phoenix Quantum MonoFX
+    </footer>
     </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btn = document.getElementById('runSignalsVsTradesReport');
-        if(btn) {
-            btn.addEventListener('click', function() {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analisi in corso...';
-                fetch('/api/run_signals_vs_trades_report', {method: 'POST'})
-                  .then(r => r.json())
-                  .then(data => {
-                    let html = '';
-                    if(data.success) {
-                        html += '<span style="color:#00ffe7;font-weight:bold;">Report generato!</span><br>';
-                        html += `<a href="${data.csv_report}" class="btn btn-success btn-sm mt-2" download>Scarica CSV</a> `;
-                        html += `<a href="${data.json_report}" class="btn btn-info btn-sm mt-2" download>Scarica JSON</a>`;
-                        // Aggiorna tabella segnali non eseguiti
-                        refreshUnexecSignalsTable();
-                    } else {
-                        html += '<span style="color:#ff3c3c;font-weight:bold;">Errore generazione report!</span><br>';
-                        html += data.error ? data.error : (data.stderr || '');
-                    }
-                    document.getElementById('signalsVsTradesReportResult').innerHTML = html;
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
-                  })
-                  .catch(err => {
-                    document.getElementById('signalsVsTradesReportResult').innerHTML = '<span style="color:#ff3c3c;font-weight:bold;">Errore di rete!</span>';
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
-                  });
-            });
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('runSignalsVsTradesReport');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analisi in corso...';
+                    fetch('/api/run_signals_vs_trades_report', { method: 'POST' })
+                        .then(r => r.json())
+                        .then(data => {
+                            let html = '';
+                            if (data.success) {
+                                html += '<span style="color:#00ffe7;font-weight:bold;">Report generato!</span><br>';
+                                html += `<a href="${data.csv_report}" class="btn btn-success btn-sm mt-2" download>Scarica CSV</a> `;
+                                html += `<a href="${data.json_report}" class="btn btn-info btn-sm mt-2" download>Scarica JSON</a>`;
+                                // Aggiorna tabella segnali non eseguiti
+                                refreshUnexecSignalsTable();
+                            } else {
+                                html += '<span style="color:#ff3c3c;font-weight:bold;">Errore generazione report!</span><br>';
+                                html += data.error ? data.error : (data.stderr || '');
+                            }
+                            document.getElementById('signalsVsTradesReportResult').innerHTML = html;
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
+                        })
+                        .catch(err => {
+                            document.getElementById('signalsVsTradesReportResult').innerHTML = '<span style="color:#ff3c3c;font-weight:bold;">Errore di rete!</span>';
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-search"></i> Analisi incrociata Segnali/Trade/Motivi Blocco';
+                        });
+                }
 
-        // Bottone per generare signals_tick_log.csv
-        const btnTickLog = document.getElementById('generateSignalsTickLog');
-        const tickLogStatus = document.getElementById('signalsTickLogStatus');
-        if(btnTickLog && tickLogStatus) {
-            btnTickLog.addEventListener('click', function() {
-                btnTickLog.disabled = true;
-                btnTickLog.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generazione in corso...';
-                tickLogStatus.innerHTML = '<span class="text-info">⏳ Generazione signals_tick_log.csv in corso...</span>';
-                fetch('/api/generate_signals_tick_log', {method: 'POST'})
-                  .then(r => r.json())
-                  .then(data => {
-                    if(data.success) {
-                        tickLogStatus.innerHTML = `<span class='text-success'>✅ signals_tick_log.csv generato!</span><br><pre style='background:#23272f; color:#b6faff; margin-top:10px; max-height:200px; overflow:auto;'>${data.stdout || ''}</pre>`;
-                    } else {
-                        tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${data.error || data.stderr}</span>`;
-                    }
-                    btnTickLog.disabled = false;
-                    btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
-                  })
-                  .catch(e => {
-                    tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${e}</span>`;
-                    btnTickLog.disabled = false;
-                    btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
-                  });
-            });
-        }
+            // Bottone per generare signals_tick_log.csv
+            const btnTickLog = document.getElementById('generateSignalsTickLog');
+                const tickLogStatus = document.getElementById('signalsTickLogStatus');
+                if (btnTickLog && tickLogStatus) {
+                    btnTickLog.addEventListener('click', function () {
+                        btnTickLog.disabled = true;
+                        btnTickLog.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generazione in corso...';
+                        tickLogStatus.innerHTML = '<span class="text-info">⏳ Generazione signals_tick_log.csv in corso...</span>';
+                        fetch('/api/generate_signals_tick_log', { method: 'POST' })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) {
+                                    tickLogStatus.innerHTML = `<span class='text-success'>✅ signals_tick_log.csv generato!</span><br><pre style='background:#23272f; color:#b6faff; margin-top:10px; max-height:200px; overflow:auto;'>${data.stdout || ''}</pre>`;
+                                } else {
+                                    tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${data.error || data.stderr}</span>`;
+                                }
+                                btnTickLog.disabled = false;
+                                btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
+                            })
+                            .catch(e => {
+                                tickLogStatus.innerHTML = `<span class='text-danger'>❌ Errore: ${e}</span>`;
+                                btnTickLog.disabled = false;
+                                btnTickLog.innerHTML = '<i class="fas fa-file-csv"></i> Genera signals_tick_log.csv';
+                            });
+                    });
+                }
 
-        // Tabella segnali non eseguiti
-        function refreshUnexecSignalsTable() {
-            const symbol = document.getElementById('unexecSymbol').value;
-            const maxRows = document.getElementById('unexecRows').value || 10;
-            fetch(`/api/unexecuted_signals?symbol=${encodeURIComponent(symbol)}&max_rows=${maxRows}`)
-              .then(r => r.json())
-              .then(data => {
+                // Tabella segnali non eseguiti
+                function refreshUnexecSignalsTable() {
+                    const symbol = document.getElementById('unexecSymbol').value;
+                    const maxRows = document.getElementById('unexecRows').value || 10;
+                    fetch(`/api/unexecuted_signals?symbol=${encodeURIComponent(symbol)}&max_rows=${maxRows}`)
+                        .then r => r.json())
+            .then(data => {
                 const tbody = document.querySelector('#unexecSignalsTable tbody');
                 tbody.innerHTML = '';
-                if(data.success && data.rows.length > 0) {
+                if (data.success && data.rows.length > 0) {
                     const blockFilter = document.getElementById('unexecBlockFilter').value;
                     let filteredRows = data.rows;
-                    if(blockFilter === 'blocked') {
+                    if (blockFilter === 'blocked') {
                         filteredRows = filteredRows.filter(row => (row.motivo_blocco || row.parametro_non_soddisfatto || row.dettagli_tecnici));
-                    } else if(blockFilter === 'noblock') {
+                    } else if (blockFilter === 'noblock') {
                         filteredRows = filteredRows.filter(row => !(row.motivo_blocco || row.parametro_non_soddisfatto || row.dettagli_tecnici));
                     }
-                    if(filteredRows.length > 0) {
+                    if (filteredRows.length > 0) {
                         filteredRows.forEach(row => {
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
@@ -705,13 +892,13 @@
                 } else {
                     tbody.innerHTML = `<tr><td colspan='7' class='text-center text-muted'>Nessun segnale non eseguito trovato. Genera prima il report incrociato.</td></tr>`;
                 }
-              });
-        }
+            });
+                }
         document.getElementById('refreshUnexecTable').addEventListener('click', refreshUnexecSignalsTable);
         document.getElementById('unexecBlockFilter').addEventListener('change', refreshUnexecSignalsTable);
         // Carica la tabella all'avvio
         refreshUnexecSignalsTable();
-    });
+            });
     </script>
     <script>
         // Forza il tema dark per tutti i grafici
@@ -727,7 +914,7 @@
                     document.getElementById(divId).innerHTML = '<div class="loading-spinner">Nessun dato disponibile per questo grafico.</div>';
                     return;
                 }
-                Plotly.newPlot(divId, chartData, chartLayout, {responsive: true});
+                Plotly.newPlot(divId, chartData, chartLayout, { responsive: true });
             } catch (e) {
                 document.getElementById(divId).innerHTML = '<div class="loading-spinner">Errore rendering grafico.</div>';
             }
@@ -760,7 +947,7 @@
         var dailyBreakdownLayout = applyDarkTheme(JSON.parse(`{% if daily_breakdown_chart is defined %}{{ daily_breakdown_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
         var dailyBreakdownData = JSON.parse(`{% if daily_breakdown_chart is defined %}{{ daily_breakdown_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('daily_breakdown_chart', dailyBreakdownData, dailyBreakdownLayout);
-        
+
         // Grafico RRR giornaliero
         var dailyRRRLayout = applyDarkTheme(JSON.parse(`{% if daily_rrr_chart is defined %}{{ daily_rrr_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
         var dailyRRRData = JSON.parse(`{% if daily_rrr_chart is defined %}{{ daily_rrr_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
@@ -770,7 +957,7 @@
         var weeklyBreakdownLayout = applyDarkTheme(JSON.parse(`{% if weekly_breakdown_chart is defined %}{{ weekly_breakdown_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
         var weeklyBreakdownData = JSON.parse(`{% if weekly_breakdown_chart is defined %}{{ weekly_breakdown_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);
         renderPlotlyChart('weekly_breakdown_chart', weeklyBreakdownData, weeklyBreakdownLayout);
-        
+
         // Grafico RRR settimanale
         var weeklyRRRLayout = applyDarkTheme(JSON.parse(`{% if weekly_rrr_chart is defined %}{{ weekly_rrr_chart.layout|tojson|safe }}{% else %}{{ {}|tojson|safe }}{% endif %}`));
         var weeklyRRRData = JSON.parse(`{% if weekly_rrr_chart is defined %}{{ weekly_rrr_chart.data|tojson|safe }}{% else %}{{ []|tojson|safe }}{% endif %}`);

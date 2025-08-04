@@ -1,84 +1,146 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Performance Metrics - Phoenix Quantum MonoFX</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='dark.css') }}">
     <style>
-        body { font-family: 'Montserrat', sans-serif; max-width: 900px; margin: 40px auto; color: #e0e0e0; }
-        .metric-card { background: #23272f; border-radius: 16px; padding: 18px; margin-bottom: 24px; box-shadow: 0 2px 12px #00ffe744; }
-        .metric-value { font-size: 2.1rem; font-weight: bold; color: #00ffe7; }
-        .metric-label { font-size: 1.1rem; color: #b0b0b0; margin-bottom: 5px; font-weight: 500; }
-        .optimal { color: #00bfff; font-size: 1rem; font-weight: 600; }
-        .desc { font-size: 0.98rem; color: #b0b0b0; margin-bottom: 10px; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            color: #e0e0e0;
+        }
+
+        .metric-card {
+            background: #23272f;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px #00ffe744;
+        }
+
+        .metric-value {
+            font-size: 2.1rem;
+            font-weight: bold;
+            color: #00ffe7;
+        }
+
+        .metric-label {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .optimal {
+            color: #00bfff;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .desc {
+            font-size: 0.98rem;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
+
 <body>
     <nav style="margin-bottom: 24px;">
         <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
-        <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
-        <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
+        <a href="/performance"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
+        <a href="/advanced_metrics"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
         <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
     </nav>
     <h2 style="color:#00ffe7;">Performance Metrics</h2>
     <div class="metric-card">
-        <div class="metric-label" title="Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.">P&L Totale</div>
+        <div class="metric-label"
+            title="Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.">P&L
+            Totale</div>
         <div class="metric-value">${{ metrics.total_pnl|round(2) }}</div>
         <div class="metric-label">Profitti Totali</div>
         <div class="metric-value profit-positive">${{ metrics.total_profit|round(2) }}</div>
         <div class="metric-label">Perdite Totali</div>
         <div class="metric-value profit-negative">${{ metrics.total_loss|round(2) }}</div>
         <div class="optimal">Ottimale: > $0 (profitto positivo)</div>
-        <div class="desc">Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.</div>
+        <div class="desc">Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.
+        </div>
     </div>
     <div class="metric-card">
-        <div class="metric-label" title="Percentuale di trade vincenti sul totale. Un win rate superiore al 55% è considerato buono per sistemi intraday.">Win Rate</div>
+        <div class="metric-label" title="Variazione percentuale del saldo rispetto al capitale iniziale.">Profit %</div>
+        <div class="metric-value">{{ metrics.profit_percentage|round(2) }}%</div>
+        <div class="optimal">Ottimale: > 0%</div>
+        <div class="desc">Variazione percentuale del saldo rispetto al capitale iniziale (5000).</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label"
+            title="Percentuale di trade vincenti sul totale. Un win rate superiore al 55% è considerato buono per sistemi intraday.">
+            Win Rate</div>
         <div class="metric-value">{{ metrics.win_rate|round(1) }}%</div>
         <div class="optimal">Ottimale: > 55%</div>
-        <div class="desc">Percentuale di trade vincenti sul totale. Un win rate superiore al 55% è considerato buono per sistemi intraday.</div>
+        <div class="desc">Percentuale di trade vincenti sul totale. Un win rate superiore al 55% è considerato buono per
+            sistemi intraday.</div>
     </div>
     <div class="metric-card">
-        <div class="metric-label" title="La massima perdita registrata rispetto al picco del capitale. Valori bassi indicano rischio contenuto.">Max Drawdown</div>
+        <div class="metric-label"
+            title="La massima perdita registrata rispetto al picco del capitale. Valori bassi indicano rischio contenuto.">
+            Max Drawdown</div>
         <div class="metric-value">{{ metrics.max_drawdown|round(2) }}%</div>
         <div class="optimal">Ottimale: < 10%</div>
-        <div class="desc">La massima perdita registrata rispetto al picco del capitale. Valori bassi indicano rischio contenuto.</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label" title="Rapporto tra profitti e perdite. Un valore superiore a 1.5 indica un sistema robusto.">Profit Factor</div>
-        <div class="metric-value">{{ metrics.profit_factor|round(2) }}</div>
-        <div class="optimal">Ottimale: > 1.5</div>
-        <div class="desc">Rapporto tra profitti e perdite. Un valore superiore a 1.5 indica un sistema robusto.</div>
-    </div>
-    <div style="margin-top:18px;">
-        <a href="/" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
-        <a href="/dashboard" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard completa</a>
-    </div>
+                <div class="desc">La massima perdita registrata rispetto al picco del capitale. Valori bassi indicano
+                    rischio contenuto.</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label"
+                title="Rapporto tra profitti e perdite. Un valore superiore a 1.5 indica un sistema robusto.">Profit
+                Factor</div>
+            <div class="metric-value">{{ metrics.profit_factor|round(2) }}</div>
+            <div class="optimal">Ottimale: > 1.5</div>
+            <div class="desc">Rapporto tra profitti e perdite. Un valore superiore a 1.5 indica un sistema robusto.
+            </div>
+        </div>
+        <div style="margin-top:18px;">
+            <a href="/" class="btn btn-primary"
+                style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
+            <a href="/dashboard" class="btn btn-info"
+                style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard
+                completa</a>
+        </div>
+        <form action="/update_mt5_orders" method="post" style="margin-bottom:18px;">
+            <button type="submit" class="btn btn-primary">Aggiorna ordini MT5</button>
+        </form>
 
-    <hr style="margin:32px 0; border-color:#00ffe7;">
-    <h3 style="color:#00bfff;">Grafici Performance</h3>
-    <div class="chart-container" style="margin-bottom:32px;">
-        <div id="pnl_chart"></div>
-        <div id="drawdown_chart" style="margin-top:32px;"></div>
-        <div id="balance_chart" style="margin-top:32px;"></div>
-        <div id="hourly_chart" style="margin-top:32px;"></div>
-        <div id="symbols_chart" style="margin-top:32px;"></div>
-    </div>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    {% set pnl_data = pnl_chart['data'] if pnl_chart and pnl_chart['data'] else [] %}
-    {% set pnl_layout = pnl_chart['layout'] if pnl_chart and pnl_chart['layout'] else {} %}
-    {% set drawdown_data = drawdown_chart['data'] if drawdown_chart and drawdown_chart['data'] else [] %}
-    {% set drawdown_layout = drawdown_chart['layout'] if drawdown_chart and drawdown_chart['layout'] else {} %}
-    {% set balance_data = balance_chart['data'] if balance_chart and balance_chart['data'] else [] %}
-    {% set balance_layout = balance_chart['layout'] if balance_chart and balance_chart['layout'] else {} %}
-    {% set hourly_data = hourly_chart['data'] if hourly_chart and hourly_chart['data'] else [] %}
-    {% set hourly_layout = hourly_chart['layout'] if hourly_chart and hourly_chart['layout'] else {} %}
-    {% set symbols_data = symbols_chart['data'] if symbols_chart and symbols_chart['data'] else [] %}
-    {% set symbols_layout = symbols_chart['layout'] if symbols_chart and symbols_chart['layout'] else {} %}
-    <script type="text/javascript">
-    Plotly.newPlot('pnl_chart', {{ pnl_data | tojson | safe }}, {{ pnl_layout | tojson | safe }});
-    Plotly.newPlot('drawdown_chart', {{ drawdown_data | tojson | safe }}, {{ drawdown_layout | tojson | safe }});
-    Plotly.newPlot('balance_chart', {{ balance_data | tojson | safe }}, {{ balance_layout | tojson | safe }});
-    Plotly.newPlot('hourly_chart', {{ hourly_data | tojson | safe }}, {{ hourly_layout | tojson | safe }});
-    Plotly.newPlot('symbols_chart', {{ symbols_data | tojson | safe }}, {{ symbols_layout | tojson | safe }});
-    </script>
+        <hr style="margin:32px 0; border-color:#00ffe7;">
+        <h3 style="color:#00bfff;">Grafici Performance</h3>
+        <div class="chart-container" style="margin-bottom:32px;">
+            <div id="pnl_chart"></div>
+            <div id="drawdown_chart" style="margin-top:32px;"></div>
+            <div id="balance_chart" style="margin-top:32px;"></div>
+            <div id="hourly_chart" style="margin-top:32px;"></div>
+            <div id="symbols_chart" style="margin-top:32px;"></div>
+        </div>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        {% set pnl_data = pnl_chart['data'] if pnl_chart and pnl_chart['data'] else [] %}
+        {% set pnl_layout = pnl_chart['layout'] if pnl_chart and pnl_chart['layout'] else {} %}
+        {% set drawdown_data = drawdown_chart['data'] if drawdown_chart and drawdown_chart['data'] else [] %}
+        {% set drawdown_layout = drawdown_chart['layout'] if drawdown_chart and drawdown_chart['layout'] else {} %}
+        {% set balance_data = balance_chart['data'] if balance_chart and balance_chart['data'] else [] %}
+        {% set balance_layout = balance_chart['layout'] if balance_chart and balance_chart['layout'] else {} %}
+        {% set hourly_data = hourly_chart['data'] if hourly_chart and hourly_chart['data'] else [] %}
+        {% set hourly_layout = hourly_chart['layout'] if hourly_chart and hourly_chart['layout'] else {} %}
+        {% set symbols_data = symbols_chart['data'] if symbols_chart and symbols_chart['data'] else [] %}
+        {% set symbols_layout = symbols_chart['layout'] if symbols_chart and symbols_chart['layout'] else {} %}
+        <script type="text/javascript">
+            Plotly.newPlot('pnl_chart', {{ pnl_data | tojson | safe }}, {{ pnl_layout | tojson | safe }});
+            Plotly.newPlot('drawdown_chart', {{ drawdown_data | tojson | safe }}, {{ drawdown_layout | tojson | safe }});
+            Plotly.newPlot('balance_chart', {{ balance_data | tojson | safe }}, {{ balance_layout | tojson | safe }});
+            Plotly.newPlot('hourly_chart', {{ hourly_data | tojson | safe }}, {{ hourly_layout | tojson | safe }});
+            Plotly.newPlot('symbols_chart', {{ symbols_data | tojson | safe }}, {{ symbols_layout | tojson | safe }});
+        </script>
 </body>
+
 </html>

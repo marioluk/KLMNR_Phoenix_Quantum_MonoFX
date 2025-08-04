@@ -1,4 +1,16 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
+import subprocess
+
+# ...esistente...
+
+## Blueprint Flask
+dashboard_bp = Blueprint('dashboard', __name__)
+
+# Route per aggiornare ordini MT5
+@dashboard_bp.route('/update_mt5_orders', methods=['POST'])
+def update_mt5_orders():
+    subprocess.run(['python', 'scripts/export_mt5_orders_to_csv.py'])
+    return redirect(request.referrer or url_for('dashboard.dashboard'))
 from .metrics import MetricsCalculator
 from .utils import deduplicate_pnl_history
 import os
@@ -79,11 +91,11 @@ def build_metrics():
     import csv
     import os
     if not orders:
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'archive', 'mt5_orders.csv')
+        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs', 'mt5_orders.csv')
         if os.path.exists(csv_path):
             print(f"[IMPORT ORDERS] Carico ordini da {csv_path}")
             with open(csv_path, encoding='utf-8') as f:
-                reader = csv.DictReader(f, delimiter='\t')
+                reader = csv.DictReader(f)
                 orders = [dict(row) for row in reader]
             print(f"[IMPORT ORDERS] {len(orders)} ordini importati")
     # Metriche base da account
@@ -217,6 +229,10 @@ def build_metrics():
         volatility = 0.0
     metrics['volatility'] = round(volatility, 2)
     print(f"DEBUG drawdown_recovery_time={metrics['drawdown_recovery_time']} min, max_drawdown={max_drawdown}, volatility={volatility}")
+    print(f"DEBUG saldo attuale (balance) = {metrics['balance']}")
+    print(f"DEBUG profit_percentage calcolato = {((metrics['balance'] - metrics['initial_balance']) / metrics['initial_balance'] * 100) if metrics['initial_balance'] else 0.0}")
+    # Calcolo e inserisco profit_percentage esplicito
+    metrics['profit_percentage'] = ((metrics['balance'] - metrics['initial_balance']) / metrics['initial_balance'] * 100) if metrics['initial_balance'] else 0.0
 
     # --- METRICHE AVANZATE ---
     import numpy as np
