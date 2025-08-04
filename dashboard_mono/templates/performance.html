@@ -23,6 +23,10 @@
     <div class="metric-card">
         <div class="metric-label" title="Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.">P&L Totale</div>
         <div class="metric-value">${{ metrics.total_pnl|round(2) }}</div>
+        <div class="metric-label">Profitti Totali</div>
+        <div class="metric-value profit-positive">${{ metrics.total_profit|round(2) }}</div>
+        <div class="metric-label">Perdite Totali</div>
+        <div class="metric-value profit-negative">${{ metrics.total_loss|round(2) }}</div>
         <div class="optimal">Ottimale: > $0 (profitto positivo)</div>
         <div class="desc">Profitto/perdita netta generata dal sistema. Valore positivo indica performance profittevole.</div>
     </div>
