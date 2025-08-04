@@ -41,7 +41,13 @@ echo - Click \"Refresh MT5\" button to update with latest data
 echo ==========================================
 
 REM Imposta PYTHONPATH alla root del progetto
-set PYTHONPATH=%CD%\..
+
+REM Vai alla root del progetto
+cd /d "%~dp0.."
+set PYTHONPATH=%CD%
+
+REM Torna nella cartella dashboard_mono
+cd dashboard_mono
 
 REM Avvia la dashboard e apri il browser
 start http://127.0.0.1:5000

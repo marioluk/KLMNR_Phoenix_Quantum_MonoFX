@@ -57,6 +57,7 @@ try:
     positions = mt5c.get_positions() or []
     orders = mt5c.get_orders() or []
 except Exception as e:
+    mt5c = None
     account_info = {}
     positions = []
     orders = []
