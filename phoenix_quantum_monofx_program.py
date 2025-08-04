@@ -1867,6 +1867,11 @@ class QuantumRiskManager:
             profit_multiplier = self._get_config(symbol, 'profit_multiplier', 2.2)
             profit_multiplier_source = 'profit_multiplier (override/symbol/global)'
 
+            # --- Fallback robusto per indici volatili ---
+            if symbol in ['SP500', 'NAS100']:
+                min_sl = max(float(min_sl), 400)
+                base_sl = max(float(base_sl), 600)
+                profit_multiplier = max(float(profit_multiplier), 2.0)
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
                 logger.error(f"Simbolo {symbol} non trovato")
