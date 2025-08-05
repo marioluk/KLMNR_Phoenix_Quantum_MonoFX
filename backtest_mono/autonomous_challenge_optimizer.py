@@ -32,6 +32,29 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class AutonomousHighStakesOptimizer:
+    def simulate_backtest_score(self, symbol, risk, trades, sl_pips, tp_pips, signal_th, days, spin_th):
+        """
+        Simula uno score di backtest per la combinazione di parametri fornita.
+        Usa una funzione pseudo-casuale basata su hash per garantire ripetibilità.
+        """
+        # Crea un seed unico per la combinazione di parametri
+        seed_str = f"{symbol}_{risk}_{trades}_{sl_pips}_{tp_pips}_{signal_th}_{days}_{spin_th}"
+        seed = int(hashlib.md5(seed_str.encode()).hexdigest()[:8], 16)
+        random.seed(seed)
+        # Simula lo score: base + bonus per parametri "coerenti" + rumore
+        base_score = 100 * risk + 10 * trades + 0.5 * tp_pips - 0.3 * sl_pips + 50 * signal_th + 30 * spin_th
+        noise = random.uniform(-15, 15)
+        score = base_score + noise
+        # Penalità se SL > TP (non sensato)
+        if sl_pips > tp_pips:
+            score -= 30
+        # Penalità se risk troppo alto
+        if risk > 0.012:
+            score -= 20
+        # Bonus se TP/SL ratio > 1.5
+        if tp_pips / max(sl_pips, 1) > 1.5:
+            score += 10
+        return max(score, 0)
     # =============================
     # PARAMETRI PRINCIPALI - DESCRIZIONE dettagliata
     # =============================
