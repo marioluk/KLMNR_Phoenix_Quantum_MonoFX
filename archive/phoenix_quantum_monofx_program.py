@@ -1,69 +1,3 @@
-    def main_tick_acquisition_loop(self):
-        """
-        Ciclo principale di acquisizione tick e popolamento buffer come nella versione archivio.
-        Per ogni simbolo, acquisisce il tick, chiama process_tick se valido, logga la dimensione del buffer.
-        """
-        global logger
-        if 'logger' not in globals() or logger is None:
-            from logging import getLogger
-            logger = getLogger("phoenix_quantum")
-        try:
-            symbol_list = list(self._config.get('symbols', {}).keys())
-            if not symbol_list:
-                logger.error("[MAIN_LOOP] Lista simboli vuota o non valida! Verifica configurazione.")
-                return
-            logger.info(f"[MAIN_LOOP] Simboli da monitorare: {symbol_list}")
-            for symbol in symbol_list:
-                tick = mt5.symbol_info_tick(symbol)
-                logger.debug(f"[DEBUG TICK] Symbol: {symbol} | Tick: {tick}")
-                if tick:
-                    logger.debug(f"[DEBUG TICK] Symbol: {symbol} | Tick.bid: {getattr(tick, 'bid', None)}")
-                    self.process_tick(symbol, tick.bid)
-                    buffer_size = len(self.get_tick_buffer(symbol))
-                    logger.debug(f"[BUFFER-DEBUG] Symbol: {symbol} | Buffer Size: {buffer_size}")
-        except Exception as e:
-            logger.error(f"[MAIN_LOOP] Errore generale nel ciclo tick: {e}", exc_info=True)
-    def main_tick_acquisition_loop(self):
-        """
-        Ciclo principale di acquisizione tick e popolamento buffer con diagnostica avanzata.
-        Logga dettagli su simboli, tick, chiamate a process_tick e stato buffer.
-        """
-        global logger
-        if 'logger' not in globals() or logger is None:
-            from logging import getLogger
-            logger = getLogger("phoenix_quantum")
-        try:
-            symbol_list = list(self._config.get('symbols', {}).keys())
-            if not symbol_list:
-                logger.error("[MAIN_LOOP] Lista simboli vuota o non valida! Verifica configurazione.")
-                return
-            logger.info(f"[MAIN_LOOP] Simboli da monitorare: {symbol_list}")
-            for symbol in symbol_list:
-                tick = None
-                try:
-                    tick = mt5.symbol_info_tick(symbol)
-                except Exception as e:
-                    logger.error(f"[MAIN_LOOP] Errore acquisizione tick per {symbol}: {e}")
-                if not tick:
-                    logger.warning(f"[MAIN_LOOP] Nessun tick disponibile per {symbol}. Verifica feed dati e connessione MT5.")
-                    continue
-                if getattr(tick, 'bid', 0) <= 0:
-                    logger.warning(f"[MAIN_LOOP] Tick non valido per {symbol}: bid={getattr(tick, 'bid', None)}")
-                    continue
-                logger.debug(f"[MAIN_LOOP] Tick ricevuto per {symbol}: bid={tick.bid}, ask={tick.ask}")
-                try:
-                    self.process_tick(symbol, tick.bid)
-                    buf = self.get_tick_buffer(symbol)
-                    logger.debug(f"[MAIN_LOOP] Buffer {symbol} dopo process_tick: size={len(buf)}, ultimo prezzo={buf[-1]['price'] if buf else 'N/A'}")
-                except Exception as e:
-                    logger.error(f"[MAIN_LOOP] Errore in process_tick per {symbol}: {e}", exc_info=True)
-            # Diagnostica finale: verifica se almeno un buffer è popolato
-            buffer_status = {s: len(self.get_tick_buffer(s)) for s in symbol_list}
-            logger.info(f"[MAIN_LOOP] Stato buffer tick: {buffer_status}")
-            if all(sz == 0 for sz in buffer_status.values()):
-                logger.warning("[MAIN_LOOP] Tutti i buffer tick sono vuoti dopo il ciclo. Possibili cause: feed dati assente, simboli errati, logica process_tick, mercato chiuso.")
-        except Exception as e:
-            logger.error(f"[MAIN_LOOP] Errore generale nel ciclo tick: {e}", exc_info=True)
 
 import os
 import csv
@@ -1386,15 +1320,9 @@ class QuantumEngine:
                 if len(ticks) >= self.min_spin_samples:
                     deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
                     entropy = self.calculate_entropy(deltas)
-                    if len(ticks) == 0:
-                        spin = 0
-                        confidence = 0.0
-                        volatility = 1.0
-                        logger.warning(f"[BUFFER EMPTY] {symbol}: buffer tick vuoto - nessuna metrica calcolata, nessun segnale generabile. Possibili cause: feed dati assente, connessione MT5, mercato chiuso o errore precedente. Verifica log errori e stato connessione.")
-                    else:
-                        spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
-                        confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
-                        volatility = 1 + abs(spin) * entropy
+                    spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
+                    confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
+                    volatility = 1 + abs(spin) * entropy
                 else:
                     entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
                 state = {
