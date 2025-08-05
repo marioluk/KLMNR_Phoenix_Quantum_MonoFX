@@ -1324,6 +1324,7 @@ class QuantumEngine:
                         spin = 0
                         confidence = 0.0
                         volatility = 1.0
+                        logger.warning(f"[BUFFER EMPTY] {symbol}: buffer tick vuoto - nessuna metrica calcolata, nessun segnale generabile. Possibili cause: feed dati assente, connessione MT5, mercato chiuso o errore precedente. Verifica log errori e stato connessione.")
                     else:
                         spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
                         confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
