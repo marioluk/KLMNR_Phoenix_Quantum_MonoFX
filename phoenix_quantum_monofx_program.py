@@ -1,3 +1,5 @@
+class QuantumEngine:
+    # ...existing code...
     def main_tick_acquisition_loop(self):
         """
         Ciclo principale di acquisizione tick e popolamento buffer come nella versione archivio.
