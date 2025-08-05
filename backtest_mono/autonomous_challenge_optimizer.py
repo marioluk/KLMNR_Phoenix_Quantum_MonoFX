@@ -702,11 +702,9 @@ class AutonomousHighStakesOptimizer:
         }
         return optimized_params
 
-    def select_optimal_symbols(self, aggressiveness: str) -> list:
+    def select_optimal_symbols(self, aggressiveness: str, mode: str = "intraday") -> list:
         symbol_scores = {}
         for symbol in self.available_symbols:
-            # Usa la modalità corrente per i range
-            mode = getattr(self, 'mode', 'intraday') if hasattr(self, 'mode') else 'intraday'
             params = self.run_parameter_optimization(symbol, 14, mode)
             symbol_scores[symbol] = params['score']
         sorted_symbols = sorted(symbol_scores.items(), key=lambda x: x[1], reverse=True)
@@ -753,7 +751,7 @@ class AutonomousHighStakesOptimizer:
         config['risk_parameters']['max_daily_trades'] = 4 if aggressiveness == "conservative" else (6 if aggressiveness == "moderate" else 8)
         config['risk_parameters']['max_concurrent_trades'] = 2 if aggressiveness == "conservative" else (3 if aggressiveness == "moderate" else 4)
         # Seleziona simboli ottimali per aggressività
-        optimal_symbols = self.select_optimal_symbols(aggressiveness)
+        optimal_symbols = self.select_optimal_symbols(aggressiveness, mode)
         optimized_symbols = {}
         total_score = 0
         spin_thresholds = []
@@ -926,4 +924,8 @@ def main():
         except Exception as e:
             print(f"[ERRORE] Input non valido o errore runtime: {e}")
             continue
+
+# Avvio script se eseguito direttamente
+if __name__ == "__main__":
+    main()
             
