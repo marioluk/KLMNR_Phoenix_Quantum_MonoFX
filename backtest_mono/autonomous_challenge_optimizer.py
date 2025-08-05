@@ -926,6 +926,4 @@ def main():
         except Exception as e:
             print(f"[ERRORE] Input non valido o errore runtime: {e}")
             continue
-            except Exception as e:
-                print(f"[ERRORE] Input non valido o errore runtime: {e}")
-                continue
+            
