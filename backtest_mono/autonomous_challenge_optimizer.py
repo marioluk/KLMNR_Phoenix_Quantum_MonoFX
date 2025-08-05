@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple, Optional, Any
 import os
 import logging
 import logging
+import hashlib
 
 # =============================================================
 # CORRELAZIONE TRA TIPOLOGIA DI TRADING E PARAMETRI SL/TP/TS
