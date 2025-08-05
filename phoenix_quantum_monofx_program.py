@@ -3226,10 +3226,9 @@ class QuantumTradingSystem:
                 if not self._validate_tick(tick):
                     continue
 
-                # Inserisci il tick nel buffer della QuantumEngine
                 if hasattr(self, 'engine') and hasattr(self.engine, 'process_tick'):
-                    # Usa il prezzo medio tra bid e ask se disponibile, altrimenti bid
-                    pass  # <-- Added to fix IndentationError
+                    price = (tick.bid + tick.ask) / 2 if tick.bid and tick.ask else tick.bid
+                    self.engine.process_tick(symbol, price)
 
                 self._process_single_symbol(symbol, tick, current_positions)
 
