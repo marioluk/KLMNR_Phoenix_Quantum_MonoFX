@@ -1128,6 +1128,8 @@ class QuantumEngine:
         if 'logger' not in globals() or logger is None:
             from logging import getLogger
             logger = getLogger("phoenix_quantum")
+        # Log di debug per tracciare ogni chiamata
+        logger.debug(f"[DEBUG-TRACE] process_tick chiamato per {symbol} con price={price}")
         """
         Aggiunge un nuovo tick al buffer circolare e calcola delta/direzione rispetto al tick precedente.
 
