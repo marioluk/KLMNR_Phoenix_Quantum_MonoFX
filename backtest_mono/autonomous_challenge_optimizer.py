@@ -861,14 +861,14 @@ def main():
 
 
     while True:
-        print("\n📋 OPZIONI DISPONIBILI:")
-        print("1. 🚀 Genera tutte le configurazioni da zero")
-        print("2. 🎯 Genera singola configurazione")
-        print("3. ❌ Esci")
-
-        choice = input("\n👉 Scegli opzione (1-3): ").strip()
-
         try:
+            print("\n📋 OPZIONI DISPONIBILI:")
+            print("1. 🚀 Genera tutte le configurazioni da zero")
+            print("2. 🎯 Genera singola configurazione")
+            print("3. ❌ Esci")
+
+            choice = input("\n👉 Scegli opzione (1-3): ").strip()
+
             if choice == "1":
                 while True:
                     print("\n⚡ Tipologie disponibili:")
@@ -922,4 +922,10 @@ def main():
                     print("2. 🟡 Moderate")
                     print("3. 🔴 Aggressive")
                     print("4. 🔙 Torna al menu principale")
-                    level_choice = input("👉 Scegli (1-4): "
+                    level_choice = input("👉 Scegli (1-4): ")
+        except Exception as e:
+            print(f"[ERRORE] Input non valido o errore runtime: {e}")
+            continue
+            except Exception as e:
+                print(f"[ERRORE] Input non valido o errore runtime: {e}")
+                continue
