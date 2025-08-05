@@ -1320,12 +1320,14 @@ class QuantumEngine:
                 if len(ticks) >= self.min_spin_samples:
                     deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
                     entropy = self.calculate_entropy(deltas)
-    if len(ticks) == 0:
-        spin = 0  # oppure None, oppure return direttamente
-    else:
-        spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
-                    confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
-                    volatility = 1 + abs(spin) * entropy
+                    if len(ticks) == 0:
+                        spin = 0
+                        confidence = 0.0
+                        volatility = 1.0
+                    else:
+                        spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
+                        confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
+                        volatility = 1 + abs(spin) * entropy
                 else:
                     entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
                 state = {
