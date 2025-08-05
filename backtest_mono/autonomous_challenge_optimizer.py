@@ -135,8 +135,8 @@ class AutonomousHighStakesOptimizer:
                     "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
                     "max_daily_trades": [1, 2, 3],
                     "max_concurrent_trades": [1, 2],
-                    "stop_loss_pips": [800, 1000, 1200, 1600],
-                    "take_profit_pips": [1600, 2000, 2400, 3200],
+                    "stop_loss_pips": [400, 600, 800, 1200],
+                    "take_profit_pips": [800, 1200, 1600, 2400],
                     "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
                     "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
                     "volatility_filter": [0.70, 0.75, 0.80, 0.85],
@@ -160,6 +160,10 @@ class AutonomousHighStakesOptimizer:
             "scalping": {
                 "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
                 "max_daily_trades": [20, 30, 40, 60, 80, 100],
+                "buffer_size": [1500, 2000, 2500, 3000, 4000],
+                "spin_window": [100, 150, 200, 250, 300],
+                "min_spin_samples": [20, 30, 40, 50, 60],
+                "signal_cooldown": [1800, 2400, 3600, 5400, 7200],
                 "max_concurrent_trades": [2, 3, 4],
                 "stop_loss_pips": [6, 8, 10, 12, 15],
                 "take_profit_pips": [10, 12, 15, 18, 20, 25],
@@ -171,6 +175,10 @@ class AutonomousHighStakesOptimizer:
             "intraday": {
                 "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
                 "max_daily_trades": [5, 6, 8, 10, 12, 15, 20],
+                "buffer_size": [3000, 4000, 5000, 6000],
+                "spin_window": [200, 300, 400, 500],
+                "min_spin_samples": [40, 50, 60, 80, 100],
+                "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
                 "max_concurrent_trades": [2, 3, 4],
                 "stop_loss_pips": [15, 18, 20, 25, 30],
                 "take_profit_pips": [30, 35, 40, 50, 60],
@@ -640,8 +648,8 @@ class AutonomousHighStakesOptimizer:
         validation_ranges = {
             'scalping': {'stop_loss_pips': (6, 12), 'take_profit_pips': (10, 20)},
             'intraday': {'stop_loss_pips': (15, 35), 'take_profit_pips': (30, 70)},
-            'swing': {'stop_loss_pips': (50, 120), 'take_profit_pips': (100, 250)},
-            'position': {'stop_loss_pips': (150, 400), 'take_profit_pips': (300, 800)}
+            'swing': {'stop_loss_pips': (50, 400), 'take_profit_pips': (100, 1200)},
+            'position': {'stop_loss_pips': (150, 1600), 'take_profit_pips': (300, 3200)}
         }
         sl_min, sl_max = validation_ranges.get(mode, validation_ranges['intraday'])['stop_loss_pips']
         tp_min, tp_max = validation_ranges.get(mode, validation_ranges['intraday'])['take_profit_pips']
@@ -726,10 +734,56 @@ class AutonomousHighStakesOptimizer:
         config['risk_parameters']['position_cooldown'] = params['position_cooldown']
         config['risk_parameters']['stop_loss_pips'] = params['stop_loss_pips']
         config['risk_parameters']['take_profit_pips'] = params['take_profit_pips']
-        config['quantum_params']['buffer_size'] = params['buffer_size']
-        config['quantum_params']['spin_window'] = params['spin_window']
-        config['quantum_params']['min_spin_samples'] = params['min_spin_samples']
-        config['quantum_params']['signal_cooldown'] = params['signal_cooldown']
+        # Seleziona simboli ottimali per aggressività
+        optimal_symbols = self.select_optimal_symbols(aggressiveness, mode)
+        optimized_symbols = {}
+        total_score = 0
+        spin_thresholds = []
+        # Inizializza le mappe globali ottimizzate
+        min_sl_distance_pips_optimized = {}
+        base_sl_pips_optimized = {}
+        take_profit_pips_optimized = {}
+        # Validazione parametri dei singoli simboli
+        for symbol in optimal_symbols:
+            symbol_params = self.optimize_symbol_parameters(symbol, aggressiveness, mode)
+            symbol_warnings = self.validate_trading_params(symbol_params, mode, log_file=log_file)
+            if symbol_warnings:
+                print(f"[VALIDAZIONE PARAMETRI - {mode.upper()}][{symbol}] WARNING:")
+                for w in symbol_warnings:
+                    print(f"  - {w}")
+                print(f"[VALIDAZIONE PARAMETRI] Log scritto su: {log_file}")
+                print(f"❌ Configurazione BLOCCATA: parametri simbolo '{symbol}' fuori range.")
+                all_warnings.extend([f"{symbol}: {w}" for w in symbol_warnings])
+            # Normalizza spin_threshold tra 0.15 e 1.0
+            st = symbol_params.get('spin_threshold', 0.25)
+            st = max(0.15, min(float(st), 1.0))
+            symbol_params['spin_threshold'] = st
+            if 'quantum_params_override' not in symbol_params:
+                symbol_params['quantum_params_override'] = {}
+            symbol_params['quantum_params_override']['spin_threshold'] = st
+            spin_thresholds.append(st)
+            optimized_symbols[symbol] = symbol_params
+            total_score += symbol_params['optimization_score']
+            # Popola le mappe globali DURANTE il ciclo
+            sl_val = symbol_params['risk_management']['stop_loss_pips']
+            tp_val = symbol_params['risk_management']['take_profit_pips']
+            min_sl_distance_pips_optimized[symbol] = sl_val
+            base_sl_pips_optimized[symbol] = sl_val
+            take_profit_pips_optimized[symbol] = tp_val
+
+        # Assegna quantum_params globali dai valori ottimizzati del primo simbolo
+        if optimal_symbols:
+            first_symbol = optimal_symbols[0]
+            first_params = optimized_symbols[first_symbol]
+            config['quantum_params']['buffer_size'] = first_params.get('quantum_params_override', {}).get('buffer_size', first_params.get('buffer_size', 0))
+            config['quantum_params']['spin_window'] = first_params.get('quantum_params_override', {}).get('spin_window', first_params.get('spin_window', 0))
+            config['quantum_params']['min_spin_samples'] = first_params.get('quantum_params_override', {}).get('min_spin_samples', first_params.get('min_spin_samples', 0))
+            config['quantum_params']['signal_cooldown'] = first_params.get('quantum_params_override', {}).get('signal_cooldown', first_params.get('signal_cooldown', 0))
+        else:
+            config['quantum_params']['buffer_size'] = params.get('buffer_size', 0)
+            config['quantum_params']['spin_window'] = params.get('spin_window', 0)
+            config['quantum_params']['min_spin_samples'] = params.get('min_spin_samples', 0)
+            config['quantum_params']['signal_cooldown'] = params.get('signal_cooldown', 0)
         # Applica override aggressività
         config['risk_parameters']['risk_percent'] = 0.005 if aggressiveness == "conservative" else (0.007 if aggressiveness == "moderate" else 0.009)
         config['risk_parameters']['max_daily_trades'] = 4 if aggressiveness == "conservative" else (6 if aggressiveness == "moderate" else 8)
