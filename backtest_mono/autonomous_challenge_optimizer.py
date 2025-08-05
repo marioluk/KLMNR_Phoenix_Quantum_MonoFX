@@ -650,6 +650,23 @@ class AutonomousHighStakesOptimizer:
         }
         return optimized_params
 
+    def select_optimal_symbols(self, aggressiveness: str) -> list:
+        symbol_scores = {}
+        for symbol in self.available_symbols:
+            # Usa la modalità corrente per i range
+            mode = getattr(self, 'mode', 'intraday') if hasattr(self, 'mode') else 'intraday'
+            params = self.run_parameter_optimization(symbol, 14, mode)
+            symbol_scores[symbol] = params['score']
+        sorted_symbols = sorted(symbol_scores.items(), key=lambda x: x[1], reverse=True)
+        symbol_counts = {
+            'conservative': 4,
+            'moderate': 5,
+            'aggressive': 6
+        }
+        count = symbol_counts.get(aggressiveness, 5)
+        selected = [symbol for symbol, score in sorted_symbols[:count]]
+        return selected
+
     def generate_optimized_config_for_mode(self, aggressiveness: str, mode: str) -> Dict:
         # Ottieni parametri tipologia trading
         params = self.get_trading_mode_params(mode)
