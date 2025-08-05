@@ -458,6 +458,28 @@ def main():
         #print("[LOG TEST] Handler:", h, "Level:", h.level)
     #print("[DEBUG] Fine main() - setup completato")
 
+    # --- Avvio thread per acquisizione tick e popolamento buffer ---
+    try:
+        # Inizializza QuantumEngine con la configurazione attuale
+        config_obj = globals().get('_GLOBAL_CONFIG', None)
+        if config_obj is not None:
+            conf = getattr(config_obj, 'config', config_obj)
+        else:
+            conf = {}
+        engine = QuantumEngine(conf)
+        def tick_acquisition_worker():
+            logger.info("[THREAD] Avvio thread acquisizione tick QuantumEngine ogni 1s.")
+            while True:
+                try:
+                    engine.main_tick_acquisition_loop()
+                except Exception as e:
+                    logger.error(f"[THREAD] Errore nel ciclo acquisizione tick: {e}", exc_info=True)
+                time.sleep(1)
+        tick_thread = threading.Thread(target=tick_acquisition_worker, daemon=True)
+        tick_thread.start()
+    except Exception as e:
+        logger.critical(f"[MAIN] Errore avvio thread acquisizione tick: {e}", exc_info=True)
+
 
 
 # --- Esegui solo se eseguito come script principale ---
