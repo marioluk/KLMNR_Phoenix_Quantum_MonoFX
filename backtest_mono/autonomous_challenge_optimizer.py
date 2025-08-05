@@ -528,9 +528,9 @@ class AutonomousHighStakesOptimizer:
                 "max_global_exposure": 50000.0,
                 "daily_trade_limit_mode": "global",
                 "max_spread": {
-                    "USDJPY": 10,
-                    "EURUSD": 12,
-                    "USDCHF": 15,
+                    "USDJPY": 15,
+                    "EURUSD": 15,
+                    "USDCHF": 18,
                     "NAS100": 180,
                     "SP500": 60,
                     "BTCUSD": 800,
