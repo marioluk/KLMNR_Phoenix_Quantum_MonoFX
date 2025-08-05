@@ -532,7 +532,16 @@ class AutonomousHighStakesOptimizer:
                     "EURUSD": 12,
                     "USDCHF": 15,
                     "NAS100": 180,
-                    "SP500": 60
+                    "SP500": 60,
+                    "BTCUSD": 800,
+                    "ETHUSD": 400,
+                    "XAUUSD": 80,
+                    "XAGUSD": 20,
+                    "US30": 50,
+                    "DAX40": 30,
+                    "FTSE100": 30,
+                    "JP225": 40,
+                    "default": 20
                 }
             },
             "symbols": {},
