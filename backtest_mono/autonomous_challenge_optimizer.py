@@ -833,6 +833,27 @@ class AutonomousHighStakesOptimizer:
         self.verify_sl_tp_consistency(config, mode=mode, log_file=log_file)
         return config
 
+    def optimize_trading_hours(self, symbol: str, score: float) -> dict:
+        """
+        Restituisce una finestra oraria di trading ottimizzata per il simbolo.
+        Per ora restituisce le sessioni principali attive in base allo score.
+        """
+        # Logica semplificata: se score > 100, abilita tutte le sessioni; altrimenti solo London/NewYork
+        if score > 100:
+            return {
+                "london": {"start": "08:00", "end": "17:00", "enabled": True},
+                "newyork": {"start": "13:00", "end": "22:00", "enabled": True},
+                "tokyo": {"start": "00:00", "end": "09:00", "enabled": True},
+                "sydney": {"start": "22:00", "end": "07:00", "enabled": True}
+            }
+        else:
+            return {
+                "london": {"start": "08:00", "end": "17:00", "enabled": True},
+                "newyork": {"start": "13:00", "end": "22:00", "enabled": True},
+                "tokyo": {"start": "00:00", "end": "09:00", "enabled": False},
+                "sydney": {"start": "22:00", "end": "07:00", "enabled": False}
+            }
+
 def main():
     print("🎯 AUTONOMOUS HIGH STAKES OPTIMIZER")
     print("Genera configurazioni ottimizzate DA ZERO senza JSON sorgente")
@@ -901,39 +922,4 @@ def main():
                     print("2. 🟡 Moderate")
                     print("3. 🔴 Aggressive")
                     print("4. 🔙 Torna al menu principale")
-                    level_choice = input("👉 Scegli (1-4): ").strip()
-                    aggressiveness_map = {
-                        "1": "conservative",
-                        "2": "moderate",
-                        "3": "aggressive"
-                    }
-                    if level_choice == "4":
-                        break
-                    aggressiveness = aggressiveness_map.get(level_choice, None)
-                    if not aggressiveness:
-                        print("❌ Scelta non valida, riprova.")
-                        continue
-                    optimizer = AutonomousHighStakesOptimizer()
-                    config = optimizer.generate_optimized_config(aggressiveness)
-                    print(f"\n📊 Parametri principali per '{aggressiveness.upper()}':")
-                    print(f"  risk_percent: {config['risk_parameters']['risk_percent']}")
-                    print(f"  max_daily_trades: {config['risk_parameters']['max_daily_trades']}")
-                    print(f"  max_concurrent_trades: {config['risk_parameters']['max_concurrent_trades']}")
-                    conferma = input("\n✅ Confermi la selezione e vuoi generare la configurazione? (s/n): ").strip().lower()
-                    if conferma != "s":
-                        print("🔙 Selezione annullata. Torna al menu aggressività.")
-                        continue
-                    filepath = optimizer.save_config(config, aggressiveness)
-                    print(f"✅ Configurazione {aggressiveness} generata e salvata: {os.path.basename(filepath)}")
-                    break
-            elif choice == "3":
-                print("Uscita dal programma.")
-                break
-            else:
-                print("❌ Scelta non valida, riprova")
-        except Exception as e:
-            logger.error(f"❌ Errore: {e}")
-            print(f"❌ Errore: {e}")
-
-if __name__ == "__main__":
-    main()
+                    level_choice = input("👉 Scegli (1-4): "
