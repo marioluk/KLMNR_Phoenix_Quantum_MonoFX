@@ -55,6 +55,33 @@ class AutonomousHighStakesOptimizer:
         if tp_pips / max(sl_pips, 1) > 1.5:
             score += 10
         return max(score, 0)
+
+    def get_symbol_max_spread(self, symbol: str) -> float:
+        """
+        Restituisce lo spread massimo consentito per il simbolo specificato.
+        Valori predefiniti per i principali asset.
+        """
+        spread_map = {
+            'EURUSD': 1.2,
+            'USDJPY': 1.5,
+            'GBPUSD': 1.8,
+            'USDCHF': 1.6,
+            'AUDUSD': 1.7,
+            'USDCAD': 1.9,
+            'NZDUSD': 2.0,
+            'BTCUSD': 80.0,
+            'ETHUSD': 40.0,
+            'XAUUSD': 25.0,
+            'XAGUSD': 8.0,
+            'SP500': 2.5,
+            'NAS100': 3.0,
+            'US30': 4.0,
+            'DAX40': 2.8,
+            'FTSE100': 2.2,
+            'JP225': 5.0
+        }
+        return spread_map.get(symbol, 2.0)
+
     # =============================
     # PARAMETRI PRINCIPALI - DESCRIZIONE dettagliata
     # =============================
