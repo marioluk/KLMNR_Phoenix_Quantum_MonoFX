@@ -347,7 +347,23 @@ class ConfigManager:
 
 ## --- Tutte le funzioni e classi rimangono qui ---
 
-# --- Avvio sistema solo se eseguito come script principale ---
+###############################################################
+# --- CLASSI CORE DEL SISTEMA (spostate sopra il main) ---
+###############################################################
+
+""" 
+2- QuantumEngine - Il motore principale che elabora i tick di mercato e genera segnali di trading 
+basati sull'entropia e stati quantistici. Dipende dalla configurazione.
+"""
+
+
+class QuantumEngine:
+    def __init__(self, config):
+        # ...existing code...
+        self.last_confidence = None  # Per debug/report
+    # ...tutta la definizione della classe QuantumEngine qui...
+
+# ...existing code...
 
 # --- Avvio sistema solo se eseguito come script principale ---
 def main():
