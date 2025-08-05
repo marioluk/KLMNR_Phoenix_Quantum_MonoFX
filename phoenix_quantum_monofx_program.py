@@ -1226,6 +1226,8 @@ class QuantumEngine:
             })
             # Usa sempre il getter anche per il debug
             logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.get_tick_buffer(symbol))}")
+            if len(self.get_tick_buffer(symbol)) == 0:
+                logger.warning(f"[process_tick] Buffer vuoto dopo inserimento per {symbol}. Possibili cause: errore logica, race condition, simbolo non inizializzato.")
         except Exception as e:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
 
@@ -2634,10 +2636,16 @@ class QuantumTradingSystem:
         while self.running:
             try:
                 # Verifica connessione MT5
-                if not mt5.terminal_info().connected:
-                    logger.error("Connessione MT5 persa!")
-                    self._safe_sleep(5)
-                    continue
+                if not mt5.terminal_info() or not mt5.terminal_info().connected:
+                    logger.warning("Connessione MT5 persa, tentativo di riconnessione...")
+                    if self._verify_connection():
+                        logger.info("Riconnessione MT5 riuscita.")
+                    else:
+                        logger.error("Riconnessione MT5 fallita. Attendo 5 secondi e riprovo.")
+                        self._safe_sleep(5)
+                        continue
+                else:
+                    logger.debug("Connessione MT5 OK")
                 current_time = time.time()
                 # Controlli periodici
                 if current_time - self.last_connection_check > 30:  # Check più frequente
