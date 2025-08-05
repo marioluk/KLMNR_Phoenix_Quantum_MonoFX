@@ -886,7 +886,7 @@ class AutonomousHighStakesOptimizer:
         """
         Restituisce una finestra oraria di trading ottimizzata per il simbolo.
         Per ora restituisce le sessioni principali attive in base allo score.
-        """
+        """                         
         # Logica semplificata: se score > 100, abilita tutte le sessioni; altrimenti solo London/NewYork
         if score > 100:
             return {
