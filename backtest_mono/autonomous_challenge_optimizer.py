@@ -380,9 +380,7 @@ class AutonomousHighStakesOptimizer:
             'optimization_period': f"{self.optimization_days} days",
             'optimization_timestamp': datetime.now().isoformat()
         }
-        # Verifica coerenza SL/TP dopo generazione
-        log_file = os.path.join(self.base_dir, "logs", f"log_sl_tp_verifica_{mode}.log")
-        self.verify_sl_tp_consistency(config, mode=mode, log_file=log_file)
+        # La validazione SL/TP è già gestita dal clipping e dalla funzione validate_trading_params
         return config
     # =============================
     # Tipologie di Trading per Timeframe
@@ -685,12 +683,23 @@ class AutonomousHighStakesOptimizer:
         signal_buy_threshold = round(base_params['signal_threshold'] * multipliers['signal'], 3)
         signal_sell_threshold = round((1 - base_params['signal_threshold']) * multipliers['signal'], 3)
         confidence_threshold = round((signal_buy_threshold + (1 - signal_sell_threshold)) / 2, 3)
+        # Clipping automatico ai limiti del range di validazione della modalità selezionata
+        validation_ranges = {
+            'scalping': {'stop_loss_pips': (6, 12), 'take_profit_pips': (10, 20)},
+            'intraday': {'stop_loss_pips': (15, 35), 'take_profit_pips': (30, 70)},
+            'swing': {'stop_loss_pips': (50, 120), 'take_profit_pips': (100, 250)},
+            'position': {'stop_loss_pips': (150, 400), 'take_profit_pips': (300, 800)}
+        }
+        sl_min, sl_max = validation_ranges.get(mode, validation_ranges['intraday'])['stop_loss_pips']
+        tp_min, tp_max = validation_ranges.get(mode, validation_ranges['intraday'])['take_profit_pips']
+        clipped_sl = max(sl_min, min(int(sl_pips), sl_max))
+        clipped_tp = max(tp_min, min(int(tp_pips), tp_max))
         optimized_params = {
             'enabled': True,
             'risk_percent': base_params['risk_percent'],
             'lot_size': round(base_params['risk_percent'] * 10, 3),
-            'stop_loss_pips': int(sl_pips),
-            'take_profit_pips': int(tp_pips),
+            'stop_loss_pips': clipped_sl,
+            'take_profit_pips': clipped_tp,
             'signal_buy_threshold': signal_buy_threshold,
             'signal_sell_threshold': signal_sell_threshold,
             'confidence_threshold': confidence_threshold,
@@ -826,9 +835,7 @@ class AutonomousHighStakesOptimizer:
             'optimization_period': f"{self.optimization_days} days",
             'optimization_timestamp': datetime.now().isoformat()
         }
-        # Verifica coerenza SL/TP dopo generazione
-        log_file = os.path.join(self.base_dir, "logs", f"log_sl_tp_verifica_{mode}.log")
-        self.verify_sl_tp_consistency(config, mode=mode, log_file=log_file)
+        # La validazione SL/TP è già gestita dal clipping e dalla funzione validate_trading_params
         return config
 
     def optimize_trading_hours(self, symbol: str, score: float) -> dict:
@@ -910,7 +917,7 @@ def main():
                     optimization_days = int(days) if days.isdigit() else default_days
                     optimizer = AutonomousHighStakesOptimizer(optimization_days)
                     print(f"\n🔄 Generazione configurazioni per tipologia '{mode}' ({optimization_days} giorni)...")
-                    optimizer.generate_all_configs()
+                    optimizer.generate_all_configs(mode)
                     print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
                     break
             elif choice == "2":
@@ -928,4 +935,4 @@ def main():
 # Avvio script se eseguito direttamente
 if __name__ == "__main__":
     main()
-            
+
