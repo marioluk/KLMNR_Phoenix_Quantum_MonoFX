@@ -202,8 +202,18 @@ def auto_correct_symbols(config):
     return config
 
 def validate_config(config):
-    """Stub temporaneo: non fa nulla, da implementare."""
-    pass
+    """Validazione minima: assicura che la chiave 'symbols' sia presente e non vuota."""
+    global logger
+    if 'logger' not in globals() or logger is None:
+        from logging import getLogger
+        logger = getLogger("phoenix_quantum")
+    if not isinstance(config, dict):
+        logger.error("[validate_config] Configurazione non è un dict!")
+        raise ValueError("Configurazione non valida: non è un dict")
+    if 'symbols' not in config or not isinstance(config['symbols'], dict) or not config['symbols']:
+        logger.error("[validate_config] Configurazione priva di simboli validi!")
+        raise ValueError("Configurazione non valida: chiave 'symbols' mancante o vuota")
+    logger.info(f"[validate_config] Simboli validati: {list(config['symbols'].keys())}")
 
 
 
