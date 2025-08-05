@@ -1,101 +1,168 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Metriche Avanzate - Phoenix Quantum MonoFX</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='dark.css') }}">
     <style>
-        body { font-family: 'Montserrat', sans-serif; max-width: 900px; margin: 40px auto; color: #e0e0e0; }
-        .metric-card { background: #23272f; border-radius: 16px; padding: 18px; margin-bottom: 24px; box-shadow: 0 2px 12px #00ffe744; }
-        .metric-value { font-size: 2.1rem; font-weight: bold; color: #00ffe7; }
-        .metric-label { font-size: 1.1rem; color: #b0b0b0; margin-bottom: 5px; font-weight: 500; }
-        .optimal { color: #00bfff; font-size: 1rem; font-weight: 600; }
-        .desc { font-size: 0.98rem; color: #b0b0b0; margin-bottom: 10px; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            color: #e0e0e0;
+        }
+
+        .metric-card {
+            background: #23272f;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px #00ffe744;
+        }
+
+        .metric-value {
+            font-size: 2.1rem;
+            font-weight: bold;
+            color: #00ffe7;
+        }
+
+        .metric-label {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .optimal {
+            color: #00bfff;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .desc {
+            font-size: 0.98rem;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
+
 <body>
     <nav style="margin-bottom: 24px;">
         <a href="/dashboard" style="color:#00ffe7; margin-right:18px; text-decoration:none; font-weight:600;">Home</a>
-        <a href="/performance" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
-        <a href="/advanced_metrics" style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
+        <a href="/performance"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Performance</a>
+        <a href="/advanced_metrics"
+            style="color:#00bfff; margin-right:18px; text-decoration:none; font-weight:600;">Metriche Avanzate</a>
         <a href="/quantum_metrics" style="color:#00bfff; text-decoration:none; font-weight:600;">Quantum Metrics</a>
     </nav>
+    <form action="/update_mt5_orders" method="post" style="margin-bottom:18px;">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Aggiorna ordini MT5</button>
+    </form>
     <h2 style="color:#00ffe7;">Metriche Avanzate</h2>
     <div class="metric-card">
-        <div class="metric-label" title="Misura il rendimento corretto per il rischio. Valori superiori a 1 indicano buon rapporto rischio/rendimento.">Sharpe Ratio</div>
+        <div class="metric-label"
+            title="Misura il rendimento corretto per il rischio. Valori superiori a 1 indicano buon rapporto rischio/rendimento.">
+            Sharpe Ratio</div>
         <div class="metric-value">{{ metrics.sharpe_ratio|default(0)|round(3) }}</div>
         <div class="optimal">Ottimale: > 1.0</div>
-        <div class="desc">Misura il rendimento corretto per il rischio. Valori superiori a 1 indicano buon rapporto rischio/rendimento.</div>
+        <div class="desc">Misura il rendimento corretto per il rischio. Valori superiori a 1 indicano buon rapporto
+            rischio/rendimento.</div>
     </div>
     <div class="metric-card">
-        <div class="metric-label" title="Come lo Sharpe, ma penalizza solo la volatilità negativa. Utile per sistemi che limitano le perdite.">Sortino Ratio</div>
+        <div class="metric-label"
+            title="Come lo Sharpe, ma penalizza solo la volatilità negativa. Utile per sistemi che limitano le perdite.">
+            Sortino Ratio</div>
         <div class="metric-value">{{ metrics.sortino_ratio|default(0)|round(3) }}</div>
         <div class="optimal">Ottimale: > 1.0</div>
-        <div class="desc">Come lo Sharpe, ma penalizza solo la volatilità negativa. Utile per sistemi che limitano le perdite.</div>
+        <div class="desc">Come lo Sharpe, ma penalizza solo la volatilità negativa. Utile per sistemi che limitano le
+            perdite.</div>
     </div>
     <div class="metric-card">
-        <div class="metric-label" title="Durata media dei trade. Valori bassi indicano operatività veloce, tipica di sistemi intraday.">Trade Duration Media</div>
+        <div class="metric-label"
+            title="Durata media dei trade. Valori bassi indicano operatività veloce, tipica di sistemi intraday.">Trade
+            Duration Media</div>
         <div class="metric-value">{{ metrics.avg_trade_duration_minutes|default(0)|round(1) }} min</div>
         <div class="optimal">Ottimale: < 60 min (intraday)</div>
-        <div class="desc">Durata media dei trade. Valori bassi indicano operatività veloce, tipica di sistemi intraday.</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label" title="Numero massimo di trade vincenti consecutivi. Valori alti indicano fasi di forte performance.">Max Consecutive Wins</div>
-        <div class="metric-value">{{ metrics.max_consecutive_wins|default(0) }}</div>
-        <div class="optimal">Ottimale: > 3</div>
-        <div class="desc">Numero massimo di trade vincenti consecutivi. Valori alti indicano fasi di forte performance.</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Max Consecutive Losses</div>
-        <div class="metric-value">{{ metrics.max_consecutive_losses|default(0) }}</div>
-        <div class="optimal">Ottimale: < 3</div>
-        <div class="desc">Numero massimo di trade perdenti consecutivi. Valori bassi indicano rischio contenuto.</div>
-    </div>
-    <div style="margin-top:18px;">
-        <a href="/" class="btn btn-primary" style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
-        <a href="/dashboard" class="btn btn-info" style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard completa</a>
-    </div>
+                <div class="desc">Durata media dei trade. Valori bassi indicano operatività veloce, tipica di sistemi
+                    intraday.</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label"
+                title="Numero massimo di trade vincenti consecutivi. Valori alti indicano fasi di forte performance.">
+                Max Consecutive Wins</div>
+            <div class="metric-value">{{ metrics.max_consecutive_wins|default(0) }}</div>
+            <div class="optimal">Ottimale: > 3</div>
+            <div class="desc">Numero massimo di trade vincenti consecutivi. Valori alti indicano fasi di forte
+                performance.</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Max Consecutive Losses</div>
+            <div class="metric-value">{{ metrics.max_consecutive_losses|default(0) }}</div>
+            <div class="optimal">Ottimale: < 3</div>
+                    <div class="desc">Numero massimo di trade perdenti consecutivi. Valori bassi indicano rischio
+                        contenuto.</div>
+            </div>
+            <div style="margin-top:18px;">
+                <a href="/" class="btn btn-primary"
+                    style="background:#00ffe7; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600;">Home</a>
+                <a href="/dashboard" class="btn btn-info"
+                    style="background:#00bfff; color:#23272f; padding:8px 18px; border-radius:12px; font-weight:600; margin-left:8px;">Dashboard
+                    completa</a>
+            </div>
 
-    <hr style="margin:32px 0; border-color:#00bfff;">
-    <h3 style="color:#00bfff;">Grafici Metriche Avanzate</h3>
-    <div class="chart-container" style="margin-bottom:32px;">
-    <h4 style="color:#00ffe7;">Grafico RRR Giornaliero</h4>
-    <div id="daily_rrr_chart"></div>
-    <div class="desc" style="margin-bottom:18px;">Il grafico mostra il Risk/Reward Ratio (RRR) calcolato giorno per giorno. Valori elevati indicano operatività profittevole rispetto al rischio assunto nelle singole sessioni giornaliere.</div>
-    <h4 style="color:#00bfff; margin-top:32px;">Grafico RRR Settimanale</h4>
-    <div id="weekly_rrr_chart"></div>
-    <div class="desc" style="margin-bottom:18px;">Il grafico mostra il Risk/Reward Ratio (RRR) calcolato su base settimanale. Permette di valutare la costanza del rapporto rischio/rendimento nel tempo.</div>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    {% set daily_rrr_data = daily_rrr_chart['data'] if daily_rrr_chart is defined and daily_rrr_chart and daily_rrr_chart['data'] is defined else [] %}
-    {% set daily_rrr_layout = daily_rrr_chart['layout'] if daily_rrr_chart is defined and daily_rrr_chart and daily_rrr_chart['layout'] is defined else {} %}
-    {% set weekly_rrr_data = weekly_rrr_chart['data'] if weekly_rrr_chart is defined and weekly_rrr_chart and weekly_rrr_chart['data'] is defined else [] %}
-    {% set weekly_rrr_layout = weekly_rrr_chart['layout'] if weekly_rrr_chart is defined and weekly_rrr_chart and weekly_rrr_chart['layout'] is defined else {} %}
-    {% set advanced_chart_dates = metrics.advanced_chart.dates if metrics.advanced_chart is defined and metrics.advanced_chart.dates is defined else [] %}
-    {% set advanced_chart_rrr = metrics.advanced_chart.rrr if metrics.advanced_chart is defined and metrics.advanced_chart.rrr is defined else [] %}
-    <script type="text/javascript">
-    // Protezione: tutte le variabili sono sempre definite come array/oggetto vuoto se assenti
-    var daily_rrr_chart_data = {{ daily_rrr_data | tojson | safe }};
-    var daily_rrr_chart_layout = {{ daily_rrr_layout | tojson | safe }};
-    var weekly_rrr_chart_data = {{ weekly_rrr_data | tojson | safe }};
-    var weekly_rrr_chart_layout = {{ weekly_rrr_layout | tojson | safe }};
-    var advanced_chart_dates = {{ advanced_chart_dates | tojson | safe }};
-    var advanced_chart_rrr = {{ advanced_chart_rrr | tojson | safe }};
-    Plotly.newPlot('daily_rrr_chart', daily_rrr_chart_data, daily_rrr_chart_layout);
-    Plotly.newPlot('weekly_rrr_chart', weekly_rrr_chart_data, weekly_rrr_chart_layout);
-    var trace1 = {
-        x: advanced_chart_dates,
-        y: advanced_chart_rrr,
-        type: 'scatter',
-        name: 'RRR'
-    };
-    var layout = {
-        title: 'Andamento RRR',
-        paper_bgcolor: '#23272f',
-        plot_bgcolor: '#23272f',
-        font: {color: '#e0e0e0'}
-    };
-    Plotly.newPlot('advanced_metrics_chart', [trace1], layout);
-    </script>
-    <div id="advanced_metrics_chart"></div>
-    <div class="desc" style="margin-bottom:18px;">Andamento storico del RRR aggregato, utile per analizzare la tendenza generale del sistema rispetto al rischio assunto.</div>
+            <hr style="margin:32px 0; border-color:#00bfff;">
+            <h3 style="color:#00bfff;">Grafici Metriche Avanzate</h3>
+            <div class="chart-container" style="margin-bottom:32px;">
+                <h4 style="color:#00ffe7;">Grafico RRR Giornaliero</h4>
+                <div id="daily_rrr_chart"></div>
+                <div class="desc" style="margin-bottom:18px;">Il grafico mostra il Risk/Reward Ratio (RRR) calcolato
+                    giorno per giorno. Valori elevati indicano operatività profittevole rispetto al rischio assunto
+                    nelle singole sessioni giornaliere.</div>
+                <h4 style="color:#00bfff; margin-top:32px;">Grafico RRR Settimanale</h4>
+                <div id="weekly_rrr_chart"></div>
+                <div class="desc" style="margin-bottom:18px;">Il grafico mostra il Risk/Reward Ratio (RRR) calcolato su
+                    base settimanale. Permette di valutare la costanza del rapporto rischio/rendimento nel tempo.</div>
+                <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+                {% set daily_rrr_data = daily_rrr_chart['data'] if daily_rrr_chart is defined and daily_rrr_chart and
+                daily_rrr_chart['data'] is defined else [] %}
+                {% set daily_rrr_layout = daily_rrr_chart['layout'] if daily_rrr_chart is defined and daily_rrr_chart
+                and daily_rrr_chart['layout'] is defined else {} %}
+                {% set weekly_rrr_data = weekly_rrr_chart['data'] if weekly_rrr_chart is defined and weekly_rrr_chart
+                and weekly_rrr_chart['data'] is defined else [] %}
+                {% set weekly_rrr_layout = weekly_rrr_chart['layout'] if weekly_rrr_chart is defined and
+                weekly_rrr_chart and weekly_rrr_chart['layout'] is defined else {} %}
+                {% set advanced_chart_dates = metrics.advanced_chart.dates if metrics.advanced_chart is defined and
+                metrics.advanced_chart.dates is defined else [] %}
+                {% set advanced_chart_rrr = metrics.advanced_chart.rrr if metrics.advanced_chart is defined and
+                metrics.advanced_chart.rrr is defined else [] %}
+                <script type="text/javascript">
+                    // Protezione: tutte le variabili sono sempre definite come array/oggetto vuoto se assenti
+                    var daily_rrr_chart_data = {{ daily_rrr_data | tojson | safe }};
+                    var daily_rrr_chart_layout = {{ daily_rrr_layout | tojson | safe }};
+                    var weekly_rrr_chart_data = {{ weekly_rrr_data | tojson | safe }};
+                    var weekly_rrr_chart_layout = {{ weekly_rrr_layout | tojson | safe }};
+                    var advanced_chart_dates = {{ advanced_chart_dates | tojson | safe }};
+                    var advanced_chart_rrr = {{ advanced_chart_rrr | tojson | safe }};
+                    Plotly.newPlot('daily_rrr_chart', daily_rrr_chart_data, daily_rrr_chart_layout);
+                    Plotly.newPlot('weekly_rrr_chart', weekly_rrr_chart_data, weekly_rrr_chart_layout);
+                    var trace1 = {
+                        x: advanced_chart_dates,
+                        y: advanced_chart_rrr,
+                        type: 'scatter',
+                        name: 'RRR'
+                    };
+                    var layout = {
+                        title: 'Andamento RRR',
+                        paper_bgcolor: '#23272f',
+                        plot_bgcolor: '#23272f',
+                        font: { color: '#e0e0e0' }
+                    };
+                    Plotly.newPlot('advanced_metrics_chart', [trace1], layout);
+                </script>
+                <div id="advanced_metrics_chart"></div>
+                <div class="desc" style="margin-bottom:18px;">Andamento storico del RRR aggregato, utile per analizzare
+                    la tendenza generale del sistema rispetto al rischio assunto.</div>
 </body>
+
 </html>

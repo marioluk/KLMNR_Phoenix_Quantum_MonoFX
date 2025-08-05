@@ -49,10 +49,61 @@ class AutonomousHighStakesOptimizer:
     # volatility_filter: Filtro sulla volatilità del mercato. Opera solo se la volatilità è entro certi limiti.
     # trend_strength: Filtro sulla forza del trend. Opera solo se il trend è sufficientemente forte.
 
-    def get_param_ranges_for_mode(self, mode):
+    def get_param_ranges_for_mode(self, mode, symbol=None):
         """
         Restituisce i range di parametri ottimali per la tipologia di trading.
+        Se symbol è SP500 o NAS100, restituisce range robusti.
         """
+        index_symbols = ["SP500", "NAS100"]
+        if symbol in index_symbols:
+            ranges = {
+                "scalping": {
+                    "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
+                    "max_daily_trades": [10, 20, 30],
+                    "max_concurrent_trades": [1, 2],
+                    "stop_loss_pips": [80, 120, 160, 200],
+                    "take_profit_pips": [160, 240, 320, 400],
+                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                    "spin_threshold": [0.15, 0.20, 0.25, 0.35, 0.5],
+                    "volatility_filter": [0.60, 0.65, 0.70, 0.75],
+                    "trend_strength": [0.50, 0.55, 0.60, 0.65]
+                },
+                "intraday": {
+                    "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
+                    "max_daily_trades": [4, 6, 8, 10],
+                    "max_concurrent_trades": [1, 2],
+                    "stop_loss_pips": [400, 500, 600, 800],
+                    "take_profit_pips": [800, 1000, 1200, 1600],
+                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7],
+                    "volatility_filter": [0.65, 0.70, 0.75, 0.80],
+                    "trend_strength": [0.55, 0.60, 0.65, 0.70]
+                },
+                "swing": {
+                    "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
+                    "max_daily_trades": [1, 2, 3],
+                    "max_concurrent_trades": [1, 2],
+                    "stop_loss_pips": [800, 1000, 1200, 1600],
+                    "take_profit_pips": [1600, 2000, 2400, 3200],
+                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
+                    "volatility_filter": [0.70, 0.75, 0.80, 0.85],
+                    "trend_strength": [0.60, 0.65, 0.70, 0.75]
+                },
+                "position": {
+                    "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
+                    "max_daily_trades": [1, 2],
+                    "max_concurrent_trades": [1, 2],
+                    "stop_loss_pips": [1600, 2000, 2400, 3200],
+                    "take_profit_pips": [3200, 4000, 4800, 6400],
+                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
+                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
+                    "volatility_filter": [0.75, 0.80, 0.85, 0.90],
+                    "trend_strength": [0.65, 0.70, 0.75, 0.80]
+                }
+            }
+            return ranges.get(mode, ranges["intraday"])
+        # ...range generici per altri simboli...
         ranges = {
             "scalping": {
                 "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],

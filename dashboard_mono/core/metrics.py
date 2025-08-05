@@ -31,12 +31,14 @@ class MetricsCalculator:
             ]
         print("DEBUG trade_history filtrato:", trade_history)
         initial_balance = self.metrics.get('initial_balance', 5000)
-        current_balance = self.metrics.get('current_balance', None)
+        # Usa il saldo attuale da MT5, se disponibile, altrimenti somma profitti all'iniziale
+        current_balance = self.metrics.get('balance', initial_balance)
         if not trade_history:
             # Se non ci sono trade chiusi, tutte le metriche sono zero
             self.metrics['total_pnl'] = 0.0
             self.metrics['total_profit'] = 0.0
             self.metrics['total_loss'] = 0.0
+            self.metrics['profit_percentage'] = 0.0
             return 0.0
         total_pnl = 0.0
         total_profit = 0.0
@@ -54,6 +56,8 @@ class MetricsCalculator:
         self.metrics['total_pnl'] = total_pnl
         self.metrics['total_profit'] = total_profit
         self.metrics['total_loss'] = total_loss
+        # Calcolo profit_percentage
+        self.metrics['profit_percentage'] = ((current_balance - initial_balance) / initial_balance) * 100 if initial_balance else 0.0
 
         # Calcolo Drawdown Recovery Time (in minuti)
         # Serve una curva balance e timestamp
