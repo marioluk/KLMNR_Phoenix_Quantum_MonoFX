@@ -1130,6 +1130,10 @@ class QuantumEngine:
             logger = getLogger("phoenix_quantum")
         # Log di debug per tracciare ogni chiamata
         logger.debug(f"[DEBUG-TRACE] process_tick chiamato per {symbol} con price={price}")
+        # Controllo corrispondenza simboli inizializzati nel buffer
+        if symbol not in self._tick_buffer:
+            logger.warning(f"[process_tick] Simbolo '{symbol}' non inizializzato nel buffer! Simboli disponibili: {list(self._tick_buffer.keys())}")
+            # Si può anche decidere di inizializzarlo qui, ma meglio segnalare l'errore
         """
         Aggiunge un nuovo tick al buffer circolare e calcola delta/direzione rispetto al tick precedente.
 
