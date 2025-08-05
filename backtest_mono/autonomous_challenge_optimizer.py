@@ -4,6 +4,7 @@ import os
 import logging
 import logging
 import hashlib
+import random
 
 # =============================================================
 # CORRELAZIONE TRA TIPOLOGIA DI TRADING E PARAMETRI SL/TP/TS
