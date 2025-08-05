@@ -271,117 +271,7 @@ class AutonomousHighStakesOptimizer:
             except Exception as e:
                 print(f"[VALIDAZIONE PARAMETRI] Errore scrittura log: {e}")
         return warnings
-    def generate_optimized_config_for_mode(self, aggressiveness: str, mode: str) -> Dict:
-        # Ottieni parametri tipologia trading
-        params = self.get_trading_mode_params(mode)
-        # Validazione automatica parametri globali
-        logs_dir = os.path.join(self.base_dir, "logs")
-        os.makedirs(logs_dir, exist_ok=True)
-        log_file = os.path.join(logs_dir, f"log_param_validation_{mode}_{aggressiveness}.log")
-        summary_file = os.path.join(logs_dir, f"summary_param_validation_{mode}_{aggressiveness}.log")
-        all_warnings = []
-        warnings = self.validate_trading_params(params, mode, log_file=log_file)
-        if warnings:
-            print(f"[VALIDAZIONE PARAMETRI - {mode.upper()}] WARNING:")
-            for w in warnings:
-                print(f"  - {w}")
-            print(f"[VALIDAZIONE PARAMETRI] Log scritto su: {log_file}")
-            print(f"❌ Configurazione BLOCCATA: parametri globali fuori range.")
-            all_warnings.extend([f"GLOBAL: {w}" for w in warnings])
-        config = self.create_base_config_template()
-        config['metadata']['trading_mode'] = mode
-        config['metadata']['comment'] = params['comment']
-        config['metadata']['aggressiveness'] = aggressiveness
-        config['risk_parameters']['max_position_hours'] = params['max_position_hours']
-        config['risk_parameters']['position_cooldown'] = params['position_cooldown']
-        config['risk_parameters']['stop_loss_pips'] = params['stop_loss_pips']
-        config['risk_parameters']['take_profit_pips'] = params['take_profit_pips']
-        config['quantum_params']['buffer_size'] = params['buffer_size']
-        config['quantum_params']['spin_window'] = params['spin_window']
-        config['quantum_params']['min_spin_samples'] = params['min_spin_samples']
-        config['quantum_params']['signal_cooldown'] = params['signal_cooldown']
-        # Applica override aggressività
-        config['risk_parameters']['risk_percent'] = 0.005 if aggressiveness == "conservative" else (0.007 if aggressiveness == "moderate" else 0.009)
-        config['risk_parameters']['max_daily_trades'] = 4 if aggressiveness == "conservative" else (6 if aggressiveness == "moderate" else 8)
-        config['risk_parameters']['max_concurrent_trades'] = 2 if aggressiveness == "conservative" else (3 if aggressiveness == "moderate" else 4)
-        # Seleziona simboli ottimali per aggressività
-        optimal_symbols = self.select_optimal_symbols(aggressiveness)
-        optimized_symbols = {}
-        total_score = 0
-        spin_thresholds = []
-        # Validazione parametri dei singoli simboli
-        for symbol in optimal_symbols:
-            symbol_params = self.optimize_symbol_parameters(symbol, aggressiveness, mode)
-            symbol_warnings = self.validate_trading_params(symbol_params, mode, log_file=log_file)
-            if symbol_warnings:
-                print(f"[VALIDAZIONE PARAMETRI - {mode.upper()}][{symbol}] WARNING:")
-                for w in symbol_warnings:
-                    print(f"  - {w}")
-                print(f"[VALIDAZIONE PARAMETRI] Log scritto su: {log_file}")
-                print(f"❌ Configurazione BLOCCATA: parametri simbolo '{symbol}' fuori range.")
-                all_warnings.extend([f"{symbol}: {w}" for w in symbol_warnings])
-            # Normalizza spin_threshold tra 0.15 e 1.0
-            st = symbol_params.get('spin_threshold', 0.25)
-            st = max(0.15, min(float(st), 1.0))
-            symbol_params['spin_threshold'] = st
-            if 'quantum_params_override' not in symbol_params:
-                symbol_params['quantum_params_override'] = {}
-            symbol_params['quantum_params_override']['spin_threshold'] = st
-            spin_thresholds.append(st)
-            optimized_symbols[symbol] = symbol_params
-            total_score += symbol_params['optimization_score']
-        # Se ci sono warning, blocca la generazione e scrivi riepilogo
-        if all_warnings:
-            print("\n===== RIEPILOGO WARNING PARAMETRI TROVATI =====")
-            for w in all_warnings:
-                print(f"  - {w}")
-            try:
-                with open(summary_file, "a", encoding="utf-8") as f:
-                    f.write(f"[RIEPILOGO PARAMETRI - {mode.upper()} - {aggressiveness}] {datetime.now().isoformat()}\n")
-                    for w in all_warnings:
-                        f.write(f"  - {w}\n")
-            except Exception as e:
-                print(f"[RIEPILOGO PARAMETRI] Errore scrittura log: {e}")
-            raise ValueError(f"Parametri fuori range: {all_warnings}")
-        config['symbols'] = optimized_symbols
-        config['pip_size_map'] = {
-            "EURUSD": 0.0001,
-            "GBPUSD": 0.0001,
-            "USDJPY": 0.01,
-            "USDCHF": 0.0001,
-            "AUDUSD": 0.0001,
-            "USDCAD": 0.0001,
-            "NZDUSD": 0.0001,
-            "BTCUSD": 0.01,
-            "ETHUSD": 0.01,
-            "XAUUSD": 0.1,
-            "XAGUSD": 0.01,
-            "SP500": 0.1,
-            "NAS100": 0.1,
-            "US30": 0.1,
-            "DAX40": 0.1,
-            "FTSE100": 0.1,
-            "JP225": 1.0,
-            "default": 0.0001
-        }
-        if spin_thresholds:
-            config['quantum_params']['spin_threshold'] = round(sum(spin_thresholds) / len(spin_thresholds), 3)
-        else:
-            config['quantum_params']['spin_threshold'] = 0.25
-        avg_score = total_score / len(optimal_symbols)
-        config['quantum_params']['adaptive_threshold'] = 0.60 + (avg_score / 200)
-        config['quantum_params']['volatility_filter'] = 0.70 + (avg_score / 300)
-        config['quantum_params']['confluence_threshold'] = 0.65 + (avg_score / 250)
-        config['optimization_results'] = {
-            'aggressiveness_level': aggressiveness,
-            'symbols_count': len(optimal_symbols),
-            'average_optimization_score': round(avg_score, 2),
-            'total_optimization_score': round(total_score, 2),
-            'optimization_period': f"{self.optimization_days} days",
-            'optimization_timestamp': datetime.now().isoformat()
-        }
-        # La validazione SL/TP è già gestita dal clipping e dalla funzione validate_trading_params
-        return config
+    # ...existing code...
     # =============================
     # Tipologie di Trading per Timeframe
     # =============================
@@ -486,7 +376,9 @@ class AutonomousHighStakesOptimizer:
 
     def __init__(self, optimization_days=60, output_dir=None, mode="intraday"):
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.output_dir = output_dir or self.base_dir
+        # Imposta la directory di output su 'config' nella root del progetto
+        config_dir = os.path.join(os.path.dirname(self.base_dir), "config")
+        self.output_dir = output_dir or config_dir
         self.optimization_days = optimization_days
         self.high_stakes_params = {
             'account_balance': 5000,
@@ -550,59 +442,120 @@ class AutonomousHighStakesOptimizer:
         return results
 
     def create_base_config_template(self) -> Dict:
+        # Dati sensibili e parametri fissi (puoi modificarli in seguito)
         base_config = {
             "metadata": {
-                "version": "2.0",
-                "created_by": "AutonomousHighStakesOptimizer",
-                "creation_date": datetime.now().isoformat(),
-                "description": "Configurazione generata autonomamente per High Stakes Challenge",
-                "optimization_period_days": self.optimization_days
+                "trading_mode": "",
+                "comment": "",
+                "aggressiveness": ""
             },
-            "high_stakes_challenge": self.high_stakes_params,
-            "trading_algorithm": {
-                "name": "phoenix_quantum_monofx_program",
-                "version": "2.0",
-                "description": "Algoritmo quantum ottimizzato per il broker"
+            "logging": {
+                "log_file": f"logs/log_autonomous_challenge_{datetime.now().strftime('%Y%m%d%H%M%S')}.log",
+                "max_size_mb": 50,
+                "backup_count": 7,
+                "log_level": "INFO"
             },
+            "metatrader5": {
+                "login": 25437097,
+                "password": "wkchTWEO_.00",
+                "server": "FivePercentOnline-Real",
+                "path": "C:/MT5/FivePercentOnlineMetaTrader5/terminal64.exe",
+                "port": 18889
+            },
+            "account_currency": "USD",
+            "magic_number": 58251,
+            "initial_balance": 5000,
             "quantum_params": {
                 "buffer_size": 500,
+                "spin_window": 67,
+                "min_spin_samples": 23,
+                "spin_threshold": 0.25,
                 "signal_cooldown": 600,
-                "adaptive_threshold": 0.65,
-                "volatility_filter": 0.75,
-                "trend_strength_min": 0.60,
-                "confluence_threshold": 0.70,
-                "quantum_boost": True,
-                "neural_enhancement": True
+                "entropy_thresholds": {
+                    "buy_signal": 0.54,
+                    "sell_signal": 0.46
+                },
+                "volatility_scale": 4.54
             },
             "risk_parameters": {
-                "risk_percent": 0.007,
+                "position_cooldown": 900,
                 "max_daily_trades": 6,
-                "max_concurrent_trades": 3,
-                "min_profit_target": 0.015,
-                "stop_loss_atr_multiplier": 1.5,
-                "take_profit_atr_multiplier": 2.5,
-                "daily_loss_limit": 0.05,
-                "max_drawdown": 0.08,
-                "risk_reward_ratio": 1.8,
-                # daily_trade_limit_mode: modalità di conteggio trade giornalieri.
-                # "per_symbol": il limite max_daily_trades viene applicato separatamente a ciascun simbolo (es: 6 trade per EURUSD, 6 per USDJPY, ...)
-                # "global": il limite max_daily_trades viene applicato come somma totale su tutti i simboli (es: 6 trade totali su tutti i simboli)
-                # Modifica questo parametro per cambiare la logica del counter giornaliero.
-                "daily_trade_limit_mode": "global"
+                "max_positions": 1,
+                "min_sl_distance_pips": {
+                    "EURUSD": 30,
+                    "GBPUSD": 35,
+                    "USDJPY": 25,
+                    "XAUUSD": 150,
+                    "NAS100": 400,
+                    "SP500": 400,
+                    "US30": 300,
+                    "BTCUSD": 200,
+                    "ETHUSD": 100,
+                    "USDCHF": 30,
+                    "default": 40
+                },
+                "base_sl_pips": {
+                    "EURUSD": 50,
+                    "GBPUSD": 60,
+                    "USDJPY": 40,
+                    "XAUUSD": 220,
+                    "NAS100": 600,
+                    "SP500": 600,
+                    "US30": 400,
+                    "BTCUSD": 400,
+                    "ETHUSD": 200,
+                    "USDCHF": 50,
+                    "default": 80
+                },
+                "profit_multiplier": 2.2,
+                "max_position_hours": 6,
+                "risk_percent": 0.007,
+                "trailing_stop": {
+                    "enable": True,
+                    "activation_pips": 100,
+                    "step_pips": 50,
+                    "lock_percentage": 0.5
+                },
+                "target_pip_value": 10.0,
+                "max_global_exposure": 50000.0,
+                "daily_trade_limit_mode": "global",
+                "max_spread": {
+                    "USDJPY": 10,
+                    "EURUSD": 12,
+                    "USDCHF": 15,
+                    "NAS100": 180,
+                    "SP500": 60
+                }
             },
             "symbols": {},
-            "trading_sessions": {
-                "london": {"start": "08:00", "end": "17:00", "enabled": True},
-                "newyork": {"start": "13:00", "end": "22:00", "enabled": True},
-                "tokyo": {"start": "00:00", "end": "09:00", "enabled": False},
-                "sydney": {"start": "22:00", "end": "07:00", "enabled": False}
+            "pip_size_map": {
+                "EURUSD": 0.0001,
+                "GBPUSD": 0.0001,
+                "USDJPY": 0.01,
+                "USDCHF": 0.0001,
+                "XAUUSD": 0.01,
+                "XAGUSD": 0.01,
+                "SP500": 1.0,
+                "NAS100": 1.0,
+                "US30": 1.0,
+                "BTCUSD": 0.01,
+                "ETHUSD": 0.01,
+                "default": 0.0001
             },
-            "filters": {
-                "news_filter": True,
-                "spread_filter": True,
-                "volatility_filter": True,
-                "trend_filter": True,
-                "time_filter": True
+            "challenge_specific": {
+                "step1_target": 8,
+                "max_daily_loss_percent": 5,
+                "max_total_loss_percent": 10,
+                "drawdown_protection": {
+                    "soft_limit": 0.02,
+                    "hard_limit": 0.05,
+                    "safe_limit": 0.01
+                }
+            },
+            "conversion_metadata": {
+                "created_by": "AutonomousHighStakesOptimizer",
+                "creation_date": datetime.now().isoformat(),
+                "aggressiveness": "moderate"
             }
         }
         return base_config
@@ -694,18 +647,40 @@ class AutonomousHighStakesOptimizer:
         tp_min, tp_max = validation_ranges.get(mode, validation_ranges['intraday'])['take_profit_pips']
         clipped_sl = max(sl_min, min(int(sl_pips), sl_max))
         clipped_tp = max(tp_min, min(int(tp_pips), tp_max))
+        # Ottimizza trading_hours come lista di stringhe (esempio: ["08:00-12:00", "13:00-17:00"])
+        trading_hours_dict = self.optimize_trading_hours(symbol, score)
+        trading_hours_list = []
+        for session, info in trading_hours_dict.items():
+            if info.get("enabled"):
+                trading_hours_list.append(f"{info['start']}-{info['end']}")
+        # Normalizza spin_threshold tra 0.15 e 1.0
+        st = base_params.get('spin_threshold', 0.25)
+        st = max(0.15, min(float(st), 1.0))
         optimized_params = {
-            'enabled': True,
-            'risk_percent': base_params['risk_percent'],
-            'lot_size': round(base_params['risk_percent'] * 10, 3),
-            'stop_loss_pips': clipped_sl,
-            'take_profit_pips': clipped_tp,
-            'signal_buy_threshold': signal_buy_threshold,
-            'signal_sell_threshold': signal_sell_threshold,
-            'confidence_threshold': confidence_threshold,
-            'spin_threshold': base_params.get('spin_threshold', 0.25),
-            'max_spread': self.get_symbol_max_spread(symbol),
-            'trading_hours': self.optimize_trading_hours(symbol, score),
+            'risk_management': {
+                'contract_size': 0.01,
+                'profit_multiplier': profit_multiplier,
+                'risk_percent': base_params['risk_percent'],
+                'stop_loss_pips': clipped_sl,
+                'take_profit_pips': clipped_tp,
+                'signal_buy_threshold': signal_buy_threshold,
+                'signal_sell_threshold': signal_sell_threshold,
+                'confidence_threshold': confidence_threshold,
+                'spin_threshold': st,
+                'max_spread': self.get_symbol_max_spread(symbol),
+                'trailing_stop': {
+                    'activation_pips': 24,
+                    'step_pips': 12
+                },
+                'target_pip_value': 10.0,
+                'max_global_exposure': 50000.0
+            },
+            'timezone': 'Europe/Rome',
+            'trading_hours': trading_hours_list,
+            'comment': f"Override generato dinamicamente per {symbol} - score {round(score,2)}",
+            'quantum_params_override': {
+                'spin_threshold': st
+            },
             'optimization_score': score,
             'aggressiveness_applied': aggressiveness
         }
@@ -764,6 +739,10 @@ class AutonomousHighStakesOptimizer:
         optimized_symbols = {}
         total_score = 0
         spin_thresholds = []
+        # Inizializza le mappe globali ottimizzate
+        min_sl_distance_pips_optimized = {}
+        base_sl_pips_optimized = {}
+        take_profit_pips_optimized = {}
         # Validazione parametri dei singoli simboli
         for symbol in optimal_symbols:
             symbol_params = self.optimize_symbol_parameters(symbol, aggressiveness, mode)
@@ -785,6 +764,12 @@ class AutonomousHighStakesOptimizer:
             spin_thresholds.append(st)
             optimized_symbols[symbol] = symbol_params
             total_score += symbol_params['optimization_score']
+            # Popola le mappe globali DURANTE il ciclo
+            sl_val = symbol_params['risk_management']['stop_loss_pips']
+            tp_val = symbol_params['risk_management']['take_profit_pips']
+            min_sl_distance_pips_optimized[symbol] = sl_val
+            base_sl_pips_optimized[symbol] = sl_val
+            take_profit_pips_optimized[symbol] = tp_val
         # Se ci sono warning, blocca la generazione e scrivi riepilogo
         if all_warnings:
             print("\n===== RIEPILOGO WARNING PARAMETRI TROVATI =====")
@@ -799,7 +784,12 @@ class AutonomousHighStakesOptimizer:
                 print(f"[RIEPILOGO PARAMETRI] Errore scrittura log: {e}")
             raise ValueError(f"Parametri fuori range: {all_warnings}")
         config['symbols'] = optimized_symbols
-        config['pip_size_map'] = {
+        # Pulisci le mappe globali: solo simboli ottimizzati
+        config['risk_parameters']['min_sl_distance_pips'] = {k: v for k, v in min_sl_distance_pips_optimized.items() if k in optimized_symbols}
+        config['risk_parameters']['base_sl_pips'] = {k: v for k, v in base_sl_pips_optimized.items() if k in optimized_symbols}
+        config['risk_parameters']['take_profit_pips_map'] = {k: v for k, v in take_profit_pips_optimized.items() if k in optimized_symbols}
+        # Pip size map: solo simboli ottimizzati
+        pip_size_full = {
             "EURUSD": 0.0001,
             "GBPUSD": 0.0001,
             "USDJPY": 0.01,
@@ -816,9 +806,9 @@ class AutonomousHighStakesOptimizer:
             "US30": 0.1,
             "DAX40": 0.1,
             "FTSE100": 0.1,
-            "JP225": 1.0,
-            "default": 0.0001
+            "JP225": 1.0
         }
+        config['pip_size_map'] = {k: v for k, v in pip_size_full.items() if k in optimized_symbols}
         if spin_thresholds:
             config['quantum_params']['spin_threshold'] = round(sum(spin_thresholds) / len(spin_thresholds), 3)
         else:
@@ -859,78 +849,103 @@ class AutonomousHighStakesOptimizer:
                 "sydney": {"start": "22:00", "end": "07:00", "enabled": False}
             }
 
+    def save_config(self, config: dict, aggressiveness: str, mode: str) -> str:
+        """
+        Salva la configurazione ottimizzata in un file JSON con nome conforme alla produzione e struttura corretta.
+        Restituisce il percorso del file salvato.
+        """
+        import json
+        # Formato richiesto: config_autonomous_challenge_[STRATEGY]_production_ready.json
+        filename = f"config_autonomous_challenge_{mode}_{aggressiveness}_production_ready.json"
+        filepath = os.path.join(self.output_dir, filename)
+        # Racchiudi la configurazione sotto la chiave 'config'
+        config_wrapped = {"config": config}
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(config_wrapped, f, indent=4, ensure_ascii=False)
+            print(f"✅ Configurazione salvata: {filepath}")
+        except Exception as e:
+            print(f"[ERRORE] Salvataggio configurazione fallito: {e}")
+        return filepath
+
 def main():
     print("🎯 AUTONOMOUS HIGH STAKES OPTIMIZER")
     print("Genera configurazioni ottimizzate DA ZERO senza JSON sorgente")
     print("="*70)
 
 
-    while True:
-        try:
-            print("\n📋 OPZIONI DISPONIBILI:")
-            print("1. 🚀 Genera tutte le configurazioni da zero")
-            print("2. 🎯 Genera singola configurazione")
-            print("3. ❌ Esci")
+    try:
+        while True:
+            try:
+                print("\n📋 OPZIONI DISPONIBILI:")
+                print("1. 🚀 Genera tutte le configurazioni da zero")
+                print("2. 🎯 Genera singola configurazione")
+                print("3. ❌ Esci")
 
-            choice = input("\n👉 Scegli opzione (1-3): ").strip()
+                choice = input("\n👉 Scegli opzione (1-3): ").strip()
 
-            if choice == "1":
-                while True:
-                    print("\n⚡ Tipologie disponibili:")
-                    print("1. Scalping")
-                    print("2. Intraday (Day Trading)")
-                    print("3. Swing Trading")
-                    print("4. Position Trading")
-                    print("5. 🔙 Torna al menu principale")
-                    mode_choice = input("👉 Scegli tipologia (1-5): ").strip()
-                    mode_map = {
-                        "1": "scalping",
-                        "2": "intraday",
-                        "3": "swing",
-                        "4": "position"
-                    }
-                    if mode_choice == "5":
+                if choice == "1":
+                    while True:
+                        print("\n⚡ Tipologie disponibili:")
+                        print("1. Scalping")
+                        print("2. Intraday (Day Trading)")
+                        print("3. Swing Trading")
+                        print("4. Position Trading")
+                        print("5. 🔙 Torna al menu principale")
+                        mode_choice = input("👉 Scegli tipologia (1-5): ").strip()
+                        mode_map = {
+                            "1": "scalping",
+                            "2": "intraday",
+                            "3": "swing",
+                            "4": "position"
+                        }
+                        if mode_choice == "5":
+                            break
+                        mode = mode_map.get(mode_choice, None)
+                        if not mode:
+                            print("❌ Scelta non valida, riprova.")
+                            continue
+                        # Mostra parametri della tipologia selezionata
+                        optimizer = AutonomousHighStakesOptimizer()
+                        params = optimizer.get_trading_mode_params(mode)
+                        print(f"\n📊 Parametri per '{mode.upper()}':")
+                        for k, v in params.items():
+                            print(f"  {k}: {v}")
+                        conferma = input("\n✅ Confermi la selezione e vuoi generare le configurazioni? (s/n): ").strip().lower()
+                        if conferma != "s":
+                            print("🔙 Selezione annullata. Torna al menu tipologie.")
+                            continue
+                        # Imposta giorni di ottimizzazione suggeriti in base alla tipologia
+                        giorni_ottimali = {
+                            "scalping": 30,
+                            "intraday": 60,
+                            "swing": 120,
+                            "position": 180
+                        }
+                        default_days = giorni_ottimali.get(mode, 60)
+                        days = input(f"📅 Giorni per ottimizzazione (default: {default_days}): ").strip()
+                        optimization_days = int(days) if days.isdigit() else default_days
+                        optimizer = AutonomousHighStakesOptimizer(optimization_days)
+                        print(f"\n🔄 Generazione configurazioni per tipologia '{mode}' ({optimization_days} giorni)...")
+                        optimizer.generate_all_configs(mode)
+                        print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
                         break
-                    mode = mode_map.get(mode_choice, None)
-                    if not mode:
-                        print("❌ Scelta non valida, riprova.")
-                        continue
-                    # Mostra parametri della tipologia selezionata
-                    optimizer = AutonomousHighStakesOptimizer()
-                    params = optimizer.get_trading_mode_params(mode)
-                    print(f"\n📊 Parametri per '{mode.upper()}':")
-                    for k, v in params.items():
-                        print(f"  {k}: {v}")
-                    conferma = input("\n✅ Confermi la selezione e vuoi generare le configurazioni? (s/n): ").strip().lower()
-                    if conferma != "s":
-                        print("🔙 Selezione annullata. Torna al menu tipologie.")
-                        continue
-                    # Imposta giorni di ottimizzazione suggeriti in base alla tipologia
-                    giorni_ottimali = {
-                        "scalping": 30,
-                        "intraday": 60,
-                        "swing": 120,
-                        "position": 180
-                    }
-                    default_days = giorni_ottimali.get(mode, 60)
-                    days = input(f"📅 Giorni per ottimizzazione (default: {default_days}): ").strip()
-                    optimization_days = int(days) if days.isdigit() else default_days
-                    optimizer = AutonomousHighStakesOptimizer(optimization_days)
-                    print(f"\n🔄 Generazione configurazioni per tipologia '{mode}' ({optimization_days} giorni)...")
-                    optimizer.generate_all_configs(mode)
-                    print("\n📄 Tutte le configurazioni per tipologia trading generate e salvate.")
+                elif choice == "2":
+                    while True:
+                        print("\n🎯 Scegli livello aggressività:")
+                        print("1. 🟢 Conservative")
+                        print("2. 🟡 Moderate")
+                        print("3. 🔴 Aggressive")
+                        print("4. 🔙 Torna al menu principale")
+                        level_choice = input("👉 Scegli (1-4): ")
+                elif choice == "3":
+                    print("\n👋 Uscita dal programma su richiesta.")
                     break
-            elif choice == "2":
-                while True:
-                    print("\n🎯 Scegli livello aggressività:")
-                    print("1. 🟢 Conservative")
-                    print("2. 🟡 Moderate")
-                    print("3. 🔴 Aggressive")
-                    print("4. 🔙 Torna al menu principale")
-                    level_choice = input("👉 Scegli (1-4): ")
-        except Exception as e:
-            print(f"[ERRORE] Input non valido o errore runtime: {e}")
-            continue
+            except Exception as e:
+                print(f"[ERRORE] Input non valido o errore runtime: {e}")
+                continue
+    except KeyboardInterrupt:
+        print("\n👋 Interruzione manuale rilevata. Uscita dal programma.")
 
 # Avvio script se eseguito direttamente
 if __name__ == "__main__":
