@@ -63,7 +63,10 @@ def main():
     # Estrai i dati dal dizionario
     indicators = df['data'].apply(parse_dict).apply(pd.Series)
     df = pd.concat([df, indicators], axis=1)
+    print("\n[DEBUG] Colonne dopo il parsing:", df.columns.tolist())
     if 'signal' not in df.columns:
+        print("\n[DEBUG] Esempi di dict estratti da 'data':")
+        print(df['data'].head(3).tolist())
         print("\nNessun dato valido dopo il parsing dei segnali.")
         return
     # Statistiche per segnale
