@@ -31,6 +31,8 @@ def main():
     simboli_input = input().strip()
 
     df = pd.read_csv(CSV_PATH, header=None, names=['timestamp', 'symbol', 'data', 'reason'])
+    print("\n[DEBUG] Prime 10 righe del DataFrame caricato dal CSV:")
+    print(df.head(10))
     # Converte la colonna timestamp in datetime
     df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
 
