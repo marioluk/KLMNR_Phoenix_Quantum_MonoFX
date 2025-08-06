@@ -26,6 +26,7 @@ def get_logger():
 # === INIZIALIZZAZIONE LOGGING DA CONFIG ===
 import os
 import time
+import csv
 config_path = os.path.join(os.path.dirname(__file__), 'config', 'config_autonomous_challenge_production_ready.json')
 if not os.path.exists(config_path):
     print(f"File di configurazione non trovato: {config_path}")
@@ -108,6 +109,19 @@ try:
         if time.time() - last_heartbeat > HEARTBEAT_INTERVAL:
             try:
                 engine.check_tick_activity()
+                # Heartbeat riassuntivo trade_decision_report.csv
+                report_path = os.path.join(os.path.dirname(__file__), '..', 'logs', 'trade_decision_report.csv')
+                if os.path.isfile(report_path):
+                    step_counts = {}
+                    symbol_counts = {}
+                    with open(report_path, 'r', encoding='utf-8') as f:
+                        reader = csv.DictReader(f)
+                        for row in reader:
+                            step = row.get('step', 'unknown')
+                            symbol = row.get('symbol', 'unknown')
+                            step_counts[step] = step_counts.get(step, 0) + 1
+                            symbol_counts[symbol] = symbol_counts.get(symbol, 0) + 1
+                    logger.info(f"[HEARTBEAT REPORT] trade_decision_report.csv: per step: {step_counts} | per symbol: {symbol_counts}")
             except Exception as e:
                 logger.warning(f"Errore heartbeat: {e}")
             last_heartbeat = time.time()
