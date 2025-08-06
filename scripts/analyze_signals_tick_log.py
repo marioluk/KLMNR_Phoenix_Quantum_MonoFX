@@ -19,6 +19,9 @@ def parse_dict(s):
         return {}
 
 def main():
+
+    # ...esistente codice di caricamento e parsing...
+
     # Parametri di soglia dalla config (modifica se necessario)
     BUY_SIGNAL = 0.54
     SELL_SIGNAL = 0.46
