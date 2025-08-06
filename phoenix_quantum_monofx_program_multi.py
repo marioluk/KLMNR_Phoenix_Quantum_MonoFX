@@ -183,7 +183,27 @@ try:
             # === INCREMENTO TRADE COUNT DOPO TRADE ESEGUITO ===
             trade_executed = False
             if signal in ("BUY", "SELL"):
-                trade_executed = True
+                # Esempio di invio ordine a MT5 (sostituisci con la tua logica reale)
+                order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
+                lot_size = 0.01  # Sostituisci con la tua logica di calcolo size
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": lot_size,
+                    "type": order_type,
+                    "price": price,
+                    "deviation": 10,
+                    "magic": 123456,
+                    "comment": "PhoenixQuantumAuto",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_IOC,
+                }
+                result = mt5.order_send(request)
+                if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                    trade_executed = True
+                    logger.info(f"[TRADE EXECUTED] {symbol} ordine aperto con successo. Ticket: {result.order}")
+                else:
+                    logger.warning(f"[TRADE FAILED] {symbol} ordine non aperto. Retcode: {getattr(result, 'retcode', None)}")
             if trade_executed:
                 trade_count_state['trade_count'][symbol] = trade_count + 1
                 save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
