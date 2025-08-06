@@ -27,9 +27,9 @@ def main():
 
 
     # --- FILTRO DATA E SIMBOLO INTERATTIVO ---
-    print("\n[Opzionale] Inserisci data/ora inizio (YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
+    print("\n[Opzionale] Inserisci data/ora inizio (YYYY-MM-DD o YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
     data_inizio = input().strip()
-    print("[Opzionale] Inserisci data/ora fine (YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
+    print("[Opzionale] Inserisci data/ora fine (YYYY-MM-DD o YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
     data_fine = input().strip()
     print("[Opzionale] Inserisci uno o più simboli separati da virgola (es: GBPUSD,ETHUSD) o lascia vuoto per tutti:")
     simboli_input = input().strip()
@@ -40,18 +40,34 @@ def main():
 
     # Applica filtro data se specificato
     if data_inizio:
-        df = df[df['timestamp'] >= pd.to_datetime(data_inizio)]
+        # Se solo data, considera tutto il giorno
+        if len(data_inizio) == 10:
+            start = pd.to_datetime(data_inizio + ' 00:00:00')
+        else:
+            start = pd.to_datetime(data_inizio)
+        df = df[df['timestamp'] >= start]
     if data_fine:
-        df = df[df['timestamp'] <= pd.to_datetime(data_fine)]
+        if len(data_fine) == 10:
+            end = pd.to_datetime(data_fine + ' 23:59:59')
+        else:
+            end = pd.to_datetime(data_fine)
+        df = df[df['timestamp'] <= end]
 
     # Applica filtro simbolo se specificato
     if simboli_input:
         simboli = [s.strip().upper() for s in simboli_input.split(',') if s.strip()]
         df = df[df['symbol'].str.upper().isin(simboli)]
 
+    if df.empty:
+        print("\nNessun dato trovato per i filtri selezionati.")
+        return
+
     # Estrai i dati dal dizionario
     indicators = df['data'].apply(parse_dict).apply(pd.Series)
     df = pd.concat([df, indicators], axis=1)
+    if 'signal' not in df.columns:
+        print("\nNessun dato valido dopo il parsing dei segnali.")
+        return
     # Statistiche per segnale
     print('--- Statistiche per segnale ---')
     print(df['signal'].value_counts())
