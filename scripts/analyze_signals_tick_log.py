@@ -1,9 +1,3 @@
-import pandas as pd
-import ast
-
-# Percorso del file CSV (modifica se necessario)
-CSV_PATH = 'logs/signals_tick_log.csv'
-
 def parse_dict(s):
     try:
         # Rimuove np.float64 e converte in float
@@ -24,7 +18,37 @@ def parse_dict(s):
         return {}
 
 def main():
+    import pandas as pd
+    import ast
+    from datetime import datetime
+    # Percorso del file CSV (modifica se necessario)
+    CSV_PATH = 'logs/signals_tick_log.csv'
+    OUTPUT_PATH = 'logs/signals_tick_log_summary.csv'
+
+
+    # --- FILTRO DATA E SIMBOLO INTERATTIVO ---
+    print("\n[Opzionale] Inserisci data/ora inizio (YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
+    data_inizio = input().strip()
+    print("[Opzionale] Inserisci data/ora fine (YYYY-MM-DD HH:MM:SS) o lascia vuoto:")
+    data_fine = input().strip()
+    print("[Opzionale] Inserisci uno o più simboli separati da virgola (es: GBPUSD,ETHUSD) o lascia vuoto per tutti:")
+    simboli_input = input().strip()
+
     df = pd.read_csv(CSV_PATH, header=None, names=['timestamp', 'symbol', 'data', 'reason'])
+    # Converte la colonna timestamp in datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+
+    # Applica filtro data se specificato
+    if data_inizio:
+        df = df[df['timestamp'] >= pd.to_datetime(data_inizio)]
+    if data_fine:
+        df = df[df['timestamp'] <= pd.to_datetime(data_fine)]
+
+    # Applica filtro simbolo se specificato
+    if simboli_input:
+        simboli = [s.strip().upper() for s in simboli_input.split(',') if s.strip()]
+        df = df[df['symbol'].str.upper().isin(simboli)]
+
     # Estrai i dati dal dizionario
     indicators = df['data'].apply(parse_dict).apply(pd.Series)
     df = pd.concat([df, indicators], axis=1)
@@ -39,7 +63,6 @@ def main():
     print(df[df['signal']=='HOLD'].head(10))
 
     # Salva riepilogo in un nuovo CSV
-    OUTPUT_PATH = 'logs/signals_tick_log_summary.csv'
     summary = df.groupby(['signal', 'reason']).agg({
         'timestamp': 'count',
         'entropy': 'mean',
