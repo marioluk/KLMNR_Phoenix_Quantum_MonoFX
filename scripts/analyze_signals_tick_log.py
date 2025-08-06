@@ -1,5 +1,6 @@
 def parse_dict(s):
     import re
+    import ast
     try:
         # Solo stringhe che iniziano con '{' sono dict validi
         if not isinstance(s, str) or not s.strip().startswith('{'):
