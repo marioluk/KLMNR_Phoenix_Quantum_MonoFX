@@ -119,6 +119,12 @@ try:
             save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
             logger.info(f"[TRADE COUNT RESET] Reset giornaliero effettuato, backup creato.")
         for symbol in symbols:
+            # Controllo posizioni totali aperte su tutti i simboli
+            all_positions = mt5.positions_get()
+            total_open_positions = len(all_positions) if all_positions else 0
+            tick = mt5.symbol_info_tick(symbol)
+        daily_trade_limit_mode = config_manager.config.get('risk_parameters', {}).get('daily_trade_limit_mode', 'global')
+        for symbol in symbols:
             tick = mt5.symbol_info_tick(symbol)
             if tick is None or tick.bid is None:
                 logger.warning(f"Tick non disponibile per {symbol}")
@@ -133,8 +139,18 @@ try:
             # Recupera contatori dal file JSON
             trade_count = trade_count_state['trade_count'].get(symbol, 0)
             max_daily_trades = config_manager.config.get('risk_parameters', {}).get('max_daily_trades', 8)
-            current_positions = config_manager.get_current_positions() if hasattr(config_manager, 'get_current_positions') else 0
             max_positions = config_manager.config.get('risk_parameters', {}).get('max_positions', 1)
+            # Nuovo: posizioni aperte per simbolo
+            positions = mt5.positions_get(symbol=symbol)
+            symbol_positions = len(positions) if positions else 0
+            # Determina il tipo di posizione aperta (BUY/SELL) se presente
+            open_type = None
+            open_ticket = None
+            if positions and symbol_positions > 0:
+                # Prende la prima posizione aperta (assume una sola per simbolo)
+                pos = positions[0]
+                open_type = 'BUY' if pos.type == mt5.POSITION_TYPE_BUY else 'SELL'
+                open_ticket = pos.ticket
             # Recupera parametri di segnale per log
             ticks_buffer = list(engine.get_tick_buffer(symbol))
             buffer_size = len(ticks_buffer)
@@ -151,26 +167,66 @@ try:
             from utils.utils import is_trading_hours
             trading_hours = is_trading_hours(symbol, config_manager.config)
             # Controllo limiti
-            if trade_count >= max_daily_trades:
-                blocked = True
-                block_reason = f"max_daily_trades ({trade_count}/{max_daily_trades})"
-            elif current_positions >= max_positions:
-                blocked = True
-                block_reason = f"max_positions ({current_positions}/{max_positions})"
-            # Logging dettagliato
-            logger.info("\n==================== [DEBUG TRADE DECISION] ====================")
-            logger.info(f"Symbol: {symbol}\n--------------------")
-            logger.info(f"can_trade: {not blocked}")
-            logger.info(f"trading_hours: {trading_hours}")
+            all_positions = mt5.positions_get()
+            total_open_positions = len(all_positions) if all_positions else 0
+            if daily_trade_limit_mode == 'symbol':
+                # Limite per simbolo
+                if trade_count >= max_daily_trades:
+                    blocked = True
+                    block_reason = f"max_daily_trades_symbol ({trade_count}/{max_daily_trades})"
+                elif symbol_positions >= max_positions:
+                    blocked = True
+                    block_reason = f"max_positions_per_symbol ({symbol_positions}/{max_positions})"
+            else:
+                # Limite globale
+                if sum(trade_count_state['trade_count'].values()) >= max_daily_trades:
+                    blocked = True
+                    block_reason = f"max_daily_trades_global ({sum(trade_count_state['trade_count'].values())}/{max_daily_trades})"
+                elif total_open_positions >= max_positions:
+                    blocked = True
+                    block_reason = f"max_total_positions ({total_open_positions}/{max_positions})"
+            # Logica direzionale per posizione aperta
+            if not blocked and open_type is not None:
+                if signal == open_type:
+                    blocked = True
+                    block_reason = f"same_position_type_open ({open_type})"
+                elif signal in ("BUY", "SELL") and signal != open_type:
+                    # Chiudi la posizione opposta prima di aprire la nuova
+                    close_request = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": symbol,
+                        "volume": pos.volume,
+                        "type": mt5.ORDER_TYPE_SELL if open_type == 'BUY' else mt5.ORDER_TYPE_BUY,
+                        "position": open_ticket,
+                        "price": price,
+                        "deviation": 10,
+                        "magic": 123456,
+                        "comment": "PhoenixQuantumAuto-CLOSE",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    close_result = mt5.order_send(close_request)
+                    if close_result and close_result.retcode == mt5.TRADE_RETCODE_DONE:
+                        logger.info(f"[POSITION CLOSED] {symbol} posizione {open_type} chiusa con successo. Ticket: {open_ticket}")
+                        # Aggiorna lo stato posizioni
+                        symbol_positions -= 1
+                        open_type = None
+                    else:
+                        blocked = True
+                        block_reason = f"failed_close_opposite ({open_type})"
             logger.info(f"Dettaglio: Confidence: {confidence if confidence is not None else '-'}; Entropia: {entropy if entropy is not None else '-'}; Spin: {spin if spin is not None else '-'}; Buffer tick: {buffer_size}")
             if blocked:
                 logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: {block_reason}")
                 if block_reason.startswith('max_daily_trades'):
                     logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {trade_count}/{max_daily_trades}. Nessun nuovo trade verrà aperto oggi.")
-                elif block_reason.startswith('max_positions'):
-                    logger.info(f"🚫 Limite posizioni raggiunto: {current_positions}/{max_positions}. Nessun nuovo trade verrà aperto ora.")
+                elif block_reason.startswith('max_total_positions'):
+                    logger.info(f"🚫 Limite massimo posizioni aperte raggiunto: {total_open_positions}/{max_positions}. Nessun nuovo trade verrà aperto.")
+                elif block_reason.startswith('same_position_type_open'):
+                    logger.info(f"🚫 Posizione {open_type} già aperta su {symbol}. Nessun nuovo trade verrà aperto.")
+                elif block_reason.startswith('failed_close_opposite'):
+                    logger.info(f"🚫 Errore nella chiusura della posizione opposta su {symbol}. Trade bloccato.")
                 logger.info("")
-                write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trade_count}, current_positions={current_positions}")
+                write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trade_count}, symbol_positions={symbol_positions}")
                 continue
             else:
                 logger.info(f"Segnale: {signal} @ {signal_price:.5f}")

@@ -94,6 +94,15 @@ class ConfigManager:
     def set_current_positions(self, value: int) -> None:
         with self._current_positions_lock:
             self._current_positions = value
+    
+    # Restituisce il numero di posizioni aperte per uno specifico simbolo (via MT5)
+    def get_positions_for_symbol(self, symbol: str) -> int:
+        try:
+            positions = mt5.positions_get(symbol=symbol)
+            return len(positions) if positions else 0
+        except Exception as e:
+            self.logger.warning(f"[ConfigManager] Errore nel recupero posizioni per {symbol}: {e}")
+            return 0
 
     # Getter/setter thread-safe per trade_count
     def get_trade_count(self, symbol: str = None) -> int:
