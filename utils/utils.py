@@ -70,6 +70,13 @@ def log_signal_tick(symbol, tick, reason=None, log_path=None):
     try:
         if log_path is None:
             log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'signals_tick_log.csv')
+        # Rotazione: se il file supera 10MB, rinomina con timestamp
+        max_size_mb = 10
+        if os.path.isfile(log_path) and os.path.getsize(log_path) > max_size_mb * 1024 * 1024:
+            base, ext = os.path.splitext(log_path)
+            ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            rotated = f"{base}_{ts}{ext}"
+            os.rename(log_path, rotated)
         file_exists = os.path.isfile(log_path)
         with open(log_path, 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
