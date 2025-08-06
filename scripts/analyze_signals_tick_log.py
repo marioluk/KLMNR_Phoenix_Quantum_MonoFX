@@ -1,18 +1,14 @@
 def parse_dict(s):
+    import re
     try:
-        # Rimuove np.float64 e converte in float
-        s = s.replace('np.float64', '')
+        # Sostituisce np.float64(xxx) con xxx (float)
+        s = re.sub(r"np\.float64\(([^)]+)\)", r"\1", s)
         d = ast.literal_eval(s)
         for k, v in d.items():
-            if isinstance(v, tuple) and len(v) == 1:
-                d[k] = float(v[0])
-            elif isinstance(v, float) or isinstance(v, int):
+            try:
                 d[k] = float(v)
-            else:
-                try:
-                    d[k] = float(str(v))
-                except:
-                    pass
+            except:
+                d[k] = v
         return d
     except Exception as e:
         return {}
