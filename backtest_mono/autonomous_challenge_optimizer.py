@@ -160,10 +160,10 @@ class AutonomousHighStakesOptimizer:
             "scalping": {
                 "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
                 "max_daily_trades": [20, 30, 40, 60, 80, 100],
-                "buffer_size": [1500, 2000, 2500, 3000, 4000],
-                "spin_window": [100, 150, 200, 250, 300],
-                "min_spin_samples": [20, 30, 40, 50, 60],
-                "signal_cooldown": [1800, 2400, 3600, 5400, 7200],
+                "buffer_size": [100, 150, 200, 250, 300],
+                "spin_window": [10, 15, 20, 25, 30],
+                "min_spin_samples": [3, 4, 5, 6],
+                "signal_cooldown": [60, 120, 180, 240, 300],
                 "max_concurrent_trades": [2, 3, 4],
                 "stop_loss_pips": [6, 8, 10, 12, 15],
                 "take_profit_pips": [10, 12, 15, 18, 20, 25],
@@ -175,10 +175,10 @@ class AutonomousHighStakesOptimizer:
             "intraday": {
                 "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
                 "max_daily_trades": [5, 6, 8, 10, 12, 15, 20],
-                "buffer_size": [3000, 4000, 5000, 6000],
-                "spin_window": [200, 300, 400, 500],
-                "min_spin_samples": [40, 50, 60, 80, 100],
-                "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
+                "buffer_size": [300, 400, 500, 600, 800],
+                "spin_window": [20, 30, 40, 50, 60],
+                "min_spin_samples": [6, 8, 10, 12],
+                "signal_cooldown": [300, 600, 900, 1200],
                 "max_concurrent_trades": [2, 3, 4],
                 "stop_loss_pips": [15, 18, 20, 25, 30],
                 "take_profit_pips": [30, 35, 40, 50, 60],
@@ -191,6 +191,10 @@ class AutonomousHighStakesOptimizer:
                 "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
                 "max_daily_trades": [1, 2, 3, 4, 5, 6],
                 "max_concurrent_trades": [1, 2, 3],
+                "buffer_size": [800, 1200, 1500, 2000],
+                "spin_window": [40, 60, 80, 100, 120],
+                "min_spin_samples": [10, 15, 20, 25, 30],
+                "signal_cooldown": [1200, 1800, 2400, 3000, 3600],
                 "stop_loss_pips": [50, 60, 80, 100, 120, 150, 200],
                 "take_profit_pips": [100, 120, 150, 180, 200, 250, 300],
                 "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
@@ -202,6 +206,10 @@ class AutonomousHighStakesOptimizer:
                 "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
                 "max_daily_trades": [1, 2],
                 "max_concurrent_trades": [1, 2],
+                "buffer_size": [1500, 2000, 3000, 4000, 5000],
+                "spin_window": [100, 150, 200, 250, 300],
+                "min_spin_samples": [20, 30, 40, 50, 60],
+                "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
                 "stop_loss_pips": [150, 200, 250, 300, 400],
                 "take_profit_pips": [300, 400, 500, 600, 800],
                 "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
@@ -228,7 +236,11 @@ class AutonomousHighStakesOptimizer:
                 'buffer_size': (100, 300),
                 'spin_window': (10, 30),
                 'min_spin_samples': (3, 6),
-                'signal_cooldown': (60, 300)
+                'signal_cooldown': (60, 300),
+                'signal_threshold': (0.55, 0.75),
+                'spin_threshold': (0.15, 0.5),
+                'volatility_filter': (0.60, 0.75),
+                'trend_strength': (0.50, 0.65)
             },
             'intraday': {
                 'max_position_hours': (2, 12),
@@ -239,7 +251,11 @@ class AutonomousHighStakesOptimizer:
                 'buffer_size': (300, 800),
                 'spin_window': (20, 60),
                 'min_spin_samples': (6, 12),
-                'signal_cooldown': (300, 1200)
+                'signal_cooldown': (300, 1200),
+                'signal_threshold': (0.55, 0.75),
+                'spin_threshold': (0.15, 0.7),
+                'volatility_filter': (0.65, 0.80),
+                'trend_strength': (0.55, 0.70)
             },
             'swing': {
                 'max_position_hours': (24, 96),
@@ -250,7 +266,11 @@ class AutonomousHighStakesOptimizer:
                 'buffer_size': (800, 2000),
                 'spin_window': (40, 120),
                 'min_spin_samples': (15, 30),
-                'signal_cooldown': (1200, 3600)
+                'signal_cooldown': (1200, 3600),
+                'signal_threshold': (0.55, 0.75),
+                'spin_threshold': (0.15, 1.0),
+                'volatility_filter': (0.70, 0.85),
+                'trend_strength': (0.60, 0.75)
             },
             'position': {
                 'max_position_hours': (96, 336),
@@ -261,7 +281,11 @@ class AutonomousHighStakesOptimizer:
                 'buffer_size': (1500, 5000),
                 'spin_window': (100, 300),
                 'min_spin_samples': (30, 60),
-                'signal_cooldown': (3600, 14400)
+                'signal_cooldown': (3600, 14400),
+                'signal_threshold': (0.55, 0.75),
+                'spin_threshold': (0.15, 1.0),
+                'volatility_filter': (0.75, 0.90),
+                'trend_strength': (0.65, 0.80)
             }
         }
         ref = ranges.get(mode, ranges['intraday'])
@@ -289,6 +313,7 @@ class AutonomousHighStakesOptimizer:
             'scalping': {
                 'max_position_hours': 1.0,
                 'max_daily_trades': 40,
+                'max_concurrent_trades': 3,
                 'position_cooldown': 180,
                 'stop_loss_pips': 9,
                 'take_profit_pips': 15,
@@ -296,11 +321,17 @@ class AutonomousHighStakesOptimizer:
                 'spin_window': 20,
                 'min_spin_samples': 4,
                 'signal_cooldown': 120,
+                'signal_threshold': 0.65,
+                'spin_threshold': 0.20,
+                'volatility_filter': 0.65,
+                'trend_strength': 0.55,
+                'risk_percent': 0.005,
                 'comment': 'Scalping: altissima velocità, molti trade al giorno, spread ridotto'
             },
             'intraday': {
                 'max_position_hours': 8,
                 'max_daily_trades': 12,
+                'max_concurrent_trades': 3,
                 'position_cooldown': 900,
                 'stop_loss_pips': 25,
                 'take_profit_pips': 50,
@@ -308,11 +339,17 @@ class AutonomousHighStakesOptimizer:
                 'spin_window': 40,
                 'min_spin_samples': 8,
                 'signal_cooldown': 600,
+                'signal_threshold': 0.65,
+                'spin_threshold': 0.35,
+                'volatility_filter': 0.70,
+                'trend_strength': 0.60,
+                'risk_percent': 0.007,
                 'comment': 'Intraday: nessuna posizione overnight, sfrutta volatilità giornaliera'
             },
             'swing': {
                 'max_position_hours': 48,
                 'max_daily_trades': 3,
+                'max_concurrent_trades': 2,
                 'position_cooldown': 2400,
                 'stop_loss_pips': 80,
                 'take_profit_pips': 180,
@@ -320,11 +357,17 @@ class AutonomousHighStakesOptimizer:
                 'spin_window': 80,
                 'min_spin_samples': 20,
                 'signal_cooldown': 2400,
+                'signal_threshold': 0.60,
+                'spin_threshold': 0.5,
+                'volatility_filter': 0.75,
+                'trend_strength': 0.65,
+                'risk_percent': 0.008,
                 'comment': 'Swing Trading: coglie oscillazioni di prezzo più ampie'
             },
             'position': {
                 'max_position_hours': 168,
                 'max_daily_trades': 1,
+                'max_concurrent_trades': 1,
                 'position_cooldown': 7200,
                 'stop_loss_pips': 300,
                 'take_profit_pips': 600,
@@ -332,6 +375,11 @@ class AutonomousHighStakesOptimizer:
                 'spin_window': 150,
                 'min_spin_samples': 40,
                 'signal_cooldown': 7200,
+                'signal_threshold': 0.60,
+                'spin_threshold': 0.7,
+                'volatility_filter': 0.80,
+                'trend_strength': 0.70,
+                'risk_percent': 0.010,
                 'comment': 'Position Trading: segue trend di lungo periodo, operatività tranquilla'
             }
         }
@@ -780,14 +828,23 @@ class AutonomousHighStakesOptimizer:
             base_sl_pips_optimized[symbol] = sl_val
             take_profit_pips_optimized[symbol] = tp_val
 
-        # Assegna quantum_params globali dai valori ottimizzati del primo simbolo
+        # Assegna quantum_params globali dai valori ottimizzati del primo simbolo, oppure dai preset della modalità
         if optimal_symbols:
             first_symbol = optimal_symbols[0]
             first_params = optimized_symbols[first_symbol]
-            config['quantum_params']['buffer_size'] = first_params.get('quantum_params_override', {}).get('buffer_size', first_params.get('buffer_size', 0))
-            config['quantum_params']['spin_window'] = first_params.get('quantum_params_override', {}).get('spin_window', first_params.get('spin_window', 0))
-            config['quantum_params']['min_spin_samples'] = first_params.get('quantum_params_override', {}).get('min_spin_samples', first_params.get('min_spin_samples', 0))
-            config['quantum_params']['signal_cooldown'] = first_params.get('quantum_params_override', {}).get('signal_cooldown', first_params.get('signal_cooldown', 0))
+            # Se i parametri non sono presenti nei parametri ottimizzati del simbolo, usa quelli del preset della modalità
+            config['quantum_params']['buffer_size'] = first_params.get('quantum_params_override', {}).get('buffer_size')
+            if config['quantum_params']['buffer_size'] is None or config['quantum_params']['buffer_size'] == 0:
+                config['quantum_params']['buffer_size'] = params.get('buffer_size', 0)
+            config['quantum_params']['spin_window'] = first_params.get('quantum_params_override', {}).get('spin_window')
+            if config['quantum_params']['spin_window'] is None or config['quantum_params']['spin_window'] == 0:
+                config['quantum_params']['spin_window'] = params.get('spin_window', 0)
+            config['quantum_params']['min_spin_samples'] = first_params.get('quantum_params_override', {}).get('min_spin_samples')
+            if config['quantum_params']['min_spin_samples'] is None or config['quantum_params']['min_spin_samples'] == 0:
+                config['quantum_params']['min_spin_samples'] = params.get('min_spin_samples', 0)
+            config['quantum_params']['signal_cooldown'] = first_params.get('quantum_params_override', {}).get('signal_cooldown')
+            if config['quantum_params']['signal_cooldown'] is None or config['quantum_params']['signal_cooldown'] == 0:
+                config['quantum_params']['signal_cooldown'] = params.get('signal_cooldown', 0)
         else:
             config['quantum_params']['buffer_size'] = params.get('buffer_size', 0)
             config['quantum_params']['spin_window'] = params.get('spin_window', 0)
