@@ -2,7 +2,7 @@ import pytest
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/..'))
-from phoenix_quantum_monofx_program import QuantumEngine
+from core.quantum_engine import QuantumEngine
 
 def test_buffer_popolazione():
     config_dict = {

@@ -1,449 +1,604 @@
 
-class QuantumRiskManager:
-    def __init__(self, config, engine, trading_system=None):
-        self._lock = threading.Lock()
-        if hasattr(config, 'get_risk_params'):
-            self._config_manager = config
-            self._config = config.config
-        else:
-            self._config_manager = None
-            self._config = config
-        self.engine = engine
-        self.trading_system = trading_system
-        account_info = mt5.account_info()
-        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-        self.drawdown_tracker = DailyDrawdownTracker(
-            account_info.equity if account_info else 10000,
-            config_dict
-        )
-        self._symbol_data = {}
-        self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
-        self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
-        self.profit_multiplier = config.get('risk_management', {}).get('profit_multiplier', 1.5)
-        """Initialize with either ConfigManager or dict, thread-safe runtime"""
-        self._lock = threading.Lock()
-        if hasattr(config, 'get_risk_params'):
-            self._config_manager = config
-            self._config = config.config
-        else:
-            self._config_manager = None
-            self._config = config
-        self.engine = engine
-        self.trading_system = trading_system
-        account_info = mt5.account_info()
-        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-        self.drawdown_tracker = DailyDrawdownTracker(
-            account_info.equity if account_info else 10000,
-            config_dict
-        )
-        self._symbol_data = {}
-        # Parametri da config
-        self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
-        self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
-        self.profit_multiplier = config.get('risk_management', {}).get('profit_multiplier', 1.5)
-    @property
-    def symbols(self):
-        if self._config_manager is not None:
-            return list(self._config_manager.config.get('symbols', {}).keys())
-        elif self._config is not None:
-            if hasattr(self._config, 'config'):
-                return list(self._config.config.get('symbols', {}).keys())
-            return list(self._config.get('symbols', {}).keys())
-        return []
+import os
+import csv
 
-    def get_symbol_data(self, symbol=None):
-        with self._lock:
-            if symbol is not None:
-                return self._symbol_data.get(symbol, None)
-            return dict(self._symbol_data)
-    def set_symbol_data(self, symbol, value):
-        with self._lock:
-            self._symbol_data[symbol] = value
-        with self._lock:
-            if symbol is not None:
-                return self._symbol_data.get(symbol, None)
-            return dict(self._symbol_data)
+# ===================== LOG SIGNAL TICK (CSV) =====================
+import csv
+import os
+def log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito):
+    log_path = os.path.join("logs", "signals_tick_log.csv")
+    header = ['timestamp', 'symbol', 'entropy', 'spin', 'confidence', 'price', 'esito', 'motivo_blocco']
+    row = [timestamp, symbol, round(entropy, 4), round(spin, 4), round(confidence, 4), price, esito]
+    # Supporta chiamate legacy senza motivo_blocco
+    motivo_blocco = None
+    if hasattr(log_signal_tick, "_motivo_blocco"):
+        motivo_blocco = log_signal_tick._motivo_blocco
+    if motivo_blocco is not None:
+        row.append(motivo_blocco)
+    else:
+        row.append("")
+    try:
+        file_exists = os.path.isfile(log_path)
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        with open(log_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(header)
+            writer.writerow(row)
+    except Exception as e:
+        logger.error(f"Errore scrittura log segnali: {e}")
+
+
+# ===================== BLOCCO CONTATORI MOTIVI DI BLOCCO =====================
+import threading
+from collections import defaultdict
+_block_reason_counter = defaultdict(int)
+_block_reason_counter_lock = threading.Lock()
+_block_reason_total = 0
+_block_reason_period = 100  # Ogni 100 segnali logga il riepilogo
+
+def log_signal_tick_with_reason(symbol, entropy, spin, confidence, timestamp, price, esito, motivo_blocco):
+    global _block_reason_total
+    # Incrementa il contatore per il motivo di blocco
+    if motivo_blocco:
+        with _block_reason_counter_lock:
+            _block_reason_counter[motivo_blocco] += 1
+            _block_reason_total += 1
+            # Logga il riepilogo ogni _block_reason_period
+            if _block_reason_total % _block_reason_period == 0:
+                try:
+                    from datetime import datetime
+                    summary = f"[BLOCK REASONS SUMMARY] {datetime.now().isoformat()} | Totale ultimi {_block_reason_period} segnali:\n"
+                    for reason, count in _block_reason_counter.items():
+                        summary += f"  - {reason}: {count}\n"
+                    logger.info(summary.strip())
+                    # Reset contatori
+                    _block_reason_counter.clear()
+                except Exception as e:
+                    logger.error(f"Errore logging riepilogo motivi di blocco: {e}")
+    # Wrapper per passare il motivo_blocco
+    log_signal_tick._motivo_blocco = motivo_blocco
+    log_signal_tick(symbol, entropy, spin, confidence, timestamp, price, esito)
+    log_signal_tick._motivo_blocco = None
+
+#print("[DEBUG] Inizio esecuzione modulo phoenix_quantum_monofx_program.py")
+
+#print("[DEBUG-TRACE] Prima di import os")
+import os
+#print("[DEBUG-TRACE] Dopo import os")
+#print("[DEBUG-TRACE] Prima di import json")
+import json
+#print("[DEBUG-TRACE] Dopo import json")
+#print("[DEBUG-TRACE] Prima di import logging")
+import logging
+#print("[DEBUG-TRACE] Dopo import logging")
+#print("[DEBUG-TRACE] Prima di import time")
+import time
+#print("[DEBUG-TRACE] Dopo import time")
+
+
+#print("[DEBUG] Import base completati")
+
+#print("[DEBUG-TRACE] Prima di import datetime")
+from datetime import datetime, time as dt_time, timedelta
+#print("[DEBUG-TRACE] Dopo import datetime")
+#print("[DEBUG-TRACE] Prima di import typing")
+from typing import Dict, Tuple, List, Any, Optional
+#print("[DEBUG-TRACE] Dopo import typing")
+#print("[DEBUG-TRACE] Prima di import collections")
+from collections import deque, defaultdict
+#print("[DEBUG-TRACE] Dopo import collections")
+#print("[DEBUG-TRACE] Prima di import RotatingFileHandler")
+try:
+    from logging.handlers import RotatingFileHandler
+    #print("[DEBUG-TRACE] Dopo import RotatingFileHandler")
+except Exception as e:
+    print(f"[IMPORT ERROR] logging.handlers: {e}")
+#print("[DEBUG-TRACE] Prima di import lru_cache")
+try:
+    from functools import lru_cache
+    #print("[DEBUG-TRACE] Dopo import lru_cache")
+except Exception as e:
+    print(f"[IMPORT ERROR] functools.lru_cache: {e}")
+#print("[DEBUG-TRACE] Prima di import threading")
+try:
+    import threading
+    #print("[DEBUG-TRACE] Dopo import threading")
+except Exception as e:
+    print(f"[IMPORT ERROR] threading: {e}")
+#print("[DEBUG-TRACE] Prima di import traceback")
+try:
+    import traceback
+    #print("[DEBUG-TRACE] Dopo import traceback")
+except Exception as e:
+    print(f"[IMPORT ERROR] traceback: {e}")
+#print("[DEBUG-TRACE] Prima di import numpy as np")
+try:
+    import numpy as np
+    #print("[DEBUG-TRACE] Dopo import numpy as np")
+except Exception as e:
+    print(f"[IMPORT ERROR] numpy: {e}")
+
+
+# Dipendenze esterne/metatrader5
+#print("[DEBUG] Prima del blocco import MT5")
+try:
+    import MetaTrader5 as mt5
+    #print("[DEBUG] Import MT5 completato")
+except ImportError as e:
+    print(f"[IMPORT ERROR] {e}. Alcune funzionalità potrebbero non funzionare correttamente.")
+
+# Stub temporanei per funzioni mancanti
+def auto_correct_symbols(config):
+    """Stub temporaneo: restituisce la config senza modifiche."""
+    return config
+
+def validate_config(config):
+    """Validazione minima: assicura che la chiave 'symbols' sia presente e non vuota."""
+    global logger
+    if 'logger' not in globals() or logger is None:
+        from logging import getLogger
+        logger = getLogger("phoenix_quantum")
+    if not isinstance(config, dict):
+        logger.error("[validate_config] Configurazione non è un dict!")
+        raise ValueError("Configurazione non valida: non è un dict")
+    if 'symbols' not in config or not isinstance(config['symbols'], dict) or not config['symbols']:
+        logger.error("[validate_config] Configurazione priva di simboli validi!")
+        raise ValueError("Configurazione non valida: chiave 'symbols' mancante o vuota")
+    logger.info(f"[validate_config] Simboli validati: {list(config['symbols'].keys())}")
+
+
+
+# ===================== CONFIGURAZIONI GLOBALI E COSTANTI =====================
+# Tutte le costanti di sistema sono centralizzate qui per chiarezza e manutenzione
+#print("[DEBUG] Prima di calcolare PROJECT_ROOT e costanti globali")
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE: str = os.path.join(PROJECT_ROOT, "config", "config_autonomous_challenge_production_ready.json")
+DEFAULT_CONFIG_RELOAD_INTERVAL: int = 900  # secondi (15 minuti)
+DEFAULT_LOG_FILE: str = "logs/default.log"
+DEFAULT_LOG_MAX_SIZE_MB: int = 10
+DEFAULT_LOG_BACKUP_COUNT: int = 5
+DEFAULT_LOG_MAX_BACKUPS: int = 10
+DEFAULT_TRADING_HOURS: str = "00:00-24:00"
+DEFAULT_TIME_RANGE: tuple = (0, 0, 23, 59)  # (h1, m1, h2, m2)
+#print("[DEBUG] Costanti globali definite")
+
+# ===================== STUB FUNZIONI DI UTILITÀ MANCANTI =====================
+# Queste funzioni sono placeholder per evitare errori di import/esecuzione.
+# TODO: Sostituire con implementazioni reali o import corretti.
+def load_config(path: str = CONFIG_FILE):
+    """Stub: Carica la configurazione da file JSON."""
+    from types import SimpleNamespace
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Se già ha la chiave 'config', wrappo in un oggetto
+            if 'config' in data:
+                return SimpleNamespace(config=data['config'])
+            else:
+                return SimpleNamespace(config=data)
+    except Exception as e:
+        print(f"[load_config] Errore caricamento config: {e}")
+        return SimpleNamespace(config={})
+
+def set_config(config):
+    """Stub: imposta la configurazione globale."""
+    global _GLOBAL_CONFIG
+    _GLOBAL_CONFIG = config
+
+def set_log_file(log_file):
+    """Stub: imposta il file di log."""
+    global _LOG_FILE
+    _LOG_FILE = log_file
+
+def get_log_file():
+    """Restituisce il file di log attuale dalla configurazione, con fallback."""
+    # Prova a recuperare dalla configurazione globale
+    config = globals().get('_GLOBAL_CONFIG', None)
+    if config is not None:
+        # Supporta sia SimpleNamespace che dict
+        conf = getattr(config, 'config', config)
+        log_file = None
+        if isinstance(conf, dict):
+            log_file = conf.get('logging', {}).get('log_file')
+        if log_file:
+            return log_file
+    # Fallback su variabile globale o default
+    return globals().get('_LOG_FILE', DEFAULT_LOG_FILE)
+
+def set_logger(logger_obj):
+    """Stub: imposta il logger globale."""
+    global logger
+    logger = logger_obj
+
+def setup_logger(config_path=None):
+    """Crea e restituisce un logger base. Accetta un argomento opzionale per compatibilità futura."""
+    logger = logging.getLogger("phoenix_quantum")
+    if not logger.handlers:
+        # Handler per console
+        stream_handler = logging.StreamHandler()
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+        # Handler per file
+        try:
+            from logging.handlers import RotatingFileHandler
+            log_file = get_log_file()
+            file_handler = RotatingFileHandler(
+                log_file,
+                maxBytes=10*1024*1024,  # 10 MB
+                backupCount=5,
+                encoding='utf-8'
+            )
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+        except Exception as e:
+            print(f"[LOGGING ERROR] Impossibile aggiungere RotatingFileHandler: {e}")
+    # Imposta il livello di log dinamicamente dal file di configurazione se presente
+    log_level = None
+    try:
+        import json
+        if config_path and isinstance(config_path, str):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if 'config' in data:
+                    log_level = data['config'].get('logging', {}).get('log_level', None)
+                else:
+                    log_level = data.get('logging', {}).get('log_level', None)
+        else:
+            config = globals().get('_GLOBAL_CONFIG', None)
+            if config is not None:
+                conf = getattr(config, 'config', config)
+                log_level = conf.get('logging', {}).get('log_level', None)
+    except Exception:
+        pass
+    level_map = {
+        'CRITICAL': logging.CRITICAL,
+        'ERROR': logging.ERROR,
+        'WARNING': logging.WARNING,
+        'INFO': logging.INFO,
+        'DEBUG': logging.DEBUG,
+        'NOTSET': logging.NOTSET
+    }
+    if log_level:
+        logger.setLevel(level_map.get(str(log_level).upper(), logging.INFO))
+    else:
+        logger.setLevel(logging.INFO)
+    return logger
+
+def get_logger():
+    """Stub: restituisce il logger globale."""
+    return globals().get('logger', setup_logger())
+
+
+def clean_old_logs():
+    pass
+
+# ===================== CONFIG MANAGER (RIPRISTINATO) =====================
+class ConfigManager:
+    def __init__(self, config_path: str):
+        self._lock = threading.Lock()
+        self._config_path = config_path
+        self._config = self._load_configuration(config_path)
+        self._validate_config(self._config)
+
+    def _load_configuration(self, config_path):
+        if not os.path.isabs(config_path):
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.abspath(os.path.join(project_root, 'config', os.path.basename(config_path)))
+        with open(config_path) as f:
+            loaded = json.load(f)
+        return loaded
+
+    def _validate_config(self, config):
+        required_top = ["logging", "metatrader5", "quantum_params", "risk_parameters", "symbols"]
+        for key in required_top:
+            if key not in config:
+                raise ValueError(f"Parametro mancante nella configurazione: '{key}'")
+        # Logica di fallback e default per metatrader5
+        mt5_conf = config.get("metatrader5", {})
+        mt5_defaults = {
+            "login": 0,
+            "password": "",
+            "server": "",
+            "path": "",
+            "port": 0
+        }
+        for k, v in mt5_defaults.items():
+            if k not in mt5_conf:
+                mt5_conf[k] = v
+                logger.warning(f"[Config] {k} non trovato in metatrader5, uso default {v}")
+        config["metatrader5"] = mt5_conf
+
     @property
     def config(self):
-        return self._config
         with self._lock:
-            self._symbol_data[symbol] = value
-    def calculate_position_size(self, symbol: str, price: float, signal: str, risk_percent: float = None) -> float:
-        # ...implementazione come da versione storica...
-        pass
-        try:
-            if not self._load_symbol_data(symbol):
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
-                logger.error(f"Impossibile caricare dati simbolo {symbol}")
-                return 0.0
+            return self._config
 
-            risk_config = self.get_risk_config(symbol)
-            account = mt5.account_info()
-            if not account:
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
-                logger.error("Impossibile ottenere info account")
-                return 0.0
+    def get(self, key, default=None):
+        with self._lock:
+            return self._config.get(key, default)
 
-            # Parametri base
-            if risk_percent is None:
-                risk_percent = risk_config.get('risk_percent', 0.02)
-            risk_amount = account.equity * risk_percent
-            sl_pips = self._calculate_sl_pips(symbol)
-            symbol_data = self._symbol_data[symbol]
-            pip_size = symbol_data['pip_size']
-            contract_size = symbol_data.get('contract_size', 1.0)
-            volume_min = symbol_data.get('volume_min', None)
-            volume_max = symbol_data.get('volume_max', None)
-            volume_step = symbol_data.get('volume_step', None)
+    def set(self, key, value):
+        with self._lock:
+            self._config[key] = value
 
-            # Calcolo pip_value (pip_size * contract_size)
-            pip_value = pip_size * contract_size
-            # Target pip value normalizzato (es: 10 USD a pip per tutti i simboli)
-            target_pip_value = self._get_config(symbol, 'target_pip_value', 10.0)
-            if pip_value <= 0 or sl_pips <= 0:
-                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
-                return 0.0
-
-            # Size normalizzata per pip_value: size = (risk_amount / sl_pips) / pip_value
-            size = (risk_amount / sl_pips) / pip_value
-
-            # Normalizza per target_pip_value (opzionale, per rendere P&L simile tra simboli)
-            size = size * (pip_value / target_pip_value)
-
-            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
-
-            # Limite massimo assoluto per simbolo
-            max_size_limit = self._get_config(symbol, 'max_size_limit', None)
-            if max_size_limit is None:
-                config = self.config.config if hasattr(self.config, 'config') else self.config
-                max_size_limit = config.get('risk_parameters', {}).get('max_size_limit', 0.1)
-            if size > max_size_limit:
-                logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
-                size = max_size_limit
-
-            # Limite esposizione globale (sommatoria size * contract_size su tutti i simboli)
-            max_global_exposure = self._get_config(symbol, 'max_global_exposure', None)
-            if max_global_exposure is not None:
-                total_exposure = 0.0
-                for sym in self.symbols:
-                    if sym == symbol:
-                        total_exposure += size * contract_size
-                    else:
-                        # Salta simboli non ancora presenti in _symbol_data per evitare KeyError
-                        if sym not in self._symbol_data:
-                            continue
-                        total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
-                if total_exposure > max_global_exposure:
-                    logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
-                    size = 0.0
-
-            # Applica limiti broker e arrotondamenti
-            size = self._apply_size_limits(symbol, size)
-
-            # Salva la size calcolata per uso futuro (esposizione globale)
-            self._symbol_data[symbol]['last_size'] = size
-
-            symbol_type = 'Metallo' if symbol in ['XAUUSD', 'XAGUSD'] else ('Indice' if symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'] else 'Forex')
-            logger.debug(
-                f"\n-------------------- [SIZE-DEBUG] --------------------\n"
-                f"Symbol: {symbol} ({symbol_type})\n"
-                f"Risk Config: {risk_config}\n"
-                f"Account Equity: {account.equity}\n"
-                f"Risk Percent: {risk_percent}\n"
-                f"Risk Amount: {risk_amount}\n"
-                f"SL Pips: {sl_pips}\n"
-                f"Pip Size: {pip_size}\n"
-                f"Contract Size: {contract_size}\n"
-                f"Pip Value: {pip_value}\n"
-                f"Target Pip Value: {target_pip_value}\n"
-                f"Volume Min: {volume_min}\n"
-                f"Volume Max: {volume_max}\n"
-                f"Volume Step: {volume_step}\n"
-                f"Size (post-normalizzazione): {size}\n"
-                "------------------------------------------------------\n"
-            )
-            logger.info(
-                f"\n==================== [SIZE-DEBUG] ====================\n"
-                f"Symbol: {symbol} ({symbol_type})\n"
-                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
-                f"SL: {sl_pips:.2f} pips\n"
-                f"Pip Value: {pip_value}\n"
-                f"Target Pip Value: {target_pip_value}\n"
-                f"Size: {size:.4f}\n"
-                "======================================================\n"
-            )
-            return size
-        except Exception as e:
-            logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
-            return 0.0
-    def _apply_size_limits(self, symbol: str, size: float) -> float:
-        # ...implementazione come da versione storica...
-        pass
-        try:
-            info = mt5.symbol_info(symbol)
-            if not info:
-                logger.error(f"[_apply_size_limits] Info simbolo non disponibile per {symbol}")
-                return 0.0
-            # Arrotonda al passo corretto
-            step = info.volume_step
-            size = round(size / step) * step
-            # Applica minimi/massimi del broker
-            size = max(size, info.volume_min)
-            size = min(size, info.volume_max)
-            # CONTROLLO MARGINE: Verifica che la posizione sia sostenibile
-            account = mt5.account_info()
-            if account and size > 0:
-                try:
-                    margin_required = mt5.order_calc_margin(
-                        mt5.ORDER_TYPE_BUY,
-                        symbol,
-                        size,
-                        info.ask
-                    )
-                    max_margin = account.margin_free * 0.8
-                    if margin_required and margin_required > max_margin:
-                        safe_size = size * (max_margin / margin_required)
-                        safe_size = round(safe_size / step) * step
-                        safe_size = max(safe_size, info.volume_min)
-                        logger.warning(f"Riduzione size per {symbol}: {size:.2f} -> {safe_size:.2f} "
-                                     f"(Margine richiesto: ${margin_required:.2f}, disponibile: ${max_margin:.2f})")
-                        size = safe_size
-                except Exception as e:
-                    logger.error(f"[_apply_size_limits] Errore calcolo margine per {symbol}: {e}", exc_info=True)
-            logger.info(
-                "\n==================== [SIZE-FINALE] ====================\n"
-                f"Symbol: {symbol}\n"
-                f"Size finale: {size:.2f}\n"
-                "======================================================\n"
-            )
-            return size
-        except Exception as e:
-            logger.error(f"[_apply_size_limits] Errore generale per {symbol}: {e}", exc_info=True)
-            return 0.0
-    def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
-        # ...implementazione come da versione storica...
-        pass
-        try:
-            # --- LOG avanzato: mostra da dove vengono i parametri ---
-            min_sl = None
-            min_sl_source = ''
-            # 1. Prova override simbolo (risk_management)
-            symbol_config = self._get_config(symbol, 'stop_loss_pips', None)
-            if symbol_config is not None:
-                min_sl = symbol_config
-                min_sl_source = 'override symbol (stop_loss_pips)'
-            else:
-                # 2. Prova min_sl_distance_pips (mappa per simbolo)
-                min_sl_map = self._get_config(symbol, 'min_sl_distance_pips', None)
-                if min_sl_map is not None:
-                    min_sl = min_sl_map
-                    min_sl_source = 'risk_parameters (min_sl_distance_pips)'
-            if min_sl is None:
-                # 3. Fallback
-                min_sl = 30
-                min_sl_source = 'fallback (30)'
-
-            base_sl = self._get_config(symbol, 'base_sl_pips', min_sl)
-            base_sl_source = 'base_sl_pips (override/symbol/global)' if base_sl != min_sl else min_sl_source
-            profit_multiplier = self._get_config(symbol, 'profit_multiplier', 2.2)
-            profit_multiplier_source = 'profit_multiplier (override/symbol/global)'
-
-            symbol_info = mt5.symbol_info(symbol)
-            if not symbol_info:
-                logger.error(f"Simbolo {symbol} non trovato")
-                return 0.0, 0.0
-            pip_size = self.engine._get_pip_size(symbol)
-            digits = symbol_info.digits
-
-            try:
-                volatility = float(self.engine.calculate_quantum_volatility(symbol))
-            except Exception:
-                volatility = 1.0
-
-            oro = ['XAUUSD', 'XAGUSD']
-            indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
-            if symbol in oro + indici:
-                volatility_factor = min(volatility, 1.5)
-            else:
-                volatility_factor = min(volatility, 1.2)
-
-            buffer_factor = 1.15
-            adjusted_sl = base_sl * volatility_factor
-            if adjusted_sl <= float(min_sl) * 1.05:
-                sl_pips = int(round(float(min_sl) * buffer_factor))
-            else:
-                sl_pips = int(round(max(adjusted_sl, float(min_sl))))
-            tp_pips = int(round(sl_pips * profit_multiplier))
-
-            # --- Trailing stop activation mode support ---
-            trailing_stop = self._get_config(symbol, 'trailing_stop', {})
-            activation_mode = trailing_stop.get('activation_mode', 'fixed')
-            activation_pips = trailing_stop.get('activation_pips', 150)
-            if activation_mode == 'percent_tp':
-                tp_percentage = trailing_stop.get('tp_percentage', 0.5)
-                activation_pips = int(round(tp_pips * tp_percentage))
-            self._last_trailing_activation_pips = activation_pips  # per debug o uso esterno
-
-            if position_type == mt5.ORDER_TYPE_BUY:
-                sl_price = entry_price - (sl_pips * pip_size)
-                tp_price = entry_price + (tp_pips * pip_size)
-            else:
-                sl_price = entry_price + (sl_pips * pip_size)
-                tp_price = entry_price - (tp_pips * pip_size)
-            sl_price = round(sl_price, digits)
-            tp_price = round(tp_price, digits)
-            logger.info(
-                "\n==================== [LEVELS-DEBUG] ====================\n"
-                f"Symbol: {symbol}\n"
-                f"SL: {sl_pips} pips\n"
-                f"TP: {tp_pips} pips\n"
-                f"Entry Price: {entry_price}\n"
-                f"SL Price: {sl_price}\n"
-                f"TP Price: {tp_price}\n"
-                f"Pip Size: {pip_size} (from config: {self.engine._get_pip_size(symbol)})\n"
-                f"Digits: {digits}\n"
-                f"Volatility: {volatility:.2f}\n"
-                f"Min SL: {min_sl} [{min_sl_source}]\n"
-                f"Base SL: {base_sl} [{base_sl_source}]\n"
-                f"Multiplier: {profit_multiplier} [{profit_multiplier_source}]\n"
-                f"Trailing Activation Mode: {activation_mode}\n"
-                f"Trailing Activation Pips: {activation_pips}\n"
-                "======================================================\n"
-            )
-            return sl_price, tp_price
-        except Exception as e:
-            logger.error(f"Errore calcolo livelli per {symbol}: {str(e)}")
-            return 0.0, 0.0
-    def _get_risk_percent(self, symbol: str) -> float:
-        # ...implementazione come da versione storica...
-        pass
-        risk_pct = self._get_config(symbol, 'risk_percent', 0.01)
-        return np.clip(risk_pct, 0.001, 0.05)  # Min 0.1%, Max 5%
-    def _calculate_sl_pips(self, symbol: str) -> float:
-        # ...implementazione come da versione storica...
-        pass
-        min_sl = self._get_config(symbol, 'stop_loss_pips', None)
-        if min_sl is None:
-            min_sl = self._get_config(symbol, 'min_sl_distance_pips', None)
-        if min_sl is None:
-            forex = ['EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD']
-            indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
-            oro = ['XAUUSD', 'XAGUSD']
-            crypto = ['BTCUSD', 'ETHUSD']
-            if symbol in forex:
-                min_sl = 250
-            elif symbol in indici:
-                min_sl = 400
-            elif symbol in oro:
-                min_sl = 800
-            elif symbol in crypto:
-                min_sl = 1200
-            else:
-                min_sl = 300
-
-        base_sl = self._get_config(symbol, 'base_sl_pips', 30)
-        try:
-            volatility = float(self.engine.calculate_quantum_volatility(symbol))
-        except Exception:
-            volatility = 1.0
-        oro = ['XAUUSD', 'XAGUSD']
-        indici = ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225']
-        if symbol in oro + indici:
-            volatility_factor = min(volatility, 1.5)
-        else:
-            volatility_factor = min(volatility, 1.2)
-
-        buffer_factor = 1.15
-        adjusted_sl = base_sl * volatility_factor
-        if adjusted_sl <= float(min_sl) * 1.05:
-            final_sl = int(round(float(min_sl) * buffer_factor))
-        else:
-            final_sl = int(round(max(adjusted_sl, float(min_sl))))
-
-        logger.debug(
-            "\n-------------------- [SL-CALC-DEBUG] ------------------\n"
-            f"Symbol: {symbol}\n"
-            f"Base SL: {base_sl}\n"
-            f"Volatility: {volatility:.2f}\n"
-            f"Factor: {volatility_factor:.2f}\n"
-            f"Min SL: {min_sl}\n"
-            f"Final SL: {final_sl} pips\n"
-            "------------------------------------------------------\n"
-        )
-        return final_sl
-    def _round_to_step(self, size: float, symbol: str) -> float:
-        # ...implementazione come da versione storica...
-        pass
-        step = self._symbol_data[symbol]['volume_step']
-        if step > 0:
-            size = round(size / step) * step
-        return max(size, self._symbol_data[symbol]['volume_min'])
-    def _get_config(self, symbol: str, key: str, default: Any = None) -> Any:
-        # ...implementazione come da versione storica...
-        pass
-        config = self.config.config if hasattr(self.config, 'config') else self.config
-
-        # Prima cerca override specifico del simbolo
-        symbol_config = config.get('symbols', {}).get(symbol, {})
-        if key in symbol_config.get('risk_management', {}):
-            return symbol_config['risk_management'][key]
-
-        # Poi cerca nei parametri globali di rischio
-        value = config.get('risk_parameters', {}).get(key, default)
-        # Se il valore è un dict (mappa per simbolo), estrai quello giusto
-        if isinstance(value, dict):
-            # Cerca chiave esatta, poi 'default', poi primo valore numerico
-            if symbol in value:
-                return value[symbol]
-            elif 'default' in value:
-                return value['default']
-            else:
-                # fallback: primo valore numerico trovato
-                for v in value.values():
-                    if isinstance(v, (int, float)):
-                        return v
-            # Se non trovato, ritorna il dict stesso (comportamento legacy)
-            return default
-        return value
-    def get_risk_config(self, symbol: str) -> dict:
-        # ...implementazione come da versione storica...
-        pass
-        try:
-            # Configurazione base
-            base_config = self._config.get('risk_parameters', {})
-            # Configurazione specifica del simbolo
+    def get_risk_params(self, symbol: Optional[str] = None) -> Dict:
+        with self._lock:
+            base = self._config.get('risk_parameters', {})
+            if not symbol:
+                return base
             symbol_config = self._config.get('symbols', {}).get(symbol, {}).get('risk_management', {})
-            # Unisci le configurazioni (i valori specifici del simbolo sovrascrivono quelli globali)
-            merged_config = {
-                **base_config,
+            trailing_base = base.get('trailing_stop', {})
+            trailing_symbol = symbol_config.get('trailing_stop', {})
+            return {
+                **base,
                 **symbol_config,
                 'trailing_stop': {
-                    **base_config.get('trailing_stop', {}),
-                    **symbol_config.get('trailing_stop', {})
+                    **trailing_base,
+                    **trailing_symbol
                 }
             }
-            # Aggiungi valori di default se mancanti
-            if 'risk_percent' not in merged_config:
-                merged_config['risk_percent'] = 0.02  # 2% default
-            if 'base_sl_pips' not in merged_config:
-                merged_config['base_sl_pips'] = 150  # 150 pips default
-            if 'profit_multiplier' not in merged_config:
-                merged_config['profit_multiplier'] = 2.0  # 2:1 default
-            # Log per debug
-            logger.debug(f"Configurazione rischio per {symbol}: {merged_config}")
-            return merged_config
+        log_conf["backup_count"] = 5
+        logger.warning("[Config] backup_count non trovato o troppo basso, uso default 5")
+
+
+
+
+## --- Tutte le funzioni e classi rimangono qui ---
+
+###############################################################
+# --- CLASSI CORE DEL SISTEMA (spostate sopra il main) ---
+###############################################################
+
+""" 
+2- QuantumEngine - Il motore principale che elabora i tick di mercato e genera segnali di trading 
+basati sull'entropia e stati quantistici. Dipende dalla configurazione.
+"""
+
+
+class QuantumEngine:
+    def __init__(self, config):
+        # ...existing code...
+        self.last_confidence = None  # Per debug/report
+        # ...resto della definizione come già presente...
+
+    def main_tick_acquisition_loop(self):
+        """
+        Ciclo principale di acquisizione tick per tutti i simboli configurati.
+        Popola i buffer tick per ogni simbolo, con logging diagnostico.
+        """
+        global logger
+        if 'logger' not in globals() or logger is None:
+            from logging import getLogger
+            logger = getLogger("phoenix_quantum")
+        symbols = self.config.get('symbols', {})
+        if not symbols:
+            logger.warning("[main_tick_acquisition_loop] Nessun simbolo configurato, buffer non popolato.")
+            return
+        for symbol in symbols:
+            try:
+                # Simulazione acquisizione tick: recupera prezzo da MT5 o mock
+                price = None
+                try:
+                    import MetaTrader5 as mt5
+                    tick = mt5.symbol_info_tick(symbol)
+                    if tick:
+                        price = tick.last
+                except Exception:
+                    pass
+                # Se non disponibile, simula prezzo random per test
+                if price is None:
+                    import random
+                    price = random.uniform(100, 200)
+                self.process_tick(symbol, price)
+                logger.debug(f"[TICK-THREAD] {symbol}: price={price} | buffer_size={len(self.get_tick_buffer(symbol))}")
+            except Exception as e:
+                logger.error(f"[main_tick_acquisition_loop] Errore acquisizione tick per {symbol}: {e}", exc_info=True)
+
+# ...existing code...
+
+# --- Avvio sistema solo se eseguito come script principale ---
+def main():
+    #print("[DEBUG] Inizio main()")
+    set_config(auto_correct_symbols(load_config()))
+    #print("[DEBUG] Configurazione caricata e impostata")
+
+    def periodic_reload_config(interval: int = DEFAULT_CONFIG_RELOAD_INTERVAL) -> None:
+        while True:
+            time.sleep(interval)
+            try:
+                new_config = load_config()
+                set_config(auto_correct_symbols(new_config))
+                print(f"[{datetime.now()}] Configurazione ricaricata.")
+            except Exception as e:
+                print(f"Errore reload config: {e}")
+
+    reload_thread = threading.Thread(target=periodic_reload_config, daemon=True)
+    reload_thread.start()
+    #print("[DEBUG] Thread di reload configurazione avviato")
+
+    set_log_file(get_log_file())
+    #print("[DEBUG] Log file impostato")
+    set_logger(setup_logger())
+    #print("[DEBUG] Logger impostato")
+    clean_old_logs()
+    #print("[DEBUG] Pulizia vecchi log eseguita")
+    global logger
+    logger = get_logger()
+    #print("[DEBUG] Logger globale ottenuto")
+
+    # --- TEST LOGGING CONFIGURAZIONE ---
+    #logger.debug("[TEST] Questo è un messaggio DEBUG (dovrebbe vedersi solo se log_level=DEBUG)")
+    #logger.info("[TEST] Questo è un messaggio INFO (dovrebbe vedersi se log_level=INFO o inferiore)")
+    #logger.warning("[TEST] Questo è un messaggio WARNING (dovrebbe vedersi sempre)")
+    #logger.error("[TEST] Questo è un messaggio ERROR (dovrebbe vedersi sempre)")
+    #logger.critical("[TEST] Questo è un messaggio CRITICAL (dovrebbe vedersi sempre)")
+    #print("[LOG TEST] Livello logger:", logger.level)
+    #for h in logger.handlers:
+        #print("[LOG TEST] Handler:", h, "Level:", h.level)
+    #print("[DEBUG] Fine main() - setup completato")
+
+    # --- Avvio thread per acquisizione tick e popolamento buffer ---
+    try:
+        # Inizializza QuantumEngine con la configurazione attuale
+        config_obj = globals().get('_GLOBAL_CONFIG', None)
+        if config_obj is not None:
+            conf = getattr(config_obj, 'config', config_obj)
+        else:
+            conf = {}
+        engine = QuantumEngine(conf)
+        def tick_acquisition_worker():
+            logger.info("[THREAD] Avvio thread acquisizione tick QuantumEngine ogni 1s.")
+            while True:
+                try:
+                    engine.main_tick_acquisition_loop()
+                except Exception as e:
+                    logger.error(f"[THREAD] Errore nel ciclo acquisizione tick: {e}", exc_info=True)
+                time.sleep(1)
+        tick_thread = threading.Thread(target=tick_acquisition_worker, daemon=True)
+        tick_thread.start()
+    except Exception as e:
+        logger.critical(f"[MAIN] Errore avvio thread acquisizione tick: {e}", exc_info=True)
+
+
+
+# --- Esegui solo se eseguito come script principale ---
+if __name__ == "__main__":
+    main()
+
+# -----------------------------------------------------------
+# UTILITY FUNCTIONS
+# -----------------------------------------------------------
+
+def parse_time(time_str: str) -> Tuple[dt_time, dt_time]:
+    """Converte una stringa 'HH:MM-HH:MM' in due oggetti time"""
+    try:
+        if isinstance(time_str, list):  # Se già parsato
+            # Assicurati che gli elementi siano oggetti time
+            start = time_str[0]
+            end = time_str[1]
+            if isinstance(start, str):
+                start = datetime.strptime(start, "%H:%M").time()
+            if isinstance(end, str):
+                end = datetime.strptime(end, "%H:%M").time()
+            return start, end
+            
+        if "-" not in time_str:  # Formato singolo
+            time_obj = datetime.strptime(time_str, "%H:%M").time()
+            return time_obj, time_obj
+            
+        start_str, end_str = time_str.split('-')
+        start = datetime.strptime(start_str, "%H:%M").time()
+        end = datetime.strptime(end_str, "%H:%M").time()
+        return start, end
+        
+    except ValueError as e:
+        logger.error(f"[parse_time] Formato orario non valido: {time_str} | Errore: {str(e)}", exc_info=True)
+        h1, m1, h2, m2 = DEFAULT_TIME_RANGE
+        return dt_time(h1, m1), dt_time(h2, m2)  # Default 24h
+
+def is_trading_hours(symbol: str, config: dict) -> bool:
+    """Versione compatibile con sessioni multiple"""
+    global logger
+    try:
+        logger
+    except NameError:
+        import logging
+        logger = logging.getLogger("phoenix_quantum")
+    try:
+        import pytz
+        import holidays
+        symbol_config = config.get('symbols', {}).get(symbol, {})
+        trading_hours = symbol_config.get('trading_hours', [DEFAULT_TRADING_HOURS])
+        timezone_str = symbol_config.get('timezone', 'Europe/Rome')
+        tz = pytz.timezone(timezone_str)
+        now_dt = datetime.now(tz)
+        now = now_dt.time()
+        today = now_dt.date()
+        debug_ranges = []
+        # Festività nazionali (Italia di default, configurabile)
+        country = symbol_config.get('holiday_country', 'IT')
+        holiday_calendar = holidays.country_holidays(country)
+        if today in holiday_calendar:
+            logger.info(f"[{symbol}] Oggi è festivo ({today}): {holiday_calendar.get(today)}")
+            return False
+        for time_range in trading_hours:
+            if isinstance(time_range, str):  # Formato legacy "HH:MM-HH:MM"
+                start, end = parse_time(time_range)
+                debug_ranges.append(f"{start.strftime('%H:%M')}-{end.strftime('%H:%M')}")
+                if start <= end:
+                    if start <= now <= end:
+                        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} {timezone_str} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} -> OK")
+                        return True
+                else:  # Overnight (es. 22:00-02:00)
+                    if now >= start or now <= end:
+                        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} {timezone_str} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} (overnight) -> OK")
+                        return True
+            elif isinstance(time_range, list):  # Nuovo formato ["HH:MM", "HH:MM"]
+                start, end = parse_time("-".join(time_range))
+                debug_ranges.append(f"{start.strftime('%H:%M')}-{end.strftime('%H:%M')}")
+                if start <= now <= end:
+                    logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} {timezone_str} - INTERVALLO: {start.strftime('%H:%M')}-{end.strftime('%H:%M')} (list) -> OK")
+                    return True
+        logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} {timezone_str} - FUORI ORARIO. Intervalli validi: {debug_ranges}")
+        return False
+    except Exception as e:
+        logger.error(f"Errore controllo orari {symbol}: {str(e)}")
+        return True  # Fallback: assume sempre trading
+        
+# -----------------------------------------------------------
+# CLASSI CORE DEL SISTEMA
+# -----------------------------------------------------------
+
+""" 
+1- ConfigManager - La prima classe necessaria, carica e gestisce la configurazione del sistema da file JSON.
+"""
+class ConfigManager:
+    def __init__(self, config_path: str) -> None:
+        """Costruttore principale thread-safe"""
+        from threading import Lock
+        logger.info(
+            "\n==================== [AVVIO QUANTUM TRADING SYSTEM] ====================\n"
+            f"File configurazione: {config_path}\n"
+            "------------------------------------------------------\n"
+        )
+        self._setup_logger(config_path)
+        logger.info("✅ Logger configurato")
+        self._config_path = config_path
+        self.running = False
+        logger.info("📋 Caricamento configurazione...")
+        self._load_configuration(config_path)  # Questo inizializza self.config
+        # Validazione automatica della configurazione
+        try:
+            validate_config(self.config.config)
+            logger.info("✅ Configurazione caricata e validata")
         except Exception as e:
-            logger.error(f"Errore in get_risk_config: {str(e)}")
-            # Ritorna configurazione di fallback
-            return {
-                'risk_percent': 0.02,
-                'base_sl_pips': 150,
-                'profit_multiplier': 2.0,
-                'trailing_stop': {'enable': False}
-            }
-    def _load_symbol_data(self, symbol: str) -> bool:
-        # ...implementazione come da versione storica...
-        pass
+            logger.critical(f"Errore di validazione configurazione: {e}")
+            raise
+        if not hasattr(self.config, 'config') or 'symbols' not in self.config.config:
+            pass
+        logger.info(
+            "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
+            f"Simboli trovati: {list(self.config.config['symbols'].keys())}\n"
+            "------------------------------------------------------\n"
+        )
+        self._config = self.config
+        logger.info("🔄 Inizializzazione componenti core...")
+        if not self._initialize_mt5():
+            pass
+        logger.info("📡 Attivazione simboli in MT5...")
+        self._activate_symbols()
+        logger.info("✅ Simboli attivati")
+        logger.info("🧠 Inizializzazione Quantum Engine...")
+        self.engine = QuantumEngine(self)
+        logger.info("✅ Quantum Engine pronto")
+        self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
+        self.max_positions = self.get_risk_params().get('max_positions', 4)
+        # Locks per variabili runtime
+        self._trade_count_lock = Lock()
+        self._current_positions_lock = Lock()
+        self._metrics_lock = Lock()
         self._trade_metrics_lock = Lock()
         # Variabili protette
         self._current_positions = 0
@@ -465,53 +620,7 @@ class QuantumRiskManager:
             'symbol_stats': defaultdict(dict)
         }
         initial_equity = self.account_info.equity if self.account_info else 10000
-        try:
-            if symbol in self._symbol_data:
-                return True
 
-            info = mt5.symbol_info(symbol)
-            if not info:
-                logger.error(f"Impossibile ottenere info MT5 per {symbol}")
-                return False
-
-            # Accesso alla configurazione universale
-            config = self.config.config if hasattr(self.config, 'config') else self.config
-            symbol_config = config.get('symbols', {}).get(symbol, {})
-            risk_config = symbol_config.get('risk_management', {})
-            contract_size = risk_config.get('contract_size', 1.0)
-            point = info.point
-
-            # 1. Cerca pip_size per simbolo in config (override per simbolo)
-            pip_size = None
-            if 'pip_size' in risk_config:
-                pip_size = float(risk_config['pip_size'])
-            else:
-                # 2. Cerca pip_size_map globale
-                pip_map = config.get('pip_size_map', {})
-                pip_size = pip_map.get(symbol)
-                if pip_size is None:
-                    pip_size = pip_map.get('default', 0.0001)
-                pip_size = float(pip_size)
-
-            self._symbol_data[symbol] = {
-                'pip_size': pip_size,
-                'volume_step': info.volume_step,
-                'digits': info.digits,
-                'volume_min': info.volume_min,
-                'volume_max': info.volume_max,
-                'contract_size': contract_size
-            }
-
-            logger.debug(f"Dati caricati per {symbol}: PipSize={pip_size}, ContractSize={contract_size}, Point={point}")
-            logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
-                        f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
-                        f"ContractSize={contract_size} | "
-                        f"PipSize={pip_size} | "
-                        f"Point={point}")
-            return True
-        except Exception as e:
-            logger.error(f"Errore critico in _load_symbol_data: {str(e)}")
-            return False
     # Getter/setter thread-safe per current_positions
     def get_current_positions(self) -> int:
         with self._current_positions_lock:
@@ -1130,6 +1239,8 @@ class QuantumEngine:
             })
             # Usa sempre il getter anche per il debug
             logger.debug(f"[TICK] {symbol}: price={price}, delta={delta}, direction={direction}, buffer_size={len(self.get_tick_buffer(symbol))}")
+            if len(self.get_tick_buffer(symbol)) == 0:
+                logger.warning(f"[process_tick] Buffer vuoto dopo inserimento per {symbol}. Possibili cause: errore logica, race condition, simbolo non inizializzato.")
         except Exception as e:
             logger.error(f"[process_tick] Errore durante l'elaborazione del tick per {symbol}: {e}", exc_info=True)
 
@@ -1292,9 +1403,15 @@ class QuantumEngine:
                 if len(ticks) >= self.min_spin_samples:
                     deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
                     entropy = self.calculate_entropy(deltas)
-                    spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
-                    confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
-                    volatility = 1 + abs(spin) * entropy
+                    if len(ticks) == 0:
+                        spin = 0
+                        confidence = 0.0
+                        volatility = 1.0
+                        logger.warning(f"[BUFFER EMPTY] {symbol}: buffer tick vuoto - nessuna metrica calcolata, nessun segnale generabile. Possibili cause: feed dati assente, connessione MT5, mercato chiuso o errore precedente. Verifica log errori e stato connessione.")
+                    else:
+                        spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
+                        confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
+                        volatility = 1 + abs(spin) * entropy
                 else:
                     entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
                 state = {
@@ -1559,7 +1676,7 @@ class DailyDrawdownTracker:
                 self._last_check_time = time.time()
                 try:
                     drawdown_pct = (current_equity - self._daily_high) / self._daily_high
-                    self._max_daily_drawdown = max(abs(drawdown_pct), self._max_daily_drawdown)
+                    self._max_daily_drawdown = min(self._max_daily_drawdown, drawdown_pct)
                     soft_hit = drawdown_pct <= -self.soft_limit
                     hard_hit = drawdown_pct <= -self.hard_limit
                     if hard_hit:
@@ -2532,10 +2649,16 @@ class QuantumTradingSystem:
         while self.running:
             try:
                 # Verifica connessione MT5
-                if not mt5.terminal_info().connected:
-                    logger.error("Connessione MT5 persa!")
-                    self._safe_sleep(5)
-                    continue
+                if not mt5.terminal_info() or not mt5.terminal_info().connected:
+                    logger.warning("Connessione MT5 persa, tentativo di riconnessione...")
+                    if self._verify_connection():
+                        logger.info("Riconnessione MT5 riuscita.")
+                    else:
+                        logger.error("Riconnessione MT5 fallita. Attendo 5 secondi e riprovo.")
+                        self._safe_sleep(5)
+                        continue
+                else:
+                    logger.debug("Connessione MT5 OK")
                 current_time = time.time()
                 # Controlli periodici
                 if current_time - self.last_connection_check > 30:  # Check più frequente
@@ -3124,10 +3247,9 @@ class QuantumTradingSystem:
                 if not self._validate_tick(tick):
                     continue
 
-                # Inserisci il tick nel buffer della QuantumEngine
                 if hasattr(self, 'engine') and hasattr(self.engine, 'process_tick'):
-                    # Usa il prezzo medio tra bid e ask se disponibile, altrimenti bid
-                    pass  # <-- Added to fix IndentationError
+                    price = (tick.bid + tick.ask) / 2 if tick.bid and tick.ask else tick.bid
+                    self.engine.process_tick(symbol, price)
 
                 self._process_single_symbol(symbol, tick, current_positions)
 
