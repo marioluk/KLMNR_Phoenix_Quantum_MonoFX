@@ -1,4 +1,96 @@
+import os
+import csv
+import json
+import time
+import threading
+import datetime
+from collections import defaultdict
+import MetaTrader5 as mt5
+from core.trading_metrics import TradingMetrics
+from core.daily_drawdown_tracker import DailyDrawdownTracker
+from core.quantum_engine import QuantumEngine
+from core.quantum_risk_manager import QuantumRiskManager
+from utils.utils import load_config, setup_logger, clean_old_logs
+from utils.utils import is_trading_hours
+
+
 class QuantumTradingSystem:
+    def __init__(self, config_path: str):
+        """Costruttore principale"""
+        self.logger = setup_logger(config_path)
+        self.symbols = []  # fallback sicuro
+        self._config_path = config_path
+        self.running = False
+        self.logger.info(
+            "\n==================== [AVVIO QUANTUM TRADING SYSTEM] ====================\n"
+            f"File configurazione: {config_path}\n"
+            "------------------------------------------------------\n"
+        )
+        self._load_configuration(config_path)  # Questo inizializza self._config
+        self.logger.info("✅ Configurazione caricata")
+        if not hasattr(self._config, 'config') or 'symbols' not in self._config.config:
+            self.logger.error("Configurazione simboli non valida nel file di configurazione")
+        else:
+            self.symbols = list(self._config.config['symbols'].keys())
+            self.logger.info(
+                "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
+                f"Simboli trovati: {self.symbols}\n"
+                "------------------------------------------------------\n"
+            )
+        self.logger.info("🔄 Inizializzazione componenti core...")
+        if not self._initialize_mt5():
+            raise RuntimeError("Inizializzazione MT5 fallita")
+        self.logger.info("📡 Attivazione simboli in MT5...")
+        self._activate_symbols()
+        self.logger.info("✅ Simboli attivati")
+        self.logger.info("🧠 Inizializzazione Quantum Engine...")
+        self.engine = QuantumEngine(self._config.config)
+        self.logger.info("✅ Quantum Engine pronto")
+        self.risk_manager = QuantumRiskManager(self._config.config, self.engine, self)  # Passa il dict config
+        self.max_positions = self._config.config.get('risk_parameters', {}).get('max_positions', 4)
+        self.current_positions = 0
+        self.trade_count = defaultdict(int)
+        self._last_trade_count_reset = datetime.datetime.now().date()
+        self._trade_count_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_count_state.json')
+        self.last_position_check = 0
+        self.last_connection_check = 0
+        self.last_account_update = 0
+        self.last_tick_check = 0
+        self.last_buffer_check = 0
+        self.metrics_lock = threading.Lock()
+        self.position_lock = threading.Lock()
+        self.metrics = TradingMetrics()
+        self.account_info = mt5.account_info()
+        self.currency = (
+            self.account_info.currency 
+            if self.account_info 
+            else self._config.config.get('account_currency', 'USD')
+        )
+        if not self.account_info:
+            self.logger.warning(f"Usando valuta di fallback: {self.currency}")
+        self.trade_metrics = {
+            'total_trades': 0,
+            'successful_trades': 0,
+            'failed_trades': 0,
+            'total_profit': 0.0,
+            'symbol_stats': defaultdict(dict)
+        }
+        initial_equity = self.account_info.equity if self.account_info else 10000
+        self.drawdown_tracker = DailyDrawdownTracker(
+            initial_equity=initial_equity,
+            config=self._config.config
+        )
+        self._load_trade_count_state()
+        self.logger.info(
+            "\n==================== [SISTEMA INIZIALIZZATO] ====================\n"
+            f"Simboli configurati: {self.symbols}\n"
+            f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}\n"
+            "======================================================\n"
+        )
+        self.logger.info("Sistema inizializzato correttamente")
+        self.logger.info(f"Simboli configurati: {self.symbols}")
+        self.logger.info(f"Parametri buffer: size={self.engine.buffer_size}, min_samples={self.engine.min_spin_samples}")
+
     def get_dynamic_risk_percent(self):
         """
         Restituisce il risk_percent dinamico in base al drawdown attuale.
@@ -42,10 +134,10 @@ class QuantumTradingSystem:
 
     def debug_trade_decision(self, symbol):
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo."""
-        logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
+        self.logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
         # 1. Può fare trading?
         can_trade = self.engine.can_trade(symbol)
-        logger.info(f"can_trade: {can_trade}")
+        self.logger.info(f"can_trade: {can_trade}")
         if not can_trade:
             logger.info("Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)")
             return
@@ -53,7 +145,7 @@ class QuantumTradingSystem:
         # 2. Orari di trading
         config_dict = self._config.config if hasattr(self._config, 'config') else self._config
         trading_hours = is_trading_hours(symbol, config_dict)
-        logger.info(f"trading_hours: {trading_hours}")
+        self.logger.info(f"trading_hours: {trading_hours}")
         if not trading_hours:
             logger.info("Motivo: fuori orario di trading")
             return
@@ -61,7 +153,7 @@ class QuantumTradingSystem:
         # 3. Posizioni già aperte
         existing_positions = mt5.positions_get(symbol=symbol)
         has_position = existing_positions and len(existing_positions) > 0
-        logger.info(f"has_position: {has_position}")
+        self.logger.info(f"has_position: {has_position}")
     import csv
     import os
     def debug_trade_decision(self, symbol):

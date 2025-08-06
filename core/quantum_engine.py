@@ -11,16 +11,13 @@ import numpy as np
 # Importa costanti e utilità
 
 from utils.constants import DEFAULT_SPREADS
-from utils.utils import log_signal_tick, log_signal_tick_with_reason
+from utils.utils import log_signal_tick
 import MetaTrader5 as mt5
 import datetime
 
 class QuantumEngine:
     def __init__(self, config_manager):
         self.config_manager = config_manager
-        self.config = config_manager.config if hasattr(config_manager, 'config') else config_manager
-    def get_tick_buffer(self, symbol):
-        return self._tick_buffer[symbol]
         self.config = config_manager.config if hasattr(config_manager, 'config') else config_manager
         self._runtime_lock = threading.RLock()
         self._tick_buffer = defaultdict(deque)
@@ -44,6 +41,9 @@ class QuantumEngine:
         self.last_confidence = None
         import logging
         self.logger = logging.getLogger("phoenix_quantum")
+
+    def get_tick_buffer(self, symbol):
+        return self._tick_buffer[symbol]
 
     def append_tick(self, symbol, tick):
         with self._runtime_lock:

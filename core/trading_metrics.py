@@ -1,11 +1,6 @@
+
 import numpy as np
 from collections import defaultdict
-"""
-5- TradingMetrics - Monitora le metriche di performance. 
-Classe indipendente ma utilizzata dal sistema principale.
-"""
-
-
 import logging
 
 class TradingMetrics:
@@ -1768,7 +1763,7 @@ class QuantumTradingSystem:
                     except Exception as e:
                         logger.error(f"Errore chiusura automatica {pos.ticket}: {str(e)}")
 
-    check_buffers(self):
+    def check_buffers(self):
         """Controlla lo stato dei buffer di ogni simbolo"""
         for symbol in self._config.config['symbols']:
             buffer = self.engine.get_tick_buffer(symbol)

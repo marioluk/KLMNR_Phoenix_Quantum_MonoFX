@@ -1,10 +1,14 @@
 # constants.py
 # Tutte le costanti globali del progetto Phoenix Quantum MonoFX
 
+
 # Costanti logging
-MAX_LOG_SIZE = 10 * 1024 * 1024  # 10 MB
-LOG_BACKUP_COUNT = 5
-LOG_ENCODING = 'utf-8'
+DEFAULT_LOG_FILE = 'phoenix_quantum.log'
+DEFAULT_LOG_LEVEL = 'INFO'
+DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+DEFAULT_LOG_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+DEFAULT_LOG_BACKUP_COUNT = 5
+DEFAULT_LOG_ENCODING = 'utf-8'
 
 # Parametri di default QuantumEngine
 DEFAULT_CACHE_TIMEOUT = 60

@@ -1,25 +1,45 @@
+from core.daily_drawdown_tracker import DailyDrawdownTracker
+import MetaTrader5 as mt5
+import threading
 # quantum_risk_manager.py
 """
 Modulo QuantumRiskManager: gestisce la logica di risk management per il sistema di trading.
 """
 import logging
+from typing import Tuple, Any
 
 
 
 class QuantumRiskManager:
     def __init__(self, config_manager, engine, parent=None):
-        self._config_manager = config_manager
+        self.logger = logging.getLogger("phoenix_quantum")
+        self._lock = threading.Lock()
+        if hasattr(config, 'get_risk_params'):
+            self._config_manager = config
+            self._config = config.config
+        else:
+            self._config_manager = None
+            self._config = config
         self.engine = engine
-        self.parent = parent
-        # ... eventuali altre inizializzazioni ...
+        self.trading_system = trading_system
+        account_info = mt5.account_info()
+        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+        self.drawdown_tracker = DailyDrawdownTracker(
+            account_info.equity if account_info else 10000,
+            config_dict
+        )
+        self._symbol_data = {}
+        # Parametri da config
+        self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
+        self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
+        self.profit_multiplier = config.get('risk_management', {}).get('profit_multiplier', 1.5)
 
     @property
     def symbols(self):
         # Accesso ai simboli tramite _config_manager o direttamente da _config
         if self._config_manager is not None:
             return list(self._config_manager.config.get('symbols', {}).keys())
-        elif self._config is not None:
-            # _config può essere un dict o avere l'attributo config
+        elif hasattr(self, '_config') and self._config is not None:
             if hasattr(self._config, 'config'):
                 return list(self._config.config.get('symbols', {}).keys())
             return list(self._config.get('symbols', {}).keys())
@@ -75,15 +95,15 @@ class QuantumRiskManager:
         """Calcola dimensione posizione normalizzata per rischio e pip value, con limiti di esposizione globale e log dettagliato"""
         try:
             if not self._load_symbol_data(symbol):
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
-                logger.error(f"Impossibile caricare dati simbolo {symbol}")
+                self.logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
+                self.logger.error(f"Impossibile caricare dati simbolo {symbol}")
                 return 0.0
 
             risk_config = self.get_risk_config(symbol)
             account = mt5.account_info()
             if not account:
-                logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
-                logger.error("Impossibile ottenere info account")
+                self.logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
+                self.logger.error("Impossibile ottenere info account")
                 return 0.0
 
             # Parametri base
@@ -103,7 +123,8 @@ class QuantumRiskManager:
             # Target pip value normalizzato (es: 10 USD a pip per tutti i simboli)
             target_pip_value = self._get_config(symbol, 'target_pip_value', 10.0)
             if pip_value <= 0 or sl_pips <= 0:
-                logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
+                
+                self.logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
                 return 0.0
 
             # Size normalizzata per pip_value: size = (risk_amount / sl_pips) / pip_value
@@ -113,6 +134,7 @@ class QuantumRiskManager:
             size = size * (pip_value / target_pip_value)
 
             logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
+            self.logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
 
             # Limite massimo assoluto per simbolo
             max_size_limit = self._get_config(symbol, 'max_size_limit', None)
@@ -121,6 +143,7 @@ class QuantumRiskManager:
                 max_size_limit = config.get('risk_parameters', {}).get('max_size_limit', 0.1)
             if size > max_size_limit:
                 logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
+                self.logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
 
             # Limite esposizione globale (sommatoria size * contract_size su tutti i simboli)
@@ -137,6 +160,7 @@ class QuantumRiskManager:
                         total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
                 if total_exposure > max_global_exposure:
                     logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
+                    self.logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
                     size = 0.0
 
             # Applica limiti broker e arrotondamenti
@@ -146,7 +170,8 @@ class QuantumRiskManager:
             self._symbol_data[symbol]['last_size'] = size
 
             symbol_type = 'Metallo' if symbol in ['XAUUSD', 'XAGUSD'] else ('Indice' if symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'] else 'Forex')
-            logger.debug(
+            
+            self.logger.debug(
                 f"\n-------------------- [SIZE-DEBUG] --------------------\n"
                 f"Symbol: {symbol} ({symbol_type})\n"
                 f"Risk Config: {risk_config}\n"
@@ -164,7 +189,8 @@ class QuantumRiskManager:
                 f"Size (post-normalizzazione): {size}\n"
                 "------------------------------------------------------\n"
             )
-            logger.info(
+            
+            self.logger.info(
                 f"\n==================== [SIZE-DEBUG] ====================\n"
                 f"Symbol: {symbol} ({symbol_type})\n"
                 f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
@@ -176,7 +202,8 @@ class QuantumRiskManager:
             )
             return size
         except Exception as e:
-            logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
+            
+            self.logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)
             return 0.0
     
        
@@ -186,7 +213,8 @@ class QuantumRiskManager:
         try:
             info = mt5.symbol_info(symbol)
             if not info:
-                logger.error(f"[_apply_size_limits] Info simbolo non disponibile per {symbol}")
+                
+                self.logger.error(f"[_apply_size_limits] Info simbolo non disponibile per {symbol}")
                 return 0.0
             # Arrotonda al passo corretto
             step = info.volume_step
@@ -209,20 +237,24 @@ class QuantumRiskManager:
                         safe_size = size * (max_margin / margin_required)
                         safe_size = round(safe_size / step) * step
                         safe_size = max(safe_size, info.volume_min)
-                        logger.warning(f"Riduzione size per {symbol}: {size:.2f} -> {safe_size:.2f} "
-                                     f"(Margine richiesto: ${margin_required:.2f}, disponibile: ${max_margin:.2f})")
+                        self.logger.warning(
+                            f"Riduzione size per {symbol}: {size:.2f} -> {safe_size:.2f} "
+                            f"(Margine richiesto: ${margin_required:.2f}, disponibile: ${max_margin:.2f})"
+                        )
                         size = safe_size
                 except Exception as e:
-                    logger.error(f"[_apply_size_limits] Errore calcolo margine per {symbol}: {e}", exc_info=True)
-            logger.info(
+                    self.logger.error(f"[_apply_size_limits] Errore calcolo margine per {symbol}: {e}", exc_info=True)
+            self.logger.info(
+            
                 "\n==================== [SIZE-FINALE] ====================\n"
                 f"Symbol: {symbol}\n"
                 f"Size finale: {size:.2f}\n"
                 "======================================================\n"
             )
             return size
+            
         except Exception as e:
-            logger.error(f"[_apply_size_limits] Errore generale per {symbol}: {e}", exc_info=True)
+            self.logger.error(f"[_apply_size_limits] Errore generale per {symbol}: {e}", exc_info=True)
             return 0.0
     
 
@@ -258,7 +290,7 @@ class QuantumRiskManager:
 
             symbol_info = mt5.symbol_info(symbol)
             if not symbol_info:
-                logger.error(f"Simbolo {symbol} non trovato")
+                self.logger.error(f"Simbolo {symbol} non trovato")
                 return 0.0, 0.0
             pip_size = self.engine._get_pip_size(symbol)
             digits = symbol_info.digits
@@ -300,7 +332,7 @@ class QuantumRiskManager:
                 tp_price = entry_price - (tp_pips * pip_size)
             sl_price = round(sl_price, digits)
             tp_price = round(tp_price, digits)
-            logger.info(
+            self.logger.info(
                 "\n==================== [LEVELS-DEBUG] ====================\n"
                 f"Symbol: {symbol}\n"
                 f"SL: {sl_pips} pips\n"
@@ -320,10 +352,9 @@ class QuantumRiskManager:
             )
             return sl_price, tp_price
         except Exception as e:
-            logger.error(f"Errore calcolo livelli per {symbol}: {str(e)}")
+            self.logger.error(f"Errore calcolo livelli per {symbol}: {str(e)}")
             return 0.0, 0.0
-                   
-    
+
     """
     4. Utility e Limitatori di Rischio
     """
@@ -375,7 +406,7 @@ class QuantumRiskManager:
         else:
             final_sl = int(round(max(adjusted_sl, float(min_sl))))
 
-        logger.debug(
+        self.logger.debug(
             "\n-------------------- [SL-CALC-DEBUG] ------------------\n"
             f"Symbol: {symbol}\n"
             f"Base SL: {base_sl}\n"
@@ -454,12 +485,13 @@ class QuantumRiskManager:
                 merged_config['profit_multiplier'] = 2.0  # 2:1 default
             
             # Log per debug
-            logger.debug(f"Configurazione rischio per {symbol}: {merged_config}")
-            
+            self.logger.debug(f"Configurazione rischio per {symbol}: {merged_config}")
+
             return merged_config
             
         except Exception as e:
-            logger.error(f"Errore in get_risk_config: {str(e)}")
+            self.logger.error(f"Errore in get_risk_config: {str(e)}")
+        
             # Ritorna configurazione di fallback
             return {
                 'risk_percent': 0.02,
@@ -481,7 +513,7 @@ class QuantumRiskManager:
 
             info = mt5.symbol_info(symbol)
             if not info:
-                logger.error(f"Impossibile ottenere info MT5 per {symbol}")
+                self.logger.error(f"Impossibile ottenere info MT5 per {symbol}")
                 return False
 
             # Accesso alla configurazione universale
@@ -512,13 +544,14 @@ class QuantumRiskManager:
                 'contract_size': contract_size
             }
 
-            logger.debug(f"Dati caricati per {symbol}: PipSize={pip_size}, ContractSize={contract_size}, Point={point}")
-            logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
+            self.logger.debug(f"Dati caricati per {symbol}: PipSize={pip_size}, ContractSize={contract_size}, Point={point}")
+            self.logger.info(f"SYMBOL CONFIG LOADED - {symbol}: "
                         f"Type={'Forex' if symbol not in ['XAUUSD','XAGUSD','SP500','NAS100','US30'] else 'Special'} | "
                         f"ContractSize={contract_size} | "
                         f"PipSize={pip_size} | "
                         f"Point={point}")
             return True
         except Exception as e:
-            logger.error(f"Errore critico in _load_symbol_data: {str(e)}")
+
+            self.logger.error(f"Errore critico in _load_symbol_data: {str(e)}")
             return False

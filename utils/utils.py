@@ -1,3 +1,4 @@
+from datetime import time as dt_time
 import os
 import csv
 import datetime
@@ -5,12 +6,64 @@ import logging
 import time
 import json
 
-def parse_time(timestr, fmt='%Y-%m-%d %H:%M:%S'):
-    """Parsa una stringa di tempo in oggetto datetime, gestendo errori."""
-    try:
-        return datetime.datetime.strptime(timestr, fmt)
-    except Exception:
-        return None
+from utils.constants import DEFAULT_LOG_FILE, DEFAULT_LOG_LEVEL, DEFAULT_LOG_FORMAT, DEFAULT_LOG_MAX_BYTES, DEFAULT_LOG_BACKUP_COUNT
+
+# Funzione parse_time_range già presente
+def setup_logger(config_path=None):
+    """Configura e restituisce un logger globale per il sistema."""
+    logger = logging.getLogger("phoenix_quantum")
+    if not logger.handlers:
+        handler = logging.handlers.RotatingFileHandler(
+            DEFAULT_LOG_FILE,
+            maxBytes=DEFAULT_LOG_MAX_BYTES,
+            backupCount=DEFAULT_LOG_BACKUP_COUNT,
+            encoding='utf-8'
+        )
+        formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(getattr(logging, DEFAULT_LOG_LEVEL, logging.INFO))
+    return logger
+
+def clean_old_logs(log_dir=None, max_files=10):
+    """Elimina i vecchi file di log mantenendo solo i più recenti."""
+    if log_dir is None:
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+    if not os.path.isdir(log_dir):
+        return
+    logs = sorted([f for f in os.listdir(log_dir) if f.endswith('.log')], reverse=True)
+    for old_log in logs[max_files:]:
+        try:
+            os.remove(os.path.join(log_dir, old_log))
+        except Exception:
+            pass
+
+def validate_config(config):
+    """Placeholder per validazione della configurazione."""
+    # Implementare validazione reale se necessario
+    if not isinstance(config, dict):
+        raise ValueError("Config non valida: deve essere un dict")
+    if 'symbols' not in config:
+        raise ValueError("Config non valida: manca la chiave 'symbols'")
+    return True
+
+def is_trading_hours(symbol, config):
+    """Verifica se il simbolo è in orario di trading secondo la configurazione."""
+    # Placeholder: sempre True, implementare logica reale se serve
+    return True
+
+# Funzione parse_time_range già presente
+def set_symbol_data(obj, symbol, value):
+    """Imposta i dati di un simbolo in modo thread-safe su un oggetto con _lock e _symbol_data."""
+    with obj._lock:
+        obj._symbol_data[symbol] = value
+
+# Funzione parse_time per parsing orari generici (es. inizio/fine)
+def parse_time_range(time_str: str) -> tuple:
+    """Parsa una stringa oraria in una tupla (inizio, fine)."""
+    # TODO: implementazione reale, placeholder
+    from datetime import time as dt_time
+    return (dt_time(0, 0), dt_time(23, 59))
 
 def log_signal_tick(symbol, tick, reason=None, log_path=None):
     """Logga un tick di segnale su file CSV."""

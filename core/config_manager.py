@@ -1,56 +1,64 @@
+# Necessario per il caricamento della configurazione
+import json
 # config_manager.py
 """
 Modulo ConfigManager: gestisce il caricamento e la validazione della configurazione del sistema trading.
 """
+
 import os
 import threading
 from collections import defaultdict
 from typing import Optional, Dict
+import logging
+import MetaTrader5 as mt5
 from utils.utils import validate_config
 from utils.constants import DEFAULT_SPREADS
-import logging
+from core.quantum_engine import QuantumEngine
+from core.quantum_risk_manager import QuantumRiskManager
+from core.trading_metrics import TradingMetrics
 
 class ConfigManager:
     def __init__(self, config_path: str) -> None:
         """Costruttore principale thread-safe"""
         from threading import Lock
-        logger = logging.getLogger("phoenix_quantum")
-        logger.info(
+        self.logger = logging.getLogger("phoenix_quantum")
+        self.logger.info(
             "\n==================== [AVVIO QUANTUM TRADING SYSTEM] ====================\n"
             f"File configurazione: {config_path}\n"
             "------------------------------------------------------\n"
         )
-        self._setup_logger(config_path)
-        logger.info("✅ Logger configurato")
+        # self._setup_logger(config_path)  # RIMOSSO: non implementato, logger già configurato nel main
+        self.logger.info("✅ Logger configurato")
         self._config_path = config_path
         self.running = False
-        logger.info("📋 Caricamento configurazione...")
-        self._load_configuration(config_path)  # Questo inizializza self.config
+        self.logger.info("📋 Caricamento configurazione...")
+        # Caricamento diretto della configurazione dal file JSON
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config_data = json.load(f)
+        # La struttura attesa è config_data['config']
+        self.config = config_data['config']
         # Validazione automatica della configurazione
         try:
-            validate_config(self.config.config)
-            logger.info("✅ Configurazione caricata e validata")
+            validate_config(self.config)
+            self.logger.info("✅ Configurazione caricata e validata")
         except Exception as e:
-            logger.critical(f"Errore di validazione configurazione: {e}")
+            self.logger.critical(f"Errore di validazione configurazione: {e}")
             raise
         # Se la configurazione non contiene simboli, logga un warning
-        if not hasattr(self.config, 'config') or 'symbols' not in self.config.config:
-            logger.warning("La configurazione non contiene la chiave 'symbols'.")
-        logger.info(
+        if 'symbols' not in self.config:
+            self.logger.warning("La configurazione non contiene la chiave 'symbols'.")
+        self.logger.info(
             "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
-            f"Simboli trovati: {list(self.config.config['symbols'].keys())}\n"
+            f"Simboli trovati: {list(self.config['symbols'].keys())}\n"
             "------------------------------------------------------\n"
         )
         self._config = self.config
-        logger.info("🔄 Inizializzazione componenti core...")
-        if not self._initialize_mt5():
-            logger.warning("MT5 non inizializzato correttamente.")
-        logger.info("📡 Attivazione simboli in MT5...")
-        self._activate_symbols()
-        logger.info("✅ Simboli attivati")
-        logger.info("🧠 Inizializzazione Quantum Engine...")
+        self.logger.info("🔄 Inizializzazione componenti core...")
+        # self._initialize_mt5() rimosso: MT5 già inizializzato nel main
+        # self._activate_symbols() rimosso: non implementato
+        self.logger.info("🧠 Inizializzazione Quantum Engine...")
         self.engine = QuantumEngine(self)
-        logger.info("✅ Quantum Engine pronto")
+        self.logger.info("✅ Quantum Engine pronto")
         self.risk_manager = QuantumRiskManager(self, self.engine, self)  # Passa self come terzo parametro
         self.max_positions = self.get_risk_params().get('max_positions', 4)
         # Locks per variabili runtime
@@ -69,7 +77,7 @@ class ConfigManager:
             else self.config.config.get('account_currency', 'USD')
         )
         if not self.account_info:
-            logger.warning("Account info non disponibile, uso fallback per la valuta.")
+            self.logger.warning("Account info non disponibile, uso fallback per la valuta.")
         self._trade_metrics = {
             'total_trades': 0,
             'successful_trades': 0,
@@ -169,6 +177,6 @@ class ConfigManager:
                 symbol_spread = spread_config
             return float(symbol_spread)
         except Exception as e:
-            logger.error(f"[ConfigManager] Errore determinazione max_spread per {symbol}: {str(e)}")
+            self.logger.error(f"[ConfigManager] Errore determinazione max_spread per {symbol}: {str(e)}")
             return 20.0
      
