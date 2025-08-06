@@ -69,7 +69,9 @@ def log_signal_tick(symbol, tick, reason=None, log_path=None):
     """Logga un tick di segnale su file CSV."""
     try:
         if log_path is None:
-            log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'signals_tick_log.csv')
+            # Scrivi nella cartella logs della root principale
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            log_path = os.path.join(project_root, 'logs', 'signals_tick_log.csv')
         # Rotazione: se il file supera 10MB, rinomina con timestamp
         max_size_mb = 10
         if os.path.isfile(log_path) and os.path.getsize(log_path) > max_size_mb * 1024 * 1024:
@@ -95,7 +97,9 @@ def write_report_row(symbol, step, detail, extra=None, report_path=None):
     """Scrive una riga di report trade decision su file CSV."""
     try:
         if report_path is None:
-            report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_decision_report.csv')
+            # Scrivi nella cartella logs della root principale
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            report_path = os.path.join(project_root, 'logs', 'trade_decision_report.csv')
         file_exists = os.path.isfile(report_path)
         with open(report_path, 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
