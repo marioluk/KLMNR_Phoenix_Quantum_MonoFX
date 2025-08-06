@@ -38,5 +38,18 @@ def main():
     print('\n--- Esempi HOLD ---')
     print(df[df['signal']=='HOLD'].head(10))
 
+    # Salva riepilogo in un nuovo CSV
+    OUTPUT_PATH = 'logs/signals_tick_log_summary.csv'
+    summary = df.groupby(['signal', 'reason']).agg({
+        'timestamp': 'count',
+        'entropy': 'mean',
+        'spin': 'mean',
+        'confidence': 'mean'
+    }).rename(columns={'timestamp': 'count'})
+    summary = summary.reset_index()
+    summary.to_csv(OUTPUT_PATH, index=False)
+    print(f"\nSalvato riepilogo in {OUTPUT_PATH}")
+    print(summary)
+
 if __name__ == '__main__':
     main()
