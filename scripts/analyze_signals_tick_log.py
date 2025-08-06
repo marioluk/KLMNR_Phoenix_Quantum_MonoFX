@@ -1,6 +1,9 @@
 def parse_dict(s):
     import re
     try:
+        # Solo stringhe che iniziano con '{' sono dict validi
+        if not isinstance(s, str) or not s.strip().startswith('{'):
+            return {}
         # Sostituisce np.float64(xxx) con xxx (float)
         s = re.sub(r"np\.float64\(([^)]+)\)", r"\1", s)
         d = ast.literal_eval(s)
@@ -11,6 +14,7 @@ def parse_dict(s):
                 d[k] = v
         return d
     except Exception as e:
+        print(f"[PARSE ERROR] Stringa non parsabile: {s} | Errore: {e}")
         return {}
 
 def main():
@@ -31,6 +35,9 @@ def main():
     simboli_input = input().strip()
 
     df = pd.read_csv(CSV_PATH, header=None, names=['timestamp', 'symbol', 'data', 'reason'])
+    # Salta la prima riga se contiene header (es. 'timestamp' nella colonna timestamp)
+    if str(df.iloc[0]['timestamp']).lower() == 'timestamp':
+        df = df.iloc[1:].reset_index(drop=True)
     print("\n[DEBUG] Prime 10 righe del DataFrame caricato dal CSV:")
     print(df.head(10))
     # Converte la colonna timestamp in datetime
