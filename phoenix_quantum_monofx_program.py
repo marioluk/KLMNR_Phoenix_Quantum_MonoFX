@@ -153,17 +153,6 @@ def is_trading_hours(symbol: str, config: dict) -> bool:
                     return True
         logger.debug(f"[{symbol}] ORA: {now.strftime('%H:%M:%S')} {timezone_str} - FUORI ORARIO. Intervalli validi: {debug_ranges}")
         return False
-            ticks = list(self.get_tick_buffer(symbol))
-            if len(ticks) < window:
-                return 1.0
-
-            deltas = np.array([t['delta'] for t in ticks[-window:]])
-            prob_dist = np.abs(deltas) / (np.sum(np.abs(deltas)) + 1e-10)
-            entropy = -np.sum(prob_dist * np.log(prob_dist + 1e-10)) / np.log(window)
-            spin, _ = self._calculate_spin_impl(ticks)
-            return 1 + abs(spin) * entropy
-
-        return self._get_cached(self.get_volatility_cache(), symbol, _calculate)
         
         
         
