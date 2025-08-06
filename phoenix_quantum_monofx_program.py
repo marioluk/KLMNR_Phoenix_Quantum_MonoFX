@@ -92,12 +92,39 @@ try:
             tick = mt5.symbol_info_tick(symbol)
             if tick is None or tick.bid is None:
                 logger.warning(f"Tick non disponibile per {symbol}")
-                # Logga anche la decisione di non processare per tick mancante
                 write_report_row(symbol, "tick", "Tick non disponibile", f"tick={tick}")
                 continue
             price = tick.bid
             engine.process_tick(symbol, price)
             signal, signal_price = engine.get_signal(symbol)
+            # --- LOGICA DI BLOCCO TRADE COME NEL LEGACY ---
+            blocked = False
+            block_reason = None
+            # Recupera contatori da config_manager (implementazione tipica)
+            try:
+                trade_count = config_manager.get_trade_count(symbol)
+                max_daily_trades = config_manager.config.get('risk_parameters', {}).get('max_daily_trades', 8)
+                current_positions = config_manager.get_current_positions() if hasattr(config_manager, 'get_current_positions') else 0
+                max_positions = config_manager.config.get('risk_parameters', {}).get('max_positions', 1)
+            except Exception as e:
+                trade_count = 0
+                max_daily_trades = 8
+                current_positions = 0
+                max_positions = 1
+            # Controllo limiti
+            if trade_count >= max_daily_trades:
+                blocked = True
+                block_reason = f"max_daily_trades ({trade_count}/{max_daily_trades})"
+            elif current_positions >= max_positions:
+                blocked = True
+                block_reason = f"max_positions ({current_positions}/{max_positions})"
+            # Logga il blocco se necessario
+            if blocked:
+                logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: {block_reason}")
+                logger.info(f"🚫 Limite raggiunto: {block_reason}. Nessun nuovo trade verrà aperto per {symbol}.")
+                write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trade_count}, current_positions={current_positions}")
+                continue
+            # Log normale se non bloccato
             detail = f"Segnale: {signal} @ {signal_price:.5f}"
             extra = f"price={price:.5f}"
             write_report_row(symbol, "signal", detail, extra)
