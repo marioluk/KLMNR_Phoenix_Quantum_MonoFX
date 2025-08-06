@@ -77,8 +77,13 @@ class QuantumEngine:
                 # (is_trading_hours richiede config, qui si assume sempre attivo per semplicità)
                 symbol_config = self.config.get('symbols', {}).get(symbol, {})
                 max_spread = symbol_config.get('max_spread', self.config.get('risk_parameters', {}).get('max_spread', 20))
-                if spread > max_spread:
-                    issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread:.1f}p")
+                # Se max_spread è un dict, estrai il valore corretto
+                if isinstance(max_spread, dict):
+                    max_spread_val = max_spread.get(symbol, max_spread.get('default', 20))
+                else:
+                    max_spread_val = max_spread
+                if spread > max_spread_val:
+                    issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread_val:.1f}p")
                 if len(self.get_tick_buffer(symbol)) < self.min_spin_samples:
                     warning_symbols.append(symbol)
             except Exception as e:
