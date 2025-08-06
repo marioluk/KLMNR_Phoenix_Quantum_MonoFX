@@ -352,7 +352,7 @@ class QuantumEngine:
                 'confidence': 0.0,
                 'signal': signal
             }, reason="Buffer tick insufficiente")
-            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, 0.0, 0.0, {signal}, Buffer tick insufficiente")
+            self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, 0.0, 0.0, 0.0, {signal}, Buffer tick insufficiente")
             return signal, last_tick_price
         spin_window = min(self.spin_window, len(ticks))
         recent_ticks = ticks[-spin_window:]
@@ -367,7 +367,7 @@ class QuantumEngine:
                 'confidence': confidence,
                 'signal': signal
             }, reason="Confidence troppo bassa")
-            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Confidence troppo bassa")
+            self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Confidence troppo bassa")
             return signal, last_tick_price
         last_signal_time = self.get_last_signal_time(symbol)
         if self._check_signal_cooldown(symbol, last_signal_time):
@@ -379,7 +379,7 @@ class QuantumEngine:
                 'confidence': confidence,
                 'signal': signal
             }, reason="Cooldown segnale attivo")
-            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Cooldown segnale attivo")
+            self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Cooldown segnale attivo")
             return signal, last_tick_price
         deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
         entropy = self.calculate_entropy(deltas)
@@ -396,7 +396,7 @@ class QuantumEngine:
                 'confidence': confidence,
                 'signal': signal
             }, reason="Condizioni BUY")
-            print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni BUY")
+            self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni BUY")
             return signal, last_tick_price
         elif sell_condition:
             signal = "SELL"
@@ -407,7 +407,7 @@ class QuantumEngine:
                 'confidence': confidence,
                 'signal': signal
             }, reason="Condizioni SELL")
-            print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni SELL")
+            self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni SELL")
             return signal, last_tick_price
         signal = "HOLD"
         log_signal_tick(symbol, {
@@ -417,7 +417,7 @@ class QuantumEngine:
             'confidence': confidence,
             'signal': signal
         }, reason="Nessuna condizione BUY/SELL")
-        print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Nessuna condizione BUY/SELL")
+        self.logger.debug(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Nessuna condizione BUY/SELL")
         return signal, last_tick_price
 
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
