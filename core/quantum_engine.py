@@ -342,16 +342,45 @@ class QuantumEngine:
     def get_signal(self, symbol: str) -> Tuple[str, float]:
         ticks = list(self.get_tick_buffer(symbol))
         if len(ticks) < self.min_spin_samples:
-            return "HOLD", 0.0
+            signal = "HOLD"
+            last_tick_price = 0.0
+            # Log anche i casi HOLD per buffer insufficiente
+            log_signal_tick(symbol, {
+                'price': last_tick_price,
+                'entropy': 0.0,
+                'spin': 0.0,
+                'confidence': 0.0,
+                'signal': signal
+            }, reason="Buffer tick insufficiente")
+            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, 0.0, 0.0, {signal}, Buffer tick insufficiente")
+            return signal, last_tick_price
         spin_window = min(self.spin_window, len(ticks))
         recent_ticks = ticks[-spin_window:]
         spin, confidence = self.calculate_spin(recent_ticks)
         last_tick_price = recent_ticks[-1]['price'] if recent_ticks else 0.0
         if confidence < 0.8:
-            return "HOLD", last_tick_price
+            signal = "HOLD"
+            log_signal_tick(symbol, {
+                'price': last_tick_price,
+                'entropy': 0.0,
+                'spin': spin,
+                'confidence': confidence,
+                'signal': signal
+            }, reason="Confidence troppo bassa")
+            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Confidence troppo bassa")
+            return signal, last_tick_price
         last_signal_time = self.get_last_signal_time(symbol)
         if self._check_signal_cooldown(symbol, last_signal_time):
-            return "HOLD", last_tick_price
+            signal = "HOLD"
+            log_signal_tick(symbol, {
+                'price': last_tick_price,
+                'entropy': 0.0,
+                'spin': spin,
+                'confidence': confidence,
+                'signal': signal
+            }, reason="Cooldown segnale attivo")
+            print(f"[CSV] {symbol}, {last_tick_price}, 0.0, {spin}, {confidence}, {signal}, Cooldown segnale attivo")
+            return signal, last_tick_price
         deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
         entropy = self.calculate_entropy(deltas)
         volatility = 1 + abs(spin) * entropy
@@ -359,10 +388,37 @@ class QuantumEngine:
         buy_condition = entropy > buy_thresh and spin > self.spin_threshold * confidence
         sell_condition = entropy < sell_thresh and spin < -self.spin_threshold * confidence
         if buy_condition:
-            return "BUY", last_tick_price
+            signal = "BUY"
+            log_signal_tick(symbol, {
+                'price': last_tick_price,
+                'entropy': entropy,
+                'spin': spin,
+                'confidence': confidence,
+                'signal': signal
+            }, reason="Condizioni BUY")
+            print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni BUY")
+            return signal, last_tick_price
         elif sell_condition:
-            return "SELL", last_tick_price
-        return "HOLD", last_tick_price
+            signal = "SELL"
+            log_signal_tick(symbol, {
+                'price': last_tick_price,
+                'entropy': entropy,
+                'spin': spin,
+                'confidence': confidence,
+                'signal': signal
+            }, reason="Condizioni SELL")
+            print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Condizioni SELL")
+            return signal, last_tick_price
+        signal = "HOLD"
+        log_signal_tick(symbol, {
+            'price': last_tick_price,
+            'entropy': entropy,
+            'spin': spin,
+            'confidence': confidence,
+            'signal': signal
+        }, reason="Nessuna condizione BUY/SELL")
+        print(f"[CSV] {symbol}, {last_tick_price}, {entropy}, {spin}, {confidence}, {signal}, Nessuna condizione BUY/SELL")
+        return signal, last_tick_price
 
     def _check_signal_cooldown(self, symbol: str, last_signal_time: float) -> bool:
         if time.time() - last_signal_time < self.signal_cooldown:
