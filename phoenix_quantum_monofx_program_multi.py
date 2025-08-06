@@ -76,6 +76,21 @@ if not mt5.initialize(
 logger.info("MT5 inizializzato e collegato con successo!")
 
 # === AVVIO LOGICA DI TRADING AUTOMATICA ===
+
+# === GESTIONE TRADE COUNT STATE JSON ===
+TRADE_COUNT_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'trade_count_state.json')
+def load_trade_count_state(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+    except Exception:
+        return {"date": "", "trade_count": {}}
+
+def save_trade_count_state(path, state):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(state, f)
+
 try:
     config_manager = ConfigManager(config_path)
     engine = config_manager.engine
@@ -85,6 +100,24 @@ try:
     last_heartbeat = time.time()
     HEARTBEAT_INTERVAL = 60  # secondi
     while True:
+        # Carica lo stato trade_count
+        trade_count_state = load_trade_count_state(TRADE_COUNT_PATH)
+        today = datetime.now().strftime('%Y-%m-%d')
+        # Reset giornaliero avanzato con backup
+        def backup_trade_count_state(path, date):
+            import shutil
+            if os.path.isfile(path) and date:
+                backup_path = path.replace('.json', f'_{date}_backup.json')
+                try:
+                    shutil.copy2(path, backup_path)
+                except Exception as e:
+                    logger.warning(f"Impossibile creare backup trade_count_state: {e}")
+        if trade_count_state['date'] != today:
+            backup_trade_count_state(TRADE_COUNT_PATH, trade_count_state['date'])
+            trade_count_state['date'] = today
+            trade_count_state['trade_count'] = {}
+            save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
+            logger.info(f"[TRADE COUNT RESET] Reset giornaliero effettuato, backup creato.")
         for symbol in symbols:
             tick = mt5.symbol_info_tick(symbol)
             if tick is None or tick.bid is None:
@@ -94,20 +127,29 @@ try:
             price = tick.bid
             engine.process_tick(symbol, price)
             signal, signal_price = engine.get_signal(symbol)
-            # --- LOGICA DI BLOCCO TRADE COME NEL LEGACY ---
+            # --- LOGICA DI BLOCCO TRADE ---
             blocked = False
             block_reason = None
-            # Recupera contatori da config_manager (implementazione tipica)
-            try:
-                trade_count = config_manager.get_trade_count(symbol)
-                max_daily_trades = config_manager.config.get('risk_parameters', {}).get('max_daily_trades', 8)
-                current_positions = config_manager.get_current_positions() if hasattr(config_manager, 'get_current_positions') else 0
-                max_positions = config_manager.config.get('risk_parameters', {}).get('max_positions', 1)
-            except Exception as e:
-                trade_count = 0
-                max_daily_trades = 8
-                current_positions = 0
-                max_positions = 1
+            # Recupera contatori dal file JSON
+            trade_count = trade_count_state['trade_count'].get(symbol, 0)
+            max_daily_trades = config_manager.config.get('risk_parameters', {}).get('max_daily_trades', 8)
+            current_positions = config_manager.get_current_positions() if hasattr(config_manager, 'get_current_positions') else 0
+            max_positions = config_manager.config.get('risk_parameters', {}).get('max_positions', 1)
+            # Recupera parametri di segnale per log
+            ticks_buffer = list(engine.get_tick_buffer(symbol))
+            buffer_size = len(ticks_buffer)
+            confidence = None
+            entropy = None
+            spin = None
+            if buffer_size > 0:
+                spin_window = min(engine.spin_window, buffer_size)
+                recent_ticks = ticks_buffer[-spin_window:]
+                spin, confidence = engine.calculate_spin(recent_ticks)
+                deltas = tuple(t['delta'] for t in recent_ticks if abs(t['delta']) > 1e-10)
+                entropy = engine.calculate_entropy(deltas)
+            # Orario di trading
+            from utils.utils import is_trading_hours
+            trading_hours = is_trading_hours(symbol, config_manager.config)
             # Controllo limiti
             if trade_count >= max_daily_trades:
                 blocked = True
@@ -115,22 +157,40 @@ try:
             elif current_positions >= max_positions:
                 blocked = True
                 block_reason = f"max_positions ({current_positions}/{max_positions})"
-            # Logga il blocco se necessario
+            # Logging dettagliato
+            logger.info("\n==================== [DEBUG TRADE DECISION] ====================")
+            logger.info(f"Symbol: {symbol}\n--------------------")
+            logger.info(f"can_trade: {not blocked}")
+            logger.info(f"trading_hours: {trading_hours}")
+            logger.info(f"Dettaglio: Confidence: {confidence if confidence is not None else '-'}; Entropia: {entropy if entropy is not None else '-'}; Spin: {spin if spin is not None else '-'}; Buffer tick: {buffer_size}")
             if blocked:
                 logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: {block_reason}")
-                logger.info(f"🚫 Limite raggiunto: {block_reason}. Nessun nuovo trade verrà aperto per {symbol}.")
+                if block_reason.startswith('max_daily_trades'):
+                    logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {trade_count}/{max_daily_trades}. Nessun nuovo trade verrà aperto oggi.")
+                elif block_reason.startswith('max_positions'):
+                    logger.info(f"🚫 Limite posizioni raggiunto: {current_positions}/{max_positions}. Nessun nuovo trade verrà aperto ora.")
+                logger.info("")
                 write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trade_count}, current_positions={current_positions}")
                 continue
+            else:
+                logger.info(f"Segnale: {signal} @ {signal_price:.5f}")
+                logger.info("")
             # Log normale se non bloccato
             detail = f"Segnale: {signal} @ {signal_price:.5f}"
             extra = f"price={price:.5f}"
             write_report_row(symbol, "signal", detail, extra)
             logger.debug(f"[{symbol}] Prezzo: {price:.5f} | Segnale: {signal} @ {signal_price:.5f}")
+            # === INCREMENTO TRADE COUNT DOPO TRADE ESEGUITO ===
+            trade_executed = False
+            if signal in ("BUY", "SELL"):
+                trade_executed = True
+            if trade_executed:
+                trade_count_state['trade_count'][symbol] = trade_count + 1
+                save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
         # Heartbeat periodico
         if time.time() - last_heartbeat > HEARTBEAT_INTERVAL:
             try:
                 engine.check_tick_activity()
-                # Heartbeat riassuntivo trade_decision_report.csv
                 report_path = os.path.join(os.path.dirname(__file__), '..', 'logs', 'trade_decision_report.csv')
                 if os.path.isfile(report_path):
                     step_counts = {}

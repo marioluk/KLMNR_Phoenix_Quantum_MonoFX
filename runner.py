@@ -1,7 +1,7 @@
 """
 Modulo runner.py: avvio e setup del sistema Phoenix Quantum MonoFX
 """
-from phoenix_quantum_monofx_program import (
+from phoenix_quantum_monofx_program_no import (
     set_config, auto_correct_symbols, load_config, set_log_file, get_log_file, set_logger, setup_logger, get_logger,
     QuantumEngine, threading, datetime, time
 )

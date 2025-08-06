@@ -1251,7 +1251,7 @@ class QuantumEngine:
             logger = getLogger("phoenix_quantum")
         try:
             ticks = list(self.get_tick_buffer(symbol))
-            from phoenix_quantum_monofx_program import is_trading_hours
+            from phoenix_quantum_monofx_program_no import is_trading_hours
             config_dict = self._config.config if hasattr(self._config, 'config') else self._config
             # 1. Buffer insufficiente
             if len(ticks) < self.min_spin_samples:

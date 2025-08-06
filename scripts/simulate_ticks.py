@@ -11,7 +11,7 @@ import random
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PROJECT_ROOT)
 
-from phoenix_quantum_monofx_program import QuantumEngine, load_config, auto_correct_symbols
+from phoenix_quantum_monofx_program_no import QuantumEngine, load_config, auto_correct_symbols
 
 # Carica la configurazione come nel main
 
