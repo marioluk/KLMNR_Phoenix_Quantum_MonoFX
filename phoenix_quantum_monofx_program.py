@@ -91,10 +91,18 @@ try:
             tick = mt5.symbol_info_tick(symbol)
             if tick is None or tick.bid is None:
                 logger.warning(f"Tick non disponibile per {symbol}")
+                # Logga anche la decisione di non processare per tick mancante
+                write_report_row(symbol, "tick", "Tick non disponibile", f"tick={tick}")
+                print(f"[REPORT] {symbol}, tick, Tick non disponibile, tick={tick}")
                 continue
             price = tick.bid
             engine.process_tick(symbol, price)
             signal, signal_price = engine.get_signal(symbol)
+            # Logga la decisione di segnale su report CSV e stampa a video
+            detail = f"Segnale: {signal} @ {signal_price:.5f}"
+            extra = f"price={price:.5f}"
+            write_report_row(symbol, "signal", detail, extra)
+            print(f"[REPORT] {symbol}, signal, {detail}, {extra}")
             logger.debug(f"[{symbol}] Prezzo: {price:.5f} | Segnale: {signal} @ {signal_price:.5f}")
         # Heartbeat periodico
         if time.time() - last_heartbeat > HEARTBEAT_INTERVAL:
