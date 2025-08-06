@@ -84,6 +84,8 @@ try:
     symbols = list(config_manager.config.get('symbols', {}).keys())
     logger.info(f"Simboli attivi: {symbols}")
     logger.info("Avvio ciclo principale di polling prezzi e segnali...")
+    last_heartbeat = time.time()
+    HEARTBEAT_INTERVAL = 60  # secondi
     while True:
         for symbol in symbols:
             tick = mt5.symbol_info_tick(symbol)
@@ -93,7 +95,14 @@ try:
             price = tick.bid
             engine.process_tick(symbol, price)
             signal, signal_price = engine.get_signal(symbol)
-            logger.info(f"[{symbol}] Prezzo: {price:.5f} | Segnale: {signal} @ {signal_price:.5f}")
+            logger.debug(f"[{symbol}] Prezzo: {price:.5f} | Segnale: {signal} @ {signal_price:.5f}")
+        # Heartbeat periodico
+        if time.time() - last_heartbeat > HEARTBEAT_INTERVAL:
+            try:
+                engine.check_tick_activity()
+            except Exception as e:
+                logger.warning(f"Errore heartbeat: {e}")
+            last_heartbeat = time.time()
         time.sleep(1)
 except KeyboardInterrupt:
     logger.info("Interrotto manualmente dall'utente.")

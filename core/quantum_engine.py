@@ -16,6 +16,110 @@ import MetaTrader5 as mt5
 import datetime
 
 class QuantumEngine:
+    def check_tick_activity(self):
+        """Monitoraggio stato mercato e qualità dati con heartbeat. Log dettagliato se i tick non arrivano."""
+        current_time = time.time()
+        issues = []
+        warning_symbols = []
+        heartbeat_data = []
+        try:
+            if not mt5.terminal_info().connected:
+                self.logger.warning("Connessione MT5 non disponibile")
+                return False
+        except Exception as e:
+            self.logger.error(f"Errore accesso terminal_info MT5: {e}")
+            return False
+        available_symbols = [s.name for s in mt5.symbols_get() or []]
+        symbols = list(self.config.get('symbols', {}).keys())
+        for symbol in symbols:
+            try:
+                tick = mt5.symbol_info_tick(symbol)
+                if not tick:
+                    symbol_info = mt5.symbol_info(symbol)
+                    is_visible = symbol_info.visible if symbol_info else False
+                    self.logger.warning(
+                        f"{symbol}: Nessun dato tick disponibile | "
+                        f"Simbolo visibile: {is_visible} | "
+                        f"Simboli disponibili: {available_symbols[:10]}..."
+                    )
+                    issues.append(f"{symbol}: Nessun dato tick disponibile")
+                    continue
+                spread = (mt5.symbol_info(symbol).ask - mt5.symbol_info(symbol).bid) / self._get_pip_size(symbol) if mt5.symbol_info(symbol) else 0
+                ticks = list(self.get_tick_buffer(symbol))[-self.spin_window:]
+                if len(ticks) >= self.min_spin_samples:
+                    deltas = tuple(t['delta'] for t in ticks if abs(t['delta']) > 1e-10)
+                    entropy = self.calculate_entropy(deltas)
+                    if len(ticks) == 0:
+                        spin = 0
+                        confidence = 0.0
+                        volatility = 1.0
+                        self.logger.warning(f"[BUFFER EMPTY] {symbol}: buffer tick vuoto - nessuna metrica calcolata, nessun segnale generabile. Possibili cause: feed dati assente, connessione MT5, mercato chiuso o errore precedente. Verifica log errori e stato connessione.")
+                    else:
+                        spin = sum(1 for t in ticks if t['direction'] > 0) / len(ticks) * 2 - 1
+                        confidence = min(1.0, abs(spin) * np.sqrt(len(ticks)))
+                        volatility = 1 + abs(spin) * entropy
+                else:
+                    entropy, spin, confidence, volatility = 0.0, 0.0, 0.0, 1.0
+                state = {
+                    'symbol': symbol,
+                    'bid': tick.bid,
+                    'ask': tick.ask,
+                    'spread': spread,
+                    'buffer_size': len(self.get_tick_buffer(symbol)),
+                    'E': round(entropy, 2),
+                    'S': round(spin, 2),
+                    'C': round(confidence, 2),
+                    'V': round(volatility, 2),
+                    'timestamp': current_time
+                }
+                heartbeat_data.append(state)
+                # Controlli spread e buffer solo se orari di trading
+                # (is_trading_hours richiede config, qui si assume sempre attivo per semplicità)
+                symbol_config = self.config.get('symbols', {}).get(symbol, {})
+                max_spread = symbol_config.get('max_spread', self.config.get('risk_parameters', {}).get('max_spread', 20))
+                if spread > max_spread:
+                    issues.append(f"{symbol}: Spread {spread:.1f}p > max {max_spread:.1f}p")
+                if len(self.get_tick_buffer(symbol)) < self.min_spin_samples:
+                    warning_symbols.append(symbol)
+            except Exception as e:
+                self.logger.error(f"Errore monitoraggio {symbol}: {str(e)}", exc_info=True)
+        if heartbeat_data:
+            hb_msg = ("\n==================== [HEARTBEAT] ====================\n" +
+                "\n".join(
+                    f"Symbol: {d['symbol']}\n"
+                    f"  Bid: {d['bid']:.5f}\n"
+                    f"  Ask: {d['ask']:.5f}\n"
+                    f"  Spread: {d['spread']:.1f} pips\n"
+                    f"  Buffer Size: {d['buffer_size']}\n"
+                    f"  Entropy (E): {d['E']:.2f}\n"
+                    f"  Spin (S): {d['S']:.2f}\n"
+                    f"  Confidence (C): {d['C']:.2f}\n"
+                    f"  Volatility (V): {d['V']:.2f}\n"
+                    "------------------------------------------------------"
+                for d in heartbeat_data[:5]) +
+                "\n======================================================\n"
+            )
+            self.logger.info(hb_msg)
+            try:
+                positions_count = len(mt5.positions_get() or [])
+                self.logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
+            except Exception:
+                pass
+        else:
+            self.logger.info("\n==================== [HEARTBEAT] ====================\n"
+                            "Nessun tick valido ricevuto per nessun simbolo!\n"
+                            "Possibile problema di connessione, dati o mercato chiuso.\n"
+                            "======================================================\n")
+            try:
+                positions_count = len(mt5.positions_get() or [])
+                self.logger.info(f"Sistema attivo - Posizioni: {positions_count}/1")
+            except Exception:
+                pass
+        if warning_symbols:
+            self.logger.warning(f"Buffer insufficiente: {', '.join(warning_symbols[:3])}")
+        if issues:
+            self.logger.warning(f"Problemi: {' | '.join(issues[:3])}")
+        return True
     def __init__(self, config_manager):
         self.config_manager = config_manager
         self.config = config_manager.config if hasattr(config_manager, 'config') else config_manager
