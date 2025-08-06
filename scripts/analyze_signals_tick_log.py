@@ -19,6 +19,51 @@ def parse_dict(s):
         return {}
 
 def main():
+    # Parametri di soglia dalla config (modifica se necessario)
+    BUY_SIGNAL = 0.54
+    SELL_SIGNAL = 0.46
+    SPIN_THRESHOLD = 0.25
+
+    import numpy as np
+    def check_expected_signal(row):
+        entropy = row.get('entropy', None)
+        spin = row.get('spin', None)
+        confidence = row.get('confidence', None)
+        if entropy is None or spin is None or confidence is None:
+            return 'HOLD', 'Dati insufficienti'
+        volatility = 1 + abs(spin) * entropy
+        buy_thresh = BUY_SIGNAL * (1 + (volatility - 1) * 0.5)
+        sell_thresh = SELL_SIGNAL * (1 - (volatility - 1) * 0.5)
+        reasons = []
+        # BUY
+        if entropy > buy_thresh:
+            if spin > SPIN_THRESHOLD * confidence:
+                return 'BUY', ''
+            else:
+                reasons.append(f"spin={spin:.3f} <= {SPIN_THRESHOLD}*{confidence:.3f}={SPIN_THRESHOLD*confidence:.3f}")
+        else:
+            reasons.append(f"entropy={entropy:.3f} <= buy_thresh={buy_thresh:.3f}")
+        # SELL
+        if entropy < sell_thresh:
+            if spin < -SPIN_THRESHOLD * confidence:
+                return 'SELL', ''
+            else:
+                reasons.append(f"spin={spin:.3f} >= -{SPIN_THRESHOLD}*{confidence:.3f}={-SPIN_THRESHOLD*confidence:.3f}")
+        else:
+            reasons.append(f"entropy={entropy:.3f} >= sell_thresh={sell_thresh:.3f}")
+        return 'HOLD', ' | '.join(reasons)
+
+    # Applica la logica a ogni riga
+    df[['expected_signal','fail_reason']] = df.apply(lambda row: pd.Series(check_expected_signal(row)), axis=1)
+
+    # Mostra confronto tra segnale reale e atteso
+    print('\n--- Confronto segnale reale vs atteso (prime 20 righe) ---')
+    print(df[['timestamp','symbol','signal','expected_signal','fail_reason']].head(20))
+
+    # Statistiche di match
+    match = (df['signal'] == df['expected_signal']).mean()
+    print(f"\nPercentuale segnali che coincidono con la logica attesa: {match*100:.2f}%")
+
     import pandas as pd
     import ast
     from datetime import datetime
@@ -86,6 +131,8 @@ def main():
     print(df.groupby('signal')[['entropy', 'spin', 'confidence']].mean())
     print('\n--- Esempi HOLD ---')
     print(df[df['signal']=='HOLD'].head(10))
+    print('\n--- Esempi di segnali scartati (prime 10 HOLD con motivazione) ---')
+    print(df[df['expected_signal'] != df['signal']][['timestamp','symbol','signal','expected_signal','fail_reason']].head(10))
 
     # Salva riepilogo in un nuovo CSV
     summary = df.groupby(['signal', 'reason']).agg({
