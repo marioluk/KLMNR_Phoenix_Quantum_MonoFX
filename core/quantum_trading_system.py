@@ -4,6 +4,7 @@ import json
 import time
 import threading
 import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 import MetaTrader5 as mt5
 from core.trading_metrics import TradingMetrics
@@ -132,30 +133,9 @@ class QuantumTradingSystem:
 #   - Esempio: sl_price, tp_price = self.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
 # =============================================================
 
-    def debug_trade_decision(self, symbol):
-        """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo."""
-        self.logger.info(f"\n==================== [DEBUG TRADE DECISION] ====================\nSymbol: {symbol}\n--------------------")
-        # 1. Può fare trading?
-        can_trade = self.engine.can_trade(symbol)
-        self.logger.info(f"can_trade: {can_trade}")
-        if not can_trade:
-            logger.info("Motivo: can_trade() = False (cooldown, spread, max posizioni, ecc.)")
-            return
-
-        # 2. Orari di trading
-        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-        trading_hours = is_trading_hours(symbol, config_dict)
-        self.logger.info(f"trading_hours: {trading_hours}")
-        if not trading_hours:
-            logger.info("Motivo: fuori orario di trading")
-            return
-
-        # 3. Posizioni già aperte
-        existing_positions = mt5.positions_get(symbol=symbol)
-        has_position = existing_positions and len(existing_positions) > 0
-        self.logger.info(f"has_position: {has_position}")
-    import csv
-    import os
+    
+    
+    
     def debug_trade_decision(self, symbol):
         """Debug step-by-step della decisione di trading per un simbolo: logga ogni condizione e mostra il motivo per cui un ordine viene o non viene messo. Esporta anche i motivi in un file CSV."""
         def write_report_row(step, detail, extra=None):
@@ -166,7 +146,7 @@ class QuantumTradingSystem:
                     writer = csv.writer(csvfile)
                     if not file_exists:
                         writer.writerow(['timestamp', 'symbol', 'step', 'detail', 'extra'])
-                    import datetime
+                    
                     writer.writerow([
                         datetime.datetime.now().isoformat(sep=' ', timespec='seconds'),
                         symbol,
@@ -397,6 +377,7 @@ class QuantumTradingSystem:
             # Caso: self._config è un dict
             return list(self._config['symbols'].keys())
         return []
+    
     def _main_loop(self):
         """
         cuore pulsante
@@ -539,7 +520,7 @@ class QuantumTradingSystem:
 
     def get_trade_history(self):
         """Restituisce lo storico operazioni reali da MT5 (ultimi 30 giorni)"""
-        from datetime import datetime, timedelta
+        
         try:
             date_to = datetime.now()
             date_from = date_to - timedelta(days=30)
@@ -678,65 +659,10 @@ class QuantumTradingSystem:
                 return {'success': False, 'error': str(result)}
         except Exception as e:
             return {'success': False, 'error': str(e)}
-    
-    """
-    1. Inizializzazione e Configurazione
-    """
-    
-    def __init__(self, config_path: str):
-        """Costruttore principale"""
-        logger.info(
-            "\n==================== [AVVIO QUANTUM TRADING SYSTEM] ====================\n"
-            f"File configurazione: {config_path}\n"
-            "------------------------------------------------------\n"
-        )
-        self.symbols = []  # fallback sicuro
-        self._setup_logger(config_path)
-        logger.info("✅ Logger configurato")
-        self._config_path = config_path
-        self.running = False
-        logger.info("📋 Caricamento configurazione...")
-        self._load_configuration(config_path)  # Questo inizializza self._config
-        logger.info("✅ Configurazione caricata")
-        if not hasattr(self._config, 'config') or 'symbols' not in self._config.config:
-            logger.error("Configurazione simboli non valida nel file di configurazione")
-            # symbols rimane lista vuota, nessun raise qui
-        else:
-            self.symbols = list(self._config.config['symbols'].keys())
-            logger.info(
-                "\n-------------------- [SIMBOLI CONFIGURATI] ----------------------\n"
-                f"Simboli trovati: {self.symbols}\n"
-                "------------------------------------------------------\n"
-            )
-        logger.info("🔄 Inizializzazione componenti core...")
-        if not self._initialize_mt5():
-            raise RuntimeError("Inizializzazione MT5 fallita")
-        logger.info("📡 Attivazione simboli in MT5...")
-        self._activate_symbols()
-        logger.info("✅ Simboli attivati")
-        logger.info("🧠 Inizializzazione Quantum Engine...")
-        self.engine = QuantumEngine(self._config.config)
-        logger.info("✅ Quantum Engine pronto")
-        self.risk_manager = QuantumRiskManager(self._config.config, self.engine, self)  # Passa il dict config
-        self.max_positions = self._config.config.get('risk_parameters', {}).get('max_positions', 4)
-        self.current_positions = 0
-        import json
-        self.trade_count = defaultdict(int)
-        self._last_trade_count_reset = datetime.now().date()
-        self._trade_count_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'trade_count_state.json')
-        # Inizializza qui tutte le variabili di tempo per evitare AttributeError, PRIMA di qualsiasi return/errore
-        self.last_position_check = 0
-        self.last_connection_check = 0
-        self.last_account_update = 0
-        self.last_tick_check = 0
-        self.last_buffer_check = 0
-        self.metrics_lock = threading.Lock()
-        self.position_lock = threading.Lock()
-        self.metrics = TradingMetrics()
-        self._load_trade_count_state()
-        # ...il resto dell'inizializzazione rimane invariato...
+        
+        
     def _load_trade_count_state(self):
-        import json
+        
         try:
             if os.path.isfile(self._trade_count_file):
                 with open(self._trade_count_file, 'r', encoding='utf-8') as f:
@@ -753,7 +679,7 @@ class QuantumTradingSystem:
             logger.error(f"Errore caricamento stato trade_count: {e}")
 
     def _save_trade_count_state(self):
-        import json
+        
         try:
             os.makedirs(os.path.dirname(self._trade_count_file), exist_ok=True)
             data = {
@@ -1711,7 +1637,7 @@ class QuantumTradingSystem:
 
     def get_daily_loss(self, day):
         """Calcola la perdita giornaliera sommando i profitti dei deals chiusi nella data specificata."""
-        from datetime import datetime, timedelta
+       
         try:
             # Inizio e fine giornata
             date_from = datetime.combine(day, datetime.min.time())

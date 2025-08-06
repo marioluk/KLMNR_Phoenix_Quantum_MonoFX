@@ -11,40 +11,6 @@ from typing import Tuple, Any
 
 
 class QuantumRiskManager:
-    def __init__(self, config_manager, engine, parent=None):
-        self.logger = logging.getLogger("phoenix_quantum")
-        self._lock = threading.Lock()
-        if hasattr(config, 'get_risk_params'):
-            self._config_manager = config
-            self._config = config.config
-        else:
-            self._config_manager = None
-            self._config = config
-        self.engine = engine
-        self.trading_system = trading_system
-        account_info = mt5.account_info()
-        config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-        self.drawdown_tracker = DailyDrawdownTracker(
-            account_info.equity if account_info else 10000,
-            config_dict
-        )
-        self._symbol_data = {}
-        # Parametri da config
-        self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
-        self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
-        self.profit_multiplier = config.get('risk_management', {}).get('profit_multiplier', 1.5)
-
-    @property
-    def symbols(self):
-        # Accesso ai simboli tramite _config_manager o direttamente da _config
-        if self._config_manager is not None:
-            return list(self._config_manager.config.get('symbols', {}).keys())
-        elif hasattr(self, '_config') and self._config is not None:
-            if hasattr(self._config, 'config'):
-                return list(self._config.config.get('symbols', {}).keys())
-            return list(self._config.get('symbols', {}).keys())
-        return []
-
     # ... qui prosegue la classe con i metodi che ora useranno self.config_manager.symbols invece di self.symbols ...
     """
     1. Inizializzazione
@@ -86,6 +52,17 @@ class QuantumRiskManager:
     def config(self):
         """Property per accesso alla configurazione"""
         return self._config
+    
+    @property
+    def symbols(self):
+        # Accesso ai simboli tramite _config_manager o direttamente da _config
+        if self._config_manager is not None:
+            return list(self._config_manager.config.get('symbols', {}).keys())
+        elif hasattr(self, '_config') and self._config is not None:
+            if hasattr(self._config, 'config'):
+                return list(self._config.config.get('symbols', {}).keys())
+            return list(self._config.get('symbols', {}).keys())
+        return []
         
         
     """
