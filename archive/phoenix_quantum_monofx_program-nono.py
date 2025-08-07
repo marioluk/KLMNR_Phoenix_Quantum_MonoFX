@@ -1,4 +1,68 @@
 
+import threading
+import datetime
+from datetime import timedelta
+import os
+import csv
+import time
+from collections import defaultdict, deque
+from functools import lru_cache
+from typing import Any, Dict, List, Optional, Tuple
+import numpy as np
+try:
+    import MetaTrader5 as mt5
+except ImportError:
+    mt5 = None
+from threading import Lock
+
+# ===================== UTILITY FUNCTIONS =====================
+import logging
+logger = logging.getLogger("phoenix_quantum")
+
+def log_signal_tick_with_reason(symbol, entropy, spin, confidence, timestamp, price, signal, reason):
+    logger.info(f"[SIGNAL] {symbol} | Entropy: {entropy:.3f} | Spin: {spin:.3f} | Confidence: {confidence:.3f} | Time: {timestamp} | Price: {price} | Signal: {signal} | Reason: {reason}")
+
+def setup_logger(name="phoenix_quantum", level=logging.INFO, log_file=None):
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    if not logger.handlers:
+        ch = logging.StreamHandler()
+        ch.setLevel(level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        if log_file:
+            fh = logging.FileHandler(log_file)
+            fh.setLevel(level)
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+    return logger
+
+def clean_old_logs(log_dir="logs", days=7):
+    now = time.time()
+    if not os.path.isdir(log_dir):
+        return
+    for fname in os.listdir(log_dir):
+        fpath = os.path.join(log_dir, fname)
+        if os.path.isfile(fpath):
+            if now - os.path.getmtime(fpath) > days * 86400:
+                try:
+                    os.remove(fpath)
+                    logger.info(f"Log eliminato: {fpath}")
+                except Exception as e:
+                    logger.error(f"Errore eliminazione log {fpath}: {e}")
+
+def load_config(config_path=None):
+    import json
+    if config_path and os.path.isfile(config_path):
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def is_trading_hours(symbol, config):
+    # Implementazione base: sempre vero, personalizzabile
+    return True
+
 class QuantumRiskManager:
     def __init__(self, config, engine, trading_system=None):
         self._lock = threading.Lock()
@@ -69,22 +133,17 @@ class QuantumRiskManager:
         with self._lock:
             self._symbol_data[symbol] = value
     def calculate_position_size(self, symbol: str, price: float, signal: str, risk_percent: float = None) -> float:
-        # ...implementazione come da versione storica...
-        pass
         try:
             if not self._load_symbol_data(symbol):
                 logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su _load_symbol_data({symbol})")
                 logger.error(f"Impossibile caricare dati simbolo {symbol}")
                 return 0.0
-
             risk_config = self.get_risk_config(symbol)
             account = mt5.account_info()
             if not account:
                 logger.debug(f"[SIZE-DEBUG-TRACE] Blocco su account_info None per {symbol}")
                 logger.error("Impossibile ottenere info account")
                 return 0.0
-
-            # Parametri base
             if risk_percent is None:
                 risk_percent = risk_config.get('risk_percent', 0.02)
             risk_amount = account.equity * risk_percent
@@ -92,27 +151,13 @@ class QuantumRiskManager:
             symbol_data = self._symbol_data[symbol]
             pip_size = symbol_data['pip_size']
             contract_size = symbol_data.get('contract_size', 1.0)
-            volume_min = symbol_data.get('volume_min', None)
-            volume_max = symbol_data.get('volume_max', None)
-            volume_step = symbol_data.get('volume_step', None)
-
-            # Calcolo pip_value (pip_size * contract_size)
             pip_value = pip_size * contract_size
-            # Target pip value normalizzato (es: 10 USD a pip per tutti i simboli)
             target_pip_value = self._get_config(symbol, 'target_pip_value', 10.0)
             if pip_value <= 0 or sl_pips <= 0:
                 logger.error(f"Valori non validi: sl_pips={sl_pips}, pip_value={pip_value}")
                 return 0.0
-
-            # Size normalizzata per pip_value: size = (risk_amount / sl_pips) / pip_value
             size = (risk_amount / sl_pips) / pip_value
-
-            # Normalizza per target_pip_value (opzionale, per rendere P&L simile tra simboli)
             size = size * (pip_value / target_pip_value)
-
-            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
-
-            # Limite massimo assoluto per simbolo
             max_size_limit = self._get_config(symbol, 'max_size_limit', None)
             if max_size_limit is None:
                 config = self.config.config if hasattr(self.config, 'config') else self.config
@@ -120,8 +165,6 @@ class QuantumRiskManager:
             if size > max_size_limit:
                 logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
-
-            # Limite esposizione globale (sommatoria size * contract_size su tutti i simboli)
             max_global_exposure = self._get_config(symbol, 'max_global_exposure', None)
             if max_global_exposure is not None:
                 total_exposure = 0.0
@@ -129,49 +172,14 @@ class QuantumRiskManager:
                     if sym == symbol:
                         total_exposure += size * contract_size
                     else:
-                        # Salta simboli non ancora presenti in _symbol_data per evitare KeyError
                         if sym not in self._symbol_data:
                             continue
                         total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
                 if total_exposure > max_global_exposure:
                     logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
                     size = 0.0
-
-            # Applica limiti broker e arrotondamenti
             size = self._apply_size_limits(symbol, size)
-
-            # Salva la size calcolata per uso futuro (esposizione globale)
             self._symbol_data[symbol]['last_size'] = size
-
-            symbol_type = 'Metallo' if symbol in ['XAUUSD', 'XAGUSD'] else ('Indice' if symbol in ['SP500', 'NAS100', 'US30', 'DAX40', 'FTSE100', 'JP225'] else 'Forex')
-            logger.debug(
-                f"\n-------------------- [SIZE-DEBUG] --------------------\n"
-                f"Symbol: {symbol} ({symbol_type})\n"
-                f"Risk Config: {risk_config}\n"
-                f"Account Equity: {account.equity}\n"
-                f"Risk Percent: {risk_percent}\n"
-                f"Risk Amount: {risk_amount}\n"
-                f"SL Pips: {sl_pips}\n"
-                f"Pip Size: {pip_size}\n"
-                f"Contract Size: {contract_size}\n"
-                f"Pip Value: {pip_value}\n"
-                f"Target Pip Value: {target_pip_value}\n"
-                f"Volume Min: {volume_min}\n"
-                f"Volume Max: {volume_max}\n"
-                f"Volume Step: {volume_step}\n"
-                f"Size (post-normalizzazione): {size}\n"
-                "------------------------------------------------------\n"
-            )
-            logger.info(
-                f"\n==================== [SIZE-DEBUG] ====================\n"
-                f"Symbol: {symbol} ({symbol_type})\n"
-                f"Risk Amount: ${risk_amount:.2f} ({risk_percent*100:.2f}%)\n"
-                f"SL: {sl_pips:.2f} pips\n"
-                f"Pip Value: {pip_value}\n"
-                f"Target Pip Value: {target_pip_value}\n"
-                f"Size: {size:.4f}\n"
-                "======================================================\n"
-            )
             return size
         except Exception as e:
             logger.error(f"Errore calcolo dimensione {symbol}: {str(e)}", exc_info=True)

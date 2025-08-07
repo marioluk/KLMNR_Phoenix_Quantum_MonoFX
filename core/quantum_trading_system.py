@@ -1,3 +1,8 @@
+
+from core.quantum_risk_manager import QuantumRiskManager
+from utils.utils import setup_logger, clean_old_logs
+# RIMOSSO: importazione globale is_trading_hours, ora gestito solo come metodo della classe
+
 import os
 import csv
 import json
@@ -10,9 +15,6 @@ import MetaTrader5 as mt5
 from core.trading_metrics import TradingMetrics
 from core.daily_drawdown_tracker import DailyDrawdownTracker
 from core.quantum_engine import QuantumEngine
-from core.quantum_risk_manager import QuantumRiskManager
-from utils.utils import setup_logger, clean_old_logs
-from utils.utils import is_trading_hours
 
 
 class QuantumTradingSystem:
@@ -212,8 +214,7 @@ class QuantumTradingSystem:
                 return
 
             # 2. Orari di trading
-            config_dict = self._config.config if hasattr(self._config, 'config') else self._config
-            trading_hours = is_trading_hours(symbol, config_dict)
+            trading_hours = self.is_trading_hours(symbol)
             logger.info(f"trading_hours: {trading_hours}")
             if not trading_hours:
                 msg = "Motivo: fuori orario di trading"
@@ -1004,7 +1005,7 @@ class QuantumTradingSystem:
                     return
 
             # 2. Verifica orari di trading
-            if not is_trading_hours(symbol, self._config.config):
+            if not self.is_trading_hours(symbol):
                 motivi_blocco.append('fuori_orario')
                 self.debug_trade_decision(symbol)
                 logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: fuori_orario")

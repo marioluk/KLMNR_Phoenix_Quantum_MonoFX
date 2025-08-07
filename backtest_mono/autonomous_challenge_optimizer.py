@@ -506,7 +506,7 @@ class AutonomousHighStakesOptimizer:
         return results
 
     def create_base_config_template(self) -> Dict:
-        # Dati sensibili e parametri fissi (puoi modificarli in seguito)
+        # Versione flat: tutte le chiavi sono al primo livello
         base_config = {
             "metadata": {
                 "trading_mode": "",
