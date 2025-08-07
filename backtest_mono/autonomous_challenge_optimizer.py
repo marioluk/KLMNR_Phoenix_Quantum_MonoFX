@@ -445,8 +445,16 @@ class AutonomousHighStakesOptimizer:
             'max_daily_loss_percent': 0.05
         }
         self.available_symbols = [
-            'EURUSD', 'USDJPY', 'GBPUSD', 'USDCHF', 'SP500', 'NAS100', 'US30',
-            'BTCUSD', 'ETHUSD', 'XAUUSD'
+            'EURUSD', 
+            'USDJPY', 
+            'GBPUSD', 
+            'USDCHF', 
+            'SP500', 
+            'NAS100', 
+            'US30',
+            #'BTCUSD', 
+            #'ETHUSD', 
+            'XAUUSD'
         ]
         self.param_ranges = self.get_param_ranges_for_mode(mode)
         self.optimized_configs = {}
