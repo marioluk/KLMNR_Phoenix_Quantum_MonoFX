@@ -52,6 +52,8 @@ class QuantumRiskManager:
             config_dict
         )
         self._symbol_data = {}
+        # Inizializza logger
+        self.logger = logging.getLogger("phoenix_quantum")
         # Parametri da config
         self.trailing_stop_activation = config.get('risk_management', {}).get('trailing_stop_activation', 0.5)
         self.trailing_step = config.get('risk_management', {}).get('trailing_step', 0.3)
