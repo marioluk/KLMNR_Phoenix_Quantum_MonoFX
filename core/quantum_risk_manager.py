@@ -1,6 +1,8 @@
 from core.daily_drawdown_tracker import DailyDrawdownTracker
 import MetaTrader5 as mt5
 import threading
+# Fix: aggiungo import numpy as np
+import numpy as np
 # quantum_risk_manager.py
 """
 Modulo QuantumRiskManager: gestisce la logica di risk management per il sistema di trading.
@@ -11,6 +13,23 @@ from typing import Tuple, Any
 
 
 class QuantumRiskManager:
+    # =============================================================================
+    # Calcolo Size Lotto Compatibile con Main
+    # -----------------------------------------------------------------------------
+    # Questo metodo fornisce un alias standardizzato per il calcolo della size del lotto,
+    # compatibile con la chiamata dal main system. Converte l'order_type MT5 (int)
+    # in stringa ('BUY'/'SELL') e richiama la logica robusta di calcolo posizione
+    # (risk, pip value, limiti, arrotondamenti, esposizione globale) già implementata
+    # in calculate_position_size. Permette di centralizzare la gestione del rischio
+    # e garantire che ogni ordine venga aperto con la size corretta secondo la config.
+    # =============================================================================
+    def calculate_lot_size(self, symbol: str, order_type: int, price: float, risk_percent: float = None) -> float:
+        """
+        Alias per il calcolo della size del lotto, compatibile con il main.
+        order_type: mt5.ORDER_TYPE_BUY/SELL -> convertito in stringa 'BUY'/'SELL'
+        """
+        signal = 'BUY' if order_type == mt5.ORDER_TYPE_BUY else 'SELL'
+        return self.calculate_position_size(symbol, price, signal, risk_percent)
     # ... qui prosegue la classe con i metodi che ora useranno self.config_manager.symbols invece di self.symbols ...
     """
     1. Inizializzazione
@@ -110,7 +129,6 @@ class QuantumRiskManager:
             # Normalizza per target_pip_value (opzionale, per rendere P&L simile tra simboli)
             size = size * (pip_value / target_pip_value)
 
-            logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
             self.logger.warning(f"[SIZE-DEBUG-TRACE] {symbol} | risk_amount={risk_amount} | sl_pips={sl_pips} | pip_value={pip_value} | size_raw={size} | max_size_limit={self._get_config(symbol, 'max_size_limit', None)} | volume_min={volume_min} | volume_max={volume_max}")
 
             # Limite massimo assoluto per simbolo
@@ -119,7 +137,6 @@ class QuantumRiskManager:
                 config = self.config.config if hasattr(self.config, 'config') else self.config
                 max_size_limit = config.get('risk_parameters', {}).get('max_size_limit', 0.1)
             if size > max_size_limit:
-                logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 self.logger.warning(f"Size limitata per {symbol}: {size:.2f} -> {max_size_limit} (Safety limit applicato)")
                 size = max_size_limit
 
@@ -136,7 +153,6 @@ class QuantumRiskManager:
                             continue
                         total_exposure += self._symbol_data[sym].get('last_size', 0.0) * self._symbol_data[sym].get('contract_size', 1.0)
                 if total_exposure > max_global_exposure:
-                    logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
                     self.logger.warning(f"Esposizione globale superata: {total_exposure} > {max_global_exposure}. Size ridotta a zero.")
                     size = 0.0
 
