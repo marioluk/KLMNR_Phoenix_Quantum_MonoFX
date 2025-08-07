@@ -1,3 +1,5 @@
+
+import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
 import os
@@ -108,132 +110,67 @@ class AutonomousHighStakesOptimizer:
         Restituisce i range di parametri ottimali per la tipologia di trading.
         Se symbol è SP500 o NAS100, restituisce range robusti.
         """
-        index_symbols = ["SP500", "NAS100"]
-        if symbol in index_symbols:
-            ranges = {
-                "scalping": {
-                    "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
-                    "max_daily_trades": [20, 30, 40, 60, 80, 100],
-                    "buffer_size": [1500, 2000, 2500, 3000, 4000],
-                    "spin_window": [100, 150, 200, 250, 300],
-                    "min_spin_samples": [20, 30, 40, 50, 60],
-                    "signal_cooldown": [1800, 2400, 3600, 5400, 7200],
-                    "max_concurrent_trades": [2, 3, 4],
-                    "stop_loss_pips": [6, 8, 10, 12, 15],
-                    "take_profit_pips": [10, 12, 15, 18, 20, 25],
-                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                    "spin_threshold": [0.15, 0.20, 0.25, 0.35, 0.5],
-                    "volatility_filter": [0.60, 0.65, 0.70, 0.75],
-                    "trend_strength": [0.50, 0.55, 0.60, 0.65]
-                    },
-                "intraday": {
-                    "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
-                    "max_daily_trades": [5, 6, 8, 10, 12, 15, 20],
-                    "buffer_size": [3000, 4000, 5000, 6000],
-                    "spin_window": [200, 300, 400, 500],
-                    "min_spin_samples": [40, 50, 60, 80, 100],
-                    "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
-                    "max_concurrent_trades": [2, 3, 4],
-                    "stop_loss_pips": [15, 18, 20, 25, 30],
-                    "take_profit_pips": [30, 35, 40, 50, 60],
-                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7],
-                    "volatility_filter": [0.65, 0.70, 0.75, 0.80],
-                    "trend_strength": [0.55, 0.60, 0.65, 0.70]
-                    },
-                "swing": {
-                    "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
-                    "max_daily_trades": [1, 2, 3, 4, 5, 6],
-                    "max_concurrent_trades": [1, 2, 3],
-                    "buffer_size": [800, 1200, 1500, 2000],
-                    "spin_window": [40, 60, 80, 100, 120],
-                    "min_spin_samples": [10, 15, 20, 25, 30],
-                    "signal_cooldown": [1200, 1800, 2400, 3000, 3600],
-                    "stop_loss_pips": [50, 60, 80, 100, 120, 150, 200],
-                    "take_profit_pips": [100, 120, 150, 180, 200, 250, 300],
-                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
-                    "volatility_filter": [0.70, 0.75, 0.80, 0.85],
-                    "trend_strength": [0.60, 0.65, 0.70, 0.75]
-                },
-                "position": {
-                    "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
-                    "max_daily_trades": [1, 2],
-                    "max_concurrent_trades": [1, 2],
-                    "buffer_size": [1500, 2000, 3000, 4000, 5000],
-                    "spin_window": [100, 150, 200, 250, 300],
-                    "min_spin_samples": [20, 30, 40, 50, 60],
-                    "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
-                    "stop_loss_pips": [150, 200, 250, 300, 400],
-                    "take_profit_pips": [300, 400, 500, 600, 800],
-                    "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                    "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
-                    "volatility_filter": [0.75, 0.80, 0.85, 0.90],
-                    "trend_strength": [0.65, 0.70, 0.75, 0.80]
-                }
-            }
-            return ranges.get(mode, ranges["intraday"])
-        # ...range generici per altri simboli...
+        # PATCH: tuning dei range per tutte le tipologie
         ranges = {
             "scalping": {
-                "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.007],
-                "max_daily_trades": [20, 30, 40, 60, 80, 100],
-                "buffer_size": [100, 150, 200, 250, 300],
-                "spin_window": [10, 15, 20, 25, 30],
-                "min_spin_samples": [3, 4, 5, 6],
-                "signal_cooldown": [60, 120, 180, 240, 300],
-                "max_concurrent_trades": [2, 3, 4],
-                "stop_loss_pips": [6, 8, 10, 12, 15],
-                "take_profit_pips": [10, 12, 15, 18, 20, 25],
-                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                "spin_threshold": [0.15, 0.20, 0.25, 0.35, 0.5],
-                "volatility_filter": [0.60, 0.65, 0.70, 0.75],
-                "trend_strength": [0.50, 0.55, 0.60, 0.65]
-            },
-            "intraday": {
-                "risk_percent": [0.004, 0.005, 0.007, 0.008, 0.010],
-                "max_daily_trades": [5, 6, 8, 10, 12, 15, 20],
-                "buffer_size": [300, 400, 500, 600, 800],
-                "spin_window": [20, 30, 40, 50, 60],
-                "min_spin_samples": [6, 8, 10, 12],
+                "risk_percent": [0.002, 0.003, 0.004, 0.005, 0.006],
+                "max_daily_trades": [20, 30, 40, 50, 60],
+                "buffer_size": [50, 100, 150, 200],
+                "spin_window": [5, 10, 15, 20],
+                "min_spin_samples": [2, 3, 4, 5],
                 "signal_cooldown": [300, 600, 900, 1200],
                 "max_concurrent_trades": [2, 3, 4],
-                "stop_loss_pips": [15, 18, 20, 25, 30],
-                "take_profit_pips": [30, 35, 40, 50, 60],
-                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7],
+                "stop_loss_pips": [5, 6, 8, 10, 12],
+                "take_profit_pips": [8, 10, 12, 15, 18],
+                "signal_threshold": [0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.20, 0.25, 0.35, 0.5],
+                "volatility_filter": [0.60, 0.65, 0.70, 0.75],
+                "trend_strength": [0.55, 0.60, 0.65]
+            },
+            "intraday": {
+                "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.008],
+                "max_daily_trades": [6, 8, 10, 12, 15, 20, 25],
+                "buffer_size": [200, 300, 400, 500, 600],
+                "spin_window": [15, 20, 30, 40, 50],
+                "min_spin_samples": [4, 6, 8, 10],
+                "signal_cooldown": [600, 900, 1200, 1800],
+                "max_concurrent_trades": [2, 3, 4],
+                "stop_loss_pips": [12, 15, 18, 20, 25, 30],
+                "take_profit_pips": [20, 30, 35, 40, 50, 60],
+                "signal_threshold": [0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.20, 0.25, 0.35, 0.5, 0.7],
                 "volatility_filter": [0.65, 0.70, 0.75, 0.80],
                 "trend_strength": [0.55, 0.60, 0.65, 0.70]
             },
             "swing": {
-                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
-                "max_daily_trades": [1, 2, 3, 4, 5, 6],
+                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.015],
+                "max_daily_trades": [1, 2, 3, 4, 5],
                 "max_concurrent_trades": [1, 2, 3],
-                "buffer_size": [800, 1200, 1500, 2000],
-                "spin_window": [40, 60, 80, 100, 120],
-                "min_spin_samples": [10, 15, 20, 25, 30],
-                "signal_cooldown": [1200, 1800, 2400, 3000, 3600],
-                "stop_loss_pips": [50, 60, 80, 100, 120, 150, 200],
-                "take_profit_pips": [100, 120, 150, 180, 200, 250, 300],
-                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
-                "volatility_filter": [0.70, 0.75, 0.80, 0.85],
-                "trend_strength": [0.60, 0.65, 0.70, 0.75]
+                "buffer_size": [600, 800, 1200, 1500, 2000],
+                "spin_window": [30, 40, 60, 80, 100],
+                "min_spin_samples": [8, 10, 15, 20],
+                "signal_cooldown": [1800, 2400, 3000, 3600, 7200],
+                "stop_loss_pips": [40, 50, 60, 80, 100, 120, 150, 200, 250],
+                "take_profit_pips": [80, 100, 120, 150, 180, 200, 250, 300, 400],
+                "signal_threshold": [0.60, 0.65, 0.70, 0.75],
+                "spin_threshold": [0.25, 0.35, 0.5, 0.7, 1.0],
+                "volatility_filter": [0.70, 0.75, 0.80, 0.85, 0.90],
+                "trend_strength": [0.60, 0.65, 0.70, 0.75, 0.80]
             },
             "position": {
-                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
+                "risk_percent": [0.007, 0.008, 0.010, 0.012, 0.015],
                 "max_daily_trades": [1, 2],
                 "max_concurrent_trades": [1, 2],
-                "buffer_size": [1500, 2000, 3000, 4000, 5000],
-                "spin_window": [100, 150, 200, 250, 300],
-                "min_spin_samples": [20, 30, 40, 50, 60],
+                "buffer_size": [1200, 1500, 2000, 3000, 4000, 5000],
+                "spin_window": [60, 100, 150, 200, 250, 300],
+                "min_spin_samples": [15, 20, 30, 40, 50, 60],
                 "signal_cooldown": [3600, 5400, 7200, 10800, 14400],
-                "stop_loss_pips": [150, 200, 250, 300, 400],
-                "take_profit_pips": [300, 400, 500, 600, 800],
-                "signal_threshold": [0.55, 0.60, 0.65, 0.70, 0.75],
-                "spin_threshold": [0.15, 0.25, 0.35, 0.5, 0.7, 1.0],
-                "volatility_filter": [0.75, 0.80, 0.85, 0.90],
-                "trend_strength": [0.65, 0.70, 0.75, 0.80]
+                "stop_loss_pips": [120, 150, 200, 250, 300, 400, 600, 800],
+                "take_profit_pips": [250, 300, 400, 500, 600, 800, 1200, 2000],
+                "signal_threshold": [0.65, 0.70, 0.75],
+                "spin_threshold": [0.35, 0.5, 0.7, 1.0],
+                "volatility_filter": [0.80, 0.85, 0.90, 0.95],
+                "trend_strength": [0.70, 0.75, 0.80, 0.90]
             }
         }
         return ranges.get(mode, ranges["intraday"])

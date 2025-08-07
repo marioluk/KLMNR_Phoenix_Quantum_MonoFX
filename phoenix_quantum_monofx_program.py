@@ -1080,14 +1080,21 @@ class QuantumEngine:
         
     def _get_pip_size(self, symbol: str) -> float:
         """
-        Calcola la dimensione di un pip in modo robusto (supporta simboli come BTCUSD, XAUUSD).
-        Tutto thread-safe.
+        Calcola la dimensione di un pip in modo robusto, usando prima il valore da pip_size_map nel config.
         """
         with self._runtime_lock:
             try:
+                config = self.config if isinstance(self.config, dict) else getattr(self.config, 'config', {})
+                pip_size_map = config.get('pip_size_map', {})
+                base_symbol = symbol.split('.')[0]
+                if base_symbol in pip_size_map:
+                    pip_size = pip_size_map[base_symbol]
+                    logger.debug(f"[PIP_SIZE] {symbol}: pip_size_map={pip_size}")
+                    return pip_size
                 # 1. Prova a ottenere info da MT5
                 info = mt5.symbol_info(symbol)
                 if info and info.point > 0:
+                    logger.debug(f"[PIP_SIZE] {symbol}: mt5.point={info.point}")
                     return info.point
                 # 2. Fallback per simboli speciali
                 pip_map = {
@@ -1098,8 +1105,9 @@ class QuantumEngine:
                     'NAS100': 0.1,
                     'default': 0.0001
                 }
-                base_symbol = symbol.split('.')[0]  # Rimuove .cash/.pro
-                return pip_map.get(base_symbol, pip_map['default'])
+                pip_size = pip_map.get(base_symbol, pip_map['default'])
+                logger.debug(f"[PIP_SIZE] {symbol}: fallback pip_map={pip_size}")
+                return pip_size
             except Exception as e:
                 logger.debug(f"Errore pip size per {symbol}: {str(e)}")
                 return 0.0001  # Valore di fallback sicuro
@@ -1467,6 +1475,10 @@ class QuantumRiskManager:
     """
     
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
+        """
+        Calcola i livelli SL/TP tenendo conto del min_stop_level del broker e parametri avanzati.
+        """
+        global logger
         try:
             # --- LOG avanzato: mostra da dove vengono i parametri ---
             min_sl = None
@@ -1498,6 +1510,7 @@ class QuantumRiskManager:
                 return 0.0, 0.0
             pip_size = self.engine._get_pip_size(symbol)
             digits = symbol_info.digits
+            min_stop_level = symbol_info.min_stop_level if symbol_info else 0
 
             try:
                 volatility = float(self.engine.calculate_quantum_volatility(symbol))
@@ -1518,6 +1531,15 @@ class QuantumRiskManager:
             else:
                 sl_pips = int(round(max(adjusted_sl, float(min_sl))))
             tp_pips = int(round(sl_pips * profit_multiplier))
+
+            # --- Verifica min_stop_level broker ---
+            min_sl_pips = min_stop_level * pip_size if min_stop_level > 0 else 0
+            if sl_pips * pip_size < min_sl_pips:
+                logger.warning(f"[{symbol}] SL troppo vicino! SL richiesto: {sl_pips * pip_size:.5f}, min_stop_level: {min_sl_pips:.5f} (pips: {min_stop_level})")
+                sl_pips = int(min_sl_pips / pip_size) + 1
+            if tp_pips * pip_size < min_sl_pips:
+                logger.warning(f"[{symbol}] TP troppo vicino! TP richiesto: {tp_pips * pip_size:.5f}, min_stop_level: {min_sl_pips:.5f} (pips: {min_stop_level})")
+                tp_pips = int(min_sl_pips / pip_size) + 1
 
             # --- Trailing stop activation mode support ---
             trailing_stop = self._get_config(symbol, 'trailing_stop', {})
@@ -1552,6 +1574,7 @@ class QuantumRiskManager:
                 f"Multiplier: {profit_multiplier} [{profit_multiplier_source}]\n"
                 f"Trailing Activation Mode: {activation_mode}\n"
                 f"Trailing Activation Pips: {activation_pips}\n"
+                f"min_stop_level: {min_stop_level}\n"
                 "======================================================\n"
             )
             return sl_price, tp_price
