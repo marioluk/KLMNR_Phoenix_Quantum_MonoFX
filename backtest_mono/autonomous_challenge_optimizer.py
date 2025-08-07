@@ -981,19 +981,15 @@ class AutonomousHighStakesOptimizer:
 
     def save_config(self, config: dict, aggressiveness: str, mode: str) -> str:
         """
-        Salva la configurazione ottimizzata in un file JSON con nome conforme alla produzione e struttura corretta.
+        Salva la configurazione ottimizzata in un file JSON flat, senza wrapper 'config'.
         Restituisce il percorso del file salvato.
         """
-        import json
-        # Formato richiesto: config_autonomous_challenge_[STRATEGY]_production_ready.json
         filename = f"config_autonomous_challenge_{mode}_{aggressiveness}_production_ready.json"
         filepath = os.path.join(self.output_dir, filename)
-        # Racchiudi la configurazione sotto la chiave 'config'
-        config_wrapped = {"config": config}
         try:
             with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(config_wrapped, f, indent=4, ensure_ascii=False)
-            print(f"✅ Configurazione salvata: {filepath}")
+                json.dump(config, f, indent=4, ensure_ascii=False)
+            print(f"✅ Configurazione flat salvata: {filepath}")
         except Exception as e:
             print(f"[ERRORE] Salvataggio configurazione fallito: {e}")
         return filepath
