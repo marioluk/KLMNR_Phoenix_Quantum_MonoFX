@@ -16,6 +16,19 @@ from utils.utils import is_trading_hours
 
 
 class QuantumTradingSystem:
+    def is_trading_hours(self, symbol):
+        """
+        Restituisce True se il simbolo è in orario di trading secondo la config. Logga sempre la decisione.
+        """
+        try:
+            from utils.utils import is_trading_hours as _is_trading_hours
+            config_dict = self._config.config if hasattr(self._config, 'config') else self._config
+            trading_hours = _is_trading_hours(symbol, config_dict)
+            self.logger.info(f"[TRADING HOURS] {symbol}: {trading_hours}")
+            return trading_hours
+        except Exception as e:
+            self.logger.warning(f"Errore calcolo trading_hours per {symbol}: {e}")
+            return True  # fallback: consenti trading se errore
     def __init__(self, config_path: str):
         """Costruttore principale"""
         self.logger = setup_logger(config_path)
@@ -1672,3 +1685,88 @@ class QuantumTradingSystem:
         for symbol in self._config.config['symbols']:
             buffer = self.engine.get_tick_buffer(symbol)
             logger.debug(f"Buffer {symbol}: {len(buffer)} ticks")
+
+    # ================== GESTIONE LIMITI TRADE COUNT E POSIZIONI ==================
+    def can_open_trade(self, symbol=None):
+        """
+        Verifica se è possibile aprire un nuovo trade (limiti giornalieri e posizioni).
+        Args:
+            symbol: opzionale, se None controlla limiti globali, altrimenti per simbolo.
+        Returns:
+            (bool, motivo): True se si può aprire, False e motivo se bloccato.
+        """
+        risk_params = self._config.config.get('risk_parameters', {})
+        max_daily_trades = risk_params.get('max_daily_trades', 8)
+        max_positions = risk_params.get('max_positions', 1)
+        daily_trade_limit_mode = risk_params.get('daily_trade_limit_mode', 'global')
+        # Carica trade_count
+        trade_count = self.get_trade_count(symbol)
+        # Posizioni aperte
+        all_positions = mt5.positions_get()
+        total_open_positions = len(all_positions) if all_positions else 0
+        if symbol:
+            positions = mt5.positions_get(symbol=symbol)
+            symbol_positions = len(positions) if positions else 0
+        else:
+            symbol_positions = None
+        # Logica limiti
+        if daily_trade_limit_mode == 'symbol' and symbol:
+            if trade_count >= max_daily_trades:
+                return False, f"max_daily_trades_symbol ({trade_count}/{max_daily_trades})"
+            elif symbol_positions is not None and symbol_positions >= max_positions:
+                return False, f"max_positions_per_symbol ({symbol_positions}/{max_positions})"
+        else:
+            total_trades = sum(self.get_trade_count().values())
+            if total_trades >= max_daily_trades:
+                return False, f"max_daily_trades_global ({total_trades}/{max_daily_trades})"
+            elif total_open_positions >= max_positions:
+                return False, f"max_total_positions ({total_open_positions}/{max_positions})"
+        return True, None
+
+    def get_trade_count(self, symbol=None):
+        """
+        Restituisce il trade count per simbolo o globale.
+        Args:
+            symbol: opzionale, se None restituisce dict completo, altrimenti solo per simbolo.
+        Returns:
+            int o dict
+        """
+        # Carica da file se necessario
+        try:
+            if os.path.isfile(self._trade_count_file):
+                with open(self._trade_count_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if symbol:
+                    return data.get('trade_count', {}).get(symbol, 0)
+                else:
+                    return data.get('trade_count', {})
+            else:
+                return 0 if symbol else {}
+        except Exception:
+            return 0 if symbol else {}
+
+    def reset_trade_count_if_new_day(self):
+        """
+        Reset giornaliero del trade_count con backup.
+        """
+        today = datetime.now().strftime('%Y-%m-%d')
+        try:
+            if os.path.isfile(self._trade_count_file):
+                with open(self._trade_count_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                file_date = data.get('date', '')
+                if file_date != today:
+                    # Backup
+                    import shutil
+                    backup_path = self._trade_count_file.replace('.json', f'_{file_date}_backup.json')
+                    try:
+                        shutil.copy2(self._trade_count_file, backup_path)
+                    except Exception as e:
+                        self.logger.warning(f"Impossibile creare backup trade_count_state: {e}")
+                    # Reset
+                    new_data = {'date': today, 'trade_count': {}}
+                    with open(self._trade_count_file, 'w', encoding='utf-8') as f2:
+                        json.dump(new_data, f2)
+                    self.logger.info(f"[TRADE COUNT RESET] Reset giornaliero effettuato, backup creato.")
+        except Exception as e:
+            self.logger.warning(f"Errore reset trade_count giornaliero: {e}")

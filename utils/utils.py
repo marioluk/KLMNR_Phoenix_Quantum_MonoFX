@@ -46,12 +46,6 @@ def validate_config(config):
     if 'symbols' not in config:
         raise ValueError("Config non valida: manca la chiave 'symbols'")
     return True
-
-def is_trading_hours(symbol, config):
-    """Verifica se il simbolo è in orario di trading secondo la configurazione."""
-    # Placeholder: sempre True, implementare logica reale se serve
-    return True
-
 # Funzione parse_time_range già presente
 def set_symbol_data(obj, symbol, value):
     """Imposta i dati di un simbolo in modo thread-safe su un oggetto con _lock e _symbol_data."""

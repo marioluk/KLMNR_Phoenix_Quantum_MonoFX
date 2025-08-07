@@ -95,35 +95,16 @@ try:
     config_manager = ConfigManager(config_path)
     engine = config_manager.engine
     symbols = list(config_manager.config.get('symbols', {}).keys())
+    # Inizializza QuantumTradingSystem per gestione ordini centralizzata
+    from core.quantum_trading_system import QuantumTradingSystem
+    trading_system = QuantumTradingSystem(config_path)
     logger.info(f"Simboli attivi: {symbols}")
     logger.info("Avvio ciclo principale di polling prezzi e segnali...")
     last_heartbeat = time.time()
     HEARTBEAT_INTERVAL = 60  # secondi
     while True:
-        # Carica lo stato trade_count
-        trade_count_state = load_trade_count_state(TRADE_COUNT_PATH)
-        today = datetime.now().strftime('%Y-%m-%d')
-        # Reset giornaliero avanzato con backup
-        def backup_trade_count_state(path, date):
-            import shutil
-            if os.path.isfile(path) and date:
-                backup_path = path.replace('.json', f'_{date}_backup.json')
-                try:
-                    shutil.copy2(path, backup_path)
-                except Exception as e:
-                    logger.warning(f"Impossibile creare backup trade_count_state: {e}")
-        if trade_count_state['date'] != today:
-            backup_trade_count_state(TRADE_COUNT_PATH, trade_count_state['date'])
-            trade_count_state['date'] = today
-            trade_count_state['trade_count'] = {}
-            save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
-            logger.info(f"[TRADE COUNT RESET] Reset giornaliero effettuato, backup creato.")
-        for symbol in symbols:
-            # Controllo posizioni totali aperte su tutti i simboli
-            all_positions = mt5.positions_get()
-            total_open_positions = len(all_positions) if all_positions else 0
-            tick = mt5.symbol_info_tick(symbol)
-        daily_trade_limit_mode = config_manager.config.get('risk_parameters', {}).get('daily_trade_limit_mode', 'global')
+        # Reset giornaliero avanzato con backup tramite core
+        trading_system.reset_trade_count_if_new_day()
         for symbol in symbols:
             tick = mt5.symbol_info_tick(symbol)
             if tick is None or tick.bid is None:
@@ -133,21 +114,14 @@ try:
             price = tick.bid
             engine.process_tick(symbol, price)
             signal, signal_price = engine.get_signal(symbol)
-            # --- LOGICA DI BLOCCO TRADE ---
-            blocked = False
-            block_reason = None
-            # Recupera contatori dal file JSON
-            trade_count = trade_count_state['trade_count'].get(symbol, 0)
-            max_daily_trades = config_manager.config.get('risk_parameters', {}).get('max_daily_trades', 8)
-            max_positions = config_manager.config.get('risk_parameters', {}).get('max_positions', 1)
-            # Nuovo: posizioni aperte per simbolo
+            # --- LOGICA DI BLOCCO TRADE DELEGATA AL CORE ---
+            can_trade, block_reason = trading_system.can_open_trade(symbol)
+            # Determina il tipo di posizione aperta (BUY/SELL) se presente
             positions = mt5.positions_get(symbol=symbol)
             symbol_positions = len(positions) if positions else 0
-            # Determina il tipo di posizione aperta (BUY/SELL) se presente
             open_type = None
             open_ticket = None
             if positions and symbol_positions > 0:
-                # Prende la prima posizione aperta (assume una sola per simbolo)
                 pos = positions[0]
                 open_type = 'BUY' if pos.type == mt5.POSITION_TYPE_BUY else 'SELL'
                 open_ticket = pos.ticket
@@ -166,26 +140,8 @@ try:
             # Orario di trading
             from utils.utils import is_trading_hours
             trading_hours = is_trading_hours(symbol, config_manager.config)
-            # Controllo limiti
-            all_positions = mt5.positions_get()
-            total_open_positions = len(all_positions) if all_positions else 0
-            if daily_trade_limit_mode == 'symbol':
-                # Limite per simbolo
-                if trade_count >= max_daily_trades:
-                    blocked = True
-                    block_reason = f"max_daily_trades_symbol ({trade_count}/{max_daily_trades})"
-                elif symbol_positions >= max_positions:
-                    blocked = True
-                    block_reason = f"max_positions_per_symbol ({symbol_positions}/{max_positions})"
-            else:
-                # Limite globale
-                if sum(trade_count_state['trade_count'].values()) >= max_daily_trades:
-                    blocked = True
-                    block_reason = f"max_daily_trades_global ({sum(trade_count_state['trade_count'].values())}/{max_daily_trades})"
-                elif total_open_positions >= max_positions:
-                    blocked = True
-                    block_reason = f"max_total_positions ({total_open_positions}/{max_positions})"
             # Logica direzionale per posizione aperta
+            blocked = not can_trade
             if not blocked and open_type is not None:
                 if signal == open_type:
                     blocked = True
@@ -208,7 +164,6 @@ try:
                     close_result = mt5.order_send(close_request)
                     if close_result and close_result.retcode == mt5.TRADE_RETCODE_DONE:
                         logger.info(f"[POSITION CLOSED] {symbol} posizione {open_type} chiusa con successo. Ticket: {open_ticket}")
-                        # Aggiorna lo stato posizioni
                         symbol_positions -= 1
                         open_type = None
                     else:
@@ -217,16 +172,7 @@ try:
             logger.info(f"Dettaglio: Confidence: {confidence if confidence is not None else '-'}; Entropia: {entropy if entropy is not None else '-'}; Spin: {spin if spin is not None else '-'}; Buffer tick: {buffer_size}")
             if blocked:
                 logger.info(f"[DEBUG-TRADE-DECISION] {symbol} | Blocco: {block_reason}")
-                if block_reason.startswith('max_daily_trades'):
-                    logger.info(f"🚫 Limite totale trade giornalieri raggiunto: {trade_count}/{max_daily_trades}. Nessun nuovo trade verrà aperto oggi.")
-                elif block_reason.startswith('max_total_positions'):
-                    logger.info(f"🚫 Limite massimo posizioni aperte raggiunto: {total_open_positions}/{max_positions}. Nessun nuovo trade verrà aperto.")
-                elif block_reason.startswith('same_position_type_open'):
-                    logger.info(f"🚫 Posizione {open_type} già aperta su {symbol}. Nessun nuovo trade verrà aperto.")
-                elif block_reason.startswith('failed_close_opposite'):
-                    logger.info(f"🚫 Errore nella chiusura della posizione opposta su {symbol}. Trade bloccato.")
-                logger.info("")
-                write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trade_count}, symbol_positions={symbol_positions}")
+                write_report_row(symbol, "block", f"Blocco: {block_reason}", f"trade_count={trading_system.get_trade_count(symbol)}, symbol_positions={symbol_positions}")
                 continue
             else:
                 logger.info(f"Segnale: {signal} @ {signal_price:.5f}")
@@ -239,39 +185,27 @@ try:
             # === INCREMENTO TRADE COUNT DOPO TRADE ESEGUITO ===
             trade_executed = False
             if signal in ("BUY", "SELL"):
-                # Calcolo SL/TP tramite QuantumRiskManager
                 order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
-                # Calcolo dinamico della size del lotto
                 try:
                     lot_size = config_manager.risk_manager.calculate_lot_size(symbol, order_type, price)
                 except Exception as e:
                     logger.warning(f"[LOT SIZE ERROR] Errore nel calcolo della size per {symbol}: {e}")
                     lot_size = 0.01  # fallback di sicurezza
-                # Calcola SL/TP
                 sl_price, tp_price = config_manager.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
-                request = {
-                    "action": mt5.TRADE_ACTION_DEAL,
-                    "symbol": symbol,
-                    "volume": lot_size,
-                    "type": order_type,
-                    "price": price,
-                    "sl": sl_price,
-                    "tp": tp_price,
-                    "deviation": 10,
-                    "magic": 123456,
-                    "comment": "PhoenixQuantumAuto",
-                    "type_time": mt5.ORDER_TIME_GTC,
-                    "type_filling": mt5.ORDER_FILLING_IOC,
-                }
-                result = mt5.order_send(request)
-                if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                result = trading_system.send_manual_order(symbol, signal, lot_size, sl=sl_price, tp=tp_price)
+                if result.get('success'):
                     trade_executed = True
-                    logger.info(f"[TRADE EXECUTED] {symbol} ordine aperto con successo. Ticket: {result.order} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
+                    logger.info(f"[TRADE EXECUTED] {symbol} ordine aperto con successo. Ticket: {result.get('ticket')} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
                 else:
-                    logger.warning(f"[TRADE FAILED] {symbol} ordine non aperto. Retcode: {getattr(result, 'retcode', None)} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
+                    logger.warning(f"[TRADE FAILED] {symbol} ordine non aperto. Errore: {result.get('error')} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
             if trade_executed:
-                trade_count_state['trade_count'][symbol] = trade_count + 1
-                save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
+                # Aggiorna trade_count tramite core
+                tc = trading_system.get_trade_count()
+                tc[symbol] = tc.get(symbol, 0) + 1
+                # Salva su file
+                today = datetime.now().strftime('%Y-%m-%d')
+                with open(trading_system._trade_count_file, 'w', encoding='utf-8') as f:
+                    json.dump({'date': today, 'trade_count': tc}, f)
         # Heartbeat periodico
         if time.time() - last_heartbeat > HEARTBEAT_INTERVAL:
             try:
