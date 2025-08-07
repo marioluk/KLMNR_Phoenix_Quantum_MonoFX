@@ -239,15 +239,24 @@ try:
             # === INCREMENTO TRADE COUNT DOPO TRADE ESEGUITO ===
             trade_executed = False
             if signal in ("BUY", "SELL"):
-                # Esempio di invio ordine a MT5 (sostituisci con la tua logica reale)
+                # Calcolo SL/TP tramite QuantumRiskManager
                 order_type = mt5.ORDER_TYPE_BUY if signal == "BUY" else mt5.ORDER_TYPE_SELL
-                lot_size = 0.01  # Sostituisci con la tua logica di calcolo size
+                # Calcolo dinamico della size del lotto
+                try:
+                    lot_size = config_manager.risk_manager.calculate_lot_size(symbol, order_type, price)
+                except Exception as e:
+                    logger.warning(f"[LOT SIZE ERROR] Errore nel calcolo della size per {symbol}: {e}")
+                    lot_size = 0.01  # fallback di sicurezza
+                # Calcola SL/TP
+                sl_price, tp_price = config_manager.risk_manager.calculate_dynamic_levels(symbol, order_type, price)
                 request = {
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
                     "volume": lot_size,
                     "type": order_type,
                     "price": price,
+                    "sl": sl_price,
+                    "tp": tp_price,
                     "deviation": 10,
                     "magic": 123456,
                     "comment": "PhoenixQuantumAuto",
@@ -257,9 +266,9 @@ try:
                 result = mt5.order_send(request)
                 if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                     trade_executed = True
-                    logger.info(f"[TRADE EXECUTED] {symbol} ordine aperto con successo. Ticket: {result.order}")
+                    logger.info(f"[TRADE EXECUTED] {symbol} ordine aperto con successo. Ticket: {result.order} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
                 else:
-                    logger.warning(f"[TRADE FAILED] {symbol} ordine non aperto. Retcode: {getattr(result, 'retcode', None)}")
+                    logger.warning(f"[TRADE FAILED] {symbol} ordine non aperto. Retcode: {getattr(result, 'retcode', None)} | Size: {lot_size} | SL: {sl_price} | TP: {tp_price}")
             if trade_executed:
                 trade_count_state['trade_count'][symbol] = trade_count + 1
                 save_trade_count_state(TRADE_COUNT_PATH, trade_count_state)
