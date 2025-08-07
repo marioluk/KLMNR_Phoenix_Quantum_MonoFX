@@ -1,4 +1,3 @@
-
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
@@ -113,7 +112,7 @@ class AutonomousHighStakesOptimizer:
         # PATCH: tuning dei range per tutte le tipologie
         ranges = {
             "scalping": {
-                "risk_percent": [0.002, 0.003, 0.004, 0.005, 0.006],
+                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.012],
                 "max_daily_trades": [20, 30, 40, 50, 60],
                 "buffer_size": [50, 100, 150, 200],
                 "spin_window": [5, 10, 15, 20],
@@ -128,7 +127,7 @@ class AutonomousHighStakesOptimizer:
                 "trend_strength": [0.55, 0.60, 0.65]
             },
             "intraday": {
-                "risk_percent": [0.003, 0.004, 0.005, 0.006, 0.008],
+                "risk_percent": [0.007, 0.008, 0.010, 0.012, 0.015],
                 "max_daily_trades": [6, 8, 10, 12, 15, 20, 25],
                 "buffer_size": [200, 300, 400, 500, 600],
                 "spin_window": [15, 20, 30, 40, 50],
@@ -143,7 +142,7 @@ class AutonomousHighStakesOptimizer:
                 "trend_strength": [0.55, 0.60, 0.65, 0.70]
             },
             "swing": {
-                "risk_percent": [0.005, 0.007, 0.008, 0.010, 0.015],
+                "risk_percent": [0.010, 0.012, 0.015, 0.018, 0.020],
                 "max_daily_trades": [1, 2, 3, 4, 5],
                 "max_concurrent_trades": [1, 2, 3],
                 "buffer_size": [600, 800, 1200, 1500, 2000],
@@ -158,7 +157,7 @@ class AutonomousHighStakesOptimizer:
                 "trend_strength": [0.60, 0.65, 0.70, 0.75, 0.80]
             },
             "position": {
-                "risk_percent": [0.007, 0.008, 0.010, 0.012, 0.015],
+                "risk_percent": [0.012, 0.015, 0.018, 0.020, 0.025],
                 "max_daily_trades": [1, 2],
                 "max_concurrent_trades": [1, 2],
                 "buffer_size": [1200, 1500, 2000, 3000, 4000, 5000],
