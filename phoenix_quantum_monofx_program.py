@@ -1476,7 +1476,7 @@ class QuantumRiskManager:
     
     def calculate_dynamic_levels(self, symbol: str, position_type: int, entry_price: float) -> Tuple[float, float]:
         """
-        Calcola i livelli SL/TP tenendo conto del min_stop_level del broker e parametri avanzati.
+        Calcola i livelli SL/TP tenendo conto del min_stop_level del broker e parametri avanzati, con fallback robusto e log di sicurezza.
         """
         global logger
         try:
@@ -1510,7 +1510,15 @@ class QuantumRiskManager:
                 return 0.0, 0.0
             pip_size = self.engine._get_pip_size(symbol)
             digits = symbol_info.digits
-            min_stop_level = symbol_info.min_stop_level if symbol_info else 0
+            # PATCH: fallback robusto per min_stop_level
+            min_stop_level = getattr(symbol_info, 'min_stop_level', None)
+            if min_stop_level is None:
+                min_stop_level = getattr(symbol_info, 'trade_min_stop', None)
+            if min_stop_level is None:
+                # fallback: usa valore dal config o default
+                min_stop_level = self._get_config(symbol, 'min_stop_level', 0)
+            if min_stop_level is None:
+                min_stop_level = 0
 
             try:
                 volatility = float(self.engine.calculate_quantum_volatility(symbol))
@@ -1540,6 +1548,11 @@ class QuantumRiskManager:
             if tp_pips * pip_size < min_sl_pips:
                 logger.warning(f"[{symbol}] TP troppo vicino! TP richiesto: {tp_pips * pip_size:.5f}, min_stop_level: {min_sl_pips:.5f} (pips: {min_stop_level})")
                 tp_pips = int(min_sl_pips / pip_size) + 1
+
+            # PATCH: log di sicurezza e blocco ordine se SL/TP non validi
+            if sl_pips <= 0 or tp_pips <= 0:
+                logger.error(f"[SECURITY] SL/TP non validi per {symbol}: SL={sl_pips}, TP={tp_pips}. Blocco ordine!")
+                return 0.0, 0.0
 
             # --- Trailing stop activation mode support ---
             trailing_stop = self._get_config(symbol, 'trailing_stop', {})
