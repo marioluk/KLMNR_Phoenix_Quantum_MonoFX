@@ -11,7 +11,7 @@ from core.trading_metrics import TradingMetrics
 from core.daily_drawdown_tracker import DailyDrawdownTracker
 from core.quantum_engine import QuantumEngine
 from core.quantum_risk_manager import QuantumRiskManager
-from utils.utils import load_config, setup_logger, clean_old_logs
+from utils.utils import setup_logger, clean_old_logs
 from utils.utils import is_trading_hours
 
 
